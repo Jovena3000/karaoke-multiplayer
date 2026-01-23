@@ -2529,90 +2529,20 @@
         link.style.display = 'none';
     }
     
-    // Remove qualquer elemento que contenha o link
-    var links = document.querySelectorAll('a');
-    links.forEach(function(link) {
-        if (link.href === 'https://lmarena.ai/code') {
-            link.parentNode.removeChild(link);
-        }
-    });
-    
     // Também remove após um pequeno delay (caso o link seja adicionado dinamicamente)
     setTimeout(function() {
         var link = document.querySelector('a[href="https://lmarena.ai/code"]');
         if (link) {
             link.style.display = 'none';
         }
-        // Remove completamente o elemento
+        // Também tenta remover por texto
         var allLinks = document.querySelectorAll('a');
         allLinks.forEach(function(a) {
             if (a.href && a.href.includes('lmarena.ai')) {
-                a.parentNode.removeChild(a);
+                a.style.display = 'none';
             }
         });
     }, 1000);
-    
-    // Remove novamente após 3 segundos (para garantir)
-    setTimeout(function() {
-        var allLinks = document.querySelectorAll('a');
-        allLinks.forEach(function(a) {
-            if (a.href && a.href.includes('lmarena.ai')) {
-                a.parentNode.removeChild(a);
-            }
-        });
-    }, 3000);
-    
-    // Remoção agressiva de todos os links e textos do LM Arena
-    (function() {
-        // Remove links
-        var links = document.querySelectorAll('a');
-        links.forEach(function(link) {
-            if (link.href.indexOf('lmarena.ai/code') !== -1) {
-                link.style.display = 'none';
-                if (link.parentNode) {
-                    link.parentNode.removeChild(link);
-                }
-            }
-        });
-
-        // Remove qualquer elemento de texto que contenha a string
-        var allElements = document.querySelectorAll('*');
-        allElements.forEach(function(el) {
-            if (el.children.length === 0 && el.textContent.indexOf('lmarena.ai/code') !== -1) {
-                el.style.display = 'none';
-                if (el.parentNode) {
-                    el.parentNode.removeChild(el);
-                }
-            }
-        });
-
-        console.log('Link do LM Arena removido!');
-    })();
-    
-    // Executar também após 2 segundos para pegar elementos dinâmicos
-    setTimeout(function() {
-        (function() {
-            var links = document.querySelectorAll('a');
-            links.forEach(function(link) {
-                if (link.href.indexOf('lmarena.ai/code') !== -1) {
-                    link.style.display = 'none';
-                    if (link.parentNode) {
-                        link.parentNode.removeChild(link);
-                    }
-                }
-            });
-
-            var allElements = document.querySelectorAll('*');
-            allElements.forEach(function(el) {
-                if (el.children.length === 0 && el.textContent.indexOf('lmarena.ai/code') !== -1) {
-                    el.style.display = 'none';
-                    if (el.parentNode) {
-                        el.parentNode.removeChild(el);
-                    }
-                }
-            });
-        })();
-    }, 2000);
     </script>
 </body>
 </html>
