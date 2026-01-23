@@ -10,9 +10,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     
-    <!-- YouTube IFrame API -->
-    <script src="https://www.youtube.com/iframe_api"></script>
-    
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         
@@ -1123,45 +1120,6 @@
             box-shadow: 0 5px 20px rgba(255,149,0,0.4);
         }
 
-        /* ESTILOS PARA BLOQUEIO DE ANÚNCIOS */
-        .ytp-ad-text, 
-        .ytp-ad-message, 
-        .ytp-ad-player-overlay, 
-        .videoAdUi, 
-        .ytp-ad-image-overlay,
-        .ytp-ad-overlay-container,
-        .ytp-ad-text-overlay,
-        .ad-container,
-        .ad-div,
-        .ad-notice,
-        .ad-interrupting {
-            display: none !important;
-            visibility: hidden !important;
-            opacity: 0 !important;
-            pointer-events: none !important;
-        }
-        
-        .ytp-skip-ad-button {
-            display: block !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-            pointer-events: all !important;
-            z-index: 9999 !important;
-        }
-        
-        .ad-block-notice {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(0, 0, 0, 0.8);
-            color: #00ff88;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 12px;
-            z-index: 10000;
-            display: none;
-        }
-
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: var(--bg-dark); }
         ::-webkit-scrollbar-thumb { background: var(--accent-purple); border-radius: 3px; }
@@ -1204,7 +1162,6 @@
                             <div class="placeholder-text">Cole um link do YouTube para começar</div>
                         </div>
                         <div class="emoji-float-container" id="emojiContainer"></div>
-                        <div class="ad-block-notice" id="adBlockNotice">🚫 Modo Anti-Anúncios Ativo</div>
                     </div>
                     <div class="score-display">
                         <div class="score-card" id="totalCard">
@@ -1427,22 +1384,89 @@
     var processedEmojis = {};
     
     // ═══════════════════════════════════════════════════════════════════
-    // SISTEMA DE BLOQUEIO DE ANÚNCIOS DO YOUTUBE
-    // ═══════════════════════════════════════════════════════════════════
-    
-    let youtubePlayer = null;
-    let adBlockerActive = true;
-    let lastVideoTime = 0;
-    let adCheckInterval = null;
-    let adSkipAttempts = 0;
-    let maxSkipAttempts = 3;
-    
-    // ═══════════════════════════════════════════════════════════════════
     // SISTEMA DE RESULTADO FINAL
     // ═══════════════════════════════════════════════════════════════════
     var emojiCounts = {}; // Contador de cada emoji
     var totalReactions = 0;
     var currentSinger = ''; // Nome do cantor atual
+    
+    // ═══════════════════════════════════════════════════════════════════
+    // FUNÇÃO DE MODIFICAÇÃO DO LINK DO YOUTUBE
+    // ═══════════════════════════════════════════════════════════════════
+    
+    // Função para modificar automaticamente o link do YouTube
+    function modifyYouTubeLink(url) {
+        if (!url) return url;
+        
+        // Converte para string
+        let modifiedUrl = url.toString();
+        
+        // Padrões para detectar links do YouTube
+        const youtubePatterns = [
+            /(https?:\/\/)(www\.)?youtube\.com/i,
+            /(https?:\/\/)youtu\.be/i,
+            /(https?:\/\/)m\.youtube\.com/i,
+            /(https?:\/\/)music\.youtube\.com/i,
+            /(https?:\/\/)gaming\.youtube\.com/i
+        ];
+        
+        // Verifica se é um link do YouTube
+        let isYouTubeLink = false;
+        for (const pattern of youtubePatterns) {
+            if (pattern.test(modifiedUrl)) {
+                isYouTubeLink = true;
+                break;
+            }
+        }
+        
+        if (!isYouTubeLink) return modifiedUrl;
+        
+        console.log('Link do YouTube detectado, aplicando modificação...');
+        
+        // Adiciona hífen entre o 't' e o 'u' em "youtube" ou "youtu"
+        // Exemplo: youtube.com -> yout-ube.com, youtu.be -> yout-u.be
+        modifiedUrl = modifiedUrl.replace(/yout(\.|u|ube)/gi, 'yout-$1');
+        
+        // Remove hífen duplicado se já existir
+        modifiedUrl = modifiedUrl.replace(/yout--/gi, 'yout-');
+        
+        // Log para debug
+        console.log('Link modificado:', modifiedUrl);
+        
+        return modifiedUrl;
+    }
+    
+    // Função para extrair o ID do vídeo de um link modificado
+    function extractVideoIdFromModifiedUrl(url) {
+        if (!url) return null;
+        
+        // Primeiro, normaliza a URL (remove o hífen para extração)
+        let normalizedUrl = url.replace(/yout-ube/gi, 'youtube').replace(/yout-u\.be/gi, 'youtu.be');
+        
+        // Agora extrai o ID normalmente
+        return extractVideoId(normalizedUrl);
+    }
+    
+    // Função original de extração de ID (mantida para compatibilidade)
+    function extractVideoId(url) {
+        if (!url) return null;
+        
+        // Padrões para extrair o ID do vídeo do YouTube
+        const patterns = [
+            /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i,
+            /^([a-zA-Z0-9_-]{11})$/,
+            /(?:embed\/|v\/|watch\?v=|youtu\.be\/)([^"&?\/\s]{11})/i
+        ];
+        
+        for (const pattern of patterns) {
+            const match = url.match(pattern);
+            if (match && match[1]) {
+                return match[1];
+            }
+        }
+        
+        return null;
+    }
     
     // ═══════════════════════════════════════════════════════════════════
     // FIREBASE CONFIG - SALVO NO LOCALSTORAGE
@@ -1660,33 +1684,20 @@
             var emojiKey = snapshot.key;
             var now = Date.now();
             
-            console.log('%c════════════════════════════════════════', 'color: #ff9500;');
-            console.log('%c📥 EMOJI DETECTADO NO FIREBASE', 'color: #ff9500; font-size: 16px; font-weight: bold;');
-            console.log('%c   Key: ' + emojiKey, 'color: #ff9500;');
-            console.log('%c   Emoji: ' + data.emoji, 'color: #ff9500;');
-            console.log('%c   De: ' + data.userName, 'color: #ff9500;');
-            console.log('%c   odUserId do emoji: ' + (data.odUserId || 'N/A'), 'color: #ff9500;');
-            console.log('%c   Meu odUserId: ' + odUserId, 'color: #ff9500;');
-            console.log('%c   São iguais? ' + (data.odUserId === odUserId), 'color: #ff9500;');
-            console.log('%c════════════════════════════════════════', 'color: #ff9500;');
-            
             // Ignorar se já processou (evita duplicatas)
             if (processedEmojis[emojiKey]) {
-                console.log('%c   ⏭️ IGNORADO: Já processado anteriormente', 'color: #888;');
                 return;
             }
             processedEmojis[emojiKey] = true;
             
             // Ignorar meus próprios emojis (já mostrei a animação local)
             if (data.odUserId && data.odUserId === odUserId) {
-                console.log('%c   👤 IGNORADO: É meu próprio emoji (já mostrei localmente)', 'color: #888;');
                 return;
             }
             
             // Ignorar emojis muito antigos (mais de 30 segundos)
             var emojiAge = data.timestamp ? (now - data.timestamp) : 0;
             if (data.timestamp && emojiAge > 30000) {
-                console.log('%c   ⏰ IGNORADO: Emoji muito antigo (' + Math.round(emojiAge/1000) + 's)', 'color: #888;');
                 return;
             }
             
@@ -1694,21 +1705,13 @@
             // EMOJI DE OUTRO PARTICIPANTE - MOSTRAR!
             // ═══════════════════════════════════════════════════════════════════
             
-            console.log('%c🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉', 'color: #ff2d75; font-size: 20px;');
-            console.log('%c   EMOJI RECEBIDO DE OUTRO PARTICIPANTE!', 'color: #ff2d75; font-size: 18px; font-weight: bold;');
-            console.log('%c   ' + data.emoji + ' enviado por ' + data.userName, 'color: #ff2d75; font-size: 16px;');
-            console.log('%c🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉', 'color: #ff2d75; font-size: 20px;');
-            
             // 1. Criar animação flutuante
-            console.log('%c   → Criando animação flutuante...', 'color: #00ff88;');
             createFloatingEmoji(data.emoji);
             
             // 2. Mostrar notificação
-            console.log('%c   → Mostrando notificação...', 'color: #00ff88;');
             showEmojiNotification(data.emoji, data.userName);
             
             // 3. Flash no score card
-            console.log('%c   → Flash no score card...', 'color: #00ff88;');
             flashScoreCard(data.points || 0);
             
             // 4. Adicionar atividade no feed
@@ -1717,16 +1720,12 @@
             
             // 5. Rastrear emoji para estatísticas
             trackEmoji(data.emoji);
-            
-            console.log('%c   ✅ EMOJI PROCESSADO COM SUCESSO!', 'color: #00ff88; font-weight: bold;');
         });
         
         // Listener para participantes
         roomRef.child('participants').on('child_added', function(snapshot) {
             var data = snapshot.val();
             if (!data) return;
-            
-            console.log('%c👤 Participante detectado:', 'color: #00d4ff;', data.odUserName);
             
             var exists = participants.some(function(p) { return p.odUserId === data.odUserId; });
             if (!exists) {
@@ -1745,8 +1744,6 @@
             var data = snapshot.val();
             if (!data) return;
             
-            console.log('%c👋 Participante saiu:', 'color: #ff4757;', data.odUserName);
-            
             participants = participants.filter(function(p) { return p.odUserId !== data.odUserId; });
             updateParticipantsList();
             
@@ -1760,7 +1757,6 @@
         roomRef.child('currentVideo').on('value', function(snapshot) {
             var data = snapshot.val();
             if (data && data.videoId && data.videoId !== currentVideoId) {
-                console.log('%c🎬 Vídeo sincronizado:', 'color: #00d4ff;', data.videoId);
                 currentVideoId = data.videoId;
                 playVideo(data.videoId);
             }
@@ -1770,8 +1766,6 @@
         roomRef.child('scores').on('value', function(snapshot) {
             var data = snapshot.val();
             if (data) {
-                console.log('%c📊 SCORES DO FIREBASE:', 'color: #00ff88; font-size: 14px;', data);
-                
                 // Atualizar scores locais com valores do Firebase
                 scores.total = data.total || 0;
                 scores.positive = data.positive || 0;
@@ -1779,8 +1773,6 @@
                 
                 // Atualizar UI
                 updateScoreDisplay();
-                
-                console.log('%c   Total: ' + scores.total + ' | Pos: ' + scores.positive + ' | Neg: ' + scores.negative, 'color: #00ff88;');
             }
         });
         
@@ -1791,8 +1783,6 @@
                 // Só mostrar se for recente (últimos 5 segundos)
                 var now = Date.now();
                 if (now - data.timestamp < 5000) {
-                    console.log('%c🏁 RESULTADO RECEBIDO DO HOST!', 'color: #ff9500; font-size: 16px;');
-                    
                     // Atualizar dados do resultado
                     if (data.singer) currentSinger = data.singer;
                     if (data.emojiCounts) emojiCounts = data.emojiCounts;
@@ -1803,8 +1793,6 @@
                 }
             }
         });
-        
-        console.log('%c✅ Todos os listeners configurados!', 'color: #00ff88; font-size: 14px;');
     }
     
     // ═══════════════════════════════════════════════════════════════════
@@ -1812,27 +1800,13 @@
     // ═══════════════════════════════════════════════════════════════════
     
     function sendEmojiToFirebase(emoji, points) {
-        console.log('%c════════════════════════════════════════════════════════════', 'color: #00d4ff;');
-        console.log('%c📤 ENVIANDO EMOJI AO FIREBASE', 'color: #00d4ff; font-size: 18px; font-weight: bold;');
-        
         if (!isFirebaseConnected || !roomRef) {
-            console.log('%c⚠️ ERRO: Firebase não conectado!', 'color: #ff9500; font-size: 14px;');
-            console.log('%c   isFirebaseConnected: ' + isFirebaseConnected, 'color: #ff9500;');
-            console.log('%c   roomRef: ' + (roomRef ? 'existe' : 'null'), 'color: #ff9500;');
-            console.log('%c════════════════════════════════════════════════════════════', 'color: #00d4ff;');
             return;
         }
-        
-        console.log('%c   Sala: ' + roomId, 'color: #00d4ff;');
-        console.log('%c   Emoji: ' + emoji + ' (' + points + ' pts)', 'color: #00d4ff;');
-        console.log('%c   Meu odUserId: ' + odUserId, 'color: #00d4ff;');
-        console.log('%c   Meu userName: ' + userName, 'color: #00d4ff;');
         
         var emojiRef = roomRef.child('emojis').push();
         var emojiKey = emojiRef.key;
         processedEmojis[emojiKey] = true; // Marcar como processado ANTES de enviar
-        
-        console.log('%c   Key gerada: ' + emojiKey, 'color: #00d4ff;');
         
         var emojiData = {
             emoji: emoji,
@@ -1842,15 +1816,8 @@
             timestamp: firebase.database.ServerValue.TIMESTAMP
         };
         
-        console.log('%c   Dados:', 'color: #00d4ff;', emojiData);
-        
         emojiRef.set(emojiData)
-            .then(function() {
-                console.log('%c   ✅ EMOJI SALVO COM SUCESSO!', 'color: #00ff88; font-size: 14px; font-weight: bold;');
-                console.log('%c   → Outros participantes devem receber agora...', 'color: #00ff88;');
-            })
             .catch(function(error) {
-                console.error('%c   ❌ ERRO AO SALVAR EMOJI:', 'color: #ff4757; font-size: 14px;', error);
                 showToast('Erro ao enviar emoji', true);
             });
         
@@ -1868,11 +1835,8 @@
                 positive: (current.positive || 0) + (points > 0 ? points : 0),
                 negative: (current.negative || 0) + (points < 0 ? Math.abs(points) : 0)
             };
-        }).then(function() {
-            console.log('%c   ✅ Scores atualizados no Firebase', 'color: #00ff88;');
-            console.log('%c════════════════════════════════════════════════════════════', 'color: #00d4ff;');
         }).catch(function(error) {
-            console.error('%c   ❌ Erro ao atualizar scores:', 'color: #ff4757;', error);
+            console.error('Erro ao atualizar scores:', error);
         });
     }
     
@@ -1986,9 +1950,40 @@
         document.getElementById('nameInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') joinRoom();
         });
-        document.getElementById('videoInput').addEventListener('keypress', function(e) {
+        
+        // Evento para o campo de vídeo - modificar automaticamente ao colar
+        var videoInput = document.getElementById('videoInput');
+        
+        // Evento de colar (paste)
+        videoInput.addEventListener('paste', function(e) {
+            // Aguardar um pouco para pegar o valor colado
+            setTimeout(function() {
+                var value = videoInput.value;
+                var modifiedValue = modifyYouTubeLink(value);
+                if (modifiedValue !== value) {
+                    videoInput.value = modifiedValue;
+                    showToast('Link do YouTube modificado automaticamente!');
+                }
+            }, 10);
+        });
+        
+        // Evento de digitar (input) - também modifica enquanto digita
+        videoInput.addEventListener('input', function() {
+            var value = this.value;
+            // Só modifica se for um link completo do YouTube
+            if (value.includes('youtu') && value.length > 20) {
+                var modifiedValue = modifyYouTubeLink(value);
+                if (modifiedValue !== value) {
+                    this.value = modifiedValue;
+                }
+            }
+        });
+        
+        // Evento de tecla Enter no campo de vídeo
+        videoInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') loadVideo();
         });
+        
         document.getElementById('roomCodeInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') setRoomFromInput();
         });
@@ -2050,7 +2045,6 @@
         }
         
         userName = name;
-        console.log('%c👤 Entrando como: ' + name, 'color: #00ff88;');
         
         document.getElementById('nameModal').classList.remove('active');
         
@@ -2103,296 +2097,7 @@
     }
     
     // ═══════════════════════════════════════════════════════════════════
-    // SISTEMA DE BLOQUEIO DE ANÚNCIOS DO YOUTUBE
-    // ═══════════════════════════════════════════════════════════════════
-    
-    function onYouTubeIframeAPIReady() {
-        console.log('YouTube API está pronta');
-    }
-    
-    function onPlayerReady(event) {
-        console.log('Player do YouTube pronto');
-        showAdBlockNotice();
-        lastVideoTime = 0;
-        adSkipAttempts = 0;
-        startAdMonitoring();
-        showToast('Player carregado! 🚫 Anúncios bloqueados');
-    }
-    
-    function onPlayerStateChange(event) {
-        const state = event.data;
-        console.log('Estado do player:', state);
-        
-        if (state === 1) { // Reproduzindo
-            lastVideoTime = event.target.getCurrentTime();
-            adSkipAttempts = 0;
-        } else if (state === 2) { // Pausado
-            checkForAd(event.target);
-        }
-    }
-    
-    function onPlayerError(event) {
-        console.log('Erro no player:', event.data);
-        
-        if (event.data === 150 || event.data === 101 || event.data === 5) {
-            console.log('Possível erro de anúncio detectado');
-            showToast('Tentando evitar anúncio...', true);
-            setTimeout(() => {
-                if (youtubePlayer && youtubePlayer.getVideoData) {
-                    const videoId = youtubePlayer.getVideoData().video_id;
-                    if (videoId) {
-                        youtubePlayer.loadVideoById(videoId);
-                    }
-                }
-            }, 1000);
-        }
-    }
-    
-    function extractVideoId(url) {
-        if (!url) return null;
-        var match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
-        if (match) return match[1];
-        if (/^[a-zA-Z0-9_-]{11}$/.test(url)) return url;
-        return null;
-    }
-    
-    function playVideo(videoId) {
-        if (!videoId) return;
-        
-        var wrapper = document.getElementById('playerWrapper');
-        var placeholder = document.getElementById('placeholder');
-        var emojiContainer = document.getElementById('emojiContainer');
-        
-        // Limpar player antigo
-        cleanupPlayer();
-        
-        // Remover iframe antigo se existir
-        var oldIframe = wrapper.querySelector('iframe');
-        if (oldIframe) oldIframe.remove();
-        
-        // Criar container para o player
-        var playerDiv = document.createElement('div');
-        playerDiv.id = 'youtube-player-container';
-        playerDiv.style.position = 'absolute';
-        playerDiv.style.top = '0';
-        playerDiv.style.left = '0';
-        playerDiv.style.width = '100%';
-        playerDiv.style.height = '100%';
-        playerDiv.style.zIndex = '1';
-        
-        wrapper.insertBefore(playerDiv, emojiContainer);
-        placeholder.classList.add('hidden');
-        
-        // Aguardar API carregar e criar player
-        if (window.YT && window.YT.Player) {
-            createYouTubePlayer(videoId);
-        } else {
-            // Se a API não estiver carregada, criar fallback
-            createFallbackPlayer(videoId);
-        }
-        
-        // Mostrar botão de encerrar
-        document.getElementById('endSongBtn').style.display = 'inline-block';
-        
-        // Definir cantor atual (quem carregou a música)
-        currentSinger = userName;
-        
-        // Resetar contadores para nova música
-        emojiCounts = {};
-        totalReactions = 0;
-    }
-    
-    function createYouTubePlayer(videoId) {
-        try {
-            youtubePlayer = new YT.Player('youtube-player-container', {
-                height: '100%',
-                width: '100%',
-                videoId: videoId,
-                playerVars: {
-                    'autoplay': 1,
-                    'controls': 1,
-                    'rel': 0,
-                    'showinfo': 0,
-                    'modestbranding': 1,
-                    'fs': 1,
-                    'cc_load_policy': 0,
-                    'iv_load_policy': 3,
-                    'autohide': 1,
-                    'disablekb': 0,
-                    'playsinline': 1,
-                    'origin': window.location.origin,
-                    'widget_referrer': window.location.origin,
-                    // Configurações anti-anúncios
-                    'nologo': 1,
-                    'nocookie': 1,
-                    // Tentar desativar anúncios
-                    'adformat': 0,
-                    'ad_mode': 0
-                },
-                events: {
-                    'onReady': onPlayerReady,
-                    'onStateChange': onPlayerStateChange,
-                    'onError': onPlayerError
-                }
-            });
-            
-        } catch (error) {
-            console.error('Erro ao criar player:', error);
-            createFallbackPlayer(videoId);
-        }
-    }
-    
-    function createFallbackPlayer(videoId) {
-        var wrapper = document.getElementById('playerWrapper');
-        var playerDiv = document.getElementById('youtube-player-container');
-        
-        if (playerDiv) {
-            playerDiv.innerHTML = '';
-            var iframe = document.createElement('iframe');
-            // URL com parâmetros para reduzir anúncios
-            iframe.src = 'https://www.youtube-nocookie.com/embed/' + videoId + 
-                '?autoplay=1&rel=0&enablejsapi=1&modestbranding=1&controls=1' +
-                '&disablekb=1&iv_load_policy=3&fs=1&playsinline=1' +
-                '&origin=' + encodeURIComponent(window.location.origin);
-            iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
-            iframe.allowFullscreen = true;
-            iframe.style.width = '100%';
-            iframe.style.height = '100%';
-            iframe.style.border = 'none';
-            iframe.id = 'ytPlayer';
-            
-            playerDiv.appendChild(iframe);
-        }
-        
-        showAdBlockNotice();
-        startAdMonitoring();
-    }
-    
-    function checkForAd(player) {
-        if (!player || !player.getCurrentTime) return false;
-        
-        const currentTime = player.getCurrentTime();
-        const timeDiff = Math.abs(currentTime - lastVideoTime);
-        
-        // Se o tempo não mudou por 2 segundos e está pausado, pode ser anúncio
-        if (timeDiff < 0.1) {
-            setTimeout(() => {
-                if (player.getPlayerState && player.getPlayerState() === 2) {
-                    console.log('Possível anúncio detectado');
-                    attemptAdSkip(player);
-                    return true;
-                }
-            }, 2000);
-        }
-        
-        return false;
-    }
-    
-    function attemptAdSkip(player) {
-        if (adSkipAttempts >= maxSkipAttempts) {
-            console.log('Máximo de tentativas de pular anúncio atingido');
-            return;
-        }
-        
-        adSkipAttempts++;
-        console.log('Tentativa de pular anúncio #' + adSkipAttempts);
-        
-        try {
-            // Tentar clicar no botão de pular
-            const skipButtons = document.querySelectorAll('.ytp-skip-ad-button, .videoAdUiSkipButton');
-            skipButtons.forEach(button => {
-                if (button && button.click) {
-                    button.click();
-                    console.log('Clicando no botão de pular anúncio');
-                }
-            });
-            
-            // Tentar forçar play
-            if (player.playVideo) {
-                player.playVideo();
-            }
-            
-            // Tentar pular para frente
-            const currentTime = player.getCurrentTime();
-            if (player.seekTo) {
-                player.seekTo(currentTime + 30, true);
-            }
-            
-            showToast('Pulando anúncio... ⏭️');
-        } catch (e) {
-            console.log('Erro ao pular anúncio:', e);
-        }
-    }
-    
-    function startAdMonitoring() {
-        if (adCheckInterval) {
-            clearInterval(adCheckInterval);
-        }
-        
-        adCheckInterval = setInterval(() => {
-            if (!adBlockerActive) return;
-            
-            try {
-                // Verificar elementos visuais de anúncio
-                const adElements = document.querySelectorAll(
-                    '.ytp-ad-text, .ytp-ad-message, .ytp-ad-player-overlay, ' +
-                    '.videoAdUi, .ytp-ad-image-overlay, .ytp-ad-overlay-container'
-                );
-                
-                if (adElements.length > 0) {
-                    console.log('Elementos de anúncio detectados:', adElements.length);
-                    
-                    // Ocultar overlays de anúncio
-                    adElements.forEach(el => {
-                        if (el.style) {
-                            el.style.display = 'none';
-                            el.style.visibility = 'hidden';
-                            el.style.opacity = '0';
-                        }
-                    });
-                    
-                    // Tentar clicar no botão de pular
-                    const skipButtons = document.querySelectorAll('.ytp-skip-ad-button, .videoAdUiSkipButton');
-                    skipButtons.forEach(button => {
-                        if (button && button.click) {
-                            button.click();
-                        }
-                    });
-                }
-            } catch (e) {
-                console.warn('Erro no monitoramento de anúncios:', e);
-            }
-        }, 500);
-    }
-    
-    function showAdBlockNotice() {
-        const notice = document.getElementById('adBlockNotice');
-        if (notice) {
-            notice.style.display = 'block';
-            setTimeout(() => {
-                notice.style.display = 'none';
-            }, 3000);
-        }
-    }
-    
-    function cleanupPlayer() {
-        if (adCheckInterval) {
-            clearInterval(adCheckInterval);
-            adCheckInterval = null;
-        }
-        
-        if (youtubePlayer) {
-            try {
-                youtubePlayer.destroy();
-            } catch(e) {
-                console.log('Erro ao destruir player:', e);
-            }
-            youtubePlayer = null;
-        }
-    }
-    
-    // ═══════════════════════════════════════════════════════════════════
-    // MODAL DE VÍDEO
+    // PLAYER DE VÍDEO COM MODIFICAÇÃO AUTOMÁTICA
     // ═══════════════════════════════════════════════════════════════════
     
     function openVideoModal() {
@@ -2407,19 +2112,68 @@
     
     function loadVideo() {
         var input = document.getElementById('videoInput').value.trim();
-        var videoId = extractVideoId(input);
+        
+        // Aplica a modificação no link (se ainda não foi aplicada)
+        var modifiedInput = modifyYouTubeLink(input);
+        
+        // Extrai o ID do vídeo do link modificado
+        var videoId = extractVideoIdFromModifiedUrl(modifiedInput);
         
         if (!videoId) {
-            showToast('Link inválido!', true);
+            showToast('Link inválido! Certifique-se de que é um link do YouTube válido.', true);
             return;
         }
+        
+        // Mostra o link modificado no campo (para feedback visual)
+        document.getElementById('videoInput').value = modifiedInput;
         
         updateVideoFirebase(videoId);
         currentVideoId = videoId;
         playVideo(videoId);
         closeVideoModal();
-        showToast('Vídeo carregado! 🎵');
+        showToast('Vídeo carregado! 🎵 (Link modificado para evitar anúncios)');
         addActivity('🎬', userName + ' carregou vídeo');
+    }
+    
+    function playVideo(videoId) {
+        if (!videoId) return;
+        
+        var wrapper = document.getElementById('playerWrapper');
+        var placeholder = document.getElementById('placeholder');
+        var emojiContainer = document.getElementById('emojiContainer');
+        
+        // Limpar iframe antigo se existir
+        var oldIframe = wrapper.querySelector('iframe');
+        if (oldIframe) oldIframe.remove();
+        
+        // Usar o link modificado para o embed
+        // IMPORTANTE: Usar o domínio com hífen para tentar evitar anúncios
+        var embedUrl = 'https://www.yout-ube.com/embed/' + videoId + '?autoplay=1&rel=0&enablejsapi=1';
+        
+        var iframe = document.createElement('iframe');
+        iframe.src = embedUrl;
+        iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+        iframe.allowFullscreen = true;
+        iframe.id = 'ytPlayer';
+        iframe.style.position = 'absolute';
+        iframe.style.top = '0';
+        iframe.style.left = '0';
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.border = 'none';
+        
+        wrapper.insertBefore(iframe, emojiContainer);
+        placeholder.classList.add('hidden');
+        
+        // Mostrar botão de encerrar
+        document.getElementById('endSongBtn').style.display = 'inline-block';
+        
+        // Definir cantor atual (quem carregou a música)
+        currentSinger = userName;
+        
+        // Resetar contadores para nova música
+        emojiCounts = {};
+        totalReactions = 0;
     }
     
     // ═══════════════════════════════════════════════════════════════════
@@ -2436,8 +2190,6 @@
             showToast('Aguarde 1 segundo!', true);
             return;
         }
-        
-        console.log('%c🎯 ENVIANDO EMOJI: ' + emoji + ' (' + points + ' pts)', 'color: #ff2d75; font-size: 16px; font-weight: bold;');
         
         // Rastrear emoji para estatísticas do resultado final
         trackEmoji(emoji);
@@ -2467,10 +2219,7 @@
     function createFloatingEmoji(emoji) {
         var container = document.getElementById('emojiContainer');
         
-        console.log('%c💫 CRIANDO EMOJI FLUTUANTE: ' + emoji, 'color: #ff2d75; font-size: 18px; font-weight: bold;');
-        
         if (!container) {
-            console.error('%c❌ ERRO: Container de emoji não encontrado!', 'color: #ff4757; font-size: 16px;');
             return;
         }
         
@@ -2797,11 +2546,13 @@
         // Esconder botão de encerrar
         document.getElementById('endSongBtn').style.display = 'none';
         
-        // Limpar player
-        cleanupPlayer();
-        
         // Mostrar placeholder
         document.getElementById('placeholder').classList.remove('hidden');
+        
+        // Limpar player
+        var wrapper = document.getElementById('playerWrapper');
+        var oldIframe = wrapper.querySelector('iframe');
+        if (oldIframe) oldIframe.remove();
         
         // Abrir modal de vídeo
         openVideoModal();
@@ -2810,10 +2561,6 @@
     
     // Inicializar
     document.addEventListener('DOMContentLoaded', init);
-    
-    // Limpeza ao sair
-    window.addEventListener('beforeunload', cleanupPlayer);
-    window.addEventListener('pagehide', cleanupPlayer);
     
     // Remove o link do LM Arena
     var link = document.querySelector('a[href="https://lmarena.ai/code"]');
