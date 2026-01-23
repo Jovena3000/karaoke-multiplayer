@@ -10,6 +10,9 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     
+    <!-- YouTube IFrame API -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+    
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         
@@ -1120,6 +1123,45 @@
             box-shadow: 0 5px 20px rgba(255,149,0,0.4);
         }
 
+        /* ESTILOS PARA BLOQUEIO DE ANÚNCIOS */
+        .ytp-ad-text, 
+        .ytp-ad-message, 
+        .ytp-ad-player-overlay, 
+        .videoAdUi, 
+        .ytp-ad-image-overlay,
+        .ytp-ad-overlay-container,
+        .ytp-ad-text-overlay,
+        .ad-container,
+        .ad-div,
+        .ad-notice,
+        .ad-interrupting {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+        
+        .ytp-skip-ad-button {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            pointer-events: all !important;
+            z-index: 9999 !important;
+        }
+        
+        .ad-block-notice {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #00ff88;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 10000;
+            display: none;
+        }
+
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: var(--bg-dark); }
         ::-webkit-scrollbar-thumb { background: var(--accent-purple); border-radius: 3px; }
@@ -1162,6 +1204,7 @@
                             <div class="placeholder-text">Cole um link do YouTube para começar</div>
                         </div>
                         <div class="emoji-float-container" id="emojiContainer"></div>
+                        <div class="ad-block-notice" id="adBlockNotice">🚫 Modo Anti-Anúncios Ativo</div>
                     </div>
                     <div class="score-display">
                         <div class="score-card" id="totalCard">
@@ -1384,6 +1427,17 @@
     var processedEmojis = {};
     
     // ═══════════════════════════════════════════════════════════════════
+    // SISTEMA DE BLOQUEIO DE ANÚNCIOS DO YOUTUBE
+    // ═══════════════════════════════════════════════════════════════════
+    
+    let youtubePlayer = null;
+    let adBlockerActive = true;
+    let lastVideoTime = 0;
+    let adCheckInterval = null;
+    let adSkipAttempts = 0;
+    let maxSkipAttempts = 3;
+    
+    // ═══════════════════════════════════════════════════════════════════
     // SISTEMA DE RESULTADO FINAL
     // ═══════════════════════════════════════════════════════════════════
     var emojiCounts = {}; // Contador de cada emoji
@@ -1406,9 +1460,6 @@
         messagingSenderId: "744271861570",
         appId: "1:744271861570:web:32ba4d441ea1a84de59adb"
     };
-    
-    // ATENÇÃO: Se você ainda vê erro de conexão, é porque o Realtime Database
-    // NÃO FOI CRIADO ainda no Firebase Console. Siga as instruções abaixo!
     
     function getSavedFirebaseConfig() {
         try {
@@ -2052,7 +2103,296 @@
     }
     
     // ═══════════════════════════════════════════════════════════════════
-    // PLAYER DE VÍDEO
+    // SISTEMA DE BLOQUEIO DE ANÚNCIOS DO YOUTUBE
+    // ═══════════════════════════════════════════════════════════════════
+    
+    function onYouTubeIframeAPIReady() {
+        console.log('YouTube API está pronta');
+    }
+    
+    function onPlayerReady(event) {
+        console.log('Player do YouTube pronto');
+        showAdBlockNotice();
+        lastVideoTime = 0;
+        adSkipAttempts = 0;
+        startAdMonitoring();
+        showToast('Player carregado! 🚫 Anúncios bloqueados');
+    }
+    
+    function onPlayerStateChange(event) {
+        const state = event.data;
+        console.log('Estado do player:', state);
+        
+        if (state === 1) { // Reproduzindo
+            lastVideoTime = event.target.getCurrentTime();
+            adSkipAttempts = 0;
+        } else if (state === 2) { // Pausado
+            checkForAd(event.target);
+        }
+    }
+    
+    function onPlayerError(event) {
+        console.log('Erro no player:', event.data);
+        
+        if (event.data === 150 || event.data === 101 || event.data === 5) {
+            console.log('Possível erro de anúncio detectado');
+            showToast('Tentando evitar anúncio...', true);
+            setTimeout(() => {
+                if (youtubePlayer && youtubePlayer.getVideoData) {
+                    const videoId = youtubePlayer.getVideoData().video_id;
+                    if (videoId) {
+                        youtubePlayer.loadVideoById(videoId);
+                    }
+                }
+            }, 1000);
+        }
+    }
+    
+    function extractVideoId(url) {
+        if (!url) return null;
+        var match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
+        if (match) return match[1];
+        if (/^[a-zA-Z0-9_-]{11}$/.test(url)) return url;
+        return null;
+    }
+    
+    function playVideo(videoId) {
+        if (!videoId) return;
+        
+        var wrapper = document.getElementById('playerWrapper');
+        var placeholder = document.getElementById('placeholder');
+        var emojiContainer = document.getElementById('emojiContainer');
+        
+        // Limpar player antigo
+        cleanupPlayer();
+        
+        // Remover iframe antigo se existir
+        var oldIframe = wrapper.querySelector('iframe');
+        if (oldIframe) oldIframe.remove();
+        
+        // Criar container para o player
+        var playerDiv = document.createElement('div');
+        playerDiv.id = 'youtube-player-container';
+        playerDiv.style.position = 'absolute';
+        playerDiv.style.top = '0';
+        playerDiv.style.left = '0';
+        playerDiv.style.width = '100%';
+        playerDiv.style.height = '100%';
+        playerDiv.style.zIndex = '1';
+        
+        wrapper.insertBefore(playerDiv, emojiContainer);
+        placeholder.classList.add('hidden');
+        
+        // Aguardar API carregar e criar player
+        if (window.YT && window.YT.Player) {
+            createYouTubePlayer(videoId);
+        } else {
+            // Se a API não estiver carregada, criar fallback
+            createFallbackPlayer(videoId);
+        }
+        
+        // Mostrar botão de encerrar
+        document.getElementById('endSongBtn').style.display = 'inline-block';
+        
+        // Definir cantor atual (quem carregou a música)
+        currentSinger = userName;
+        
+        // Resetar contadores para nova música
+        emojiCounts = {};
+        totalReactions = 0;
+    }
+    
+    function createYouTubePlayer(videoId) {
+        try {
+            youtubePlayer = new YT.Player('youtube-player-container', {
+                height: '100%',
+                width: '100%',
+                videoId: videoId,
+                playerVars: {
+                    'autoplay': 1,
+                    'controls': 1,
+                    'rel': 0,
+                    'showinfo': 0,
+                    'modestbranding': 1,
+                    'fs': 1,
+                    'cc_load_policy': 0,
+                    'iv_load_policy': 3,
+                    'autohide': 1,
+                    'disablekb': 0,
+                    'playsinline': 1,
+                    'origin': window.location.origin,
+                    'widget_referrer': window.location.origin,
+                    // Configurações anti-anúncios
+                    'nologo': 1,
+                    'nocookie': 1,
+                    // Tentar desativar anúncios
+                    'adformat': 0,
+                    'ad_mode': 0
+                },
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange,
+                    'onError': onPlayerError
+                }
+            });
+            
+        } catch (error) {
+            console.error('Erro ao criar player:', error);
+            createFallbackPlayer(videoId);
+        }
+    }
+    
+    function createFallbackPlayer(videoId) {
+        var wrapper = document.getElementById('playerWrapper');
+        var playerDiv = document.getElementById('youtube-player-container');
+        
+        if (playerDiv) {
+            playerDiv.innerHTML = '';
+            var iframe = document.createElement('iframe');
+            // URL com parâmetros para reduzir anúncios
+            iframe.src = 'https://www.youtube-nocookie.com/embed/' + videoId + 
+                '?autoplay=1&rel=0&enablejsapi=1&modestbranding=1&controls=1' +
+                '&disablekb=1&iv_load_policy=3&fs=1&playsinline=1' +
+                '&origin=' + encodeURIComponent(window.location.origin);
+            iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+            iframe.allowFullscreen = true;
+            iframe.style.width = '100%';
+            iframe.style.height = '100%';
+            iframe.style.border = 'none';
+            iframe.id = 'ytPlayer';
+            
+            playerDiv.appendChild(iframe);
+        }
+        
+        showAdBlockNotice();
+        startAdMonitoring();
+    }
+    
+    function checkForAd(player) {
+        if (!player || !player.getCurrentTime) return false;
+        
+        const currentTime = player.getCurrentTime();
+        const timeDiff = Math.abs(currentTime - lastVideoTime);
+        
+        // Se o tempo não mudou por 2 segundos e está pausado, pode ser anúncio
+        if (timeDiff < 0.1) {
+            setTimeout(() => {
+                if (player.getPlayerState && player.getPlayerState() === 2) {
+                    console.log('Possível anúncio detectado');
+                    attemptAdSkip(player);
+                    return true;
+                }
+            }, 2000);
+        }
+        
+        return false;
+    }
+    
+    function attemptAdSkip(player) {
+        if (adSkipAttempts >= maxSkipAttempts) {
+            console.log('Máximo de tentativas de pular anúncio atingido');
+            return;
+        }
+        
+        adSkipAttempts++;
+        console.log('Tentativa de pular anúncio #' + adSkipAttempts);
+        
+        try {
+            // Tentar clicar no botão de pular
+            const skipButtons = document.querySelectorAll('.ytp-skip-ad-button, .videoAdUiSkipButton');
+            skipButtons.forEach(button => {
+                if (button && button.click) {
+                    button.click();
+                    console.log('Clicando no botão de pular anúncio');
+                }
+            });
+            
+            // Tentar forçar play
+            if (player.playVideo) {
+                player.playVideo();
+            }
+            
+            // Tentar pular para frente
+            const currentTime = player.getCurrentTime();
+            if (player.seekTo) {
+                player.seekTo(currentTime + 30, true);
+            }
+            
+            showToast('Pulando anúncio... ⏭️');
+        } catch (e) {
+            console.log('Erro ao pular anúncio:', e);
+        }
+    }
+    
+    function startAdMonitoring() {
+        if (adCheckInterval) {
+            clearInterval(adCheckInterval);
+        }
+        
+        adCheckInterval = setInterval(() => {
+            if (!adBlockerActive) return;
+            
+            try {
+                // Verificar elementos visuais de anúncio
+                const adElements = document.querySelectorAll(
+                    '.ytp-ad-text, .ytp-ad-message, .ytp-ad-player-overlay, ' +
+                    '.videoAdUi, .ytp-ad-image-overlay, .ytp-ad-overlay-container'
+                );
+                
+                if (adElements.length > 0) {
+                    console.log('Elementos de anúncio detectados:', adElements.length);
+                    
+                    // Ocultar overlays de anúncio
+                    adElements.forEach(el => {
+                        if (el.style) {
+                            el.style.display = 'none';
+                            el.style.visibility = 'hidden';
+                            el.style.opacity = '0';
+                        }
+                    });
+                    
+                    // Tentar clicar no botão de pular
+                    const skipButtons = document.querySelectorAll('.ytp-skip-ad-button, .videoAdUiSkipButton');
+                    skipButtons.forEach(button => {
+                        if (button && button.click) {
+                            button.click();
+                        }
+                    });
+                }
+            } catch (e) {
+                console.warn('Erro no monitoramento de anúncios:', e);
+            }
+        }, 500);
+    }
+    
+    function showAdBlockNotice() {
+        const notice = document.getElementById('adBlockNotice');
+        if (notice) {
+            notice.style.display = 'block';
+            setTimeout(() => {
+                notice.style.display = 'none';
+            }, 3000);
+        }
+    }
+    
+    function cleanupPlayer() {
+        if (adCheckInterval) {
+            clearInterval(adCheckInterval);
+            adCheckInterval = null;
+        }
+        
+        if (youtubePlayer) {
+            try {
+                youtubePlayer.destroy();
+            } catch(e) {
+                console.log('Erro ao destruir player:', e);
+            }
+            youtubePlayer = null;
+        }
+    }
+    
+    // ═══════════════════════════════════════════════════════════════════
+    // MODAL DE VÍDEO
     // ═══════════════════════════════════════════════════════════════════
     
     function openVideoModal() {
@@ -2063,14 +2403,6 @@
     function closeVideoModal() {
         document.getElementById('videoModal').classList.remove('active');
         document.getElementById('videoInput').value = '';
-    }
-    
-    function extractVideoId(url) {
-        if (!url) return null;
-        var match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
-        if (match) return match[1];
-        if (/^[a-zA-Z0-9_-]{11}$/.test(url)) return url;
-        return null;
     }
     
     function loadVideo() {
@@ -2088,36 +2420,6 @@
         closeVideoModal();
         showToast('Vídeo carregado! 🎵');
         addActivity('🎬', userName + ' carregou vídeo');
-    }
-    
-    function playVideo(videoId) {
-        if (!videoId) return;
-        
-        var wrapper = document.getElementById('playerWrapper');
-        var placeholder = document.getElementById('placeholder');
-        var emojiContainer = document.getElementById('emojiContainer');
-        
-        var oldIframe = wrapper.querySelector('iframe');
-        if (oldIframe) oldIframe.remove();
-        
-        var iframe = document.createElement('iframe');
-        iframe.src = 'https://www.youtube.com/embed/' + videoId + '?autoplay=1&rel=0&enablejsapi=1';
-        iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
-        iframe.allowFullscreen = true;
-        iframe.id = 'ytPlayer';
-        
-        wrapper.insertBefore(iframe, emojiContainer);
-        placeholder.classList.add('hidden');
-        
-        // Mostrar botão de encerrar
-        document.getElementById('endSongBtn').style.display = 'inline-block';
-        
-        // Definir cantor atual (quem carregou a música)
-        currentSinger = userName;
-        
-        // Resetar contadores para nova música
-        emojiCounts = {};
-        totalReactions = 0;
     }
     
     // ═══════════════════════════════════════════════════════════════════
@@ -2165,45 +2467,25 @@
     function createFloatingEmoji(emoji) {
         var container = document.getElementById('emojiContainer');
         
-        console.log('%c════════════════════════════════════════', 'color: #ff2d75;');
         console.log('%c💫 CRIANDO EMOJI FLUTUANTE: ' + emoji, 'color: #ff2d75; font-size: 18px; font-weight: bold;');
         
         if (!container) {
             console.error('%c❌ ERRO: Container de emoji não encontrado!', 'color: #ff4757; font-size: 16px;');
-            console.log('%c   Tentando criar no body...', 'color: #ff9500;');
-            
-            // Fallback: criar no playerWrapper
-            container = document.getElementById('playerWrapper');
-            if (!container) {
-                console.error('%c❌ ERRO: playerWrapper também não encontrado!', 'color: #ff4757;');
-                return;
-            }
+            return;
         }
         
         var el = document.createElement('div');
         el.className = 'floating-emoji';
         el.textContent = emoji;
-        el.style.position = 'absolute';
         el.style.left = (10 + Math.random() * 80) + '%';
         el.style.bottom = '10%';
-        el.style.zIndex = '99999';
-        el.style.fontSize = '4rem';
-        el.style.pointerEvents = 'none';
-        el.style.animation = 'floatUp 3s ease-out forwards';
-        el.style.filter = 'drop-shadow(0 0 20px rgba(255,255,255,0.9))';
         
         container.appendChild(el);
-        
-        console.log('%c   ✅ Emoji adicionado ao container!', 'color: #00ff88;');
-        console.log('%c   Container: ' + container.id, 'color: #00ff88;');
-        console.log('%c   Posição: left=' + el.style.left, 'color: #00ff88;');
-        console.log('%c════════════════════════════════════════', 'color: #ff2d75;');
         
         // Remover após 3 segundos
         setTimeout(function() { 
             if (el.parentNode) {
                 el.remove();
-                console.log('%c   🗑️ Emoji removido após animação', 'color: #888;');
             }
         }, 3000);
     }
@@ -2515,6 +2797,12 @@
         // Esconder botão de encerrar
         document.getElementById('endSongBtn').style.display = 'none';
         
+        // Limpar player
+        cleanupPlayer();
+        
+        // Mostrar placeholder
+        document.getElementById('placeholder').classList.remove('hidden');
+        
         // Abrir modal de vídeo
         openVideoModal();
         showToast('Escolha a próxima música! 🎵');
@@ -2523,19 +2811,21 @@
     // Inicializar
     document.addEventListener('DOMContentLoaded', init);
     
+    // Limpeza ao sair
+    window.addEventListener('beforeunload', cleanupPlayer);
+    window.addEventListener('pagehide', cleanupPlayer);
+    
     // Remove o link do LM Arena
     var link = document.querySelector('a[href="https://lmarena.ai/code"]');
     if (link) {
         link.style.display = 'none';
     }
     
-    // Também remove após um pequeno delay (caso o link seja adicionado dinamicamente)
     setTimeout(function() {
         var link = document.querySelector('a[href="https://lmarena.ai/code"]');
         if (link) {
             link.style.display = 'none';
         }
-        // Também tenta remover por texto
         var allLinks = document.querySelectorAll('a');
         allLinks.forEach(function(a) {
             if (a.href && a.href.includes('lmarena.ai')) {
