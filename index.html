@@ -2558,28 +2558,6 @@
         openVideoModal();
         showToast('Escolha a próxima música! 🎵');
     }
-    
-    // Inicializar
-    document.addEventListener('DOMContentLoaded', init);
-    
-    // Remove o link do LM Arena
-    var link = document.querySelector('a[href="https://lmarena.ai/code"]');
-    if (link) {
-        link.style.display = 'none';
-    }
-    
-    setTimeout(function() {
-        var link = document.querySelector('a[href="https://lmarena.ai/code"]');
-        if (link) {
-            link.style.display = 'none';
-        }
-        var allLinks = document.querySelectorAll('a');
-        allLinks.forEach(function(a) {
-            if (a.href && a.href.includes('lmarena.ai')) {
-                a.style.display = 'none';
-            }
-        });
-    }, 1000);
     </script>
 </body>
 </html>
