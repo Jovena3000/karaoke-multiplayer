@@ -190,6 +190,8 @@
             background: #000;
             border-radius: 0.75rem;
             overflow: hidden;
+            /* Garantir contexto de empilhamento */
+            transform: translateZ(0);
         }
         
         .player-wrapper iframe {
@@ -197,7 +199,7 @@
             top: 0; left: 0;
             width: 100%; height: 100%;
             border: none;
-            z-index: 1;
+            z-index: 1 !important; /* Garantir z-index baixo */
         }
         
         .placeholder {
@@ -216,27 +218,37 @@
         .placeholder-icon { font-size: 4rem; margin-bottom: 1rem; }
         .placeholder-text { color: var(--text-secondary); }
 
+        /* CONTAINER DE EMOJIS - CORRIGIDO PARA PC */
         .emoji-float-container {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            pointer-events: none;
-            overflow: hidden;
-            z-index: 1000;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            pointer-events: none !important;
+            overflow: hidden !important;
+            z-index: 1000 !important; /* Z-INDEX ALTO PARA FICAR SOBRE O VÍDEO */
+            transform: translateZ(0); /* Forçar aceleração de hardware */
         }
         
         .floating-emoji {
             position: absolute;
-            font-size: 4rem;
+            font-size: 3.5rem;
             animation: floatUp 3s ease-out forwards;
-            filter: drop-shadow(0 0 20px rgba(255,255,255,0.9));
-            z-index: 1001;
+            filter: drop-shadow(0 5px 15px rgba(255,255,255,0.7));
+            z-index: 1001 !important;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            pointer-events: none !important;
+            will-change: transform, opacity; /* Otimização para animação */
         }
         
         @keyframes floatUp {
             0% { opacity: 0; transform: translateY(0) scale(0.3) rotate(0deg); }
-            15% { opacity: 1; transform: translateY(-30px) scale(1.4) rotate(15deg); }
-            100% { opacity: 0; transform: translateY(-450px) scale(0.5) rotate(-20deg); }
+            15% { opacity: 1; transform: translateY(-30px) scale(1.3) rotate(15deg); }
+            100% { opacity: 0; transform: translateY(-350px) scale(0.5) rotate(-20deg); }
         }
 
         .score-display {
@@ -1391,80 +1403,29 @@
     var currentSinger = ''; // Nome do cantor atual
     
     // ═══════════════════════════════════════════════════════════════════
-    // FUNÇÃO DE MODIFICAÇÃO DO LINK DO YOUTUBE
+    // FUNÇÃO SIMPLIFICADA PARA EXTRAIR ID DO YOUTUBE
     // ═══════════════════════════════════════════════════════════════════
     
-    // Função para modificar automaticamente o link do YouTube
-    function modifyYouTubeLink(url) {
-        if (!url) return url;
-        
-        // Converte para string
-        let modifiedUrl = url.toString();
-        
-        // Padrões para detectar links do YouTube
-        const youtubePatterns = [
-            /(https?:\/\/)(www\.)?youtube\.com/i,
-            /(https?:\/\/)youtu\.be/i,
-            /(https?:\/\/)m\.youtube\.com/i,
-            /(https?:\/\/)music\.youtube\.com/i,
-            /(https?:\/\/)gaming\.youtube\.com/i
-        ];
-        
-        // Verifica se é um link do YouTube
-        let isYouTubeLink = false;
-        for (const pattern of youtubePatterns) {
-            if (pattern.test(modifiedUrl)) {
-                isYouTubeLink = true;
-                break;
-            }
-        }
-        
-        if (!isYouTubeLink) return modifiedUrl;
-        
-        console.log('Link do YouTube detectado, aplicando modificação...');
-        
-        // Adiciona hífen entre o 't' e o 'u' em "youtube" ou "youtu"
-        // Exemplo: youtube.com -> yout-ube.com, youtu.be -> yout-u.be
-        modifiedUrl = modifiedUrl.replace(/yout(\.|u|ube)/gi, 'yout-$1');
-        
-        // Remove hífen duplicado se já existir
-        modifiedUrl = modifiedUrl.replace(/yout--/gi, 'yout-');
-        
-        // Log para debug
-        console.log('Link modificado:', modifiedUrl);
-        
-        return modifiedUrl;
-    }
-    
-    // Função para extrair o ID do vídeo de um link modificado
-    function extractVideoIdFromModifiedUrl(url) {
-        if (!url) return null;
-        
-        // Primeiro, normaliza a URL (remove o hífen para extração)
-        let normalizedUrl = url.replace(/yout-ube/gi, 'youtube').replace(/yout-u\.be/gi, 'youtu.be');
-        
-        // Agora extrai o ID normalmente
-        return extractVideoId(normalizedUrl);
-    }
-    
-    // Função original de extração de ID (mantida para compatibilidade)
     function extractVideoId(url) {
         if (!url) return null;
         
+        console.log('Extraindo ID do YouTube da URL:', url);
+        
         // Padrões para extrair o ID do vídeo do YouTube
         const patterns = [
-            /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i,
-            /^([a-zA-Z0-9_-]{11})$/,
-            /(?:embed\/|v\/|watch\?v=|youtu\.be\/)([^"&?\/\s]{11})/i
+            /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/,
+            /^([a-zA-Z0-9_-]{11})$/
         ];
         
         for (const pattern of patterns) {
             const match = url.match(pattern);
             if (match && match[1]) {
+                console.log('ID encontrado:', match[1]);
                 return match[1];
             }
         }
         
+        console.log('ID não encontrado na URL');
         return null;
     }
     
@@ -1600,6 +1561,8 @@
                     updateConnectionStatus('connected');
                 } else {
                     console.log('%c⏳ Aguardando conexão Firebase...', 'color: #ff9500;');
+                    isFirebaseConnected = false;
+                    updateConnectionStatus('disconnected');
                 }
             }, function(error) {
                 console.error('%c❌ Erro ao conectar:', 'color: #ff4757;', error.message);
@@ -1647,6 +1610,9 @@
         } else if (status === 'timeout') {
             el.className = 'connection-status disconnected';
             el.innerHTML = '⏳ <strong>Timeout.</strong> O Realtime Database pode não ter sido criado. <a href="https://console.firebase.google.com" target="_blank" style="color:white;text-decoration:underline;">Criar agora</a>';
+        } else if (status === 'disconnected') {
+            el.className = 'connection-status disconnected';
+            el.innerHTML = '❌ <strong>Desconectado.</strong> Verifique sua conexão com a internet.';
         } else {
             el.className = 'connection-status disconnected';
             el.innerHTML = '❌ <strong>Erro de conexão.</strong> Verifique se o Realtime Database foi criado no Firebase Console.';
@@ -1654,7 +1620,7 @@
     }
     
     // ═══════════════════════════════════════════════════════════════════
-    // FIREBASE LISTENERS
+    // FIREBASE LISTENERS - CORRIGIDO PARA SINCRONIZAÇÃO DE EMOJIS
     // ═══════════════════════════════════════════════════════════════════
     
     var listenerStartTime = 0;
@@ -1676,6 +1642,9 @@
         console.log('%c   Timestamp: ' + listenerStartTime, 'color: #00ff88;');
         console.log('%c════════════════════════════════════════════════════════════', 'color: #00ff88;');
         
+        // Limpar processedEmojis para evitar conflitos
+        processedEmojis = {};
+        
         // Listener para TODOS os emojis (child_added dispara para cada novo)
         roomRef.child('emojis').on('child_added', function(snapshot) {
             var data = snapshot.val();
@@ -1686,26 +1655,31 @@
             
             // Ignorar se já processou (evita duplicatas)
             if (processedEmojis[emojiKey]) {
+                console.log('Emoji já processado (chave duplicada):', emojiKey);
                 return;
             }
             processedEmojis[emojiKey] = true;
             
             // Ignorar meus próprios emojis (já mostrei a animação local)
             if (data.odUserId && data.odUserId === odUserId) {
+                console.log('Emoji do próprio usuário, ignorando:', emojiKey);
                 return;
             }
             
             // Ignorar emojis muito antigos (mais de 30 segundos)
             var emojiAge = data.timestamp ? (now - data.timestamp) : 0;
             if (data.timestamp && emojiAge > 30000) {
+                console.log('Emoji muito antigo (idade: ' + emojiAge + 'ms), ignorando:', emojiKey);
                 return;
             }
+            
+            console.log('📩 Novo emoji recebido de outro usuário:', data.emoji, 'de', data.userName, 'pontos:', data.points);
             
             // ═══════════════════════════════════════════════════════════════════
             // EMOJI DE OUTRO PARTICIPANTE - MOSTRAR!
             // ═══════════════════════════════════════════════════════════════════
             
-            // 1. Criar animação flutuante
+            // 1. Criar animação flutuante - CORRIGIDO PARA PC
             createFloatingEmoji(data.emoji);
             
             // 2. Mostrar notificação
@@ -1720,6 +1694,23 @@
             
             // 5. Rastrear emoji para estatísticas
             trackEmoji(data.emoji);
+            
+            // 6. Atualizar scores localmente também (IMPORTANTE!)
+            if (data.points) {
+                scores.total += data.points;
+                if (data.points > 0) {
+                    scores.positive += data.points;
+                } else {
+                    scores.negative += Math.abs(data.points);
+                }
+                updateScoreDisplay();
+            }
+        });
+        
+        // Listener para remoção de emojis (limpeza automática)
+        roomRef.child('emojis').on('child_removed', function(snapshot) {
+            var emojiKey = snapshot.key;
+            delete processedEmojis[emojiKey];
         });
         
         // Listener para participantes
@@ -1796,17 +1787,20 @@
     }
     
     // ═══════════════════════════════════════════════════════════════════
-    // ENVIAR PARA FIREBASE
+    // ENVIAR PARA FIREBASE - CORRIGIDO PARA SINCRONIZAÇÃO!
     // ═══════════════════════════════════════════════════════════════════
     
     function sendEmojiToFirebase(emoji, points) {
         if (!isFirebaseConnected || !roomRef) {
+            console.log('Firebase não conectado. Emoji não enviado para nuvem.');
             return;
         }
         
         var emojiRef = roomRef.child('emojis').push();
         var emojiKey = emojiRef.key;
-        processedEmojis[emojiKey] = true; // Marcar como processado ANTES de enviar
+        
+        // Marcar como processado localmente para evitar duplicatas
+        processedEmojis[emojiKey] = true;
         
         var emojiData = {
             emoji: emoji,
@@ -1816,12 +1810,27 @@
             timestamp: firebase.database.ServerValue.TIMESTAMP
         };
         
-        emojiRef.set(emojiData)
-            .catch(function(error) {
-                showToast('Erro ao enviar emoji', true);
-            });
+        console.log('📤 Enviando emoji para Firebase:', emoji, 'pontos:', points, 'chave:', emojiKey);
         
-        // Atualizar scores no Firebase
+        // Enviar emoji
+        emojiRef.set(emojiData)
+            .then(function() {
+                console.log('✅ Emoji enviado com sucesso para Firebase');
+                
+                // Atualizar scores no Firebase APÓS enviar emoji
+                updateScoresInFirebase(points);
+            })
+            .catch(function(error) {
+                console.error('❌ Erro ao enviar emoji:', error);
+                showToast('Erro ao enviar emoji para nuvem', true);
+                // Remover do processed se falhar
+                delete processedEmojis[emojiKey];
+            });
+    }
+    
+    function updateScoresInFirebase(points) {
+        if (!isFirebaseConnected || !roomRef) return;
+        
         roomRef.child('scores').transaction(function(current) {
             if (!current) {
                 return { 
@@ -1830,10 +1839,25 @@
                     negative: points < 0 ? Math.abs(points) : 0 
                 };
             }
+            
+            // Calcular novos valores
+            var newTotal = (current.total || 0) + points;
+            var newPositive = (current.positive || 0) + (points > 0 ? points : 0);
+            var newNegative = (current.negative || 0) + (points < 0 ? Math.abs(points) : 0);
+            
+            console.log('🔄 Atualizando scores no Firebase:', {
+                oldTotal: current.total || 0,
+                newTotal: newTotal,
+                oldPositive: current.positive || 0,
+                newPositive: newPositive,
+                oldNegative: current.negative || 0,
+                newNegative: newNegative
+            });
+            
             return {
-                total: (current.total || 0) + points,
-                positive: (current.positive || 0) + (points > 0 ? points : 0),
-                negative: (current.negative || 0) + (points < 0 ? Math.abs(points) : 0)
+                total: newTotal,
+                positive: newPositive,
+                negative: newNegative
             };
         }).catch(function(error) {
             console.error('Erro ao atualizar scores:', error);
@@ -1856,6 +1880,15 @@
         
         // Remover quando desconectar
         roomRef.child('participants').child(odUserId).onDisconnect().remove();
+        
+        // Configurar scores iniciais se for nova sala
+        if (isNewRoom) {
+            roomRef.child('scores').set({
+                total: 0,
+                positive: 0,
+                negative: 0
+            });
+        }
     }
     
     function updateVideoFirebase(videoId) {
@@ -1863,7 +1896,8 @@
         
         roomRef.child('currentVideo').set({
             videoId: videoId,
-            updatedAt: firebase.database.ServerValue.TIMESTAMP
+            updatedAt: firebase.database.ServerValue.TIMESTAMP,
+            updatedBy: userName
         });
     }
     
@@ -1951,36 +1985,8 @@
             if (e.key === 'Enter') joinRoom();
         });
         
-        // Evento para o campo de vídeo - modificar automaticamente ao colar
-        var videoInput = document.getElementById('videoInput');
-        
-        // Evento de colar (paste)
-        videoInput.addEventListener('paste', function(e) {
-            // Aguardar um pouco para pegar o valor colado
-            setTimeout(function() {
-                var value = videoInput.value;
-                var modifiedValue = modifyYouTubeLink(value);
-                if (modifiedValue !== value) {
-                    videoInput.value = modifiedValue;
-                    showToast('Link do YouTube modificado automaticamente!');
-                }
-            }, 10);
-        });
-        
-        // Evento de digitar (input) - também modifica enquanto digita
-        videoInput.addEventListener('input', function() {
-            var value = this.value;
-            // Só modifica se for um link completo do YouTube
-            if (value.includes('youtu') && value.length > 20) {
-                var modifiedValue = modifyYouTubeLink(value);
-                if (modifiedValue !== value) {
-                    this.value = modifiedValue;
-                }
-            }
-        });
-        
         // Evento de tecla Enter no campo de vídeo
-        videoInput.addEventListener('keypress', function(e) {
+        document.getElementById('videoInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') loadVideo();
         });
         
@@ -2097,7 +2103,7 @@
     }
     
     // ═══════════════════════════════════════════════════════════════════
-    // PLAYER DE VÍDEO COM MODIFICAÇÃO AUTOMÁTICA
+    // PLAYER DE VÍDEO - CORRIGIDO!
     // ═══════════════════════════════════════════════════════════════════
     
     function openVideoModal() {
@@ -2113,25 +2119,26 @@
     function loadVideo() {
         var input = document.getElementById('videoInput').value.trim();
         
-        // Aplica a modificação no link (se ainda não foi aplicada)
-        var modifiedInput = modifyYouTubeLink(input);
+        if (!input) {
+            showToast('Digite ou cole um link do YouTube!', true);
+            return;
+        }
         
-        // Extrai o ID do vídeo do link modificado
-        var videoId = extractVideoIdFromModifiedUrl(modifiedInput);
+        // Extrai o ID do vídeo
+        var videoId = extractVideoId(input);
         
         if (!videoId) {
             showToast('Link inválido! Certifique-se de que é um link do YouTube válido.', true);
             return;
         }
         
-        // Mostra o link modificado no campo (para feedback visual)
-        document.getElementById('videoInput').value = modifiedInput;
+        console.log('ID do vídeo extraído:', videoId);
         
         updateVideoFirebase(videoId);
         currentVideoId = videoId;
         playVideo(videoId);
         closeVideoModal();
-        showToast('Vídeo carregado! 🎵 (Link modificado para evitar anúncios)');
+        showToast('Vídeo carregado! 🎵');
         addActivity('🎬', userName + ' carregou vídeo');
     }
     
@@ -2146,9 +2153,10 @@
         var oldIframe = wrapper.querySelector('iframe');
         if (oldIframe) oldIframe.remove();
         
-        // Usar o link modificado para o embed
-        // IMPORTANTE: Usar o domínio com hífen para tentar evitar anúncios
-        var embedUrl = 'https://www.yout-ube.com/embed/' + videoId + '?autoplay=1&rel=0&enablejsapi=1';
+        // Usar link padrão do YouTube
+        var embedUrl = 'https://www.youtube.com/embed/' + videoId + '?autoplay=1&rel=0&enablejsapi=1';
+        
+        console.log('Carregando vídeo com URL:', embedUrl);
         
         var iframe = document.createElement('iframe');
         iframe.src = embedUrl;
@@ -2161,9 +2169,23 @@
         iframe.style.width = '100%';
         iframe.style.height = '100%';
         iframe.style.border = 'none';
+        iframe.style.zIndex = '1'; // Garantir z-index baixo
         
+        // INSERIR o iframe ANTES do container de emojis para garantir que fique atrás
         wrapper.insertBefore(iframe, emojiContainer);
         placeholder.classList.add('hidden');
+        
+        // Garantir que o container de emojis esteja com z-index alto
+        if (emojiContainer) {
+            emojiContainer.style.zIndex = '1000';
+            emojiContainer.style.position = 'absolute';
+            emojiContainer.style.top = '0';
+            emojiContainer.style.left = '0';
+            emojiContainer.style.width = '100%';
+            emojiContainer.style.height = '100%';
+            emojiContainer.style.pointerEvents = 'none';
+            emojiContainer.style.overflow = 'hidden';
+        }
         
         // Mostrar botão de encerrar
         document.getElementById('endSongBtn').style.display = 'inline-block';
@@ -2177,7 +2199,7 @@
     }
     
     // ═══════════════════════════════════════════════════════════════════
-    // SISTEMA DE EMOJIS
+    // SISTEMA DE EMOJIS - CORRIGIDO ESPECIALMENTE PARA PC!
     // ═══════════════════════════════════════════════════════════════════
     
     function sendEmoji(emoji, points) {
@@ -2191,18 +2213,29 @@
             return;
         }
         
+        console.log('🎯 Enviando emoji:', emoji, 'pontos:', points, 'usuário:', userName);
+        
         // Rastrear emoji para estatísticas do resultado final
         trackEmoji(emoji);
         
-        // Animação local IMEDIATA
+        // Animação local IMEDIATA - CORRIGIDO PARA PC
         createFloatingEmoji(emoji);
         flashScoreCard(points);
+        
+        // Atualizar scores locais
+        scores.total += points;
+        if (points > 0) {
+            scores.positive += points;
+        } else {
+            scores.negative += Math.abs(points);
+        }
+        updateScoreDisplay();
         
         // Atividade local
         var pt = points > 0 ? '+' + points : String(points);
         addActivity(emoji, userName + ' reagiu (' + pt + ')');
         
-        // Enviar ao Firebase (scores serão atualizados pelo listener)
+        // Enviar ao Firebase
         sendEmojiToFirebase(emoji, points);
         
         // Cooldown de 1 segundo
@@ -2216,25 +2249,63 @@
         }, 1000);
     }
     
+    // ═══════════════════════════════════════════════════════════════════
+    // FUNÇÃO CRITICALMENTE CORRIGIDA - EMOJIS FLUTUANTES NO PC
+    // ═══════════════════════════════════════════════════════════════════
+    
     function createFloatingEmoji(emoji) {
+        var wrapper = document.getElementById('playerWrapper');
         var container = document.getElementById('emojiContainer');
         
+        console.log('Criando emoji flutuante no PC:', emoji);
+        
+        // Se o container não existir, criá-lo
         if (!container) {
-            return;
+            console.log('Container de emojis não encontrado, criando...');
+            container = document.createElement('div');
+            container.id = 'emojiContainer';
+            container.className = 'emoji-float-container';
+            wrapper.appendChild(container);
         }
         
+        // GARANTIR que o container tenha os estilos corretos (importantíssimo para PC)
+        container.style.position = 'absolute';
+        container.style.top = '0';
+        container.style.left = '0';
+        container.style.width = '100%';
+        container.style.height = '100%';
+        container.style.pointerEvents = 'none';
+        container.style.overflow = 'hidden';
+        container.style.zIndex = '1000'; // Z-INDEX ALTO PARA FICAR SOBRE O VÍDEO
+        container.style.transform = 'translateZ(0)'; // Forçar aceleração de hardware
+        
+        // Criar o elemento do emoji
         var el = document.createElement('div');
         el.className = 'floating-emoji';
         el.textContent = emoji;
-        el.style.left = (10 + Math.random() * 80) + '%';
-        el.style.bottom = '10%';
         
+        // Posicionamento aleatório (10% a 90% da largura)
+        var leftPos = 10 + Math.random() * 80;
+        el.style.left = leftPos + '%';
+        el.style.bottom = '20px'; // Começar um pouco acima do fundo
+        
+        // Estilos críticos para PC
+        el.style.zIndex = '1001';
+        el.style.position = 'absolute';
+        el.style.pointerEvents = 'none';
+        el.style.userSelect = 'none';
+        el.style.willChange = 'transform, opacity'; // Otimização para animação
+        
+        // Adicionar ao container
         container.appendChild(el);
         
-        // Remover após 3 segundos
+        console.log('Emoji criado com sucesso no PC. Posição left:', leftPos + '%');
+        
+        // Remover após 3 segundos (tempo da animação)
         setTimeout(function() { 
             if (el.parentNode) {
                 el.remove();
+                console.log('Emoji removido do PC.');
             }
         }, 3000);
     }
@@ -2325,11 +2396,14 @@
         
         scores = { total: 0, positive: 0, negative: 0 };
         activities = [];
+        emojiCounts = {};
+        totalReactions = 0;
         updateScoreDisplay();
         updateActivityFeed();
         
         if (isFirebaseConnected && roomRef) {
             roomRef.child('scores').set(scores);
+            roomRef.child('emojis').remove();
         }
         
         showToast('Resetado! 🔄');
@@ -2558,6 +2632,28 @@
         openVideoModal();
         showToast('Escolha a próxima música! 🎵');
     }
+    
+    // Inicializar
+    document.addEventListener('DOMContentLoaded', init);
+    
+    // Remove o link do LM Arena
+    var link = document.querySelector('a[href="https://lmarena.ai/code"]');
+    if (link) {
+        link.style.display = 'none';
+    }
+    
+    setTimeout(function() {
+        var link = document.querySelector('a[href="https://lmarena.ai/code"]');
+        if (link) {
+            link.style.display = 'none';
+        }
+        var allLinks = document.querySelectorAll('a');
+        allLinks.forEach(function(a) {
+            if (a.href && a.href.includes('lmarena.ai')) {
+                a.style.display = 'none';
+            }
+        });
+    }, 1000);
     </script>
 </body>
 </html>
