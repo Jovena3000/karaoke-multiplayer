@@ -1007,13 +1007,14 @@
     // ============================================
     // CONFIGURAÇÃO SUPABASE - COLE SUAS CHAVES AQUI!
     // ============================================
-    const SUPABASE_URL = "https://yvrskenfgfpgrcpmmeln.supabase.co"; // 🔁 COLE SUA URL
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl2cnNrZW5mZ2ZwZ3JjcG1tZWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNzk1NTAsImV4cCI6MjA4Njc1NTU1MH0.DzO4mZ7jYkTPoleIlF7smZ_Kim7KqFxXA4aumb7Qf8U"; // 🔁 COLE SUA ANON KEY
+    // 🔁 SUBSTITUA PELAS SUAS CHAVES REAIS
+    const SUPABASE_URL = "https://yvrskenfgfpgrcpmmeln.supabase.co"; // Sua URL
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl2cnNrZW5mZ2ZwZ3JjcG1tZWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNzk1NTAsImV4cCI6MjA4Njc1NTU1MH0.DzO4mZ7jYkTPoleIlF7smZ_Kim7KqFxXA4aumb7Qf8U"; // Sua Anon Key
 
     // ============================================
-    // VARIÁVEIS GLOBAIS
+    // VARIÁVEIS GLOBAIS (UMA ÚNICA VEZ)
     // ============================================
-    let supabase = null;
+    let supabaseClient = null;
     let roomChannel = null;
     let isSupabaseConnected = false;
     let roomId = '';
@@ -1033,8 +1034,375 @@
     let currentSinger = '';
 
     // ============================================
-    // INICIALIZAÇÃO SUPABASE
+    // FUNÇÕES SÃO DECLARADAS ANTES DE SEREM USADAS
     // ============================================
+
+    // Funções de UI
+    function showToast(msg, isError) {
+        const toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.className = 'toast show' + (isError ? ' error' : '');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    function updateConnectionStatus(status) {
+        const el = document.getElementById('connectionStatus');
+        if (status === 'connected') {
+            el.className = 'connection-status connected';
+            el.innerHTML = '✅ <strong>Conectado!</strong> Emojis sincronizam em tempo real!';
+        } else if (status === 'connecting') {
+            el.className = 'connection-status connecting';
+            el.innerHTML = '🔄 Conectando ao servidor...';
+        } else if (status === 'config-error') {
+            el.className = 'connection-status disconnected';
+            el.innerHTML = '❌ <strong>Configure suas chaves Supabase no código!</strong>';
+        } else {
+            el.className = 'connection-status disconnected';
+            el.innerHTML = '❌ <strong>Desconectado.</strong> Verifique sua conexão.';
+        }
+    }
+
+    // Funções utilitárias
+    function generateRoomId() {
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        let id = '';
+        for (let i = 0; i < 6; i++) {
+            id += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return id;
+    }
+
+    function getRoomFromUrl() {
+        const hash = window.location.hash;
+        if (hash && hash.length > 1) {
+            const h = hash.substring(1).toUpperCase();
+            if (/^[A-Z0-9]{6}$/.test(h)) return h;
+        }
+        
+        const params = new URLSearchParams(window.location.search);
+        const room = params.get('room');
+        if (room && /^[A-Z0-9]{6}$/i.test(room)) return room.toUpperCase();
+        
+        return null;
+    }
+
+    function getShareUrl() {
+        const base = window.location.origin + window.location.pathname;
+        return base + '?room=' + roomId + '#' + roomId;
+    }
+
+    function extractVideoId(url) {
+        if (!url) return null;
+        
+        const patterns = [
+            /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/,
+            /^([a-zA-Z0-9_-]{11})$/
+        ];
+        
+        for (const pattern of patterns) {
+            const match = url.match(pattern);
+            if (match && match[1]) return match[1];
+        }
+        
+        return null;
+    }
+
+    // Funções de UI (continuação)
+    function updateScoreDisplay() {
+        document.getElementById('totalScore').textContent = scores.total;
+        document.getElementById('posScore').textContent = scores.positive;
+        document.getElementById('negScore').textContent = scores.negative;
+        
+        const totalEl = document.getElementById('totalScore');
+        if (scores.total > 0) totalEl.className = 'score-value pos';
+        else if (scores.total < 0) totalEl.className = 'score-value neg';
+        else totalEl.className = 'score-value';
+    }
+
+    function updateParticipantsList() {
+        const el = document.getElementById('participantsList');
+        const c1 = document.getElementById('participantCount');
+        const c2 = document.getElementById('participantCount2');
+        
+        c1.textContent = participants.length;
+        c2.textContent = participants.length;
+        
+        if (!participants.length) {
+            el.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:1rem;">Aguardando...</div>';
+            return;
+        }
+        
+        let html = '';
+        participants.forEach(p => {
+            const isYou = p.odUserId === odUserId;
+            const name = p.odUserName || 'Anônimo';
+            html += '<div class="participant-item">' +
+                '<div class="participant-avatar">' + name.charAt(0).toUpperCase() + '</div>' +
+                '<span>' + name + '</span>' +
+                (isYou ? '<span class="you-badge">você</span>' : '<span class="online-badge">online</span>') +
+                '</div>';
+        });
+        el.innerHTML = html;
+    }
+
+    function addActivity(emoji, text) {
+        activities.unshift({ emoji: emoji, text: text });
+        if (activities.length > 20) activities.pop();
+        
+        const el = document.getElementById('activityFeed');
+        if (!activities.length) {
+            el.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:1rem;">Nenhuma atividade</div>';
+            return;
+        }
+        
+        let html = '';
+        activities.forEach(a => {
+            html += '<div class="activity-item"><span class="activity-emoji">' + a.emoji + '</span><span>' + a.text + '</span></div>';
+        });
+        el.innerHTML = html;
+    }
+
+    function createFloatingEmoji(emoji) {
+        const wrapper = document.getElementById('playerWrapper');
+        let container = document.getElementById('emojiContainer');
+        
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'emojiContainer';
+            container.className = 'emoji-float-container';
+            wrapper.appendChild(container);
+        }
+        
+        container.style.position = 'absolute';
+        container.style.top = '0';
+        container.style.left = '0';
+        container.style.width = '100%';
+        container.style.height = '100%';
+        container.style.pointerEvents = 'none';
+        container.style.overflow = 'hidden';
+        container.style.zIndex = '1000';
+        container.style.transform = 'translateZ(0)';
+        
+        const el = document.createElement('div');
+        el.className = 'floating-emoji';
+        el.textContent = emoji;
+        
+        const leftPos = 10 + Math.random() * 80;
+        el.style.left = leftPos + '%';
+        el.style.bottom = '20px';
+        el.style.zIndex = '1001';
+        el.style.position = 'absolute';
+        el.style.pointerEvents = 'none';
+        el.style.userSelect = 'none';
+        el.style.willChange = 'transform, opacity';
+        
+        container.appendChild(el);
+        
+        setTimeout(() => { 
+            if (el.parentNode) el.remove();
+        }, 3000);
+    }
+
+    function showEmojiNotification(emoji, name) {
+        const notif = document.getElementById('emojiNotif');
+        document.getElementById('notifEmoji').textContent = emoji;
+        document.getElementById('notifText').textContent = name + ' reagiu!';
+        
+        notif.classList.add('show');
+        setTimeout(() => notif.classList.remove('show'), 2500);
+    }
+
+    function flashScoreCard(points) {
+        const card = points > 0 ? document.getElementById('posCard') : document.getElementById('negCard');
+        if (card) {
+            card.classList.add('highlight');
+            setTimeout(() => card.classList.remove('highlight'), 500);
+        }
+    }
+
+    function generateQRCode() {
+        const shareUrl = getShareUrl();
+        const container = document.getElementById('qrCode');
+        
+        document.getElementById('shareLink').textContent = shareUrl;
+        container.innerHTML = '<div style="padding:2rem;color:#666;">⏳</div>';
+        
+        const img = new Image();
+        img.onload = function() {
+            container.innerHTML = '';
+            img.style.width = '160px';
+            img.style.height = '160px';
+            container.appendChild(img);
+        };
+        img.onerror = function() {
+            container.innerHTML = '<div style="padding:1rem;color:#00d4ff;text-align:center;"><strong style="font-size:1.5rem;">' + roomId + '</strong><br><small>Digite este código</small></div>';
+        };
+        img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=' + encodeURIComponent(shareUrl);
+    }
+
+    function copyLink() {
+        const url = getShareUrl();
+        navigator.clipboard.writeText(url).then(() => {
+            showToast('Link copiado!');
+        }).catch(() => {
+            showToast('Link: ' + url);
+        });
+    }
+
+    function openVideoModal() {
+        document.getElementById('videoModal').classList.add('active');
+        document.getElementById('videoInput').focus();
+    }
+
+    function closeVideoModal() {
+        document.getElementById('videoModal').classList.remove('active');
+        document.getElementById('videoInput').value = '';
+    }
+
+    function playVideo(videoId) {
+        if (!videoId) return;
+        
+        const wrapper = document.getElementById('playerWrapper');
+        const placeholder = document.getElementById('placeholder');
+        const emojiContainer = document.getElementById('emojiContainer');
+        
+        const oldIframe = wrapper.querySelector('iframe');
+        if (oldIframe) oldIframe.remove();
+        
+        const embedUrl = 'https://www.youtube.com/embed/' + videoId + '?autoplay=1&rel=0';
+        
+        const iframe = document.createElement('iframe');
+        iframe.src = embedUrl;
+        iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+        iframe.allowFullscreen = true;
+        iframe.id = 'ytPlayer';
+        iframe.style.position = 'absolute';
+        iframe.style.top = '0';
+        iframe.style.left = '0';
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.border = 'none';
+        iframe.style.zIndex = '1';
+        
+        wrapper.insertBefore(iframe, emojiContainer);
+        placeholder.classList.add('hidden');
+        
+        if (emojiContainer) {
+            emojiContainer.style.zIndex = '1000';
+            emojiContainer.style.position = 'absolute';
+            emojiContainer.style.top = '0';
+            emojiContainer.style.left = '0';
+            emojiContainer.style.width = '100%';
+            emojiContainer.style.height = '100%';
+            emojiContainer.style.pointerEvents = 'none';
+            emojiContainer.style.overflow = 'hidden';
+        }
+        
+        document.getElementById('endSongBtn').style.display = 'inline-block';
+        
+        currentSinger = userName;
+        emojiCounts = {};
+        totalReactions = 0;
+    }
+
+    function trackEmoji(emoji) {
+        if (!emojiCounts[emoji]) emojiCounts[emoji] = 0;
+        emojiCounts[emoji]++;
+        totalReactions++;
+    }
+
+    function getMostVotedEmoji() {
+        let maxCount = 0;
+        let topEmoji = '🎉';
+        
+        for (const emoji in emojiCounts) {
+            if (emojiCounts[emoji] > maxCount) {
+                maxCount = emojiCounts[emoji];
+                topEmoji = emoji;
+            }
+        }
+        
+        return { emoji: topEmoji, count: maxCount };
+    }
+
+    function getResultMessage(total) {
+        if (total >= 20) return { text: '🌟 PERFORMANCE LENDÁRIA! 🌟', class: 'excellent' };
+        if (total >= 10) return { text: '🔥 Performance Incrível!', class: 'excellent' };
+        if (total >= 5) return { text: '👏 Muito Bem!', class: 'good' };
+        if (total >= 0) return { text: '👍 Boa Performance!', class: 'good' };
+        if (total >= -5) return { text: '😅 Pode Melhorar...', class: 'bad' };
+        return { text: '💪 Treinar Mais!', class: 'bad' };
+    }
+
+    function createConfetti() {
+        const colors = ['#ff2d75', '#9d4edd', '#00d4ff', '#00ff88', '#ff9500', '#ffff00'];
+        
+        for (let i = 0; i < 100; i++) {
+            setTimeout(() => {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                confetti.style.width = (5 + Math.random() * 10) + 'px';
+                confetti.style.height = (5 + Math.random() * 10) + 'px';
+                confetti.style.animationDuration = (2 + Math.random() * 2) + 's';
+                document.body.appendChild(confetti);
+                
+                setTimeout(() => {
+                    if (confetti.parentNode) confetti.remove();
+                }, 4000);
+            }, i * 30);
+        }
+    }
+
+    function closeResult() {
+        document.getElementById('resultOverlay').classList.remove('active');
+    }
+
+    function showResultScreen() {
+        const overlay = document.getElementById('resultOverlay');
+        
+        const singerName = currentSinger || userName || 'Cantor';
+        document.getElementById('resultSingerName').textContent = singerName;
+        
+        const topEmoji = getMostVotedEmoji();
+        document.getElementById('resultEmoji').textContent = topEmoji.emoji;
+        
+        const totalScoreEl = document.getElementById('resultTotalScore');
+        const totalText = scores.total >= 0 ? '+' + scores.total : String(scores.total);
+        totalScoreEl.textContent = totalText;
+        
+        if (scores.total > 0) totalScoreEl.className = 'result-total-score positive';
+        else if (scores.total < 0) totalScoreEl.className = 'result-total-score negative';
+        else totalScoreEl.className = 'result-total-score neutral';
+        
+        document.getElementById('resultPosScore').textContent = '+' + scores.positive;
+        document.getElementById('resultNegScore').textContent = '-' + scores.negative;
+        document.getElementById('resultTotalReactions').textContent = totalReactions;
+        
+        let breakdownHtml = '';
+        const sortedEmojis = Object.keys(emojiCounts).sort((a, b) => emojiCounts[b] - emojiCounts[a]);
+        
+        sortedEmojis.forEach(emoji => {
+            breakdownHtml += '<div class="result-emoji-item">' +
+                '<span class="emoji">' + emoji + '</span>' +
+                '<span class="count">×' + emojiCounts[emoji] + '</span>' +
+                '</div>';
+        });
+        document.getElementById('resultEmojiBreakdown').innerHTML = breakdownHtml;
+        
+        const message = getResultMessage(scores.total);
+        const messageEl = document.getElementById('resultMessage');
+        messageEl.textContent = message.text;
+        messageEl.className = 'result-message ' + message.class;
+        
+        overlay.classList.add('active');
+        
+        if (scores.total >= 5) createConfetti();
+    }
+
+    // Funções Supabase
     async function initSupabase() {
         console.log('%c🔥 Inicializando Supabase...', 'color: #ff9500; font-size: 14px;');
         
@@ -1045,10 +1413,10 @@
         }
         
         try {
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             
             // Testar conexão
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .from('rooms')
                 .select('count')
                 .limit(1);
@@ -1070,36 +1438,14 @@
             return false;
         }
     }
-    
-    function updateConnectionStatus(status) {
-        const el = document.getElementById('connectionStatus');
-        if (status === 'connected') {
-            el.className = 'connection-status connected';
-            el.innerHTML = '✅ <strong>Conectado!</strong> Emojis sincronizam em tempo real!';
-        } else if (status === 'connecting') {
-            el.className = 'connection-status connecting';
-            el.innerHTML = '🔄 Conectando ao servidor...';
-        } else if (status === 'config-error') {
-            el.className = 'connection-status disconnected';
-            el.innerHTML = '❌ <strong>Configure suas chaves Supabase no código!</strong>';
-        } else {
-            el.className = 'connection-status disconnected';
-            el.innerHTML = '❌ <strong>Desconectado.</strong> Verifique sua conexão.';
-        }
-    }
 
-    // ============================================
-    // FUNÇÕES SUPABASE - REALTIME
-    // ============================================
     async function setupSupabaseListeners() {
-        if (!isSupabaseConnected || !supabase) return;
+        if (!isSupabaseConnected || !supabaseClient) return;
         
         console.log('Configurando listeners para sala:', roomId);
         
-        // Criar canal para a sala
-        roomChannel = supabase.channel(`room:${roomId}`);
+        roomChannel = supabaseClient.channel(`room:${roomId}`);
         
-        // Escutar participantes
         roomChannel
             .on('presence', { event: 'sync' }, () => {
                 const presenceState = roomChannel.presenceState();
@@ -1133,10 +1479,7 @@
                     showToast(`${pres.odUserName} saiu`);
                 });
                 updateParticipantsList();
-            });
-        
-        // Escutar emojis
-        roomChannel
+            })
             .on('broadcast', { event: 'new-emoji' }, ({ payload }) => {
                 const { emoji, points, userId, userName: emojiUserName, emojiId } = payload;
                 
@@ -1145,15 +1488,12 @@
                 
                 if (userId === odUserId) return;
                 
-                console.log('📩 Emoji recebido:', emoji, 'de', emojiUserName);
-                
                 createFloatingEmoji(emoji);
                 showEmojiNotification(emoji, emojiUserName);
                 flashScoreCard(points);
                 addActivity(emoji, `${emojiUserName} reagiu (${points > 0 ? '+' + points : points})`);
                 trackEmoji(emoji);
                 
-                // Atualizar scores
                 scores.total += points;
                 if (points > 0) scores.positive += points;
                 else scores.negative += Math.abs(points);
@@ -1184,16 +1524,14 @@
                 totalReactions = 0;
                 activities = [];
                 updateScoreDisplay();
-                updateActivityFeed();
+                addActivity('🔄', 'Pontuação resetada');
                 showToast('Pontuação resetada! 🔄');
             });
         
-        // Subscrever
         roomChannel.subscribe(async (status) => {
             if (status === 'SUBSCRIBED') {
                 console.log('✅ Inscrito no canal da sala');
                 
-                // Enviar presença
                 await roomChannel.track({
                     odUserId: odUserId,
                     odUserName: userName,
@@ -1202,7 +1540,7 @@
             }
         });
     }
-    
+
     async function sendEmojiToSupabase(emoji, points) {
         if (!isSupabaseConnected || !roomChannel) return;
         
@@ -1220,14 +1558,13 @@
             }
         });
         
-        // Atualizar scores no broadcast
         await roomChannel.send({
             type: 'broadcast',
             event: 'scores-update',
             payload: scores
         });
     }
-    
+
     async function updateVideoSupabase(videoId) {
         if (!isSupabaseConnected || !roomChannel) return;
         
@@ -1240,7 +1577,7 @@
             }
         });
     }
-    
+
     async function showResultSupabase() {
         if (!isSupabaseConnected || !roomChannel) return;
         
@@ -1254,7 +1591,7 @@
             }
         });
     }
-    
+
     async function resetScoresSupabase() {
         if (!isSupabaseConnected || !roomChannel) return;
         
@@ -1265,56 +1602,176 @@
         });
     }
 
-    // ============================================
-    // FUNÇÕES UTILITÁRIAS
-    // ============================================
-    function generateRoomId() {
-        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-        let id = '';
-        for (let i = 0; i < 6; i++) {
-            id += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        return id;
-    }
-    
-    function getRoomFromUrl() {
-        const hash = window.location.hash;
-        if (hash && hash.length > 1) {
-            const h = hash.substring(1).toUpperCase();
-            if (/^[A-Z0-9]{6}$/.test(h)) return h;
+    // Funções chamadas pelos botões (AGORA DECLARADAS ANTES)
+    function setRoomFromInput() {
+        const input = document.getElementById('roomCodeInput');
+        const code = input.value.trim().toUpperCase();
+        
+        if (!code || code.length !== 6) {
+            showToast('Digite um código de 6 caracteres!', true);
+            return;
         }
         
-        const params = new URLSearchParams(window.location.search);
-        const room = params.get('room');
-        if (room && /^[A-Z0-9]{6}$/i.test(room)) return room.toUpperCase();
+        roomId = code;
+        isNewRoom = false;
         
-        return null;
-    }
-    
-    function getShareUrl() {
-        const base = window.location.origin + window.location.pathname;
-        return base + '?room=' + roomId + '#' + roomId;
-    }
-    
-    function extractVideoId(url) {
-        if (!url) return null;
+        document.getElementById('headerRoomId').textContent = code;
+        document.getElementById('qrRoomId').textContent = code;
+        document.getElementById('modalRoomId').textContent = code;
+        document.getElementById('shareLink').textContent = getShareUrl();
         
-        const patterns = [
-            /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/,
-            /^([a-zA-Z0-9_-]{11})$/
-        ];
+        const modeEl = document.getElementById('modalMode');
+        modeEl.textContent = '🚪 Entrando em sala existente';
+        modeEl.className = 'modal-mode join';
         
-        for (const pattern of patterns) {
-            const match = url.match(pattern);
-            if (match && match[1]) return match[1];
+        if (window.history && window.history.replaceState) {
+            window.history.replaceState({}, '', getShareUrl());
         }
         
-        return null;
+        generateQRCode();
+        showToast('Sala definida: ' + code);
+        document.getElementById('nameInput').focus();
     }
 
-    // ============================================
-    // FUNÇÕES PRINCIPAIS
-    // ============================================
+    async function joinRoom() {
+        const nameInput = document.getElementById('nameInput');
+        const name = nameInput.value.trim();
+        
+        if (!name) {
+            showToast('Digite seu nome!', true);
+            nameInput.focus();
+            return;
+        }
+        
+        userName = name;
+        
+        document.getElementById('nameModal').classList.remove('active');
+        
+        if (isSupabaseConnected) {
+            await setupSupabaseListeners();
+        }
+        
+        if (isNewRoom) {
+            showToast('Sala criada! Código: ' + roomId);
+        } else {
+            showToast('Bem-vindo, ' + name + '! 🎤');
+        }
+    }
+
+    async function loadVideo() {
+        const input = document.getElementById('videoInput').value.trim();
+        
+        if (!input) {
+            showToast('Digite ou cole um link do YouTube!', true);
+            return;
+        }
+        
+        const videoId = extractVideoId(input);
+        
+        if (!videoId) {
+            showToast('Link inválido!', true);
+            return;
+        }
+        
+        console.log('ID do vídeo:', videoId);
+        
+        await updateVideoSupabase(videoId);
+        currentVideoId = videoId;
+        playVideo(videoId);
+        closeVideoModal();
+        showToast('Vídeo carregado! 🎵');
+        addActivity('🎬', userName + ' carregou vídeo');
+    }
+
+    async function sendEmoji(emoji, points) {
+        if (!userName) {
+            showToast('Entre na sala primeiro!', true);
+            return;
+        }
+        
+        if (inCooldown) {
+            showToast('Aguarde 1 segundo!', true);
+            return;
+        }
+        
+        console.log('🎯 Enviando emoji:', emoji, 'pontos:', points);
+        
+        trackEmoji(emoji);
+        
+        createFloatingEmoji(emoji);
+        flashScoreCard(points);
+        
+        scores.total += points;
+        if (points > 0) scores.positive += points;
+        else scores.negative += Math.abs(points);
+        updateScoreDisplay();
+        
+        const pt = points > 0 ? '+' + points : String(points);
+        addActivity(emoji, userName + ' reagiu (' + pt + ')');
+        
+        await sendEmojiToSupabase(emoji, points);
+        
+        inCooldown = true;
+        const btns = document.querySelectorAll('.emoji-btn');
+        btns.forEach(btn => btn.classList.add('cooldown'));
+        setTimeout(() => {
+            inCooldown = false;
+            btns.forEach(btn => btn.classList.remove('cooldown'));
+        }, 1000);
+    }
+
+    async function resetScores() {
+        if (!confirm('Resetar pontuação?')) return;
+        
+        scores = { total: 0, positive: 0, negative: 0 };
+        activities = [];
+        emojiCounts = {};
+        totalReactions = 0;
+        updateScoreDisplay();
+        addActivity('🔄', 'Pontuação resetada');
+        
+        await resetScoresSupabase();
+        
+        showToast('Resetado! 🔄');
+    }
+
+    async function endSongAndShowResults() {
+        if (totalReactions === 0) {
+            showToast('Nenhuma reação recebida ainda!', true);
+            return;
+        }
+        
+        await showResultSupabase();
+        
+        showResultScreen();
+    }
+
+    async function closeResultAndNewSong() {
+        closeResult();
+        
+        scores = { total: 0, positive: 0, negative: 0 };
+        emojiCounts = {};
+        totalReactions = 0;
+        activities = [];
+        currentSinger = '';
+        
+        updateScoreDisplay();
+        addActivity('🎵', 'Nova música selecionada');
+        
+        await resetScoresSupabase();
+        
+        document.getElementById('endSongBtn').style.display = 'none';
+        document.getElementById('placeholder').classList.remove('hidden');
+        
+        const wrapper = document.getElementById('playerWrapper');
+        const oldIframe = wrapper.querySelector('iframe');
+        if (oldIframe) oldIframe.remove();
+        
+        openVideoModal();
+        showToast('Escolha a próxima música! 🎵');
+    }
+
+    // Função de inicialização principal
     async function init() {
         console.log('%c🚀 Iniciando Karaokê Online...', 'color: #00d4ff; font-size: 16px;');
         
@@ -1367,480 +1824,8 @@
         
         setTimeout(() => document.getElementById('nameInput').focus(), 300);
     }
-    
-    function setRoomFromInput() {
-        const input = document.getElementById('roomCodeInput');
-        const code = input.value.trim().toUpperCase();
-        
-        if (!code || code.length !== 6) {
-            showToast('Digite um código de 6 caracteres!', true);
-            return;
-        }
-        
-        roomId = code;
-        isNewRoom = false;
-        
-        document.getElementById('headerRoomId').textContent = code;
-        document.getElementById('qrRoomId').textContent = code;
-        document.getElementById('modalRoomId').textContent = code;
-        document.getElementById('shareLink').textContent = getShareUrl();
-        
-        const modeEl = document.getElementById('modalMode');
-        modeEl.textContent = '🚪 Entrando em sala existente';
-        modeEl.className = 'modal-mode join';
-        
-        if (window.history && window.history.replaceState) {
-            window.history.replaceState({}, '', getShareUrl());
-        }
-        
-        generateQRCode();
-        showToast('Sala definida: ' + code);
-        document.getElementById('nameInput').focus();
-    }
-    
-    async function joinRoom() {
-        const nameInput = document.getElementById('nameInput');
-        const name = nameInput.value.trim();
-        
-        if (!name) {
-            showToast('Digite seu nome!', true);
-            nameInput.focus();
-            return;
-        }
-        
-        userName = name;
-        
-        document.getElementById('nameModal').classList.remove('active');
-        
-        if (isSupabaseConnected) {
-            await setupSupabaseListeners();
-        }
-        
-        if (isNewRoom) {
-            showToast('Sala criada! Código: ' + roomId);
-        } else {
-            showToast('Bem-vindo, ' + name + '! 🎤');
-        }
-    }
-    
-    function generateQRCode() {
-        const shareUrl = getShareUrl();
-        const container = document.getElementById('qrCode');
-        
-        document.getElementById('shareLink').textContent = shareUrl;
-        container.innerHTML = '<div style="padding:2rem;color:#666;">⏳</div>';
-        
-        const img = new Image();
-        img.onload = function() {
-            container.innerHTML = '';
-            img.style.width = '160px';
-            img.style.height = '160px';
-            container.appendChild(img);
-        };
-        img.onerror = function() {
-            container.innerHTML = '<div style="padding:1rem;color:#00d4ff;text-align:center;"><strong style="font-size:1.5rem;">' + roomId + '</strong><br><small>Digite este código</small></div>';
-        };
-        img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=' + encodeURIComponent(shareUrl);
-    }
-    
-    function copyLink() {
-        const url = getShareUrl();
-        navigator.clipboard.writeText(url).then(() => {
-            showToast('Link copiado!');
-        }).catch(() => {
-            showToast('Link: ' + url);
-        });
-    }
-    
-    function openVideoModal() {
-        document.getElementById('videoModal').classList.add('active');
-        document.getElementById('videoInput').focus();
-    }
-    
-    function closeVideoModal() {
-        document.getElementById('videoModal').classList.remove('active');
-        document.getElementById('videoInput').value = '';
-    }
-    
-    async function loadVideo() {
-        const input = document.getElementById('videoInput').value.trim();
-        
-        if (!input) {
-            showToast('Digite ou cole um link do YouTube!', true);
-            return;
-        }
-        
-        const videoId = extractVideoId(input);
-        
-        if (!videoId) {
-            showToast('Link inválido!', true);
-            return;
-        }
-        
-        console.log('ID do vídeo:', videoId);
-        
-        await updateVideoSupabase(videoId);
-        currentVideoId = videoId;
-        playVideo(videoId);
-        closeVideoModal();
-        showToast('Vídeo carregado! 🎵');
-        addActivity('🎬', userName + ' carregou vídeo');
-    }
-    
-    function playVideo(videoId) {
-        if (!videoId) return;
-        
-        const wrapper = document.getElementById('playerWrapper');
-        const placeholder = document.getElementById('placeholder');
-        const emojiContainer = document.getElementById('emojiContainer');
-        
-        const oldIframe = wrapper.querySelector('iframe');
-        if (oldIframe) oldIframe.remove();
-        
-        const embedUrl = 'https://www.youtube.com/embed/' + videoId + '?autoplay=1&rel=0';
-        
-        const iframe = document.createElement('iframe');
-        iframe.src = embedUrl;
-        iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
-        iframe.allowFullscreen = true;
-        iframe.id = 'ytPlayer';
-        iframe.style.position = 'absolute';
-        iframe.style.top = '0';
-        iframe.style.left = '0';
-        iframe.style.width = '100%';
-        iframe.style.height = '100%';
-        iframe.style.border = 'none';
-        iframe.style.zIndex = '1';
-        
-        wrapper.insertBefore(iframe, emojiContainer);
-        placeholder.classList.add('hidden');
-        
-        if (emojiContainer) {
-            emojiContainer.style.zIndex = '1000';
-            emojiContainer.style.position = 'absolute';
-            emojiContainer.style.top = '0';
-            emojiContainer.style.left = '0';
-            emojiContainer.style.width = '100%';
-            emojiContainer.style.height = '100%';
-            emojiContainer.style.pointerEvents = 'none';
-            emojiContainer.style.overflow = 'hidden';
-        }
-        
-        document.getElementById('endSongBtn').style.display = 'inline-block';
-        
-        currentSinger = userName;
-        emojiCounts = {};
-        totalReactions = 0;
-    }
-    
-    function createFloatingEmoji(emoji) {
-        const wrapper = document.getElementById('playerWrapper');
-        let container = document.getElementById('emojiContainer');
-        
-        if (!container) {
-            container = document.createElement('div');
-            container.id = 'emojiContainer';
-            container.className = 'emoji-float-container';
-            wrapper.appendChild(container);
-        }
-        
-        container.style.position = 'absolute';
-        container.style.top = '0';
-        container.style.left = '0';
-        container.style.width = '100%';
-        container.style.height = '100%';
-        container.style.pointerEvents = 'none';
-        container.style.overflow = 'hidden';
-        container.style.zIndex = '1000';
-        container.style.transform = 'translateZ(0)';
-        
-        const el = document.createElement('div');
-        el.className = 'floating-emoji';
-        el.textContent = emoji;
-        
-        const leftPos = 10 + Math.random() * 80;
-        el.style.left = leftPos + '%';
-        el.style.bottom = '20px';
-        el.style.zIndex = '1001';
-        el.style.position = 'absolute';
-        el.style.pointerEvents = 'none';
-        el.style.userSelect = 'none';
-        el.style.willChange = 'transform, opacity';
-        
-        container.appendChild(el);
-        
-        setTimeout(() => { 
-            if (el.parentNode) el.remove();
-        }, 3000);
-    }
-    
-    function showEmojiNotification(emoji, name) {
-        const notif = document.getElementById('emojiNotif');
-        document.getElementById('notifEmoji').textContent = emoji;
-        document.getElementById('notifText').textContent = name + ' reagiu!';
-        
-        notif.classList.add('show');
-        setTimeout(() => notif.classList.remove('show'), 2500);
-    }
-    
-    function flashScoreCard(points) {
-        const card = points > 0 ? document.getElementById('posCard') : document.getElementById('negCard');
-        if (card) {
-            card.classList.add('highlight');
-            setTimeout(() => card.classList.remove('highlight'), 500);
-        }
-    }
-    
-    async function sendEmoji(emoji, points) {
-        if (!userName) {
-            showToast('Entre na sala primeiro!', true);
-            return;
-        }
-        
-        if (inCooldown) {
-            showToast('Aguarde 1 segundo!', true);
-            return;
-        }
-        
-        console.log('🎯 Enviando emoji:', emoji, 'pontos:', points);
-        
-        trackEmoji(emoji);
-        
-        createFloatingEmoji(emoji);
-        flashScoreCard(points);
-        
-        scores.total += points;
-        if (points > 0) scores.positive += points;
-        else scores.negative += Math.abs(points);
-        updateScoreDisplay();
-        
-        const pt = points > 0 ? '+' + points : String(points);
-        addActivity(emoji, userName + ' reagiu (' + pt + ')');
-        
-        await sendEmojiToSupabase(emoji, points);
-        
-        inCooldown = true;
-        const btns = document.querySelectorAll('.emoji-btn');
-        btns.forEach(btn => btn.classList.add('cooldown'));
-        setTimeout(() => {
-            inCooldown = false;
-            btns.forEach(btn => btn.classList.remove('cooldown'));
-        }, 1000);
-    }
-    
-    function updateScoreDisplay() {
-        document.getElementById('totalScore').textContent = scores.total;
-        document.getElementById('posScore').textContent = scores.positive;
-        document.getElementById('negScore').textContent = scores.negative;
-        
-        const totalEl = document.getElementById('totalScore');
-        if (scores.total > 0) totalEl.className = 'score-value pos';
-        else if (scores.total < 0) totalEl.className = 'score-value neg';
-        else totalEl.className = 'score-value';
-    }
-    
-    function updateParticipantsList() {
-        const el = document.getElementById('participantsList');
-        const c1 = document.getElementById('participantCount');
-        const c2 = document.getElementById('participantCount2');
-        
-        c1.textContent = participants.length;
-        c2.textContent = participants.length;
-        
-        if (!participants.length) {
-            el.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:1rem;">Aguardando...</div>';
-            return;
-        }
-        
-        let html = '';
-        participants.forEach(p => {
-            const isYou = p.odUserId === odUserId;
-            const name = p.odUserName || 'Anônimo';
-            html += '<div class="participant-item">' +
-                '<div class="participant-avatar">' + name.charAt(0).toUpperCase() + '</div>' +
-                '<span>' + name + '</span>' +
-                (isYou ? '<span class="you-badge">você</span>' : '<span class="online-badge">online</span>') +
-                '</div>';
-        });
-        el.innerHTML = html;
-    }
-    
-    function addActivity(emoji, text) {
-        activities.unshift({ emoji: emoji, text: text });
-        if (activities.length > 20) activities.pop();
-        updateActivityFeed();
-    }
-    
-    function updateActivityFeed() {
-        const el = document.getElementById('activityFeed');
-        
-        if (!activities.length) {
-            el.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:1rem;">Nenhuma atividade</div>';
-            return;
-        }
-        
-        let html = '';
-        activities.forEach(a => {
-            html += '<div class="activity-item"><span class="activity-emoji">' + a.emoji + '</span><span>' + a.text + '</span></div>';
-        });
-        el.innerHTML = html;
-    }
-    
-    async function resetScores() {
-        if (!confirm('Resetar pontuação?')) return;
-        
-        scores = { total: 0, positive: 0, negative: 0 };
-        activities = [];
-        emojiCounts = {};
-        totalReactions = 0;
-        updateScoreDisplay();
-        updateActivityFeed();
-        
-        await resetScoresSupabase();
-        
-        showToast('Resetado! 🔄');
-    }
-    
-    function showToast(msg, isError) {
-        const toast = document.getElementById('toast');
-        toast.textContent = msg;
-        toast.className = 'toast show' + (isError ? ' error' : '');
-        setTimeout(() => toast.classList.remove('show'), 3000);
-    }
-    
-    function trackEmoji(emoji) {
-        if (!emojiCounts[emoji]) emojiCounts[emoji] = 0;
-        emojiCounts[emoji]++;
-        totalReactions++;
-    }
-    
-    function getMostVotedEmoji() {
-        let maxCount = 0;
-        let topEmoji = '🎉';
-        
-        for (const emoji in emojiCounts) {
-            if (emojiCounts[emoji] > maxCount) {
-                maxCount = emojiCounts[emoji];
-                topEmoji = emoji;
-            }
-        }
-        
-        return { emoji: topEmoji, count: maxCount };
-    }
-    
-    function getResultMessage(total) {
-        if (total >= 20) return { text: '🌟 PERFORMANCE LENDÁRIA! 🌟', class: 'excellent' };
-        if (total >= 10) return { text: '🔥 Performance Incrível!', class: 'excellent' };
-        if (total >= 5) return { text: '👏 Muito Bem!', class: 'good' };
-        if (total >= 0) return { text: '👍 Boa Performance!', class: 'good' };
-        if (total >= -5) return { text: '😅 Pode Melhorar...', class: 'bad' };
-        return { text: '💪 Treinar Mais!', class: 'bad' };
-    }
-    
-    function createConfetti() {
-        const colors = ['#ff2d75', '#9d4edd', '#00d4ff', '#00ff88', '#ff9500', '#ffff00'];
-        
-        for (let i = 0; i < 100; i++) {
-            setTimeout(() => {
-                const confetti = document.createElement('div');
-                confetti.className = 'confetti';
-                confetti.style.left = Math.random() * 100 + 'vw';
-                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
-                confetti.style.width = (5 + Math.random() * 10) + 'px';
-                confetti.style.height = (5 + Math.random() * 10) + 'px';
-                confetti.style.animationDuration = (2 + Math.random() * 2) + 's';
-                document.body.appendChild(confetti);
-                
-                setTimeout(() => {
-                    if (confetti.parentNode) confetti.remove();
-                }, 4000);
-            }, i * 30);
-        }
-    }
-    
-    async function endSongAndShowResults() {
-        if (totalReactions === 0) {
-            showToast('Nenhuma reação recebida ainda!', true);
-            return;
-        }
-        
-        await showResultSupabase();
-        
-        showResultScreen();
-    }
-    
-    function showResultScreen() {
-        const overlay = document.getElementById('resultOverlay');
-        
-        const singerName = currentSinger || userName || 'Cantor';
-        document.getElementById('resultSingerName').textContent = singerName;
-        
-        const topEmoji = getMostVotedEmoji();
-        document.getElementById('resultEmoji').textContent = topEmoji.emoji;
-        
-        const totalScoreEl = document.getElementById('resultTotalScore');
-        const totalText = scores.total >= 0 ? '+' + scores.total : String(scores.total);
-        totalScoreEl.textContent = totalText;
-        
-        if (scores.total > 0) totalScoreEl.className = 'result-total-score positive';
-        else if (scores.total < 0) totalScoreEl.className = 'result-total-score negative';
-        else totalScoreEl.className = 'result-total-score neutral';
-        
-        document.getElementById('resultPosScore').textContent = '+' + scores.positive;
-        document.getElementById('resultNegScore').textContent = '-' + scores.negative;
-        document.getElementById('resultTotalReactions').textContent = totalReactions;
-        
-        let breakdownHtml = '';
-        const sortedEmojis = Object.keys(emojiCounts).sort((a, b) => emojiCounts[b] - emojiCounts[a]);
-        
-        sortedEmojis.forEach(emoji => {
-            breakdownHtml += '<div class="result-emoji-item">' +
-                '<span class="emoji">' + emoji + '</span>' +
-                '<span class="count">×' + emojiCounts[emoji] + '</span>' +
-                '</div>';
-        });
-        document.getElementById('resultEmojiBreakdown').innerHTML = breakdownHtml;
-        
-        const message = getResultMessage(scores.total);
-        const messageEl = document.getElementById('resultMessage');
-        messageEl.textContent = message.text;
-        messageEl.className = 'result-message ' + message.class;
-        
-        overlay.classList.add('active');
-        
-        if (scores.total >= 5) createConfetti();
-    }
-    
-    function closeResult() {
-        document.getElementById('resultOverlay').classList.remove('active');
-    }
-    
-    async function closeResultAndNewSong() {
-        closeResult();
-        
-        scores = { total: 0, positive: 0, negative: 0 };
-        emojiCounts = {};
-        totalReactions = 0;
-        activities = [];
-        currentSinger = '';
-        
-        updateScoreDisplay();
-        updateActivityFeed();
-        
-        await resetScoresSupabase();
-        
-        document.getElementById('endSongBtn').style.display = 'none';
-        document.getElementById('placeholder').classList.remove('hidden');
-        
-        const wrapper = document.getElementById('playerWrapper');
-        const oldIframe = wrapper.querySelector('iframe');
-        if (oldIframe) oldIframe.remove();
-        
-        openVideoModal();
-        showToast('Escolha a próxima música! 🎵');
-    }
-    
+
+    // Iniciar tudo quando a página carregar
     document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
