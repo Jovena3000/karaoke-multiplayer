@@ -6,9 +6,8 @@
     <title>🎤 Karaokê Online - Tempo Real</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
@@ -190,7 +189,6 @@
             background: #000;
             border-radius: 0.75rem;
             overflow: hidden;
-            /* Garantir contexto de empilhamento */
             transform: translateZ(0);
         }
         
@@ -199,7 +197,7 @@
             top: 0; left: 0;
             width: 100%; height: 100%;
             border: none;
-            z-index: 1 !important; /* Garantir z-index baixo */
+            z-index: 1;
         }
         
         .placeholder {
@@ -218,7 +216,6 @@
         .placeholder-icon { font-size: 4rem; margin-bottom: 1rem; }
         .placeholder-text { color: var(--text-secondary); }
 
-        /* CONTAINER DE EMOJIS - CORRIGIDO PARA PC */
         .emoji-float-container {
             position: absolute !important;
             top: 0 !important;
@@ -227,8 +224,8 @@
             height: 100% !important;
             pointer-events: none !important;
             overflow: hidden !important;
-            z-index: 1000 !important; /* Z-INDEX ALTO PARA FICAR SOBRE O VÍDEO */
-            transform: translateZ(0); /* Forçar aceleração de hardware */
+            z-index: 1000 !important;
+            transform: translateZ(0);
         }
         
         .floating-emoji {
@@ -238,11 +235,8 @@
             filter: drop-shadow(0 5px 15px rgba(255,255,255,0.7));
             z-index: 1001 !important;
             user-select: none;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            pointer-events: none !important;
-            will-change: transform, opacity; /* Otimização para animação */
+            pointer-events: none;
+            will-change: transform, opacity;
         }
         
         @keyframes floatUp {
@@ -576,60 +570,6 @@
             margin-bottom: 1rem;
         }
         
-        .firebase-setup {
-            background: rgba(255,45,117,0.1);
-            border: 2px solid var(--accent-pink);
-            border-radius: 0.75rem;
-            padding: 1rem;
-            margin-bottom: 1rem;
-        }
-        
-        .firebase-setup h4 {
-            color: var(--accent-pink);
-            margin-bottom: 0.5rem;
-        }
-        
-        .firebase-setup textarea {
-            width: 100%;
-            height: 120px;
-            background: var(--bg-dark);
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 0.5rem;
-            color: var(--accent-green);
-            font-family: monospace;
-            font-size: 0.75rem;
-            padding: 0.5rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .firebase-setup button {
-            background: var(--accent-pink);
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            margin-right: 0.5rem;
-        }
-        
-        .firebase-status {
-            padding: 0.5rem;
-            border-radius: 0.5rem;
-            font-size: 0.8rem;
-            margin-top: 0.5rem;
-        }
-        
-        .firebase-status.success {
-            background: rgba(0,255,136,0.2);
-            color: var(--accent-green);
-        }
-        
-        .firebase-status.error {
-            background: rgba(255,71,87,0.2);
-            color: #ff4757;
-        }
-
         .toast {
             position: fixed;
             bottom: 1.5rem; right: 1.5rem;
@@ -666,10 +606,7 @@
         .notif-emoji { font-size: 2rem; }
         .notif-text { font-size: 0.9rem; }
 
-        /* ═══════════════════════════════════════════════════════════════════
-           MODAL DE RESULTADO FINAL - TELA CHEIA (RESPONSIVO 100%)
-           ═══════════════════════════════════════════════════════════════════ */
-        
+        /* Modal de resultado final */
         .result-overlay {
             display: none;
             position: fixed;
@@ -677,19 +614,12 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            min-height: 100%;
-            min-width: 100%;
             background: linear-gradient(135deg, rgba(10,14,39,0.98), rgba(26,15,46,0.98));
             z-index: 5000;
-            justify-content: flex-start;
+            justify-content: center;
             align-items: center;
-            flex-direction: column;
             backdrop-filter: blur(20px);
             animation: fadeIn 0.5s ease;
-            overflow-y: auto;
-            overflow-x: hidden;
-            box-sizing: border-box;
-            padding: 1rem 0;
         }
         
         .result-overlay.active { display: flex; }
@@ -701,32 +631,19 @@
         
         .result-container {
             text-align: center;
-            padding: 1.5rem;
+            padding: 2rem;
             max-width: 600px;
             width: 95%;
-            position: relative;
-            margin: auto;
-            max-height: none;
-            overflow-y: visible;
-            background-color: rgba(255, 255, 255, 0.03);
+            background-color: rgba(255,255,255,0.03);
             border-radius: 1.5rem;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
         }
-        
-
         
         .result-title {
             font-size: 1.3rem;
             color: var(--text-secondary);
             margin-bottom: 0.25rem;
-            margin-top: 0;
-            animation: slideDown 0.5s ease;
-        }
-        
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-30px); }
-            to { opacity: 1; transform: translateY(0); }
         }
         
         .result-singer-name {
@@ -736,88 +653,21 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-bottom: 1rem;
-            animation: slideDown 0.6s ease;
         }
         
-        /* Box central com emoji e pontuação JUNTOS NO CENTRO */
         .result-main-box {
             background: linear-gradient(135deg, var(--bg-card), var(--bg-lighter));
             border: 2px solid var(--accent-purple);
             border-radius: 1.5rem;
-            padding: 1.5rem 2rem;
+            padding: 1.5rem;
             margin-bottom: 1rem;
-            animation: scaleIn 0.7s ease;
-            box-shadow: 0 15px 40px rgba(157,78,221,0.3);
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            min-height: 200px;
         }
         
-        .result-emoji {
-            font-size: 6rem;
-            animation: emojiPop 1s ease;
-            filter: drop-shadow(0 0 40px rgba(255,255,255,0.5));
-            line-height: 1;
-            margin-bottom: 0.25rem;
-        }
-        
-        @media (max-width: 600px) {
-            .result-emoji {
-                font-size: 4rem;
-            }
-            .result-singer-name {
-                font-size: 1.2rem;
-            }
-            .result-total-score {
-                font-size: 2.5rem;
-            }
-            .result-back-btn-bottom {
-                font-size: 0.9rem;
-                padding: 0.7rem 1.2rem;
-            }
-            .result-container {
-                padding: 0.5rem;
-            }
-            .result-main-box {
-                padding: 1rem 0.75rem;
-                min-height: 150px;
-            }
-            .result-title {
-                font-size: 1rem;
-            }
-        }
-        
-        @keyframes emojiPop {
-            0% { transform: scale(0) rotate(-180deg); opacity: 0; }
-            50% { transform: scale(1.3) rotate(10deg); }
-            70% { transform: scale(0.9) rotate(-5deg); }
-            100% { transform: scale(1) rotate(0deg); opacity: 1; }
-        }
-        
-        /* Removido - já definido acima */
-        
-        @keyframes scaleIn {
-            from { opacity: 0; transform: scale(0.8); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        
-        .result-total-score {
-            font-size: 3.5rem;
-            font-weight: 800;
-            margin-bottom: 0.15rem;
-            margin-top: 0;
-            line-height: 1;
-            animation: scoreReveal 0.8s ease;
-        }
-        
-        @keyframes scoreReveal {
-            0% { opacity: 0; transform: scale(0.5); }
-            60% { transform: scale(1.1); }
-            100% { opacity: 1; transform: scale(1); }
-        }
-        
+        .result-emoji { font-size: 5rem; margin-bottom: 0.5rem; }
+        .result-total-score { font-size: 3rem; font-weight: 800; }
         .result-total-score.positive { color: var(--accent-green); }
         .result-total-score.negative { color: #ff4757; }
         .result-total-score.neutral { color: var(--accent-blue); }
@@ -826,15 +676,6 @@
             font-size: 0.75rem;
             color: var(--text-secondary);
             text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 0.25rem;
-        }
-        
-        .result-emoji-label {
-            font-size: 0.85rem;
-            color: var(--accent-purple);
-            margin-top: 0.25rem;
-            font-weight: 600;
         }
         
         .result-stats {
@@ -848,258 +689,71 @@
             background: var(--bg-lighter);
             padding: 0.6rem;
             border-radius: 0.75rem;
-            animation: slideUp 0.8s ease;
         }
         
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .result-stat-value {
-            font-size: 1.5rem;
-            font-weight: 800;
-        }
-        
+        .result-stat-value { font-size: 1.5rem; font-weight: 800; }
         .result-stat-value.pos { color: var(--accent-green); }
         .result-stat-value.neg { color: #ff4757; }
         .result-stat-value.reactions { color: var(--accent-blue); }
         
-        .result-stat-label {
-            font-size: 0.65rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-        }
+        .result-stat-label { font-size: 0.65rem; color: var(--text-secondary); }
         
         .result-emoji-breakdown {
             display: flex;
             justify-content: center;
-            gap: 0.75rem;
+            gap: 0.5rem;
             flex-wrap: wrap;
             margin-bottom: 1rem;
         }
         
         .result-emoji-item {
             background: var(--bg-lighter);
-            padding: 0.5rem 0.75rem;
+            padding: 0.3rem 0.8rem;
             border-radius: 0.75rem;
             display: flex;
             align-items: center;
             gap: 0.3rem;
-            animation: slideUp 0.9s ease;
-            border: 1px solid rgba(255,255,255,0.1);
         }
         
         .result-emoji-item .emoji { font-size: 1.2rem; }
-        .result-emoji-item .count { font-size: 1rem; font-weight: 700; color: var(--accent-blue); }
+        .result-emoji-item .count { font-size: 1rem; font-weight: 700; }
         
-        /* Mensagem final */
-        .result-message {
-            font-size: 1.2rem;
-            animation: fadeIn 1s ease;
-            margin: 0 0 1rem 0;
-        }
-        
+        .result-message { font-size: 1.5rem; margin-bottom: 1.5rem; }
         .result-message.excellent { color: var(--accent-green); }
         .result-message.good { color: var(--accent-blue); }
         .result-message.bad { color: #ff4757; }
         
-        /* Botões de ação lado a lado - PROFISSIONAL */
         .result-buttons-row {
-            display: flex !important;
+            display: flex;
             justify-content: center;
-            align-items: center;
-            gap: 1.5rem;
+            gap: 1rem;
             flex-wrap: wrap;
-            margin-top: 2rem;
-            margin-bottom: 1rem;
-            width: 100%;
+        }
+        
+        .result-btn-next, .result-btn-back {
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
         }
         
         .result-btn-next {
-            display: inline-flex !important;
-            align-items: center;
-            justify-content: center;
             background: linear-gradient(135deg, var(--accent-green), #00cc6a);
-            border: 2px solid rgba(255,255,255,0.3);
-            padding: 1rem 2.5rem;
-            border-radius: 0.75rem;
             color: #000;
-            font-weight: 700;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: all 0.3s;
-            white-space: nowrap;
-            box-shadow: 0 4px 20px rgba(0,255,136,0.4);
-            min-width: 200px;
-            text-decoration: none;
-        }
-        
-        .result-btn-next:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 30px rgba(0,255,136,0.5);
-            border-color: rgba(255,255,255,0.6);
-        }
-        
-        .result-btn-next:active {
-            transform: translateY(0);
         }
         
         .result-btn-back {
-            display: inline-flex !important;
-            align-items: center;
-            justify-content: center;
             background: linear-gradient(135deg, var(--accent-pink), var(--accent-purple));
-            border: 2px solid rgba(255,255,255,0.3);
-            padding: 1rem 2.5rem;
-            border-radius: 0.75rem;
             color: white;
-            font-weight: 700;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: all 0.3s;
-            white-space: nowrap;
-            box-shadow: 0 4px 20px rgba(255,45,117,0.4);
-            min-width: 200px;
-            text-decoration: none;
         }
         
-        .result-btn-back:hover {
+        .result-btn-next:hover, .result-btn-back:hover {
             transform: translateY(-3px);
-            box-shadow: 0 8px 30px rgba(255,45,117,0.5);
-            border-color: rgba(255,255,255,0.6);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
         }
         
-        .result-btn-back:active {
-            transform: translateY(0);
-        }
-        
-        /* PC com zoom 80% ou telas grandes */
-        @media (min-width: 1200px) {
-            .result-btn-next,
-            .result-btn-back {
-                padding: 1.2rem 3rem;
-                font-size: 1.2rem;
-                min-width: 220px;
-            }
-        }
-        
-        /* Responsivo - Tablet */
-        @media (max-width: 768px) {
-            .result-btn-next,
-            .result-btn-back {
-                padding: 0.9rem 2rem;
-                font-size: 1rem;
-                min-width: 180px;
-            }
-        }
-        
-        /* Responsivo - Celular */
-        @media (max-width: 600px) {
-            .result-buttons-row {
-                flex-direction: column;
-                align-items: center;
-                gap: 0.75rem;
-            }
-            .result-btn-next,
-            .result-btn-back {
-                width: 100%;
-                max-width: 280px;
-                padding: 0.9rem 1.5rem;
-                font-size: 1rem;
-                min-width: unset;
-            }
-        }
-        
-        /* Responsivo - Celular pequeno */
-        @media (max-width: 380px) {
-            .result-btn-next,
-            .result-btn-back {
-                padding: 0.8rem 1.2rem;
-                font-size: 0.95rem;
-            }
-        }
-        
-        /* Responsivo para tela de resultado em diferentes alturas */
-        @media (max-height: 700px) {
-            .result-container {
-                padding: 0.5rem;
-            }
-            .result-title {
-                font-size: 1rem;
-                margin-bottom: 0.15rem;
-            }
-            .result-singer-name {
-                font-size: 1.5rem;
-                margin-bottom: 0.5rem;
-            }
-            .result-main-box {
-                padding: 1rem;
-                min-height: 140px;
-            }
-            .result-emoji {
-                font-size: 4rem;
-            }
-            .result-total-score {
-                font-size: 2.5rem;
-            }
-            .result-stats {
-                gap: 0.3rem;
-                margin-bottom: 0.5rem;
-            }
-            .result-stat {
-                padding: 0.4rem;
-            }
-            .result-stat-value {
-                font-size: 1.2rem;
-            }
-            .result-emoji-breakdown {
-                gap: 0.5rem;
-                margin-bottom: 0.5rem;
-            }
-            .result-emoji-item {
-                padding: 0.3rem 0.5rem;
-            }
-            .result-message {
-                font-size: 1rem;
-                margin-bottom: 0.5rem;
-            }
-            .result-buttons-row {
-                gap: 0.5rem;
-                margin-top: 0.5rem;
-            }
-            .result-btn-next,
-            .result-btn-back {
-                padding: 0.6rem 1rem;
-                font-size: 0.85rem;
-                min-width: 140px;
-            }
-        }
-        
-        @media (max-height: 550px) {
-            .result-overlay {
-                justify-content: flex-start;
-                padding-top: 0.5rem;
-            }
-            .result-main-box {
-                min-height: 100px;
-                padding: 0.75rem;
-            }
-            .result-emoji {
-                font-size: 3rem;
-            }
-            .result-total-score {
-                font-size: 2rem;
-            }
-            .result-stats {
-                display: none;
-            }
-            .result-emoji-breakdown {
-                display: none;
-            }
-        }
-        
-        /* Confetti animation */
         .confetti {
             position: fixed;
             width: 10px;
@@ -1114,7 +768,6 @@
             100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
         }
         
-        /* Botão de encerrar música */
         .end-song-btn {
             background: linear-gradient(135deg, #ff9500, #ff6b00);
             border: none;
@@ -1139,7 +792,7 @@
 </head>
 <body>
     <div class="connection-status connecting" id="connectionStatus">
-        🔄 Iniciando...
+        🔄 Conectando ao servidor...
     </div>
 
     <header class="header">
@@ -1265,26 +918,6 @@
         <div class="modal-content">
             <h2 class="modal-title">🎤 Bem-vindo ao Karaokê!</h2>
             
-            <!-- Firebase Setup -->
-            <div class="firebase-setup" id="firebaseSetup">
-                <h4>🔥 Configure o Firebase para emojis online</h4>
-                <p style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.5rem;">
-                    Cole aqui o <code>firebaseConfig</code> do seu projeto:
-                </p>
-                <textarea id="firebaseConfigInput" placeholder='{
-  "apiKey": "AIzaSy...",
-  "authDomain": "seu-projeto.firebaseapp.com",
-  "databaseURL": "https://seu-projeto-default-rtdb.firebaseio.com",
-  "projectId": "seu-projeto",
-  "storageBucket": "seu-projeto.appspot.com",
-  "messagingSenderId": "123456789",
-  "appId": "1:123456789:web:abcdef"
-}'></textarea>
-                <button onclick="applyFirebaseConfig()">Aplicar</button>
-                <button onclick="showFirebaseHelp()" style="background: var(--accent-blue);">Como obter?</button>
-                <div class="firebase-status" id="firebaseStatus" style="display:none;"></div>
-            </div>
-            
             <div class="join-existing">
                 <div class="modal-room-label" style="margin-bottom: 0.5rem;">Tem um código de sala?</div>
                 <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
@@ -1335,12 +968,10 @@
             <div class="result-title">🎤 Performance Finalizada!</div>
             <div class="result-singer-name" id="resultSingerName">Cantor</div>
             
-            <!-- Box central com emoji e pontuação CENTRALIZADOS -->
             <div class="result-main-box">
                 <div class="result-emoji" id="resultEmoji">🎉</div>
                 <div class="result-total-score positive" id="resultTotalScore">+42</div>
                 <div class="result-score-label">Pontuação Total</div>
-                <div class="result-emoji-label" id="resultEmojiLabel">Reação mais votada</div>
             </div>
             
             <div class="result-stats">
@@ -1359,15 +990,12 @@
             </div>
             
             <div class="result-emoji-breakdown" id="resultEmojiBreakdown">
-                <!-- Preenchido via JS -->
             </div>
             
-            <!-- Mensagem final -->
             <div class="result-message excellent" id="resultMessage" style="font-size: 1.5rem; margin-bottom: 1.5rem;">
                 🌟 Performance Incrível! 🌟
             </div>
             
-            <!-- Botões de ação lado a lado -->
             <div class="result-buttons-row">
                 <button class="result-btn-next" onclick="closeResultAndNewSong()">🎵 Próxima Música</button>
                 <button class="result-btn-back" onclick="closeResult()">🎤 Voltar ao Karaokê</button>
@@ -1376,42 +1004,301 @@
     </div>
 
     <script>
-    // ═══════════════════════════════════════════════════════════════════
+    // ============================================
+    // CONFIGURAÇÃO SUPABASE - COLE SUAS CHAVES AQUI!
+    // ============================================
+    const SUPABASE_URL = "https://yvrskenfgfpgrcpmmeln.supabase.co"; // 🔁 COLE SUA URL
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl2cnNrZW5mZ2ZwZ3JjcG1tZWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNzk1NTAsImV4cCI6MjA4Njc1NTU1MH0.DzO4mZ7jYkTPoleIlF7smZ_Kim7KqFxXA4aumb7Qf8U"; // 🔁 COLE SUA ANON KEY
+
+    // ============================================
     // VARIÁVEIS GLOBAIS
-    // ═══════════════════════════════════════════════════════════════════
+    // ============================================
+    let supabase = null;
+    let roomChannel = null;
+    let isSupabaseConnected = false;
+    let roomId = '';
+    let odUserId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    let userName = null;
+    let isNewRoom = true;
+    let inCooldown = false;
+    let currentVideoId = null;
+    let scores = { total: 0, positive: 0, negative: 0 };
+    let participants = [];
+    let activities = [];
+    let processedEmojis = new Set();
     
-    var firebaseApp = null;
-    var database = null;
-    var roomRef = null;
-    var isFirebaseConnected = false;
-    var roomId = '';
-    var odUserId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-    var userName = null;
-    var isNewRoom = true;
-    var inCooldown = false;
-    var currentVideoId = null;
-    var scores = { total: 0, positive: 0, negative: 0 };
-    var participants = [];
-    var activities = [];
-    var processedEmojis = {};
+    // Sistema de resultado final
+    let emojiCounts = {};
+    let totalReactions = 0;
+    let currentSinger = '';
+
+    // ============================================
+    // INICIALIZAÇÃO SUPABASE
+    // ============================================
+    async function initSupabase() {
+        console.log('%c🔥 Inicializando Supabase...', 'color: #ff9500; font-size: 14px;');
+        
+        if (!SUPABASE_URL || !SUPABASE_ANON_KEY || SUPABASE_URL === "https://seu-projeto.supabase.co") {
+            console.error('%c❌ Configure suas chaves do Supabase no código!', 'color: #ff4757; font-size: 16px;');
+            updateConnectionStatus('config-error');
+            return false;
+        }
+        
+        try {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            
+            // Testar conexão
+            const { data, error } = await supabase
+                .from('rooms')
+                .select('count')
+                .limit(1);
+            
+            if (error) {
+                console.error('Erro ao conectar:', error);
+                updateConnectionStatus('error');
+                return false;
+            }
+            
+            console.log('%c✅ Conectado ao Supabase!', 'color: #00ff88; font-size: 16px;');
+            isSupabaseConnected = true;
+            updateConnectionStatus('connected');
+            return true;
+            
+        } catch (error) {
+            console.error('Erro fatal:', error);
+            updateConnectionStatus('error');
+            return false;
+        }
+    }
     
-    // ═══════════════════════════════════════════════════════════════════
-    // SISTEMA DE RESULTADO FINAL
-    // ═══════════════════════════════════════════════════════════════════
-    var emojiCounts = {}; // Contador de cada emoji
-    var totalReactions = 0;
-    var currentSinger = ''; // Nome do cantor atual
+    function updateConnectionStatus(status) {
+        const el = document.getElementById('connectionStatus');
+        if (status === 'connected') {
+            el.className = 'connection-status connected';
+            el.innerHTML = '✅ <strong>Conectado!</strong> Emojis sincronizam em tempo real!';
+        } else if (status === 'connecting') {
+            el.className = 'connection-status connecting';
+            el.innerHTML = '🔄 Conectando ao servidor...';
+        } else if (status === 'config-error') {
+            el.className = 'connection-status disconnected';
+            el.innerHTML = '❌ <strong>Configure suas chaves Supabase no código!</strong>';
+        } else {
+            el.className = 'connection-status disconnected';
+            el.innerHTML = '❌ <strong>Desconectado.</strong> Verifique sua conexão.';
+        }
+    }
+
+    // ============================================
+    // FUNÇÕES SUPABASE - REALTIME
+    // ============================================
+    async function setupSupabaseListeners() {
+        if (!isSupabaseConnected || !supabase) return;
+        
+        console.log('Configurando listeners para sala:', roomId);
+        
+        // Criar canal para a sala
+        roomChannel = supabase.channel(`room:${roomId}`);
+        
+        // Escutar participantes
+        roomChannel
+            .on('presence', { event: 'sync' }, () => {
+                const presenceState = roomChannel.presenceState();
+                const newParticipants = [];
+                
+                Object.keys(presenceState).forEach(key => {
+                    const presences = presenceState[key];
+                    presences.forEach(pres => {
+                        if (!newParticipants.find(part => part.odUserId === pres.odUserId)) {
+                            newParticipants.push(pres);
+                        }
+                    });
+                });
+                
+                participants = newParticipants;
+                updateParticipantsList();
+            })
+            .on('presence', { event: 'join' }, ({ key, newPresences }) => {
+                newPresences.forEach(pres => {
+                    if (!participants.find(p => p.odUserId === pres.odUserId)) {
+                        participants.push(pres);
+                        showToast(`${pres.odUserName} entrou! 👋`);
+                        addActivity('👋', `${pres.odUserName} entrou`);
+                    }
+                });
+                updateParticipantsList();
+            })
+            .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
+                leftPresences.forEach(pres => {
+                    participants = participants.filter(p => p.odUserId !== pres.odUserId);
+                    showToast(`${pres.odUserName} saiu`);
+                });
+                updateParticipantsList();
+            });
+        
+        // Escutar emojis
+        roomChannel
+            .on('broadcast', { event: 'new-emoji' }, ({ payload }) => {
+                const { emoji, points, userId, userName: emojiUserName, emojiId } = payload;
+                
+                if (processedEmojis.has(emojiId)) return;
+                processedEmojis.add(emojiId);
+                
+                if (userId === odUserId) return;
+                
+                console.log('📩 Emoji recebido:', emoji, 'de', emojiUserName);
+                
+                createFloatingEmoji(emoji);
+                showEmojiNotification(emoji, emojiUserName);
+                flashScoreCard(points);
+                addActivity(emoji, `${emojiUserName} reagiu (${points > 0 ? '+' + points : points})`);
+                trackEmoji(emoji);
+                
+                // Atualizar scores
+                scores.total += points;
+                if (points > 0) scores.positive += points;
+                else scores.negative += Math.abs(points);
+                updateScoreDisplay();
+            })
+            .on('broadcast', { event: 'new-video' }, ({ payload }) => {
+                const { videoId, loadedBy } = payload;
+                if (videoId && videoId !== currentVideoId) {
+                    currentVideoId = videoId;
+                    playVideo(videoId);
+                    showToast(`${loadedBy} carregou um vídeo! 🎬`);
+                }
+            })
+            .on('broadcast', { event: 'show-result' }, ({ payload }) => {
+                const { singer, emojiCounts: counts, totalReactions: reactions } = payload;
+                currentSinger = singer;
+                emojiCounts = counts || {};
+                totalReactions = reactions || 0;
+                showResultScreen();
+            })
+            .on('broadcast', { event: 'scores-update' }, ({ payload }) => {
+                scores = payload;
+                updateScoreDisplay();
+            })
+            .on('broadcast', { event: 'reset' }, () => {
+                scores = { total: 0, positive: 0, negative: 0 };
+                emojiCounts = {};
+                totalReactions = 0;
+                activities = [];
+                updateScoreDisplay();
+                updateActivityFeed();
+                showToast('Pontuação resetada! 🔄');
+            });
+        
+        // Subscrever
+        roomChannel.subscribe(async (status) => {
+            if (status === 'SUBSCRIBED') {
+                console.log('✅ Inscrito no canal da sala');
+                
+                // Enviar presença
+                await roomChannel.track({
+                    odUserId: odUserId,
+                    odUserName: userName,
+                    joinedAt: Date.now()
+                });
+            }
+        });
+    }
     
-    // ═══════════════════════════════════════════════════════════════════
-    // FUNÇÃO SIMPLIFICADA PARA EXTRAIR ID DO YOUTUBE
-    // ═══════════════════════════════════════════════════════════════════
+    async function sendEmojiToSupabase(emoji, points) {
+        if (!isSupabaseConnected || !roomChannel) return;
+        
+        const emojiId = `${odUserId}_${Date.now()}_${Math.random()}`;
+        
+        await roomChannel.send({
+            type: 'broadcast',
+            event: 'new-emoji',
+            payload: {
+                emoji: emoji,
+                points: points,
+                userId: odUserId,
+                userName: userName,
+                emojiId: emojiId
+            }
+        });
+        
+        // Atualizar scores no broadcast
+        await roomChannel.send({
+            type: 'broadcast',
+            event: 'scores-update',
+            payload: scores
+        });
+    }
+    
+    async function updateVideoSupabase(videoId) {
+        if (!isSupabaseConnected || !roomChannel) return;
+        
+        await roomChannel.send({
+            type: 'broadcast',
+            event: 'new-video',
+            payload: {
+                videoId: videoId,
+                loadedBy: userName
+            }
+        });
+    }
+    
+    async function showResultSupabase() {
+        if (!isSupabaseConnected || !roomChannel) return;
+        
+        await roomChannel.send({
+            type: 'broadcast',
+            event: 'show-result',
+            payload: {
+                singer: currentSinger || userName,
+                emojiCounts: emojiCounts,
+                totalReactions: totalReactions
+            }
+        });
+    }
+    
+    async function resetScoresSupabase() {
+        if (!isSupabaseConnected || !roomChannel) return;
+        
+        await roomChannel.send({
+            type: 'broadcast',
+            event: 'reset',
+            payload: {}
+        });
+    }
+
+    // ============================================
+    // FUNÇÕES UTILITÁRIAS
+    // ============================================
+    function generateRoomId() {
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        let id = '';
+        for (let i = 0; i < 6; i++) {
+            id += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return id;
+    }
+    
+    function getRoomFromUrl() {
+        const hash = window.location.hash;
+        if (hash && hash.length > 1) {
+            const h = hash.substring(1).toUpperCase();
+            if (/^[A-Z0-9]{6}$/.test(h)) return h;
+        }
+        
+        const params = new URLSearchParams(window.location.search);
+        const room = params.get('room');
+        if (room && /^[A-Z0-9]{6}$/i.test(room)) return room.toUpperCase();
+        
+        return null;
+    }
+    
+    function getShareUrl() {
+        const base = window.location.origin + window.location.pathname;
+        return base + '?room=' + roomId + '#' + roomId;
+    }
     
     function extractVideoId(url) {
         if (!url) return null;
         
-        console.log('Extraindo ID do YouTube da URL:', url);
-        
-        // Padrões para extrair o ID do vídeo do YouTube
         const patterns = [
             /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/,
             /^([a-zA-Z0-9_-]{11})$/
@@ -1419,534 +1306,21 @@
         
         for (const pattern of patterns) {
             const match = url.match(pattern);
-            if (match && match[1]) {
-                console.log('ID encontrado:', match[1]);
-                return match[1];
-            }
+            if (match && match[1]) return match[1];
         }
-        
-        console.log('ID não encontrado na URL');
-        return null;
-    }
-    
-    // ═══════════════════════════════════════════════════════════════════
-    // FIREBASE CONFIG - SALVO NO LOCALSTORAGE
-    // ═══════════════════════════════════════════════════════════════════
-    
-    // ═══════════════════════════════════════════════════════════════════
-    // SEU FIREBASE CONFIG - ATUALIZADO!
-    // ═══════════════════════════════════════════════════════════════════
-    var DEFAULT_FIREBASE_CONFIG = {
-        apiKey: "AIzaSyBxeyQWOG0w0aMIt4flCyRQzziGFb9O3vo",
-        authDomain: "karaoke2026.firebaseapp.com",
-        databaseURL: "https://karaoke2026-default-rtdb.firebaseio.com",
-        projectId: "karaoke2026",
-        storageBucket: "karaoke2026.firebasestorage.app",
-        messagingSenderId: "744271861570",
-        appId: "1:744271861570:web:32ba4d441ea1a84de59adb"
-    };
-    
-    function getSavedFirebaseConfig() {
-        try {
-            var saved = localStorage.getItem('karaoke_firebase_config');
-            if (saved) {
-                return JSON.parse(saved);
-            }
-        } catch (e) {}
-        // Retorna o config padrão se não tiver salvo
-        return DEFAULT_FIREBASE_CONFIG;
-    }
-    
-    function saveFirebaseConfig(config) {
-        localStorage.setItem('karaoke_firebase_config', JSON.stringify(config));
-    }
-    
-    function applyFirebaseConfig() {
-        var textarea = document.getElementById('firebaseConfigInput');
-        var statusEl = document.getElementById('firebaseStatus');
-        var input = textarea.value.trim();
-        
-        try {
-            // Limpar input (remover const, var, etc)
-            input = input.replace(/^(const|var|let)\s+\w+\s*=\s*/, '');
-            input = input.replace(/;$/, '');
-            
-            var config = JSON.parse(input);
-            
-            // Validar campos obrigatórios
-            if (!config.apiKey || !config.databaseURL || !config.projectId) {
-                throw new Error('Faltam campos obrigatórios');
-            }
-            
-            // Salvar
-            saveFirebaseConfig(config);
-            
-            // Mostrar sucesso
-            statusEl.style.display = 'block';
-            statusEl.className = 'firebase-status success';
-            statusEl.innerHTML = '✅ Configuração salva! Recarregando...';
-            
-            // Recarregar para aplicar
-            setTimeout(function() {
-                window.location.reload();
-            }, 1000);
-            
-        } catch (e) {
-            statusEl.style.display = 'block';
-            statusEl.className = 'firebase-status error';
-            statusEl.innerHTML = '❌ JSON inválido. Cole o firebaseConfig completo.';
-        }
-    }
-    
-    function showFirebaseHelp() {
-        alert(
-            '🔥 COMO OBTER O FIREBASE CONFIG:\n\n' +
-            '1. Acesse: https://console.firebase.google.com\n\n' +
-            '2. Clique "Adicionar projeto" → Nome: "meu-karaoke"\n\n' +
-            '3. Menu lateral → "Criação" → "Realtime Database"\n\n' +
-            '4. Clique "Criar banco de dados" → "Iniciar no modo de teste"\n\n' +
-            '5. Volte para "Visão geral do projeto"\n\n' +
-            '6. Clique no ícone "</>" (Web) → Nome: "karaoke"\n\n' +
-            '7. COPIE o bloco firebaseConfig e cole aqui!\n\n' +
-            '✅ Firebase é GRATUITO!'
-        );
-    }
-    
-    // ═══════════════════════════════════════════════════════════════════
-    // INICIALIZAÇÃO DO FIREBASE
-    // ═══════════════════════════════════════════════════════════════════
-    
-    function initFirebase() {
-        console.log('%c🔥 Inicializando Firebase...', 'color: #ff9500; font-size: 14px;');
-        
-        // Verificar se Firebase SDK está carregado
-        if (typeof firebase === 'undefined') {
-            console.error('❌ Firebase SDK não carregado');
-            updateConnectionStatus('error');
-            return false;
-        }
-        
-        // Usar config padrão (já configurado no código)
-        var config = getSavedFirebaseConfig();
-        
-        console.log('%c📋 Firebase Config:', 'color: #00d4ff;', config);
-        
-        if (!config || !config.databaseURL) {
-            console.log('%c⚠️ Firebase não configurado ou faltando databaseURL', 'color: #ff9500;');
-            updateConnectionStatus('local');
-            document.getElementById('firebaseSetup').style.display = 'block';
-            return false;
-        }
-        
-        // Esconder setup se já tem config válido
-        document.getElementById('firebaseSetup').style.display = 'none';
-        
-        try {
-            // Inicializar Firebase
-            if (!firebase.apps.length) {
-                firebaseApp = firebase.initializeApp(config);
-            } else {
-                firebaseApp = firebase.apps[0];
-            }
-            database = firebase.database();
-            
-            console.log('%c📡 Testando conexão com Firebase...', 'color: #00d4ff;');
-            
-            // Testar conexão
-            var connectedRef = firebase.database().ref('.info/connected');
-            connectedRef.on('value', function(snap) {
-                if (snap.val() === true) {
-                    console.log('%c✅ Firebase conectado!', 'color: #00ff88; font-size: 16px; font-weight: bold;');
-                    isFirebaseConnected = true;
-                    updateConnectionStatus('connected');
-                } else {
-                    console.log('%c⏳ Aguardando conexão Firebase...', 'color: #ff9500;');
-                    isFirebaseConnected = false;
-                    updateConnectionStatus('disconnected');
-                }
-            }, function(error) {
-                console.error('%c❌ Erro ao conectar:', 'color: #ff4757;', error.message);
-                isFirebaseConnected = false;
-                
-                // Verificar se é erro de permissão ou de database não existente
-                if (error.message.includes('permission') || error.message.includes('PERMISSION_DENIED')) {
-                    updateConnectionStatus('permission');
-                } else {
-                    updateConnectionStatus('error');
-                }
-            });
-            
-            // Timeout para verificar se conectou
-            setTimeout(function() {
-                if (!isFirebaseConnected) {
-                    console.log('%c⚠️ Firebase não conectou após 5 segundos', 'color: #ff9500;');
-                    updateConnectionStatus('timeout');
-                }
-            }, 5000);
-            
-            return true;
-            
-        } catch (error) {
-            console.error('❌ Erro Firebase:', error);
-            updateConnectionStatus('error');
-            return false;
-        }
-    }
-    
-    function updateConnectionStatus(status) {
-        var el = document.getElementById('connectionStatus');
-        if (status === 'connected') {
-            el.className = 'connection-status connected';
-            el.innerHTML = '✅ <strong>Conectado!</strong> Emojis sincronizam em tempo real entre todos os dispositivos.';
-        } else if (status === 'connecting') {
-            el.className = 'connection-status connecting';
-            el.innerHTML = '🔄 Conectando ao Firebase...';
-        } else if (status === 'local') {
-            el.className = 'connection-status connecting';
-            el.innerHTML = '⚠️ <strong>Modo Local.</strong> Configure o Firebase no formulário abaixo para emojis online.';
-        } else if (status === 'permission') {
-            el.className = 'connection-status disconnected';
-            el.innerHTML = '🔒 <strong>Erro de permissão.</strong> Configure as regras do Realtime Database no modo teste.';
-        } else if (status === 'timeout') {
-            el.className = 'connection-status disconnected';
-            el.innerHTML = '⏳ <strong>Timeout.</strong> O Realtime Database pode não ter sido criado. <a href="https://console.firebase.google.com" target="_blank" style="color:white;text-decoration:underline;">Criar agora</a>';
-        } else if (status === 'disconnected') {
-            el.className = 'connection-status disconnected';
-            el.innerHTML = '❌ <strong>Desconectado.</strong> Verifique sua conexão com a internet.';
-        } else {
-            el.className = 'connection-status disconnected';
-            el.innerHTML = '❌ <strong>Erro de conexão.</strong> Verifique se o Realtime Database foi criado no Firebase Console.';
-        }
-    }
-    
-    // ═══════════════════════════════════════════════════════════════════
-    // FIREBASE LISTENERS - CORRIGIDO PARA SINCRONIZAÇÃO DE EMOJIS
-    // ═══════════════════════════════════════════════════════════════════
-    
-    var listenerStartTime = 0;
-    
-    function setupFirebaseListeners() {
-        if (!isFirebaseConnected || !database) {
-            console.log('%c⚠️ Firebase não conectado, usando modo local', 'color: #ff9500; font-size: 14px;');
-            return;
-        }
-        
-        roomRef = database.ref('rooms/' + roomId);
-        listenerStartTime = Date.now();
-        
-        console.log('%c════════════════════════════════════════════════════════════', 'color: #00ff88;');
-        console.log('%c📡 CONFIGURANDO LISTENERS FIREBASE', 'color: #00ff88; font-size: 18px; font-weight: bold;');
-        console.log('%c   Sala: ' + roomId, 'color: #00ff88; font-size: 14px;');
-        console.log('%c   Meu ID: ' + odUserId, 'color: #00ff88; font-size: 14px;');
-        console.log('%c   Meu Nome: ' + userName, 'color: #00ff88; font-size: 14px;');
-        console.log('%c   Timestamp: ' + listenerStartTime, 'color: #00ff88;');
-        console.log('%c════════════════════════════════════════════════════════════', 'color: #00ff88;');
-        
-        // Limpar processedEmojis para evitar conflitos
-        processedEmojis = {};
-        
-        // Listener para TODOS os emojis (child_added dispara para cada novo)
-        roomRef.child('emojis').on('child_added', function(snapshot) {
-            var data = snapshot.val();
-            if (!data) return;
-            
-            var emojiKey = snapshot.key;
-            var now = Date.now();
-            
-            // Ignorar se já processou (evita duplicatas)
-            if (processedEmojis[emojiKey]) {
-                console.log('Emoji já processado (chave duplicada):', emojiKey);
-                return;
-            }
-            processedEmojis[emojiKey] = true;
-            
-            // Ignorar meus próprios emojis (já mostrei a animação local)
-            if (data.odUserId && data.odUserId === odUserId) {
-                console.log('Emoji do próprio usuário, ignorando:', emojiKey);
-                return;
-            }
-            
-            // Ignorar emojis muito antigos (mais de 30 segundos)
-            var emojiAge = data.timestamp ? (now - data.timestamp) : 0;
-            if (data.timestamp && emojiAge > 30000) {
-                console.log('Emoji muito antigo (idade: ' + emojiAge + 'ms), ignorando:', emojiKey);
-                return;
-            }
-            
-            console.log('📩 Novo emoji recebido de outro usuário:', data.emoji, 'de', data.userName, 'pontos:', data.points);
-            
-            // ═══════════════════════════════════════════════════════════════════
-            // EMOJI DE OUTRO PARTICIPANTE - MOSTRAR!
-            // ═══════════════════════════════════════════════════════════════════
-            
-            // 1. Criar animação flutuante - CORRIGIDO PARA PC
-            createFloatingEmoji(data.emoji);
-            
-            // 2. Mostrar notificação
-            showEmojiNotification(data.emoji, data.userName);
-            
-            // 3. Flash no score card
-            flashScoreCard(data.points || 0);
-            
-            // 4. Adicionar atividade no feed
-            var pointsText = data.points > 0 ? '+' + data.points : String(data.points);
-            addActivity(data.emoji, data.userName + ' reagiu (' + pointsText + ')');
-            
-            // 5. Rastrear emoji para estatísticas
-            trackEmoji(data.emoji);
-            
-            // 6. Atualizar scores localmente também (IMPORTANTE!)
-            if (data.points) {
-                scores.total += data.points;
-                if (data.points > 0) {
-                    scores.positive += data.points;
-                } else {
-                    scores.negative += Math.abs(data.points);
-                }
-                updateScoreDisplay();
-            }
-        });
-        
-        // Listener para remoção de emojis (limpeza automática)
-        roomRef.child('emojis').on('child_removed', function(snapshot) {
-            var emojiKey = snapshot.key;
-            delete processedEmojis[emojiKey];
-        });
-        
-        // Listener para participantes
-        roomRef.child('participants').on('child_added', function(snapshot) {
-            var data = snapshot.val();
-            if (!data) return;
-            
-            var exists = participants.some(function(p) { return p.odUserId === data.odUserId; });
-            if (!exists) {
-                participants.push(data);
-                updateParticipantsList();
-                
-                if (data.odUserId !== odUserId) {
-                    showToast(data.odUserName + ' entrou! 👋');
-                    addActivity('👋', data.odUserName + ' entrou');
-                }
-            }
-        });
-        
-        // Listener para participante removido
-        roomRef.child('participants').on('child_removed', function(snapshot) {
-            var data = snapshot.val();
-            if (!data) return;
-            
-            participants = participants.filter(function(p) { return p.odUserId !== data.odUserId; });
-            updateParticipantsList();
-            
-            if (data.odUserId !== odUserId) {
-                showToast(data.odUserName + ' saiu');
-                addActivity('👋', data.odUserName + ' saiu');
-            }
-        });
-        
-        // Listener para vídeo
-        roomRef.child('currentVideo').on('value', function(snapshot) {
-            var data = snapshot.val();
-            if (data && data.videoId && data.videoId !== currentVideoId) {
-                currentVideoId = data.videoId;
-                playVideo(data.videoId);
-            }
-        });
-        
-        // Listener para scores - ATUALIZA PARA TODOS
-        roomRef.child('scores').on('value', function(snapshot) {
-            var data = snapshot.val();
-            if (data) {
-                // Atualizar scores locais com valores do Firebase
-                scores.total = data.total || 0;
-                scores.positive = data.positive || 0;
-                scores.negative = data.negative || 0;
-                
-                // Atualizar UI
-                updateScoreDisplay();
-            }
-        });
-        
-        // Listener para mostrar resultado para TODOS quando música encerra
-        roomRef.child('showResult').on('value', function(snapshot) {
-            var data = snapshot.val();
-            if (data && data.show && data.timestamp) {
-                // Só mostrar se for recente (últimos 5 segundos)
-                var now = Date.now();
-                if (now - data.timestamp < 5000) {
-                    // Atualizar dados do resultado
-                    if (data.singer) currentSinger = data.singer;
-                    if (data.emojiCounts) emojiCounts = data.emojiCounts;
-                    if (data.totalReactions) totalReactions = data.totalReactions;
-                    
-                    // Mostrar tela de resultado
-                    showResultScreen();
-                }
-            }
-        });
-    }
-    
-    // ═══════════════════════════════════════════════════════════════════
-    // ENVIAR PARA FIREBASE - CORRIGIDO PARA SINCRONIZAÇÃO!
-    // ═══════════════════════════════════════════════════════════════════
-    
-    function sendEmojiToFirebase(emoji, points) {
-        if (!isFirebaseConnected || !roomRef) {
-            console.log('Firebase não conectado. Emoji não enviado para nuvem.');
-            return;
-        }
-        
-        var emojiRef = roomRef.child('emojis').push();
-        var emojiKey = emojiRef.key;
-        
-        // Marcar como processado localmente para evitar duplicatas
-        processedEmojis[emojiKey] = true;
-        
-        var emojiData = {
-            emoji: emoji,
-            points: points,
-            odUserId: odUserId,
-            userName: userName,
-            timestamp: firebase.database.ServerValue.TIMESTAMP
-        };
-        
-        console.log('📤 Enviando emoji para Firebase:', emoji, 'pontos:', points, 'chave:', emojiKey);
-        
-        // Enviar emoji
-        emojiRef.set(emojiData)
-            .then(function() {
-                console.log('✅ Emoji enviado com sucesso para Firebase');
-                
-                // Atualizar scores no Firebase APÓS enviar emoji
-                updateScoresInFirebase(points);
-            })
-            .catch(function(error) {
-                console.error('❌ Erro ao enviar emoji:', error);
-                showToast('Erro ao enviar emoji para nuvem', true);
-                // Remover do processed se falhar
-                delete processedEmojis[emojiKey];
-            });
-    }
-    
-    function updateScoresInFirebase(points) {
-        if (!isFirebaseConnected || !roomRef) return;
-        
-        roomRef.child('scores').transaction(function(current) {
-            if (!current) {
-                return { 
-                    total: points, 
-                    positive: points > 0 ? points : 0, 
-                    negative: points < 0 ? Math.abs(points) : 0 
-                };
-            }
-            
-            // Calcular novos valores
-            var newTotal = (current.total || 0) + points;
-            var newPositive = (current.positive || 0) + (points > 0 ? points : 0);
-            var newNegative = (current.negative || 0) + (points < 0 ? Math.abs(points) : 0);
-            
-            console.log('🔄 Atualizando scores no Firebase:', {
-                oldTotal: current.total || 0,
-                newTotal: newTotal,
-                oldPositive: current.positive || 0,
-                newPositive: newPositive,
-                oldNegative: current.negative || 0,
-                newNegative: newNegative
-            });
-            
-            return {
-                total: newTotal,
-                positive: newPositive,
-                negative: newNegative
-            };
-        }).catch(function(error) {
-            console.error('Erro ao atualizar scores:', error);
-        });
-    }
-    
-    function joinRoomFirebase() {
-        if (!isFirebaseConnected || !roomRef) {
-            participants.push({ odUserId: odUserId, odUserName: userName });
-            updateParticipantsList();
-            return;
-        }
-        
-        // Adicionar participante
-        roomRef.child('participants').child(odUserId).set({
-            odUserId: odUserId,
-            odUserName: userName,
-            joinedAt: firebase.database.ServerValue.TIMESTAMP
-        });
-        
-        // Remover quando desconectar
-        roomRef.child('participants').child(odUserId).onDisconnect().remove();
-        
-        // Configurar scores iniciais se for nova sala
-        if (isNewRoom) {
-            roomRef.child('scores').set({
-                total: 0,
-                positive: 0,
-                negative: 0
-            });
-        }
-    }
-    
-    function updateVideoFirebase(videoId) {
-        if (!isFirebaseConnected || !roomRef) return;
-        
-        roomRef.child('currentVideo').set({
-            videoId: videoId,
-            updatedAt: firebase.database.ServerValue.TIMESTAMP,
-            updatedBy: userName
-        });
-    }
-    
-    // ═══════════════════════════════════════════════════════════════════
-    // FUNÇÕES UTILITÁRIAS
-    // ═══════════════════════════════════════════════════════════════════
-    
-    function generateRoomId() {
-        var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-        var id = '';
-        for (var i = 0; i < 6; i++) {
-            id += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        return id;
-    }
-    
-    function getRoomFromUrl() {
-        // Hash (#XXXXXX)
-        var hash = window.location.hash;
-        if (hash && hash.length > 1) {
-            var h = hash.substring(1).toUpperCase();
-            if (/^[A-Z0-9]{6}$/.test(h)) return h;
-        }
-        
-        // Query string (?room=XXXXXX)
-        var params = new URLSearchParams(window.location.search);
-        var room = params.get('room');
-        if (room && /^[A-Z0-9]{6}$/i.test(room)) return room.toUpperCase();
         
         return null;
     }
-    
-    function getShareUrl() {
-        var base = window.location.origin + window.location.pathname;
-        return base + '?room=' + roomId + '#' + roomId;
-    }
-    
-    // ═══════════════════════════════════════════════════════════════════
-    // INICIALIZAÇÃO
-    // ═══════════════════════════════════════════════════════════════════
-    
-    function init() {
+
+    // ============================================
+    // FUNÇÕES PRINCIPAIS
+    // ============================================
+    async function init() {
         console.log('%c🚀 Iniciando Karaokê Online...', 'color: #00d4ff; font-size: 16px;');
         
-        // Inicializar Firebase
-        initFirebase();
+        await initSupabase();
         
-        // Determinar sala
-        var urlRoom = getRoomFromUrl();
+        const urlRoom = getRoomFromUrl();
         if (urlRoom) {
             roomId = urlRoom;
             isNewRoom = false;
@@ -1955,14 +1329,12 @@
             isNewRoom = true;
         }
         
-        // Atualizar UI
         document.getElementById('headerRoomId').textContent = roomId;
         document.getElementById('qrRoomId').textContent = roomId;
         document.getElementById('modalRoomId').textContent = roomId;
         document.getElementById('shareLink').textContent = getShareUrl();
         
-        // Badge do modal
-        var modeEl = document.getElementById('modalMode');
+        const modeEl = document.getElementById('modalMode');
         if (isNewRoom) {
             modeEl.textContent = '🆕 Criando nova sala';
             modeEl.className = 'modal-mode new';
@@ -1972,47 +1344,33 @@
             document.getElementById('roomCodeInput').value = roomId;
         }
         
-        // Atualizar URL
         if (window.history && window.history.replaceState) {
             window.history.replaceState({}, '', getShareUrl());
         }
         
-        // Gerar QR Code
         generateQRCode();
         
-        // Eventos
-        document.getElementById('nameInput').addEventListener('keypress', function(e) {
+        document.getElementById('nameInput').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') joinRoom();
         });
         
-        // Evento de tecla Enter no campo de vídeo
-        document.getElementById('videoInput').addEventListener('keypress', function(e) {
+        document.getElementById('videoInput').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') loadVideo();
         });
         
-        document.getElementById('roomCodeInput').addEventListener('keypress', function(e) {
+        document.getElementById('roomCodeInput').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') setRoomFromInput();
         });
-        document.getElementById('roomCodeInput').addEventListener('input', function(e) {
+        document.getElementById('roomCodeInput').addEventListener('input', (e) => {
             e.target.value = e.target.value.toUpperCase();
         });
         
-        // Carregar config salvo no textarea
-        var savedConfig = getSavedFirebaseConfig();
-        if (savedConfig) {
-            document.getElementById('firebaseConfigInput').value = JSON.stringify(savedConfig, null, 2);
-        }
-        
-        setTimeout(function() { document.getElementById('nameInput').focus(); }, 300);
+        setTimeout(() => document.getElementById('nameInput').focus(), 300);
     }
     
-    // ═══════════════════════════════════════════════════════════════════
-    // ENTRADA NA SALA
-    // ═══════════════════════════════════════════════════════════════════
-    
     function setRoomFromInput() {
-        var input = document.getElementById('roomCodeInput');
-        var code = input.value.trim().toUpperCase();
+        const input = document.getElementById('roomCodeInput');
+        const code = input.value.trim().toUpperCase();
         
         if (!code || code.length !== 6) {
             showToast('Digite um código de 6 caracteres!', true);
@@ -2027,7 +1385,7 @@
         document.getElementById('modalRoomId').textContent = code;
         document.getElementById('shareLink').textContent = getShareUrl();
         
-        var modeEl = document.getElementById('modalMode');
+        const modeEl = document.getElementById('modalMode');
         modeEl.textContent = '🚪 Entrando em sala existente';
         modeEl.className = 'modal-mode join';
         
@@ -2040,9 +1398,9 @@
         document.getElementById('nameInput').focus();
     }
     
-    function joinRoom() {
-        var nameInput = document.getElementById('nameInput');
-        var name = nameInput.value.trim();
+    async function joinRoom() {
+        const nameInput = document.getElementById('nameInput');
+        const name = nameInput.value.trim();
         
         if (!name) {
             showToast('Digite seu nome!', true);
@@ -2054,13 +1412,9 @@
         
         document.getElementById('nameModal').classList.remove('active');
         
-        // Configurar listeners
-        if (isFirebaseConnected) {
-            setupFirebaseListeners();
+        if (isSupabaseConnected) {
+            await setupSupabaseListeners();
         }
-        
-        // Entrar na sala
-        joinRoomFirebase();
         
         if (isNewRoom) {
             showToast('Sala criada! Código: ' + roomId);
@@ -2069,18 +1423,14 @@
         }
     }
     
-    // ═══════════════════════════════════════════════════════════════════
-    // QR CODE
-    // ═══════════════════════════════════════════════════════════════════
-    
     function generateQRCode() {
-        var shareUrl = getShareUrl();
-        var container = document.getElementById('qrCode');
+        const shareUrl = getShareUrl();
+        const container = document.getElementById('qrCode');
         
         document.getElementById('shareLink').textContent = shareUrl;
         container.innerHTML = '<div style="padding:2rem;color:#666;">⏳</div>';
         
-        var img = new Image();
+        const img = new Image();
         img.onload = function() {
             container.innerHTML = '';
             img.style.width = '160px';
@@ -2094,17 +1444,13 @@
     }
     
     function copyLink() {
-        var url = getShareUrl();
-        navigator.clipboard.writeText(url).then(function() {
+        const url = getShareUrl();
+        navigator.clipboard.writeText(url).then(() => {
             showToast('Link copiado!');
-        }).catch(function() {
+        }).catch(() => {
             showToast('Link: ' + url);
         });
     }
-    
-    // ═══════════════════════════════════════════════════════════════════
-    // PLAYER DE VÍDEO - CORRIGIDO!
-    // ═══════════════════════════════════════════════════════════════════
     
     function openVideoModal() {
         document.getElementById('videoModal').classList.add('active');
@@ -2116,25 +1462,24 @@
         document.getElementById('videoInput').value = '';
     }
     
-    function loadVideo() {
-        var input = document.getElementById('videoInput').value.trim();
+    async function loadVideo() {
+        const input = document.getElementById('videoInput').value.trim();
         
         if (!input) {
             showToast('Digite ou cole um link do YouTube!', true);
             return;
         }
         
-        // Extrai o ID do vídeo
-        var videoId = extractVideoId(input);
+        const videoId = extractVideoId(input);
         
         if (!videoId) {
-            showToast('Link inválido! Certifique-se de que é um link do YouTube válido.', true);
+            showToast('Link inválido!', true);
             return;
         }
         
-        console.log('ID do vídeo extraído:', videoId);
+        console.log('ID do vídeo:', videoId);
         
-        updateVideoFirebase(videoId);
+        await updateVideoSupabase(videoId);
         currentVideoId = videoId;
         playVideo(videoId);
         closeVideoModal();
@@ -2145,20 +1490,16 @@
     function playVideo(videoId) {
         if (!videoId) return;
         
-        var wrapper = document.getElementById('playerWrapper');
-        var placeholder = document.getElementById('placeholder');
-        var emojiContainer = document.getElementById('emojiContainer');
+        const wrapper = document.getElementById('playerWrapper');
+        const placeholder = document.getElementById('placeholder');
+        const emojiContainer = document.getElementById('emojiContainer');
         
-        // Limpar iframe antigo se existir
-        var oldIframe = wrapper.querySelector('iframe');
+        const oldIframe = wrapper.querySelector('iframe');
         if (oldIframe) oldIframe.remove();
         
-        // Usar link padrão do YouTube
-        var embedUrl = 'https://www.youtube.com/embed/' + videoId + '?autoplay=1&rel=0&enablejsapi=1';
+        const embedUrl = 'https://www.youtube.com/embed/' + videoId + '?autoplay=1&rel=0';
         
-        console.log('Carregando vídeo com URL:', embedUrl);
-        
-        var iframe = document.createElement('iframe');
+        const iframe = document.createElement('iframe');
         iframe.src = embedUrl;
         iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
         iframe.allowFullscreen = true;
@@ -2169,13 +1510,11 @@
         iframe.style.width = '100%';
         iframe.style.height = '100%';
         iframe.style.border = 'none';
-        iframe.style.zIndex = '1'; // Garantir z-index baixo
+        iframe.style.zIndex = '1';
         
-        // INSERIR o iframe ANTES do container de emojis para garantir que fique atrás
         wrapper.insertBefore(iframe, emojiContainer);
         placeholder.classList.add('hidden');
         
-        // Garantir que o container de emojis esteja com z-index alto
         if (emojiContainer) {
             emojiContainer.style.zIndex = '1000';
             emojiContainer.style.position = 'absolute';
@@ -2187,22 +1526,72 @@
             emojiContainer.style.overflow = 'hidden';
         }
         
-        // Mostrar botão de encerrar
         document.getElementById('endSongBtn').style.display = 'inline-block';
         
-        // Definir cantor atual (quem carregou a música)
         currentSinger = userName;
-        
-        // Resetar contadores para nova música
         emojiCounts = {};
         totalReactions = 0;
     }
     
-    // ═══════════════════════════════════════════════════════════════════
-    // SISTEMA DE EMOJIS - CORRIGIDO ESPECIALMENTE PARA PC!
-    // ═══════════════════════════════════════════════════════════════════
+    function createFloatingEmoji(emoji) {
+        const wrapper = document.getElementById('playerWrapper');
+        let container = document.getElementById('emojiContainer');
+        
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'emojiContainer';
+            container.className = 'emoji-float-container';
+            wrapper.appendChild(container);
+        }
+        
+        container.style.position = 'absolute';
+        container.style.top = '0';
+        container.style.left = '0';
+        container.style.width = '100%';
+        container.style.height = '100%';
+        container.style.pointerEvents = 'none';
+        container.style.overflow = 'hidden';
+        container.style.zIndex = '1000';
+        container.style.transform = 'translateZ(0)';
+        
+        const el = document.createElement('div');
+        el.className = 'floating-emoji';
+        el.textContent = emoji;
+        
+        const leftPos = 10 + Math.random() * 80;
+        el.style.left = leftPos + '%';
+        el.style.bottom = '20px';
+        el.style.zIndex = '1001';
+        el.style.position = 'absolute';
+        el.style.pointerEvents = 'none';
+        el.style.userSelect = 'none';
+        el.style.willChange = 'transform, opacity';
+        
+        container.appendChild(el);
+        
+        setTimeout(() => { 
+            if (el.parentNode) el.remove();
+        }, 3000);
+    }
     
-    function sendEmoji(emoji, points) {
+    function showEmojiNotification(emoji, name) {
+        const notif = document.getElementById('emojiNotif');
+        document.getElementById('notifEmoji').textContent = emoji;
+        document.getElementById('notifText').textContent = name + ' reagiu!';
+        
+        notif.classList.add('show');
+        setTimeout(() => notif.classList.remove('show'), 2500);
+    }
+    
+    function flashScoreCard(points) {
+        const card = points > 0 ? document.getElementById('posCard') : document.getElementById('negCard');
+        if (card) {
+            card.classList.add('highlight');
+            setTimeout(() => card.classList.remove('highlight'), 500);
+        }
+    }
+    
+    async function sendEmoji(emoji, points) {
         if (!userName) {
             showToast('Entre na sala primeiro!', true);
             return;
@@ -2213,139 +1602,47 @@
             return;
         }
         
-        console.log('🎯 Enviando emoji:', emoji, 'pontos:', points, 'usuário:', userName);
+        console.log('🎯 Enviando emoji:', emoji, 'pontos:', points);
         
-        // Rastrear emoji para estatísticas do resultado final
         trackEmoji(emoji);
         
-        // Animação local IMEDIATA - CORRIGIDO PARA PC
         createFloatingEmoji(emoji);
         flashScoreCard(points);
         
-        // Atualizar scores locais
         scores.total += points;
-        if (points > 0) {
-            scores.positive += points;
-        } else {
-            scores.negative += Math.abs(points);
-        }
+        if (points > 0) scores.positive += points;
+        else scores.negative += Math.abs(points);
         updateScoreDisplay();
         
-        // Atividade local
-        var pt = points > 0 ? '+' + points : String(points);
+        const pt = points > 0 ? '+' + points : String(points);
         addActivity(emoji, userName + ' reagiu (' + pt + ')');
         
-        // Enviar ao Firebase
-        sendEmojiToFirebase(emoji, points);
+        await sendEmojiToSupabase(emoji, points);
         
-        // Cooldown de 1 segundo
         inCooldown = true;
-        var btns = document.querySelectorAll('.emoji-btn');
-        for (var i = 0; i < btns.length; i++) btns[i].classList.add('cooldown');
-        setTimeout(function() {
+        const btns = document.querySelectorAll('.emoji-btn');
+        btns.forEach(btn => btn.classList.add('cooldown'));
+        setTimeout(() => {
             inCooldown = false;
-            var btns = document.querySelectorAll('.emoji-btn');
-            for (var i = 0; i < btns.length; i++) btns[i].classList.remove('cooldown');
+            btns.forEach(btn => btn.classList.remove('cooldown'));
         }, 1000);
     }
-    
-    // ═══════════════════════════════════════════════════════════════════
-    // FUNÇÃO CRITICALMENTE CORRIGIDA - EMOJIS FLUTUANTES NO PC
-    // ═══════════════════════════════════════════════════════════════════
-    
-    function createFloatingEmoji(emoji) {
-        var wrapper = document.getElementById('playerWrapper');
-        var container = document.getElementById('emojiContainer');
-        
-        console.log('Criando emoji flutuante no PC:', emoji);
-        
-        // Se o container não existir, criá-lo
-        if (!container) {
-            console.log('Container de emojis não encontrado, criando...');
-            container = document.createElement('div');
-            container.id = 'emojiContainer';
-            container.className = 'emoji-float-container';
-            wrapper.appendChild(container);
-        }
-        
-        // GARANTIR que o container tenha os estilos corretos (importantíssimo para PC)
-        container.style.position = 'absolute';
-        container.style.top = '0';
-        container.style.left = '0';
-        container.style.width = '100%';
-        container.style.height = '100%';
-        container.style.pointerEvents = 'none';
-        container.style.overflow = 'hidden';
-        container.style.zIndex = '1000'; // Z-INDEX ALTO PARA FICAR SOBRE O VÍDEO
-        container.style.transform = 'translateZ(0)'; // Forçar aceleração de hardware
-        
-        // Criar o elemento do emoji
-        var el = document.createElement('div');
-        el.className = 'floating-emoji';
-        el.textContent = emoji;
-        
-        // Posicionamento aleatório (10% a 90% da largura)
-        var leftPos = 10 + Math.random() * 80;
-        el.style.left = leftPos + '%';
-        el.style.bottom = '20px'; // Começar um pouco acima do fundo
-        
-        // Estilos críticos para PC
-        el.style.zIndex = '1001';
-        el.style.position = 'absolute';
-        el.style.pointerEvents = 'none';
-        el.style.userSelect = 'none';
-        el.style.willChange = 'transform, opacity'; // Otimização para animação
-        
-        // Adicionar ao container
-        container.appendChild(el);
-        
-        console.log('Emoji criado com sucesso no PC. Posição left:', leftPos + '%');
-        
-        // Remover após 3 segundos (tempo da animação)
-        setTimeout(function() { 
-            if (el.parentNode) {
-                el.remove();
-                console.log('Emoji removido do PC.');
-            }
-        }, 3000);
-    }
-    
-    function showEmojiNotification(emoji, name) {
-        var notif = document.getElementById('emojiNotif');
-        document.getElementById('notifEmoji').textContent = emoji;
-        document.getElementById('notifText').textContent = name + ' reagiu!';
-        
-        notif.classList.add('show');
-        setTimeout(function() { notif.classList.remove('show'); }, 2500);
-    }
-    
-    function flashScoreCard(points) {
-        var card = points > 0 ? document.getElementById('posCard') : document.getElementById('negCard');
-        if (card) {
-            card.classList.add('highlight');
-            setTimeout(function() { card.classList.remove('highlight'); }, 500);
-        }
-    }
-    
-    // ═══════════════════════════════════════════════════════════════════
-    // ATUALIZAÇÃO DA UI
-    // ═══════════════════════════════════════════════════════════════════
     
     function updateScoreDisplay() {
         document.getElementById('totalScore').textContent = scores.total;
         document.getElementById('posScore').textContent = scores.positive;
         document.getElementById('negScore').textContent = scores.negative;
         
-        var totalEl = document.getElementById('totalScore');
+        const totalEl = document.getElementById('totalScore');
         if (scores.total > 0) totalEl.className = 'score-value pos';
         else if (scores.total < 0) totalEl.className = 'score-value neg';
         else totalEl.className = 'score-value';
     }
     
     function updateParticipantsList() {
-        var el = document.getElementById('participantsList');
-        var c1 = document.getElementById('participantCount');
-        var c2 = document.getElementById('participantCount2');
+        const el = document.getElementById('participantsList');
+        const c1 = document.getElementById('participantCount');
+        const c2 = document.getElementById('participantCount2');
         
         c1.textContent = participants.length;
         c2.textContent = participants.length;
@@ -2355,17 +1652,16 @@
             return;
         }
         
-        var html = '';
-        for (var i = 0; i < participants.length; i++) {
-            var p = participants[i];
-            var isYou = p.odUserId === odUserId;
-            var name = p.odUserName || 'Anônimo';
+        let html = '';
+        participants.forEach(p => {
+            const isYou = p.odUserId === odUserId;
+            const name = p.odUserName || 'Anônimo';
             html += '<div class="participant-item">' +
                 '<div class="participant-avatar">' + name.charAt(0).toUpperCase() + '</div>' +
                 '<span>' + name + '</span>' +
                 (isYou ? '<span class="you-badge">você</span>' : '<span class="online-badge">online</span>') +
                 '</div>';
-        }
+        });
         el.innerHTML = html;
     }
     
@@ -2376,22 +1672,21 @@
     }
     
     function updateActivityFeed() {
-        var el = document.getElementById('activityFeed');
+        const el = document.getElementById('activityFeed');
         
         if (!activities.length) {
             el.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:1rem;">Nenhuma atividade</div>';
             return;
         }
         
-        var html = '';
-        for (var i = 0; i < activities.length; i++) {
-            var a = activities[i];
+        let html = '';
+        activities.forEach(a => {
             html += '<div class="activity-item"><span class="activity-emoji">' + a.emoji + '</span><span>' + a.text + '</span></div>';
-        }
+        });
         el.innerHTML = html;
     }
     
-    function resetScores() {
+    async function resetScores() {
         if (!confirm('Resetar pontuação?')) return;
         
         scores = { total: 0, positive: 0, negative: 0 };
@@ -2401,38 +1696,29 @@
         updateScoreDisplay();
         updateActivityFeed();
         
-        if (isFirebaseConnected && roomRef) {
-            roomRef.child('scores').set(scores);
-            roomRef.child('emojis').remove();
-        }
+        await resetScoresSupabase();
         
         showToast('Resetado! 🔄');
     }
     
     function showToast(msg, isError) {
-        var toast = document.getElementById('toast');
+        const toast = document.getElementById('toast');
         toast.textContent = msg;
         toast.className = 'toast show' + (isError ? ' error' : '');
-        setTimeout(function() { toast.classList.remove('show'); }, 3000);
+        setTimeout(() => toast.classList.remove('show'), 3000);
     }
     
-    // ═══════════════════════════════════════════════════════════════════
-    // SISTEMA DE RESULTADO FINAL DA MÚSICA
-    // ═══════════════════════════════════════════════════════════════════
-    
     function trackEmoji(emoji) {
-        if (!emojiCounts[emoji]) {
-            emojiCounts[emoji] = 0;
-        }
+        if (!emojiCounts[emoji]) emojiCounts[emoji] = 0;
         emojiCounts[emoji]++;
         totalReactions++;
     }
     
     function getMostVotedEmoji() {
-        var maxCount = 0;
-        var topEmoji = '🎉';
+        let maxCount = 0;
+        let topEmoji = '🎉';
         
-        for (var emoji in emojiCounts) {
+        for (const emoji in emojiCounts) {
             if (emojiCounts[emoji] > maxCount) {
                 maxCount = emojiCounts[emoji];
                 topEmoji = emoji;
@@ -2440,17 +1726,6 @@
         }
         
         return { emoji: topEmoji, count: maxCount };
-    }
-    
-    function getEmojiLabel(emoji) {
-        var labels = {
-            '😀': 'Bom!',
-            '😍': 'Muito Bom!',
-            '😂': 'Engraçado!',
-            '😢': 'Triste...',
-            '😡': 'Péssimo...'
-        };
-        return labels[emoji] || 'Reação mais votada';
     }
     
     function getResultMessage(total) {
@@ -2463,11 +1738,11 @@
     }
     
     function createConfetti() {
-        var colors = ['#ff2d75', '#9d4edd', '#00d4ff', '#00ff88', '#ff9500', '#ffff00'];
+        const colors = ['#ff2d75', '#9d4edd', '#00d4ff', '#00ff88', '#ff9500', '#ffff00'];
         
-        for (var i = 0; i < 100; i++) {
-            setTimeout(function() {
-                var confetti = document.createElement('div');
+        for (let i = 0; i < 100; i++) {
+            setTimeout(() => {
+                const confetti = document.createElement('div');
                 confetti.className = 'confetti';
                 confetti.style.left = Math.random() * 100 + 'vw';
                 confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
@@ -2477,132 +1752,73 @@
                 confetti.style.animationDuration = (2 + Math.random() * 2) + 's';
                 document.body.appendChild(confetti);
                 
-                setTimeout(function() {
+                setTimeout(() => {
                     if (confetti.parentNode) confetti.remove();
                 }, 4000);
             }, i * 30);
         }
     }
     
-    function endSongAndShowResults() {
+    async function endSongAndShowResults() {
         if (totalReactions === 0) {
             showToast('Nenhuma reação recebida ainda!', true);
             return;
         }
         
-        // Enviar sinal para TODOS os participantes verem o resultado
-        if (isFirebaseConnected && roomRef) {
-            roomRef.child('showResult').set({
-                show: true,
-                singer: currentSinger || userName,
-                emojiCounts: emojiCounts,
-                totalReactions: totalReactions,
-                timestamp: Date.now()
-            });
-            
-            // Limpar após 10 segundos
-            setTimeout(function() {
-                if (roomRef) {
-                    roomRef.child('showResult').remove();
-                }
-            }, 10000);
-        }
+        await showResultSupabase();
         
         showResultScreen();
     }
     
     function showResultScreen() {
-        var overlay = document.getElementById('resultOverlay');
+        const overlay = document.getElementById('resultOverlay');
         
-        // Nome do cantor (quem carregou o vídeo ou o host)
-        var singerName = currentSinger || userName || 'Cantor';
+        const singerName = currentSinger || userName || 'Cantor';
         document.getElementById('resultSingerName').textContent = singerName;
         
-        // Emoji mais votado
-        var topEmoji = getMostVotedEmoji();
+        const topEmoji = getMostVotedEmoji();
         document.getElementById('resultEmoji').textContent = topEmoji.emoji;
         
-        // Label do emoji com contagem
-        var emojiLabelText = getEmojiLabel(topEmoji.emoji);
-        if (topEmoji.count > 0) {
-            emojiLabelText += ' (×' + topEmoji.count + ')';
-        }
-        document.getElementById('resultEmojiLabel').textContent = emojiLabelText;
-        
-        // Pontuação total
-        var totalScoreEl = document.getElementById('resultTotalScore');
-        var totalText = scores.total >= 0 ? '+' + scores.total : String(scores.total);
+        const totalScoreEl = document.getElementById('resultTotalScore');
+        const totalText = scores.total >= 0 ? '+' + scores.total : String(scores.total);
         totalScoreEl.textContent = totalText;
         
-        if (scores.total > 0) {
-            totalScoreEl.className = 'result-total-score positive';
-        } else if (scores.total < 0) {
-            totalScoreEl.className = 'result-total-score negative';
-        } else {
-            totalScoreEl.className = 'result-total-score neutral';
-        }
+        if (scores.total > 0) totalScoreEl.className = 'result-total-score positive';
+        else if (scores.total < 0) totalScoreEl.className = 'result-total-score negative';
+        else totalScoreEl.className = 'result-total-score neutral';
         
-        // Estatísticas
         document.getElementById('resultPosScore').textContent = '+' + scores.positive;
         document.getElementById('resultNegScore').textContent = '-' + scores.negative;
         document.getElementById('resultTotalReactions').textContent = totalReactions;
         
-        // Breakdown de emojis
-        var breakdownHtml = '';
-        var sortedEmojis = Object.keys(emojiCounts).sort(function(a, b) {
-            return emojiCounts[b] - emojiCounts[a];
-        });
+        let breakdownHtml = '';
+        const sortedEmojis = Object.keys(emojiCounts).sort((a, b) => emojiCounts[b] - emojiCounts[a]);
         
-        for (var i = 0; i < sortedEmojis.length; i++) {
-            var emoji = sortedEmojis[i];
+        sortedEmojis.forEach(emoji => {
             breakdownHtml += '<div class="result-emoji-item">' +
                 '<span class="emoji">' + emoji + '</span>' +
                 '<span class="count">×' + emojiCounts[emoji] + '</span>' +
                 '</div>';
-        }
+        });
         document.getElementById('resultEmojiBreakdown').innerHTML = breakdownHtml;
         
-        // Mensagem de resultado
-        var message = getResultMessage(scores.total);
-        var messageEl = document.getElementById('resultMessage');
+        const message = getResultMessage(scores.total);
+        const messageEl = document.getElementById('resultMessage');
         messageEl.textContent = message.text;
         messageEl.className = 'result-message ' + message.class;
         
-        // Mostrar overlay
         overlay.classList.add('active');
         
-        // Confetti se for boa performance
-        if (scores.total >= 5) {
-            createConfetti();
-        }
-        
-        // Salvar no Firebase
-        saveResultToFirebase();
-    }
-    
-    function saveResultToFirebase() {
-        if (!isFirebaseConnected || !roomRef) return;
-        
-        roomRef.child('songResults').push({
-            singer: currentSinger || userName,
-            totalScore: scores.total,
-            positiveScore: scores.positive,
-            negativeScore: scores.negative,
-            totalReactions: totalReactions,
-            topEmoji: getMostVotedEmoji().emoji,
-            emojiBreakdown: emojiCounts,
-            timestamp: firebase.database.ServerValue.TIMESTAMP
-        });
+        if (scores.total >= 5) createConfetti();
     }
     
     function closeResult() {
         document.getElementById('resultOverlay').classList.remove('active');
     }
     
-    function closeResultAndNewSong() {
+    async function closeResultAndNewSong() {
         closeResult();
         
-        // Resetar tudo para próxima música
         scores = { total: 0, positive: 0, negative: 0 };
         emojiCounts = {};
         totalReactions = 0;
@@ -2612,48 +1828,20 @@
         updateScoreDisplay();
         updateActivityFeed();
         
-        if (isFirebaseConnected && roomRef) {
-            roomRef.child('scores').set(scores);
-            roomRef.child('emojis').remove();
-        }
+        await resetScoresSupabase();
         
-        // Esconder botão de encerrar
         document.getElementById('endSongBtn').style.display = 'none';
-        
-        // Mostrar placeholder
         document.getElementById('placeholder').classList.remove('hidden');
         
-        // Limpar player
-        var wrapper = document.getElementById('playerWrapper');
-        var oldIframe = wrapper.querySelector('iframe');
+        const wrapper = document.getElementById('playerWrapper');
+        const oldIframe = wrapper.querySelector('iframe');
         if (oldIframe) oldIframe.remove();
         
-        // Abrir modal de vídeo
         openVideoModal();
         showToast('Escolha a próxima música! 🎵');
     }
     
-    // Inicializar
     document.addEventListener('DOMContentLoaded', init);
-    
-    // Remove o link do LM Arena
-    var link = document.querySelector('a[href="https://lmarena.ai/code"]');
-    if (link) {
-        link.style.display = 'none';
-    }
-    
-    setTimeout(function() {
-        var link = document.querySelector('a[href="https://lmarena.ai/code"]');
-        if (link) {
-            link.style.display = 'none';
-        }
-        var allLinks = document.querySelectorAll('a');
-        allLinks.forEach(function(a) {
-            if (a.href && a.href.includes('lmarena.ai')) {
-                a.style.display = 'none';
-            }
-        });
-    }, 1000);
     </script>
 </body>
 </html>
