@@ -10,7 +10,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
-        /* MESMO CSS ANTERIOR - manter igual */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         
         :root {
@@ -276,6 +275,51 @@
         .score-value.pos { color: var(--accent-green); }
         .score-value.neg { color: #ff4757; }
 
+        /* ===== EMOJIS ===== */
+        .emoji-section {
+            background: var(--bg-card);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            border: 1px solid rgba(157,78,221,0.2);
+        }
+        
+        .emoji-header { font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; }
+        
+        .emoji-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.75rem;
+        }
+        
+        .emoji-btn {
+            background: var(--bg-lighter);
+            border: 2px solid transparent;
+            padding: 1rem 0.5rem;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+            transition: all 0.3s;
+        }
+        
+        .emoji-btn:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-purple);
+        }
+        
+        .emoji-btn.positive:hover { border-color: var(--accent-green); }
+        .emoji-btn.negative:hover { border-color: #ff4757; }
+        .emoji-btn.cooldown { opacity: 0.4; pointer-events: none; }
+        
+        .emoji-icon { font-size: 2.5rem; }
+        .emoji-label { font-size: 0.7rem; color: var(--text-secondary); }
+        .emoji-points { font-size: 0.75rem; font-weight: 700; }
+        .emoji-points.positive { color: var(--accent-green); }
+        .emoji-points.negative { color: #ff4757; }
+
         /* ===== FILA DE ESPERA ===== */
         .queue-section {
             background: var(--bg-card);
@@ -422,50 +466,6 @@
             margin-bottom: 0.5rem;
             opacity: 0.5;
         }
-
-        .emoji-section {
-            background: var(--bg-card);
-            border-radius: 1rem;
-            padding: 1.5rem;
-            margin-top: 1.5rem;
-            border: 1px solid rgba(157,78,221,0.2);
-        }
-        
-        .emoji-header { font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; }
-        
-        .emoji-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 0.75rem;
-        }
-        
-        .emoji-btn {
-            background: var(--bg-lighter);
-            border: 2px solid transparent;
-            padding: 1rem 0.5rem;
-            border-radius: 0.75rem;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.25rem;
-            transition: all 0.3s;
-        }
-        
-        .emoji-btn:hover {
-            transform: translateY(-5px);
-            border-color: var(--accent-purple);
-        }
-        
-        .emoji-btn.positive:hover { border-color: var(--accent-green); }
-        .emoji-btn.negative:hover { border-color: #ff4757; }
-        .emoji-btn.cooldown { opacity: 0.4; pointer-events: none; }
-        
-        .emoji-icon { font-size: 2.5rem; }
-        .emoji-label { font-size: 0.7rem; color: var(--text-secondary); }
-        .emoji-points { font-size: 0.75rem; font-weight: 700; }
-        .emoji-points.positive { color: var(--accent-green); }
-        .emoji-points.negative { color: #ff4757; }
 
         .card {
             background: var(--bg-card);
@@ -942,7 +942,6 @@
     </style>
 </head>
 <body>
-    <!-- MESMO HTML ANTERIOR - manter igual -->
     <div class="connection-status connecting" id="connectionStatus">
         🔄 Conectando ao servidor...
     </div>
@@ -964,6 +963,7 @@
 
     <div class="container">
         <div class="main-grid">
+            <!-- COLUNA ESQUERDA (Player → Pontuação → Emojis → Fila) -->
             <div class="left-column">
                 <div class="video-section">
                     <div class="video-header">
@@ -996,24 +996,7 @@
                     </div>
                 </div>
 
-                <!-- SEÇÃO DA FILA DE ESPERA -->
-                <div class="queue-section">
-                    <div class="queue-header">
-                        <div class="queue-title">
-                            📋 Fila de Espera
-                            <span class="queue-count" id="queueCount">0</span>
-                        </div>
-                        <button class="add-to-queue-btn" onclick="openVideoModal(true)">➕ Adicionar</button>
-                    </div>
-                    <div class="queue-list" id="queueList">
-                        <div class="empty-queue">
-                            <div style="font-size: 3rem; margin-bottom: 0.5rem;">🎵</div>
-                            <p>Nenhuma música na fila</p>
-                            <small>Adicione links do YouTube para começar</small>
-                        </div>
-                    </div>
-                </div>
-
+                <!-- EMOJIS -->
                 <div class="emoji-section">
                     <h3 class="emoji-header">🎉 Reações ao Vivo</h3>
                     <div class="emoji-grid">
@@ -1044,8 +1027,27 @@
                         </button>
                     </div>
                 </div>
+
+                <!-- FILA DE ESPERA -->
+                <div class="queue-section">
+                    <div class="queue-header">
+                        <div class="queue-title">
+                            📋 Fila de Espera
+                            <span class="queue-count" id="queueCount">0</span>
+                        </div>
+                        <button class="add-to-queue-btn" onclick="openVideoModal(true)">➕ Adicionar</button>
+                    </div>
+                    <div class="queue-list" id="queueList">
+                        <div class="empty-queue">
+                            <div style="font-size: 3rem; margin-bottom: 0.5rem;">🎵</div>
+                            <p>Nenhuma música na fila</p>
+                            <small>Adicione links do YouTube para começar</small>
+                        </div>
+                    </div>
+                </div>
             </div>
 
+            <!-- COLUNA DIREITA (inalterada) -->
             <div class="right-column">
                 <div class="card">
                     <h3 class="card-title">📱 Compartilhar Sala</h3>
@@ -1319,7 +1321,6 @@
         updateActivityFeed();
     }
 
-    // ✅ FUNÇÃO QUE ESTAVA FALTANDO
     function updateActivityFeed() {
         const el = document.getElementById('activityFeed');
         if (!activities.length) {
@@ -1645,9 +1646,7 @@
         await saveQueueToSupabase();
     }
 
-    // ✅ FUNÇÃO CORRIGIDA: zera os pontos mas mantém a fila
     async function endSongAndPlayNext() {
-        // Mostrar resultado antes de zerar
         if (totalReactions > 0) {
             await showResultSupabase();
             showResultScreen();
@@ -1658,10 +1657,7 @@
             totalReactions = 0;
             updateScoreDisplay();
             
-            // Salvar scores zerados no Supabase
             await saveScoresToSupabase();
-            
-            // Avançar na fila
             await playNextInQueue();
         }
     }
@@ -1669,16 +1665,12 @@
     function closeResultAndPlayNext() {
         closeResult();
         
-        // Zera os pontos ao fechar o resultado
         scores = { total: 0, positive: 0, negative: 0 };
         emojiCounts = {};
         totalReactions = 0;
         updateScoreDisplay();
         
-        // Salvar scores zerados
         saveScoresToSupabase();
-        
-        // Avançar na fila
         playNextInQueue();
     }
 
@@ -1950,7 +1942,6 @@
                 updateScoreDisplay();
             })
             .on('broadcast', { event: 'reset' }, () => {
-                // ✅ Reset APENAS scores, mantém fila
                 scores = { total: 0, positive: 0, negative: 0 };
                 emojiCounts = {};
                 totalReactions = 0;
@@ -2173,11 +2164,9 @@
         }, 1000);
     }
 
-    // ✅ FUNÇÃO CORRIGIDA: NÃO APAGA A FILA
     async function resetScores() {
         if (!confirm('Resetar pontuação?')) return;
         
-        // Reset APENAS scores, mantém fila
         scores = { total: 0, positive: 0, negative: 0 };
         emojiCounts = {};
         totalReactions = 0;
