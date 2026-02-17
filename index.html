@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎤 Karaokê Online - Fila Inteligente</title>
+    <title>🎤 Karaokê Online - Fila Compartilhada</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
     
     <!-- Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
-        /* (mesmo CSS anterior - mantido por brevidade) */
+        /* (MESMO CSS ANTERIOR - manter igual) */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         
         :root {
@@ -942,6 +942,7 @@
     </style>
 </head>
 <body>
+    <!-- (MESMO HTML ANTERIOR - manter igual) -->
     <div class="connection-status connecting" id="connectionStatus">
         🔄 Conectando ao servidor...
     </div>
@@ -1206,8 +1207,11 @@
     let totalReactions = 0;
     let currentSinger = '';
 
+    // Flag para controle de sincronização inicial
+    let hasReceivedInitialState = false;
+
     // ============================================
-    // FUNÇÕES DE UI
+    // FUNÇÕES DE UI (mantidas iguais)
     // ============================================
     function showToast(msg, isError) {
         const toast = document.getElementById('toast');
@@ -1462,7 +1466,7 @@
     }
 
     // ============================================
-    // FUNÇÕES DA FILA (CORRIGIDAS)
+    // FUNÇÕES DA FILA
     // ============================================
     function updateQueueDisplay() {
         const queueList = document.getElementById('queueList');
@@ -1486,7 +1490,6 @@
             const isPlaying = (index === currentQueuePosition);
             const position = index + 1;
             
-            // Fallback para thumbnail com emoji
             const thumbnailHtml = `<img src="${item.thumbnail}" alt="thumbnail" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null; this.style.display='none'; this.parentNode.innerHTML='<div style=\'width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--bg-dark);color:var(--accent-pink);font-size:1.5rem;\'>🎵</div>';">`;
             
             html += `
@@ -1556,7 +1559,6 @@
         showToast(`"${title}" adicionado à fila! 🎵`);
         addActivity('➕', `${userName} adicionou música à fila`);
         
-        // ✅ CORRIGIDO: não toca automaticamente!
         if (currentQueuePosition === -1) {
             showToast('Música adicionada. Clique em "▶️" na fila para tocar!');
         }
@@ -1653,7 +1655,7 @@
     }
 
     // ============================================
-    // FUNÇÕES SUPABASE
+    // FUNÇÕES SUPABASE CORRIGIDAS
     // ============================================
     async function saveQueueToSupabase() {
         if (!isSupabaseConnected || !roomChannel) return;
@@ -1690,12 +1692,21 @@
         await roomChannel.send({
             type: 'broadcast',
             event: 'request-state',
-            payload: { userId: odUserId, timestamp: Date.now() }
+            payload: { 
+                userId: odUserId, 
+                timestamp: Date.now(),
+                // ✅ Importante: indicar que é uma requisição de novo usuário
+                isNewUser: true 
+            }
         });
     }
 
     async function sendStateToUser(targetUserId) {
         if (!isSupabaseConnected || !roomChannel) return;
+        
+        // ✅ Só envia se tiver dados relevantes
+        if (!currentVideoId && songQueue.length === 0) return;
+        
         const roomState = {
             currentVideoId: currentVideoId || null,
             scores: scores,
@@ -1704,12 +1715,18 @@
             totalReactions: totalReactions,
             activities: activities.slice(0, 10),
             queue: songQueue,
-            currentQueuePosition: currentQueuePosition
+            currentQueuePosition: currentQueuePosition,
+            // ✅ Adicionar timestamp para evitar estados antigos
+            timestamp: Date.now()
         };
+        
         await roomChannel.send({
             type: 'broadcast',
             event: 'initial-state',
-            payload: { targetUserId: targetUserId, state: roomState }
+            payload: { 
+                targetUserId: targetUserId, 
+                state: roomState 
+            }
         });
     }
 
@@ -1760,17 +1777,19 @@
                 updateParticipantsList();
             })
             .on('presence', { event: 'join' }, async ({ key, newPresences }) => {
-                newPresences.forEach(async (pres) => {
+                for (const pres of newPresences) {
                     if (!participants.find(p => p.odUserId === pres.odUserId)) {
                         participants.push(pres);
                         showToast(`${pres.odUserName} entrou! 👋`);
                         addActivity('👋', `${pres.odUserName} entrou`);
+                        
+                        // ✅ Enviar estado apenas para o novo participante
                         if (pres.odUserId !== odUserId && (currentVideoId || songQueue.length > 0)) {
                             console.log('📤 Enviando estado atual para novo participante:', pres.odUserName);
                             await sendStateToUser(pres.odUserId);
                         }
                     }
-                });
+                }
                 updateParticipantsList();
             })
             .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
@@ -1781,16 +1800,32 @@
                 updateParticipantsList();
             })
             .on('broadcast', { event: 'request-state' }, async ({ payload }) => {
-                const { userId } = payload;
-                if (userId !== odUserId && (currentVideoId || songQueue.length > 0)) {
-                    console.log('📤 Respondendo à solicitação de estado de:', userId);
+                const { userId, isNewUser } = payload;
+                
+                // ✅ Só responder se:
+                // 1. Não for o próprio usuário
+                // 2. Tiver dados para enviar
+                // 3. For uma requisição de novo usuário (para evitar loops)
+                if (userId !== odUserId && isNewUser && (currentVideoId || songQueue.length > 0)) {
+                    console.log('📤 Respondendo à solicitação de estado de novo usuário:', userId);
                     await sendStateToUser(userId);
                 }
             })
             .on('broadcast', { event: 'initial-state' }, ({ payload }) => {
                 const { targetUserId, state } = payload;
+                
+                // ✅ Só processar se for para este usuário
                 if (targetUserId === odUserId) {
                     console.log('📥 Recebendo estado inicial da sala:', state);
+                    
+                    // ✅ Verificar se o estado é mais recente
+                    if (state.timestamp && state.timestamp < (lastStateUpdate || 0)) return;
+                    
+                    if (state.queue) {
+                        songQueue = state.queue;
+                        currentQueuePosition = state.currentQueuePosition !== undefined ? state.currentQueuePosition : -1;
+                        updateQueueDisplay();
+                    }
                     
                     if (state.currentVideoId && state.currentVideoId !== currentVideoId) {
                         currentVideoId = state.currentVideoId;
@@ -1813,18 +1848,19 @@
                         updateActivityFeed();
                     }
                     
-                    if (state.queue) {
-                        songQueue = state.queue;
-                        currentQueuePosition = state.currentQueuePosition !== undefined ? state.currentQueuePosition : -1;
-                        updateQueueDisplay();
-                    }
-                    
+                    hasReceivedInitialState = true;
                     showToast('Sala sincronizada! 🎤');
                 }
             })
             .on('broadcast', { event: 'room-state' }, ({ payload }) => {
                 if (payload.updatedAt > (lastStateUpdate || 0)) {
                     lastStateUpdate = payload.updatedAt;
+                    
+                    if (payload.queue) {
+                        songQueue = payload.queue;
+                        currentQueuePosition = payload.currentQueuePosition !== undefined ? payload.currentQueuePosition : -1;
+                        updateQueueDisplay();
+                    }
                     
                     if (payload.currentVideoId && payload.currentVideoId !== currentVideoId) {
                         currentVideoId = payload.currentVideoId;
@@ -1835,12 +1871,6 @@
                     if (payload.scores) {
                         scores = payload.scores;
                         updateScoreDisplay();
-                    }
-                    
-                    if (payload.queue) {
-                        songQueue = payload.queue;
-                        currentQueuePosition = payload.currentQueuePosition !== undefined ? payload.currentQueuePosition : -1;
-                        updateQueueDisplay();
                     }
                 }
             })
@@ -1923,8 +1953,12 @@
                     odUserName: userName,
                     joinedAt: Date.now()
                 });
+                
+                // ✅ Solicitar estado após 1 segundo (só uma vez)
                 setTimeout(async () => {
-                    await requestRoomState();
+                    if (!hasReceivedInitialState) {
+                        await requestRoomState();
+                    }
                 }, 1000);
             }
         });
