@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎤 Karaokê Online - Fila Compartilhada</title>
+    <title>🎤 Karaokê Online - Scores Compartilhados</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
     
     <!-- Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
-        /* (MESMO CSS ANTERIOR - manter igual) */
+        /* MESMO CSS ANTERIOR - manter igual */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         
         :root {
@@ -942,7 +942,7 @@
     </style>
 </head>
 <body>
-    <!-- (MESMO HTML ANTERIOR - manter igual) -->
+    <!-- MESMO HTML ANTERIOR - manter igual -->
     <div class="connection-status connecting" id="connectionStatus">
         🔄 Conectando ao servidor...
     </div>
@@ -1655,7 +1655,7 @@
     }
 
     // ============================================
-    // FUNÇÕES SUPABASE CORRIGIDAS
+    // FUNÇÕES SUPABASE CORRIGIDAS (COM SCORES)
     // ============================================
     async function saveQueueToSupabase() {
         if (!isSupabaseConnected || !roomChannel) return;
@@ -1669,11 +1669,21 @@
         });
     }
 
+    // ✅ NOVA FUNÇÃO: salvar scores no Supabase
+    async function saveScoresToSupabase() {
+        if (!isSupabaseConnected || !roomChannel) return;
+        await roomChannel.send({
+            type: 'broadcast',
+            event: 'scores-update',
+            payload: scores
+        });
+    }
+
     async function saveRoomState() {
         if (!isSupabaseConnected || !roomChannel) return;
         const roomState = {
             currentVideoId: currentVideoId || null,
-            scores: scores,
+            scores: scores, // ✅ Incluindo scores
             currentSinger: currentSinger || null,
             queue: songQueue,
             currentQueuePosition: currentQueuePosition,
@@ -1695,7 +1705,6 @@
             payload: { 
                 userId: odUserId, 
                 timestamp: Date.now(),
-                // ✅ Importante: indicar que é uma requisição de novo usuário
                 isNewUser: true 
             }
         });
@@ -1704,21 +1713,22 @@
     async function sendStateToUser(targetUserId) {
         if (!isSupabaseConnected || !roomChannel) return;
         
-        // ✅ Só envia se tiver dados relevantes
-        if (!currentVideoId && songQueue.length === 0) return;
+        // ✅ Só envia se tiver dados relevantes (incluindo scores)
+        if (!currentVideoId && songQueue.length === 0 && scores.total === 0) return;
         
         const roomState = {
             currentVideoId: currentVideoId || null,
-            scores: scores,
+            scores: scores, // ✅ Incluindo scores no estado inicial
             currentSinger: currentSinger || null,
             emojiCounts: emojiCounts,
             totalReactions: totalReactions,
             activities: activities.slice(0, 10),
             queue: songQueue,
             currentQueuePosition: currentQueuePosition,
-            // ✅ Adicionar timestamp para evitar estados antigos
             timestamp: Date.now()
         };
+        
+        console.log('📤 Enviando estado para novo usuário:', targetUserId, 'scores:', scores);
         
         await roomChannel.send({
             type: 'broadcast',
@@ -1784,8 +1794,8 @@
                         addActivity('👋', `${pres.odUserName} entrou`);
                         
                         // ✅ Enviar estado apenas para o novo participante
-                        if (pres.odUserId !== odUserId && (currentVideoId || songQueue.length > 0)) {
-                            console.log('📤 Enviando estado atual para novo participante:', pres.odUserName);
+                        if (pres.odUserId !== odUserId && (currentVideoId || songQueue.length > 0 || scores.total !== 0)) {
+                            console.log('📤 Enviando estado atual para novo participante:', pres.odUserName, 'scores:', scores);
                             await sendStateToUser(pres.odUserId);
                         }
                     }
@@ -1806,8 +1816,8 @@
                 // 1. Não for o próprio usuário
                 // 2. Tiver dados para enviar
                 // 3. For uma requisição de novo usuário (para evitar loops)
-                if (userId !== odUserId && isNewUser && (currentVideoId || songQueue.length > 0)) {
-                    console.log('📤 Respondendo à solicitação de estado de novo usuário:', userId);
+                if (userId !== odUserId && isNewUser && (currentVideoId || songQueue.length > 0 || scores.total !== 0)) {
+                    console.log('📤 Respondendo à solicitação de estado de novo usuário:', userId, 'scores:', scores);
                     await sendStateToUser(userId);
                 }
             })
@@ -1818,8 +1828,12 @@
                 if (targetUserId === odUserId) {
                     console.log('📥 Recebendo estado inicial da sala:', state);
                     
-                    // ✅ Verificar se o estado é mais recente
-                    if (state.timestamp && state.timestamp < (lastStateUpdate || 0)) return;
+                    // ✅ Atualizar scores PRIMEIRO
+                    if (state.scores) {
+                        scores = state.scores;
+                        updateScoreDisplay();
+                        console.log('✅ Scores atualizados:', scores);
+                    }
                     
                     if (state.queue) {
                         songQueue = state.queue;
@@ -1831,11 +1845,6 @@
                         currentVideoId = state.currentVideoId;
                         currentSinger = state.currentSinger;
                         playVideo(state.currentVideoId);
-                    }
-                    
-                    if (state.scores) {
-                        scores = state.scores;
-                        updateScoreDisplay();
                     }
                     
                     if (state.emojiCounts) {
@@ -1856,6 +1865,11 @@
                 if (payload.updatedAt > (lastStateUpdate || 0)) {
                     lastStateUpdate = payload.updatedAt;
                     
+                    if (payload.scores) {
+                        scores = payload.scores;
+                        updateScoreDisplay();
+                    }
+                    
                     if (payload.queue) {
                         songQueue = payload.queue;
                         currentQueuePosition = payload.currentQueuePosition !== undefined ? payload.currentQueuePosition : -1;
@@ -1866,11 +1880,6 @@
                         currentVideoId = payload.currentVideoId;
                         currentSinger = payload.currentSinger;
                         playVideo(payload.currentVideoId);
-                    }
-                    
-                    if (payload.scores) {
-                        scores = payload.scores;
-                        updateScoreDisplay();
                     }
                 }
             })
@@ -1897,6 +1906,7 @@
                 updateScoreDisplay();
                 
                 saveRoomState();
+                saveScoresToSupabase(); // ✅ Salvar scores separadamente também
             })
             .on('broadcast', { event: 'new-video' }, ({ payload }) => {
                 const { videoId, loadedBy, title } = payload;
@@ -1954,7 +1964,6 @@
                     joinedAt: Date.now()
                 });
                 
-                // ✅ Solicitar estado após 1 segundo (só uma vez)
                 setTimeout(async () => {
                     if (!hasReceivedInitialState) {
                         await requestRoomState();
@@ -1972,11 +1981,7 @@
             event: 'new-emoji',
             payload: { emoji, points, userId: odUserId, userName, emojiId }
         });
-        await roomChannel.send({
-            type: 'broadcast',
-            event: 'scores-update',
-            payload: scores
-        });
+        await saveScoresToSupabase(); // ✅ Usar função específica de scores
     }
 
     async function updateVideoSupabase(videoId, title) {
