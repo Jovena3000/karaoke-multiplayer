@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎤 Karaokê Online - Scores Compartilhados</title>
+    <title>🎤 Karaokê Online - Scores e Fila</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
     
     <!-- Supabase SDK -->
@@ -1211,7 +1211,7 @@
     let hasReceivedInitialState = false;
 
     // ============================================
-    // FUNÇÕES DE UI (mantidas iguais)
+    // FUNÇÕES DE UI
     // ============================================
     function showToast(msg, isError) {
         const toast = document.getElementById('toast');
@@ -1316,6 +1316,11 @@
     function addActivity(emoji, text) {
         activities.unshift({ emoji: emoji, text: text });
         if (activities.length > 20) activities.pop();
+        updateActivityFeed();
+    }
+
+    // ✅ FUNÇÃO QUE ESTAVA FALTANDO
+    function updateActivityFeed() {
         const el = document.getElementById('activityFeed');
         if (!activities.length) {
             el.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:1rem;">Nenhuma atividade</div>';
@@ -1640,22 +1645,45 @@
         await saveQueueToSupabase();
     }
 
+    // ✅ FUNÇÃO CORRIGIDA: zera os pontos mas mantém a fila
     async function endSongAndPlayNext() {
+        // Mostrar resultado antes de zerar
         if (totalReactions > 0) {
             await showResultSupabase();
             showResultScreen();
         } else {
+            // Zera os pontos mas mantém a fila
+            scores = { total: 0, positive: 0, negative: 0 };
+            emojiCounts = {};
+            totalReactions = 0;
+            updateScoreDisplay();
+            
+            // Salvar scores zerados no Supabase
+            await saveScoresToSupabase();
+            
+            // Avançar na fila
             await playNextInQueue();
         }
     }
 
     function closeResultAndPlayNext() {
         closeResult();
+        
+        // Zera os pontos ao fechar o resultado
+        scores = { total: 0, positive: 0, negative: 0 };
+        emojiCounts = {};
+        totalReactions = 0;
+        updateScoreDisplay();
+        
+        // Salvar scores zerados
+        saveScoresToSupabase();
+        
+        // Avançar na fila
         playNextInQueue();
     }
 
     // ============================================
-    // FUNÇÕES SUPABASE CORRIGIDAS (COM SCORES)
+    // FUNÇÕES SUPABASE
     // ============================================
     async function saveQueueToSupabase() {
         if (!isSupabaseConnected || !roomChannel) return;
@@ -1669,7 +1697,6 @@
         });
     }
 
-    // ✅ NOVA FUNÇÃO: salvar scores no Supabase
     async function saveScoresToSupabase() {
         if (!isSupabaseConnected || !roomChannel) return;
         await roomChannel.send({
@@ -1683,7 +1710,7 @@
         if (!isSupabaseConnected || !roomChannel) return;
         const roomState = {
             currentVideoId: currentVideoId || null,
-            scores: scores, // ✅ Incluindo scores
+            scores: scores,
             currentSinger: currentSinger || null,
             queue: songQueue,
             currentQueuePosition: currentQueuePosition,
@@ -1713,12 +1740,11 @@
     async function sendStateToUser(targetUserId) {
         if (!isSupabaseConnected || !roomChannel) return;
         
-        // ✅ Só envia se tiver dados relevantes (incluindo scores)
         if (!currentVideoId && songQueue.length === 0 && scores.total === 0) return;
         
         const roomState = {
             currentVideoId: currentVideoId || null,
-            scores: scores, // ✅ Incluindo scores no estado inicial
+            scores: scores,
             currentSinger: currentSinger || null,
             emojiCounts: emojiCounts,
             totalReactions: totalReactions,
@@ -1793,7 +1819,6 @@
                         showToast(`${pres.odUserName} entrou! 👋`);
                         addActivity('👋', `${pres.odUserName} entrou`);
                         
-                        // ✅ Enviar estado apenas para o novo participante
                         if (pres.odUserId !== odUserId && (currentVideoId || songQueue.length > 0 || scores.total !== 0)) {
                             console.log('📤 Enviando estado atual para novo participante:', pres.odUserName, 'scores:', scores);
                             await sendStateToUser(pres.odUserId);
@@ -1812,10 +1837,6 @@
             .on('broadcast', { event: 'request-state' }, async ({ payload }) => {
                 const { userId, isNewUser } = payload;
                 
-                // ✅ Só responder se:
-                // 1. Não for o próprio usuário
-                // 2. Tiver dados para enviar
-                // 3. For uma requisição de novo usuário (para evitar loops)
                 if (userId !== odUserId && isNewUser && (currentVideoId || songQueue.length > 0 || scores.total !== 0)) {
                     console.log('📤 Respondendo à solicitação de estado de novo usuário:', userId, 'scores:', scores);
                     await sendStateToUser(userId);
@@ -1824,11 +1845,9 @@
             .on('broadcast', { event: 'initial-state' }, ({ payload }) => {
                 const { targetUserId, state } = payload;
                 
-                // ✅ Só processar se for para este usuário
                 if (targetUserId === odUserId) {
                     console.log('📥 Recebendo estado inicial da sala:', state);
                     
-                    // ✅ Atualizar scores PRIMEIRO
                     if (state.scores) {
                         scores = state.scores;
                         updateScoreDisplay();
@@ -1906,7 +1925,7 @@
                 updateScoreDisplay();
                 
                 saveRoomState();
-                saveScoresToSupabase(); // ✅ Salvar scores separadamente também
+                saveScoresToSupabase();
             })
             .on('broadcast', { event: 'new-video' }, ({ payload }) => {
                 const { videoId, loadedBy, title } = payload;
@@ -1931,28 +1950,17 @@
                 updateScoreDisplay();
             })
             .on('broadcast', { event: 'reset' }, () => {
+                // ✅ Reset APENAS scores, mantém fila
                 scores = { total: 0, positive: 0, negative: 0 };
                 emojiCounts = {};
                 totalReactions = 0;
                 activities = [];
-                songQueue = [];
-                currentQueuePosition = -1;
-                currentVideoId = null;
-                currentSinger = null;
                 
                 updateScoreDisplay();
-                updateQueueDisplay();
                 updateActivityFeed();
                 
-                document.getElementById('endSongBtn').style.display = 'none';
-                document.getElementById('placeholder').classList.remove('hidden');
-                
-                const wrapper = document.getElementById('playerWrapper');
-                const oldIframe = wrapper.querySelector('iframe');
-                if (oldIframe) oldIframe.remove();
-                
-                addActivity('🔄', 'Sala reiniciada');
-                showToast('Sala reiniciada! 🔄');
+                addActivity('🔄', 'Pontuação resetada');
+                showToast('Pontuação resetada! 🔄');
             });
 
         roomChannel.subscribe(async (status) => {
@@ -1981,7 +1989,7 @@
             event: 'new-emoji',
             payload: { emoji, points, userId: odUserId, userName, emojiId }
         });
-        await saveScoresToSupabase(); // ✅ Usar função específica de scores
+        await saveScoresToSupabase();
     }
 
     async function updateVideoSupabase(videoId, title) {
@@ -2165,21 +2173,23 @@
         }, 1000);
     }
 
+    // ✅ FUNÇÃO CORRIGIDA: NÃO APAGA A FILA
     async function resetScores() {
         if (!confirm('Resetar pontuação?')) return;
+        
+        // Reset APENAS scores, mantém fila
         scores = { total: 0, positive: 0, negative: 0 };
-        activities = [];
         emojiCounts = {};
         totalReactions = 0;
-        songQueue = [];
-        currentQueuePosition = -1;
+        activities = [];
         
         updateScoreDisplay();
-        updateQueueDisplay();
         updateActivityFeed();
         
         await resetScoresSupabase();
-        showToast('Resetado! 🔄');
+        
+        showToast('Pontuação resetada! 🔄');
+        addActivity('🔄', 'Pontuação resetada');
     }
 
     // ============================================
