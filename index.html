@@ -10,6 +10,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
+        /* (mesmo CSS anterior - mantido por brevidade) */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         
         :root {
@@ -1005,7 +1006,7 @@
                     </div>
                     <div class="queue-list" id="queueList">
                         <div class="empty-queue">
-                            <i>🎵</i>
+                            <div style="font-size: 3rem; margin-bottom: 0.5rem;">🎵</div>
                             <p>Nenhuma música na fila</p>
                             <small>Adicione links do YouTube para começar</small>
                         </div>
@@ -1110,7 +1111,7 @@
         </div>
     </div>
 
-    <!-- Modal Vídeo (para adicionar à fila) -->
+    <!-- Modal Vídeo -->
     <div class="modal" id="videoModal">
         <div class="modal-content">
             <h2 class="modal-title">🎬 Adicionar à Fila</h2>
@@ -1271,16 +1272,7 @@
         return null;
     }
 
-    // Função para obter título do vídeo (simplificada - idealmente usaria API do YouTube)
-    async function getVideoTitle(videoId) {
-        // Por enquanto, retorna um título genérico
-        // Em produção, você pode usar a API do YouTube Data v3
-        return `Vídeo do YouTube (${videoId})`;
-    }
-
-    // Função para obter thumbnail do YouTube
     function getYouTubeThumbnail(videoId, quality = 'mqdefault') {
-        // Qualidades: default, mqdefault, hqdefault, sddefault, maxresdefault
         return `https://img.youtube.com/vi/${videoId}/${quality}.jpg`;
     }
 
@@ -1407,7 +1399,6 @@
     function openVideoModal(addToQueue = true) {
         document.getElementById('videoModal').classList.add('active');
         document.getElementById('videoInput').focus();
-        // Armazenar se é para adicionar à fila
         window.isAddToQueue = addToQueue;
     }
 
@@ -1471,7 +1462,7 @@
     }
 
     // ============================================
-    // FUNÇÕES DA FILA
+    // FUNÇÕES DA FILA (CORRIGIDAS)
     // ============================================
     function updateQueueDisplay() {
         const queueList = document.getElementById('queueList');
@@ -1482,7 +1473,7 @@
         if (!songQueue.length) {
             queueList.innerHTML = `
                 <div class="empty-queue">
-                    <i>🎵</i>
+                    <div style="font-size: 3rem; margin-bottom: 0.5rem;">🎵</div>
                     <p>Nenhuma música na fila</p>
                     <small>Adicione links do YouTube para começar</small>
                 </div>
@@ -1495,16 +1486,19 @@
             const isPlaying = (index === currentQueuePosition);
             const position = index + 1;
             
+            // Fallback para thumbnail com emoji
+            const thumbnailHtml = `<img src="${item.thumbnail}" alt="thumbnail" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null; this.style.display='none'; this.parentNode.innerHTML='<div style=\'width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--bg-dark);color:var(--accent-pink);font-size:1.5rem;\'>🎵</div>';">`;
+            
             html += `
                 <div class="queue-item ${isPlaying ? 'playing' : ''}" data-index="${index}">
                     <div class="queue-position">#${position}</div>
                     <div class="queue-thumbnail">
-                        <img src="${item.thumbnail}" alt="thumbnail" onerror="this.src='https://via.placeholder.com/60x45?text=🎵'">
+                        ${thumbnailHtml}
                     </div>
                     <div class="queue-info">
-                        <div class="queue-video-title">${item.title || 'Vídeo do YouTube'}</div>
+                        <div class="queue-video-title">${item.video_title || 'Vídeo do YouTube'}</div>
                         <div class="queue-added-by">
-                            <span>👤 ${item.addedByName}</span>
+                            <span>👤 ${item.added_by_name}</span>
                             ${isPlaying ? '<span style="color:var(--accent-green);margin-left:0.5rem;">▶️ Tocando agora</span>' : ''}
                         </div>
                     </div>
@@ -1536,18 +1530,16 @@
             return;
         }
         
-        // Gerar título (simplificado - idealmente buscaria da API)
-        const title = `Vídeo do YouTube (${videoId})`;
+        const title = `Vídeo (${videoId})`;
         const thumbnail = getYouTubeThumbnail(videoId, 'mqdefault');
         
         closeVideoModal();
         
-        // Criar item da fila
         const queueItem = {
             room_id: roomId,
             video_id: videoId,
             video_title: title,
-            thumbnail_url: thumbnail,
+            thumbnail: thumbnail,
             added_by: odUserId,
             added_by_name: userName,
             status: 'waiting',
@@ -1564,16 +1556,15 @@
         showToast(`"${title}" adicionado à fila! 🎵`);
         addActivity('➕', `${userName} adicionou música à fila`);
         
-        // Se não há música tocando, começar a primeira da fila
-        if (currentQueuePosition === -1 && songQueue.length > 0) {
-            playNextInQueue();
+        // ✅ CORRIGIDO: não toca automaticamente!
+        if (currentQueuePosition === -1) {
+            showToast('Música adicionada. Clique em "▶️" na fila para tocar!');
         }
     }
 
     async function removeFromQueue(index) {
         if (index < 0 || index >= songQueue.length) return;
         
-        // Se for a música atual, não permitir remover
         if (index === currentQueuePosition) {
             showToast('Não é possível remover a música que está tocando!', true);
             return;
@@ -1586,7 +1577,6 @@
             item.order = i;
         });
         
-        // Ajustar currentQueuePosition se necessário
         if (currentQueuePosition > index) {
             currentQueuePosition--;
         }
@@ -1603,18 +1593,13 @@
         
         const item = songQueue[index];
         
-        // Se já está tocando, não fazer nada
         if (index === currentQueuePosition) return;
         
-        // Atualizar posição atual
         currentQueuePosition = index;
         
-        // Tocar o vídeo
         playVideo(item.video_id, item.video_title);
         
         updateQueueDisplay();
-        
-        // Salvar estado
         await saveQueueToSupabase();
         
         showToast(`Tocando agora: ${item.video_title}`);
@@ -1623,13 +1608,11 @@
 
     async function playNextInQueue() {
         if (songQueue.length === 0) {
-            // Fila vazia
             currentQueuePosition = -1;
             currentVideoId = null;
             document.getElementById('placeholder').classList.remove('hidden');
             document.getElementById('endSongBtn').style.display = 'none';
             
-            // Remover iframe
             const wrapper = document.getElementById('playerWrapper');
             const oldIframe = wrapper.querySelector('iframe');
             if (oldIframe) oldIframe.remove();
@@ -1638,17 +1621,13 @@
             return;
         }
         
-        // Se não há música tocando, começar da primeira
         if (currentQueuePosition === -1) {
             currentQueuePosition = 0;
         } else {
-            // Ir para a próxima
             currentQueuePosition++;
-            
-            // Se passou do fim, voltar ao início (loop) ou parar
             if (currentQueuePosition >= songQueue.length) {
                 currentQueuePosition = -1;
-                playNextInQueue(); // Recursivo para mostrar mensagem de fila vazia
+                playNextInQueue();
                 return;
             }
         }
@@ -1660,12 +1639,10 @@
     }
 
     async function endSongAndPlayNext() {
-        // Mostrar resultados antes de passar para a próxima
         if (totalReactions > 0) {
             await showResultSupabase();
             showResultScreen();
         } else {
-            // Se não houve reações, só passar para a próxima
             await playNextInQueue();
         }
     }
@@ -1676,11 +1653,10 @@
     }
 
     // ============================================
-    // FUNÇÕES SUPABASE (ATUALIZADAS)
+    // FUNÇÕES SUPABASE
     // ============================================
     async function saveQueueToSupabase() {
         if (!isSupabaseConnected || !roomChannel) return;
-        
         await roomChannel.send({
             type: 'broadcast',
             event: 'queue-update',
@@ -1996,9 +1972,87 @@
         });
     }
 
-    // ============================================
-    // FUNÇÕES LEGADO (adaptadas)
-    // ============================================
+    function trackEmoji(emoji) {
+        if (!emojiCounts[emoji]) emojiCounts[emoji] = 0;
+        emojiCounts[emoji]++;
+        totalReactions++;
+    }
+
+    function getMostVotedEmoji() {
+        let maxCount = 0;
+        let topEmoji = '🎉';
+        for (const emoji in emojiCounts) {
+            if (emojiCounts[emoji] > maxCount) {
+                maxCount = emojiCounts[emoji];
+                topEmoji = emoji;
+            }
+        }
+        return { emoji: topEmoji, count: maxCount };
+    }
+
+    function getResultMessage(total) {
+        if (total >= 20) return { text: '🌟 PERFORMANCE LENDÁRIA! 🌟', class: 'excellent' };
+        if (total >= 10) return { text: '🔥 Performance Incrível!', class: 'excellent' };
+        if (total >= 5) return { text: '👏 Muito Bem!', class: 'good' };
+        if (total >= 0) return { text: '👍 Boa Performance!', class: 'good' };
+        if (total >= -5) return { text: '😅 Pode Melhorar...', class: 'bad' };
+        return { text: '💪 Treinar Mais!', class: 'bad' };
+    }
+
+    function createConfetti() {
+        const colors = ['#ff2d75', '#9d4edd', '#00d4ff', '#00ff88', '#ff9500', '#ffff00'];
+        for (let i = 0; i < 100; i++) {
+            setTimeout(() => {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                confetti.style.width = (5 + Math.random() * 10) + 'px';
+                confetti.style.height = (5 + Math.random() * 10) + 'px';
+                confetti.style.animationDuration = (2 + Math.random() * 2) + 's';
+                document.body.appendChild(confetti);
+                setTimeout(() => { if (confetti.parentNode) confetti.remove(); }, 4000);
+            }, i * 30);
+        }
+    }
+
+    function closeResult() {
+        document.getElementById('resultOverlay').classList.remove('active');
+    }
+
+    function showResultScreen() {
+        const overlay = document.getElementById('resultOverlay');
+        const singerName = currentSinger || userName || 'Cantor';
+        document.getElementById('resultSingerName').textContent = singerName;
+        const topEmoji = getMostVotedEmoji();
+        document.getElementById('resultEmoji').textContent = topEmoji.emoji;
+        const totalScoreEl = document.getElementById('resultTotalScore');
+        const totalText = scores.total >= 0 ? '+' + scores.total : String(scores.total);
+        totalScoreEl.textContent = totalText;
+        if (scores.total > 0) totalScoreEl.className = 'result-total-score positive';
+        else if (scores.total < 0) totalScoreEl.className = 'result-total-score negative';
+        else totalScoreEl.className = 'result-total-score neutral';
+        document.getElementById('resultPosScore').textContent = '+' + scores.positive;
+        document.getElementById('resultNegScore').textContent = '-' + scores.negative;
+        document.getElementById('resultTotalReactions').textContent = totalReactions;
+        let breakdownHtml = '';
+        const sortedEmojis = Object.keys(emojiCounts).sort((a, b) => emojiCounts[b] - emojiCounts[a]);
+        sortedEmojis.forEach(emoji => {
+            breakdownHtml += '<div class="result-emoji-item">' +
+                '<span class="emoji">' + emoji + '</span>' +
+                '<span class="count">×' + emojiCounts[emoji] + '</span>' +
+                '</div>';
+        });
+        document.getElementById('resultEmojiBreakdown').innerHTML = breakdownHtml;
+        const message = getResultMessage(scores.total);
+        const messageEl = document.getElementById('resultMessage');
+        messageEl.textContent = message.text;
+        messageEl.className = 'result-message ' + message.class;
+        overlay.classList.add('active');
+        if (scores.total >= 5) createConfetti();
+    }
+
     function setRoomFromInput() {
         const input = document.getElementById('roomCodeInput');
         const code = input.value.trim().toUpperCase();
@@ -2087,87 +2141,6 @@
         
         await resetScoresSupabase();
         showToast('Resetado! 🔄');
-    }
-
-    function trackEmoji(emoji) {
-        if (!emojiCounts[emoji]) emojiCounts[emoji] = 0;
-        emojiCounts[emoji]++;
-        totalReactions++;
-    }
-
-    function getMostVotedEmoji() {
-        let maxCount = 0;
-        let topEmoji = '🎉';
-        for (const emoji in emojiCounts) {
-            if (emojiCounts[emoji] > maxCount) {
-                maxCount = emojiCounts[emoji];
-                topEmoji = emoji;
-            }
-        }
-        return { emoji: topEmoji, count: maxCount };
-    }
-
-    function getResultMessage(total) {
-        if (total >= 20) return { text: '🌟 PERFORMANCE LENDÁRIA! 🌟', class: 'excellent' };
-        if (total >= 10) return { text: '🔥 Performance Incrível!', class: 'excellent' };
-        if (total >= 5) return { text: '👏 Muito Bem!', class: 'good' };
-        if (total >= 0) return { text: '👍 Boa Performance!', class: 'good' };
-        if (total >= -5) return { text: '😅 Pode Melhorar...', class: 'bad' };
-        return { text: '💪 Treinar Mais!', class: 'bad' };
-    }
-
-    function createConfetti() {
-        const colors = ['#ff2d75', '#9d4edd', '#00d4ff', '#00ff88', '#ff9500', '#ffff00'];
-        for (let i = 0; i < 100; i++) {
-            setTimeout(() => {
-                const confetti = document.createElement('div');
-                confetti.className = 'confetti';
-                confetti.style.left = Math.random() * 100 + 'vw';
-                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
-                confetti.style.width = (5 + Math.random() * 10) + 'px';
-                confetti.style.height = (5 + Math.random() * 10) + 'px';
-                confetti.style.animationDuration = (2 + Math.random() * 2) + 's';
-                document.body.appendChild(confetti);
-                setTimeout(() => { if (confetti.parentNode) confetti.remove(); }, 4000);
-            }, i * 30);
-        }
-    }
-
-    function closeResult() {
-        document.getElementById('resultOverlay').classList.remove('active');
-    }
-
-    function showResultScreen() {
-        const overlay = document.getElementById('resultOverlay');
-        const singerName = currentSinger || userName || 'Cantor';
-        document.getElementById('resultSingerName').textContent = singerName;
-        const topEmoji = getMostVotedEmoji();
-        document.getElementById('resultEmoji').textContent = topEmoji.emoji;
-        const totalScoreEl = document.getElementById('resultTotalScore');
-        const totalText = scores.total >= 0 ? '+' + scores.total : String(scores.total);
-        totalScoreEl.textContent = totalText;
-        if (scores.total > 0) totalScoreEl.className = 'result-total-score positive';
-        else if (scores.total < 0) totalScoreEl.className = 'result-total-score negative';
-        else totalScoreEl.className = 'result-total-score neutral';
-        document.getElementById('resultPosScore').textContent = '+' + scores.positive;
-        document.getElementById('resultNegScore').textContent = '-' + scores.negative;
-        document.getElementById('resultTotalReactions').textContent = totalReactions;
-        let breakdownHtml = '';
-        const sortedEmojis = Object.keys(emojiCounts).sort((a, b) => emojiCounts[b] - emojiCounts[a]);
-        sortedEmojis.forEach(emoji => {
-            breakdownHtml += '<div class="result-emoji-item">' +
-                '<span class="emoji">' + emoji + '</span>' +
-                '<span class="count">×' + emojiCounts[emoji] + '</span>' +
-                '</div>';
-        });
-        document.getElementById('resultEmojiBreakdown').innerHTML = breakdownHtml;
-        const message = getResultMessage(scores.total);
-        const messageEl = document.getElementById('resultMessage');
-        messageEl.textContent = message.text;
-        messageEl.className = 'result-message ' + message.class;
-        overlay.classList.add('active');
-        if (scores.total >= 5) createConfetti();
     }
 
     // ============================================
