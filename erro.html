@@ -1,0 +1,73 @@
+const mercadopago = require('mercadopago');
+
+// Configura o Mercado Pago com seu Access Token
+mercadopago.configure({
+  access_token: 'SEU_ACCESS_TOKEN' // substitua pelo seu access token
+});
+
+module.exports = async (req, res) => {
+  // Permitir CORS (para chamadas do frontend)
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  // Lidar com preflight requests
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
+  // Apenas aceitar requisições POST
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Método não permitido' });
+  }
+
+  try {
+    // Dados do produto/plano (você pode enviar do frontend)
+    const { title, price, quantity, plan } = req.body;
+
+    // Criar um item de preferência
+    let preference = {
+      items: [
+        {
+          title: title || 'Plano Karaokê Multiplayer',
+          unit_price: parseFloat(price) || 24.90,
+          quantity: parseInt(quantity) || 1,
+          currency_id: 'BRL',
+          description: plan || 'Plano Trimestral'
+        }
+      ],
+      // URLs de redirecionamento após o pagamento
+      back_urls: {
+        success: 'https://seu-site.github.io/success.html',
+        failure: 'https://seu-site.github.io/failure.html',
+        pending: 'https://seu-site.github.io/pending.html'
+      },
+      auto_return: 'approved', // Redirecionar automaticamente após aprovação
+      // Webhook para notificações de pagamento
+      notification_url: 'https://seu-vercel-app.vercel.app/api/webhook',
+      // Dados adicionais que você quer coletar
+      payer: {
+        name: '',
+        surname: '',
+        email: ''
+      },
+      // Configurações adicionais
+      payment_methods: {
+        excluded_payment_methods: [],
+        excluded_payment_types: [],
+        installments: 1 // Número máximo de parcelas
+      },
+      external_reference: 'referencia_interna' // Pode ser o ID do usuário ou plano
+    };
+
+    // Criar a preferência no Mercado Pago
+    const response = await mercadopago.preferences.create(preference);
+
+    // Retornar o ID da preferência (que contém o link de pagamento)
+    res.status(200).json({ id: response.body.id, init_point: response.body.init_point });
+
+  } catch (error) {
+    console.error('Erro ao criar preferência:', error);
+    res.status(500).json({ error: 'Erro ao criar preferência de pagamento' });
+  }
+};
