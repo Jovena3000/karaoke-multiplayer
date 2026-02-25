@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Karaokê Multiplayer</title>
+    <script src="config.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background: #1a1a2e; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .login-container { background: #16213e; padding: 2rem; border-radius: 10px; width: 300px; }
+        h2 { text-align: center; color: #ff4d94; }
+        input { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: none; }
+        button { width: 100%; padding: 10px; background: #ff4d94; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #ff2d75; }
+        .error { color: #ff4757; font-size: 0.9rem; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h2>🎤 Login</h2>
+        <input type="email" id="email" placeholder="Email" required>
+        <input type="password" id="senha" placeholder="Senha" required>
+        <button onclick="fazerLogin()">Entrar</button>
+        <p style="text-align: center; margin-top: 1rem;">
+            <a href="checkout.html" style="color: #00d4ff;">Ainda não é assinante?</a>
+        </p>
+    </div>
+
+    <script>
+    async function fazerLogin() {
+        const email = document.getElementById('email').value;
+        const senha = document.getElementById('senha').value;
+        
+        try {
+            const resposta = await fetch(`${API_URL}/api/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, senha })
+            });
+            
+            const dados = await resposta.json();
+            
+            if (dados.sucesso) {
+                // Salvar token no localStorage
+                localStorage.setItem('token', dados.token);
+                localStorage.setItem('usuario', JSON.stringify(dados.usuario));
+                
+                // Redirecionar para a página principal do karaokê
+                window.location.href = 'karaoke.html';
+            } else {
+                alert(dados.erro || 'Erro no login');
+            }
+        } catch (erro) {
+            console.error('Erro:', erro);
+            alert('Erro de conexão');
+        }
+    }
+    </script>
+</body>
+</html>
