@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Karaokê Multiplayer</title>
+    <script src="config.js"></script>
+    <style>
+        /* Seus estilos aqui */
+    </style>
+</head>
+<body>
+    <h1>🎤 Bem-vindo ao Karaokê!</h1>
+    <div id="user-info"></div>
+    <button onclick="logout()">Sair</button>
+
+    <script>
+    // Verificar se usuário está logado
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = 'login.html';
+    }
+
+    // Mostrar informações do usuário
+    const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+    document.getElementById('user-info').innerHTML = `
+        <p>Olá, ${usuario.nome}!</p>
+        <p>Plano: ${usuario.plano}</p>
+    `;
+
+    // Função de logout
+    function logout() {
+        localStorage.removeItem('token');
+        localStorage.removeItem('usuario');
+        window.location.href = 'login.html';
+    }
+
+    // Exemplo de requisição autenticada
+    async function fazerRequisicaoAutenticada(url, options = {}) {
+        const token = localStorage.getItem('token');
+        return fetch(url, {
+            ...options,
+            headers: {
+                ...options.headers,
+                'Authorization': `Bearer ${token}`
+            }
+        });
+    }
+    </script>
+</body>
+</html>
