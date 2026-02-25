@@ -629,239 +629,271 @@
     </div>
 
     <script>
-        // Variáveis para controle do plano
-        let selectedPlan = 'trimestral'; // 'mensal' ou 'trimestral'
-        let selectedPaymentMethod = 'credit-card';
+           <!-- Script de configuração da API -->
+    <script src="config.js"></script>
+    
+    <script>
+    // ============================================
+    // INTEGRAÇÃO COM BACKEND - CHECKOUT
+    // ============================================
+    
+    async function processarPagamento(plano, email) {
+        const btn = document.querySelector('.btn-pay');
+        const textoOriginal = btn.innerText;
         
-        // Preços dos planos
-        const planPrices = {
-            mensal: { price: 11.90, period: 'Válido por 1 mês', subtotal: 11.90, discount: 0 },
-            trimestral: { price: 24.90, period: 'Válido por 3 meses • Economize R$ 10,80', subtotal: 35.70, discount: 10.80 }
-        };
+        btn.disabled = true;
+        btn.innerText = 'PROCESSANDO...';
         
-        // Inicialização
-        document.addEventListener('DOMContentLoaded', function() {
-            // Verificar se veio de uma página anterior com parâmetros
-            const urlParams = new URLSearchParams(window.location.search);
-            const plan = urlParams.get('plan');
+        try {
+            const resposta = await fetch(`${API_URL}/api/criar-pagamento`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ plano, email })
+            });
             
-            if (plan === 'mensal') {
-                selectedPlan = 'mensal';
-                updatePlanDisplay();
+            const dados = await resposta.json();
+            
+            if (dados.sucesso) {
+                // Redirecionar para o Mercado Pago ou página de sucesso
+                if (dados.pagamento?.init_point) {
+                    window.location.href = dados.pagamento.init_point;
+                } else {
+                    window.location.href = 'pagamento-sucesso.html';
+                }
+            } else {
+                alert('Erro: ' + (dados.erro || 'Falha no pagamento'));
+                window.location.href = 'erro.html';
             }
-            
-            // Configurar eventos dos métodos de pagamento
-            document.getElementById('credit-card').addEventListener('click', function() {
-                selectPaymentMethod('credit-card');
-            });
-            
-            document.getElementById('pix').addEventListener('click', function() {
-                selectPaymentMethod('pix');
-            });
-            
-            // Formatação dos inputs
-            document.getElementById('card-number').addEventListener('input', formatCardNumber);
-            document.getElementById('card-expiry').addEventListener('input', formatCardExpiry);
-            document.getElementById('cpf').addEventListener('input', formatCPF);
-            
-            // Submissão do formulário
-            document.getElementById('payment-form').addEventListener('submit', processPayment);
-            
-            // Alterar plano (simulação)
-            document.querySelector('.change-plan').addEventListener('click', function(e) {
+        } catch (erro) {
+            console.error('Erro:', erro);
+            alert('Erro de conexão com o servidor');
+            window.location.href = 'erro.html';
+        } finally {
+            btn.disabled = false;
+            btn.innerText = textoOriginal;
+        }
+    }
+    
+    // Capturar o formulário de checkout
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('payment-form');
+        if (form) {
+            form.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                selectedPlan = selectedPlan === 'mensal' ? 'trimestral' : 'mensal';
-                updatePlanDisplay();
+                
+                const email = document.getElementById('email')?.value;
+                const plano = 'trimestral'; // Como você não tem input radio, fixo por enquanto
+                
+                if (!email) {
+                    alert('Por favor, insira seu email');
+                    return;
+                }
+                
+                await processarPagamento(plano, email);
             });
-            
-            // Atualizar parcelamento
-            document.getElementById('card-installments').addEventListener('change', updateInstallments);
+        }
+    });
+    
+    // ===== CÓDIGO EXISTENTE DE FORMATAÇÃO =====
+    // Variáveis para controle do plano
+    let selectedPlan = 'trimestral';
+    let selectedPaymentMethod = 'credit-card';
+    
+    // Preços dos planos
+    const planPrices = {
+        mensal: { price: 11.90, period: 'Válido por 1 mês', subtotal: 11.90, discount: 0 },
+        trimestral: { price: 24.90, period: 'Válido por 3 meses • Economize R$ 10,80', subtotal: 35.70, discount: 10.80 }
+    };
+    
+    // Inicialização
+    document.addEventListener('DOMContentLoaded', function() {
+        // Verificar se veio de uma página anterior com parâmetros
+        const urlParams = new URLSearchParams(window.location.search);
+        const plan = urlParams.get('plan');
+        
+        if (plan === 'mensal') {
+            selectedPlan = 'mensal';
+            updatePlanDisplay();
+        }
+        
+        // Configurar eventos dos métodos de pagamento
+        document.getElementById('credit-card').addEventListener('click', function() {
+            selectPaymentMethod('credit-card');
         });
         
-        // Selecionar método de pagamento
-        function selectPaymentMethod(method) {
-            selectedPaymentMethod = method;
-            
-            // Atualizar UI
-            document.getElementById('credit-card').classList.remove('active');
-            document.getElementById('pix').classList.remove('active');
-            document.getElementById(method).classList.add('active');
-            
-            // Mostrar campos apropriados
-            if (method === 'credit-card') {
-                document.getElementById('credit-card-fields').style.display = 'block';
-                document.getElementById('pix-fields').style.display = 'none';
-                document.getElementById('payment-method-text').textContent = 'Cartão de Crédito';
-            } else {
-                document.getElementById('credit-card-fields').style.display = 'none';
-                document.getElementById('pix-fields').style.display = 'block';
-                document.getElementById('payment-method-text').textContent = 'PIX';
-            }
-        }
+        document.getElementById('pix').addEventListener('click', function() {
+            selectPaymentMethod('pix');
+        });
         
-        // Atualizar exibição do plano
-        function updatePlanDisplay() {
-            const plan = planPrices[selectedPlan];
-            const planName = selectedPlan === 'mensal' ? 'Plano Mensal' : 'Plano Trimestral';
-            
-            document.getElementById('plan-name').textContent = planName;
-            document.getElementById('plan-price').textContent = `R$ ${plan.price.toFixed(2).replace('.', ',')}`;
-            document.getElementById('plan-period').textContent = plan.period;
-            document.getElementById('subtotal').textContent = `R$ ${plan.subtotal.toFixed(2).replace('.', ',')}`;
-            document.getElementById('total-final').textContent = `R$ ${plan.price.toFixed(2).replace('.', ',')}`;
-            
-            // Atualizar opções de parcelamento
-            updateInstallmentOptions();
-        }
+        // Formatação dos inputs
+        document.getElementById('card-number').addEventListener('input', formatCardNumber);
+        document.getElementById('card-expiry').addEventListener('input', formatCardExpiry);
+        document.getElementById('cpf').addEventListener('input', formatCPF);
         
-        // Atualizar opções de parcelamento
-        function updateInstallmentOptions() {
-            const select = document.getElementById('card-installments');
-            const price = planPrices[selectedPlan].price;
-            
-            // Limpar opções atuais
-            select.innerHTML = '';
-            
-            // Adicionar novas opções baseadas no preço
-            const maxInstallments = selectedPlan === 'mensal' ? 2 : 4;
-            
-            for (let i = 1; i <= maxInstallments; i++) {
-                const installmentValue = price / i;
-                const option = document.createElement('option');
-                option.value = i;
-                option.textContent = i === 1 
-                    ? `À vista (R$ ${price.toFixed(2).replace('.', ',')})`
-                    : `${i}x de R$ ${installmentValue.toFixed(2).replace('.', ',')}`;
-                select.appendChild(option);
-            }
-        }
+        // Submissão do formulário (AGORA USA NOSSA FUNÇÃO)
+        document.getElementById('payment-form').addEventListener('submit', processarPagamentoWrapper);
+        
+        // Alterar plano (simulação)
+        document.querySelector('.change-plan').addEventListener('click', function(e) {
+            e.preventDefault();
+            selectedPlan = selectedPlan === 'mensal' ? 'trimestral' : 'mensal';
+            updatePlanDisplay();
+        });
         
         // Atualizar parcelamento
-        function updateInstallments() {
-            // Em um sistema real, aqui você atualizaria o valor total se houver juros
-            console.log('Parcelamento alterado para:', document.getElementById('card-installments').value);
+        document.getElementById('card-installments').addEventListener('change', updateInstallments);
+    });
+    
+    // Wrapper para compatibilidade
+    async function processarPagamentoWrapper(e) {
+        e.preventDefault();
+        
+        const email = document.getElementById('email')?.value;
+        const plano = selectedPlan;
+        
+        if (!email) {
+            alert('Por favor, insira seu email');
+            return;
         }
         
-        // Formatar número do cartão
-        function formatCardNumber(e) {
-            let value = e.target.value.replace(/\D/g, '');
-            value = value.replace(/(\d{4})(?=\d)/g, '$1 ');
-            e.target.value = value.substring(0, 19);
-        }
+        await processarPagamento(plano, email);
+    }
+    
+    // Selecionar método de pagamento
+    function selectPaymentMethod(method) {
+        selectedPaymentMethod = method;
         
-        // Formatar validade do cartão
-        function formatCardExpiry(e) {
-            let value = e.target.value.replace(/\D/g, '');
-            if (value.length >= 2) {
-                value = value.substring(0, 2) + '/' + value.substring(2, 4);
-            }
-            e.target.value = value.substring(0, 5);
-        }
+        document.getElementById('credit-card').classList.remove('active');
+        document.getElementById('pix').classList.remove('active');
+        document.getElementById(method).classList.add('active');
         
-        // Formatar CPF
-        function formatCPF(e) {
-            let value = e.target.value.replace(/\D/g, '');
-            if (value.length > 3 && value.length <= 6) {
-                value = value.substring(0, 3) + '.' + value.substring(3);
-            } else if (value.length > 6 && value.length <= 9) {
-                value = value.substring(0, 3) + '.' + value.substring(3, 6) + '.' + value.substring(6);
-            } else if (value.length > 9) {
-                value = value.substring(0, 3) + '.' + value.substring(3, 6) + '.' + value.substring(6, 9) + '-' + value.substring(9, 11);
-            }
-            e.target.value = value.substring(0, 14);
+        if (method === 'credit-card') {
+            document.getElementById('credit-card-fields').style.display = 'block';
+            document.getElementById('pix-fields').style.display = 'none';
+            document.getElementById('payment-method-text').textContent = 'Cartão de Crédito';
+        } else {
+            document.getElementById('credit-card-fields').style.display = 'none';
+            document.getElementById('pix-fields').style.display = 'block';
+            document.getElementById('payment-method-text').textContent = 'PIX';
         }
+    }
+    
+    // Atualizar exibição do plano
+    function updatePlanDisplay() {
+        const plan = planPrices[selectedPlan];
+        const planName = selectedPlan === 'mensal' ? 'Plano Mensal' : 'Plano Trimestral';
         
-        // Processar pagamento
-        function processPayment(e) {
-            e.preventDefault();
-            
-            // Validação básica
-            if (!validateForm()) {
-                return;
-            }
-            
-            // Simular processamento
-            const submitBtn = document.getElementById('submit-btn');
-            const spinner = document.getElementById('loading-spinner');
-            const lockIcon = document.getElementById('lock-icon');
-            const btnText = submitBtn.querySelector('span');
-            
-            // Mostrar loading
-            btnText.textContent = 'PROCESSANDO PAGAMENTO...';
-            spinner.style.display = 'block';
-            lockIcon.style.display = 'none';
-            submitBtn.disabled = true;
-            
-            // Simular delay de processamento
-            setTimeout(function() {
-                // Aqui em um sistema real, você enviaria os dados para seu backend
-                // que se comunicaria com o gateway de pagamento
-                
-                // Simular sucesso
-                spinner.style.display = 'none';
-                lockIcon.style.display = 'inline-block';
-                lockIcon.className = 'fas fa-check';
-                submitBtn.style.background = '#4CAF50';
-                btnText.textContent = 'PAGAMENTO APROVADO!';
-                
-                // Redirecionar para página de sucesso após 1.5 segundos
-                setTimeout(function() {
-                    window.location.href = `pagamento-sucesso.html?plan=${selectedPlan}&email=${encodeURIComponent(document.getElementById('email').value)}`;
-                }, 1500);
-                
-            }, 2000);
+        document.getElementById('plan-name').textContent = planName;
+        document.getElementById('plan-price').textContent = `R$ ${plan.price.toFixed(2).replace('.', ',')}`;
+        document.getElementById('plan-period').textContent = plan.period;
+        document.getElementById('subtotal').textContent = `R$ ${plan.subtotal.toFixed(2).replace('.', ',')}`;
+        document.getElementById('total-final').textContent = `R$ ${plan.price.toFixed(2).replace('.', ',')}`;
+        
+        updateInstallmentOptions();
+    }
+    
+    // Atualizar opções de parcelamento
+    function updateInstallmentOptions() {
+        const select = document.getElementById('card-installments');
+        const price = planPrices[selectedPlan].price;
+        
+        select.innerHTML = '';
+        
+        const maxInstallments = selectedPlan === 'mensal' ? 2 : 4;
+        
+        for (let i = 1; i <= maxInstallments; i++) {
+            const installmentValue = price / i;
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = i === 1 
+                ? `À vista (R$ ${price.toFixed(2).replace('.', ',')})`
+                : `${i}x de R$ ${installmentValue.toFixed(2).replace('.', ',')}`;
+            select.appendChild(option);
         }
+    }
+    
+    function updateInstallments() {
+        console.log('Parcelamento alterado para:', document.getElementById('card-installments').value);
+    }
+    
+    // Formatar número do cartão
+    function formatCardNumber(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        value = value.replace(/(\d{4})(?=\d)/g, '$1 ');
+        e.target.value = value.substring(0, 19);
+    }
+    
+    // Formatar validade do cartão
+    function formatCardExpiry(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length >= 2) {
+            value = value.substring(0, 2) + '/' + value.substring(2, 4);
+        }
+        e.target.value = value.substring(0, 5);
+    }
+    
+    // Formatar CPF
+    function formatCPF(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length > 3 && value.length <= 6) {
+            value = value.substring(0, 3) + '.' + value.substring(3);
+        } else if (value.length > 6 && value.length <= 9) {
+            value = value.substring(0, 3) + '.' + value.substring(3, 6) + '.' + value.substring(6);
+        } else if (value.length > 9) {
+            value = value.substring(0, 3) + '.' + value.substring(3, 6) + '.' + value.substring(6, 9) + '-' + value.substring(9, 11);
+        }
+        e.target.value = value.substring(0, 14);
+    }
+    
+    // Validar formulário (mantido do código original)
+    function validateForm() {
+        const cardName = document.getElementById('card-name').value;
+        const cardNumber = document.getElementById('card-number').value.replace(/\s/g, '');
+        const cardExpiry = document.getElementById('card-expiry').value;
+        const cardCvv = document.getElementById('card-cvv').value;
+        const cpf = document.getElementById('cpf').value;
+        const email = document.getElementById('email').value;
+        const terms = document.getElementById('terms').checked;
         
-        // Validar formulário
-        function validateForm() {
-            // Validação básica - em um sistema real, seria mais completa
-            const cardName = document.getElementById('card-name').value;
-            const cardNumber = document.getElementById('card-number').value.replace(/\s/g, '');
-            const cardExpiry = document.getElementById('card-expiry').value;
-            const cardCvv = document.getElementById('card-cvv').value;
-            const cpf = document.getElementById('cpf').value;
-            const email = document.getElementById('email').value;
-            const terms = document.getElementById('terms').checked;
-            
-            if (selectedPaymentMethod === 'credit-card') {
-                if (!cardName || cardName.length < 3) {
-                    alert('Por favor, insira o nome completo como está no cartão.');
-                    return false;
-                }
-                
-                if (!cardNumber || cardNumber.length < 13) {
-                    alert('Por favor, insira um número de cartão válido.');
-                    return false;
-                }
-                
-                if (!cardExpiry || !/^\d{2}\/\d{2}$/.test(cardExpiry)) {
-                    alert('Por favor, insira uma data de validade válida no formato MM/AA.');
-                    return false;
-                }
-                
-                if (!cardCvv || cardCvv.length < 3) {
-                    alert('Por favor, insira o código de segurança (CVV) do cartão.');
-                    return false;
-                }
-            }
-            
-            if (!cpf || cpf.length < 11) {
-                alert('Por favor, insira um CPF válido.');
+        if (selectedPaymentMethod === 'credit-card') {
+            if (!cardName || cardName.length < 3) {
+                alert('Por favor, insira o nome completo como está no cartão.');
                 return false;
             }
             
-            if (!email || !/\S+@\S+\.\S+/.test(email)) {
-                alert('Por favor, insira um e-mail válido.');
+            if (!cardNumber || cardNumber.length < 13) {
+                alert('Por favor, insira um número de cartão válido.');
                 return false;
             }
             
-            if (!terms) {
-                alert('Você precisa aceitar os termos de serviço para continuar.');
+            if (!cardExpiry || !/^\d{2}\/\d{2}$/.test(cardExpiry)) {
+                alert('Por favor, insira uma data de validade válida no formato MM/AA.');
                 return false;
             }
             
-            return true;
+            if (!cardCvv || cardCvv.length < 3) {
+                alert('Por favor, insira o código de segurança (CVV) do cartão.');
+                return false;
+            }
         }
+        
+        if (!cpf || cpf.length < 11) {
+            alert('Por favor, insira um CPF válido.');
+            return false;
+        }
+        
+        if (!email || !/\S+@\S+\.\S+/.test(email)) {
+            alert('Por favor, insira um e-mail válido.');
+            return false;
+        }
+        
+        if (!terms) {
+            alert('Você precisa aceitar os termos de serviço para continuar.');
+            return false;
+        }
+        
+        return true;
+    }
     </script>
 </body>
 </html>
