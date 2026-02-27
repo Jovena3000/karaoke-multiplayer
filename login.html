@@ -31,6 +31,12 @@
         const email = document.getElementById('email').value;
         const senha = document.getElementById('senha').value;
         
+        // Validação básica
+        if (!email || !senha) {
+            alert('Por favor, preencha todos os campos');
+            return;
+        }
+        
         try {
             const resposta = await fetch(`${API_URL}/api/auth/login`, {
                 method: 'POST',
@@ -39,6 +45,11 @@
             });
             
             const dados = await resposta.json();
+            
+            // Verificar se a resposta foi bem-sucedida
+            if (!resposta.ok) {
+                throw new Error(dados.erro || 'Erro no login');
+            }
             
             if (dados.sucesso) {
                 // Salvar token no localStorage
@@ -52,7 +63,7 @@
             }
         } catch (erro) {
             console.error('Erro:', erro);
-            alert('Erro de conexão');
+            alert(erro.message || 'Erro de conexão');
         }
     }
     </script>
