@@ -1,71 +1,171 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Karaokê Multiplayer</title>
-    <script src="config.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; background: #1a1a2e; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .login-container { background: #16213e; padding: 2rem; border-radius: 10px; width: 300px; }
-        h2 { text-align: center; color: #ff4d94; }
-        input { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: none; }
-        button { width: 100%; padding: 10px; background: #ff4d94; color: white; border: none; border-radius: 5px; cursor: pointer; }
-        button:hover { background: #ff2d75; }
-        .error { color: #ff4757; font-size: 0.9rem; text-align: center; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #764ba2;
+        }
+        .links {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .links a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        .alert {
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
     </style>
 </head>
 <body>
     <div class="login-container">
-        <h2>🎤 Login</h2>
-        <input type="email" id="email" placeholder="Email" required>
-        <input type="password" id="senha" placeholder="Senha" required>
-        <button onclick="fazerLogin()">Entrar</button>
-        <p style="text-align: center; margin-top: 1rem;">
-            <a href="checkout.html" style="color: #00d4ff;">Ainda não é assinante?</a>
-        </p>
+        <h1>🎤 Karaokê Multiplayer</h1>
+        
+        <div id="alertMessage" class="alert"></div>
+        
+        <form id="loginForm" onsubmit="fazerLogin(event)">
+            <div class="form-group">
+                <label>E-mail</label>
+                <input type="email" id="email" required>
+            </div>
+            <div class="form-group">
+                <label>Senha</label>
+                <input type="password" id="senha" required>
+            </div>
+            <button type="submit">Entrar</button>
+        </form>
+        
+        <div class="links">
+            <p>Não tem acesso? <a href="/checkout.html">Comprar um plano</a></p>
+            <p><a href="#" onclick="esqueciSenha()">Esqueci minha senha</a></p>
+        </div>
     </div>
 
     <script>
-    async function fazerLogin() {
-        const email = document.getElementById('email').value;
-        const senha = document.getElementById('senha').value;
-        
-        // Validação básica
-        if (!email || !senha) {
-            alert('Por favor, preencha todos os campos');
-            return;
-        }
-        
-        try {
-            const resposta = await fetch(`${API_URL}/api/auth/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, senha })
-            });
+        const API_URL = 'https://karaoke-api-backend3.vercel.app/api';
+
+        async function fazerLogin(event) {
+            event.preventDefault();
             
-            const dados = await resposta.json();
-            
-            // Verificar se a resposta foi bem-sucedida
-            if (!resposta.ok) {
-                throw new Error(dados.erro || 'Erro no login');
+            const email = document.getElementById('email').value;
+            const senha = document.getElementById('senha').value;
+
+            try {
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, senha })
+                });
+
+                const data = await response.json();
+
+                if (data.sucesso) {
+                    // Salvar token e dados do usuário
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('usuario', JSON.stringify(data.usuario));
+                    
+                    mostrarAlerta('Login realizado com sucesso!', 'success');
+                    
+                    // Redirecionar para o karaokê
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 1000);
+                } else {
+                    mostrarAlerta('E-mail ou senha inválidos', 'error');
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                mostrarAlerta('Erro ao conectar com o servidor', 'error');
             }
-            
-            if (dados.sucesso) {
-                // Salvar token no localStorage
-                localStorage.setItem('token', dados.token);
-                localStorage.setItem('usuario', JSON.stringify(dados.usuario));
-                
-                // Redirecionar para a página principal do karaokê
-                window.location.href = 'index.html';
-            } else {
-                alert(dados.erro || 'Erro no login');
-            }
-        } catch (erro) {
-            console.error('Erro:', erro);
-            alert(erro.message || 'Erro de conexão');
         }
-    }
+
+        function mostrarAlerta(mensagem, tipo) {
+            const alertEl = document.getElementById('alertMessage');
+            alertEl.textContent = mensagem;
+            alertEl.className = `alert ${tipo}`;
+        }
+
+        function esqueciSenha() {
+            alert('Entre em contato pelo e-mail de confirmação do pagamento.');
+        }
+
+        // Verificar se já está logado
+        if (localStorage.getItem('token')) {
+            window.location.href = '/';
+        }
     </script>
 </body>
 </html>
