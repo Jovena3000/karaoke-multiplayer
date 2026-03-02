@@ -96,8 +96,3 @@ async function registrarUsuario(email, senha, nome, plano) {
         alert('Erro ao conectar com o servidor');
     }
 }
-
-// ============================================
-// CONFIGURAÇÃO DA API - KARAOKÊ MULTIPLAYER
-// ============================================
-const API_URL = 'https://karaoke-api-backend3.vercel.app';
