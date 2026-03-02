@@ -10,7 +10,8 @@
             const paginaAtual = window.location.pathname;
             
             const isPaginaPublica = paginasPublicas.some(pagina => 
-                paginaAtual.includes(pagina) || paginaAtual === '/'
+    paginaAtual.includes(pagina)
+
             );
             
             if (!token && !isPaginaPublica) {
