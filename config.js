@@ -4,7 +4,7 @@ const CONFIG = {
     API_URL: 'http://localhost:3000/api',
     
     // Quando fizer deploy, mude para:
-    // API_URL: 'https://seu-backend.vercel.app/api',
+    const API_URL = 'https://karaoke-api-backend3.vercel.app/api';
     
     // Planos disponíveis
     PLANS: {
