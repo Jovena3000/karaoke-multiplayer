@@ -1,6 +1,38 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+    <!-- PRIMEIRO: Verificação de autenticação -->
+    <script>
+        // ================= VERIFICAÇÃO DE AUTENTICAÇÃO =================
+        (function() {
+            const paginasPublicas = ['/login.html', '/checkout.html', '/checkout'];
+            const token = localStorage.getItem('token');
+            const paginaAtual = window.location.pathname;
+            
+            const isPaginaPublica = paginasPublicas.some(pagina => 
+                paginaAtual.includes(pagina) || paginaAtual === '/'
+            );
+            
+            if (!token && !isPaginaPublica) {
+                console.log('🔒 Redirecionando para login...');
+                window.location.href = '/login.html';
+                return;
+            }
+            
+            if (token) {
+                const originalFetch = window.fetch;
+                window.fetch = function(resource, options = {}) {
+                    if (typeof resource === 'string' && resource.includes('karaoke-api-backend3.vercel.app')) {
+                        options.headers = options.headers || {};
+                        options.headers['Authorization'] = `Bearer ${token}`;
+                    }
+                    return originalFetch(resource, options);
+                };
+            }
+        })();
+
+</script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🎤 Karaokê Online - Scores e Fila</title>
