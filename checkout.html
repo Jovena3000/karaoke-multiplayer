@@ -665,31 +665,59 @@
 
         // Função principal de pagamento
         async function processarPagamento() {
-            const email = document.getElementById('emailCliente').value;
+    const email = document.getElementById('emailCliente').value;
+    
+    if (!email || !email.includes('@')) {
+        mostrarAlerta('Digite um e-mail válido!', 'error');
+        return;
+    }
+
+    mostrarAlerta('Processando pagamento simulado...', 'success');
+    document.getElementById('loading').classList.add('active');
+    document.getElementById('btnPagar').disabled = true;
+
+    try {
+        // Chamar a rota de simulação
+        const response = await fetch(`${API_URL}/simular-pagamento`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                plan: planoSelecionado,
+                email: email
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.sucesso) {
+            // Mostrar a senha para o usuário
+            mostrarAlerta(`✅ PAGAMENTO SIMULADO COM SUCESSO!\n\nSua senha de acesso: ${data.senha}\n\nGuarde esta senha para fazer login.`, 'success');
             
-            // Validar email
-            if (!email || !email.includes('@')) {
-                mostrarAlerta('Por favor, digite um e-mail válido para receber sua senha de acesso', 'error');
-                return;
-            }
-
-            // Mostrar loading
-            document.getElementById('loading').classList.add('active');
-            document.getElementById('btnPagar').disabled = true;
-
-            try {
-                // Chamar a API para criar pagamento
-                const response = await fetch(`${API_URL}/criar-pagamento`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        plan: planoSelecionado,
-                        email: email
-                    })
-                });
-
+            // Salvar no localStorage
+            localStorage.setItem('usuario_simulado', JSON.stringify({
+                email: data.email,
+                senha: data.senha,
+                plano: data.plano
+            }));
+            
+            // Redirecionar para login após 5 segundos
+            setTimeout(() => {
+                window.location.href = '/login.html';
+            }, 5000);
+            
+        } else {
+            mostrarAlerta('Erro: ' + data.erro, 'error');
+        }
+    } catch (error) {
+        console.error('Erro:', error);
+        mostrarAlerta('Erro ao conectar com o servidor', 'error');
+    } finally {
+        document.getElementById('loading').classList.remove('active');
+        document.getElementById('btnPagar').disabled = false;
+    }
+}
                 const data = await response.json();
 
                 if (data.sucesso) {
