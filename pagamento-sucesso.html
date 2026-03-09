@@ -165,31 +165,31 @@
         <div class="order-details">
             <div class="detail-row">
                 <span>Plano:</span>
-                <span id="success-plan">Plano Trimestral</span>
+                <span id="success-plan">Carregando...</span>
             </div>
             <div class="detail-row">
                 <span>Valor:</span>
-                <span id="success-price">R$ 24,90</span>
+                <span id="success-price">Carregando...</span>
             </div>
             <div class="detail-row">
                 <span>ID da Transação:</span>
-                <span id="transaction-id">MP-<?php echo rand(100000, 999999); ?></span>
+                <span id="transaction-id">Carregando...</span>
             </div>
             <div class="detail-row">
                 <span>Data:</span>
-                <span id="transaction-date"><?php echo date('d/m/Y H:i'); ?></span>
+                <span id="transaction-date">Carregando...</span>
             </div>
             <div class="detail-row">
                 <span>E-mail:</span>
-                <span id="success-email">usuario@email.com</span>
+                <span id="success-email">Carregando...</span>
             </div>
         </div>
         
         <div class="access-card">
             <h3><i class="fas fa-key"></i> SEU ACESSO PREMIUM</h3>
             <p>Use este código para acessar recursos exclusivos:</p>
-            <div class="access-code">KARAOKE-PREMIUM-<?php echo strtoupper(substr(md5(rand()), 0, 8)); ?></div>
-            <p>Validade: <strong id="validity-date"><?php echo date('d/m/Y', strtotime('+3 months')); ?></strong></p>
+            <div class="access-code" id="access-code">CARREGANDO...</div>
+            <p>Validade: <strong id="validity-date">Carregando...</strong></p>
         </div>
         
         <div class="email-note">
@@ -200,7 +200,7 @@
             <a href="https://karaoke-multiplayer.pages.dev" class="btn">
                 <i class="fas fa-microphone"></i> COMEÇAR A CANTAR AGORA
             </a>
-            <a href="#" class="btn btn-secondary">
+            <a href="#" class="btn btn-secondary" onclick="window.print(); return false;">
                 <i class="fas fa-download"></i> BAIXAR COMPROVANTE
             </a>
         </div>
@@ -211,32 +211,102 @@
     </div>
 
     <script>
-        // Preencher dados da transação a partir dos parâmetros da URL
         document.addEventListener('DOMContentLoaded', function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const plan = urlParams.get('plan') || 'trimestral';
-            const email = urlParams.get('email') || 'usuario@email.com';
+            // Função para obter parâmetros da URL
+            function getUrlParams() {
+                const params = new URLSearchParams(window.location.search);
+                return {
+                    collection_id: params.get('collection_id'),
+                    payment_id: params.get('payment_id'),
+                    status: params.get('status'),
+                    external_reference: params.get('external_reference'),
+                    payment_type: params.get('payment_type')
+                };
+            }
+
+            // Função para decodificar o external_reference
+            function parseExternalReference(extRef) {
+                if (!extRef) return { email: null, plan: null };
+                try {
+                    // O parâmetro external_reference vem como string JSON codificada
+                    // Ex: {%22email%22:%22dominio3002@gmail.com%22,%22plan%22:%22mensal%22}
+                    const decodedJson = decodeURIComponent(extRef);
+                    return JSON.parse(decodedJson);
+                } catch (e) {
+                    console.error("Erro ao processar external_reference:", e);
+                    return { email: null, plan: null };
+                }
+            }
+
+            // Função para formatar o nome do plano
+            function formatPlanName(plan) {
+                const plans = {
+                    mensal: "Plano Mensal",
+                    trimestral: "Plano Trimestral",
+                    semestral: "Plano Semestral",
+                    anual: "Plano Anual"
+                };
+                return plans[plan] || "Plano não identificado";
+            }
+
+            // Função para obter o preço do plano
+            function getPlanPrice(plan) {
+                const prices = {
+                    mensal: "R$ 19,90",
+                    trimestral: "R$ 49,90",
+                    semestral: "R$ 89,90",
+                    anual: "R$ 159,90"
+                };
+                return prices[plan] || "R$ 19,90";
+            }
+
+            // Função para calcular data de validade
+            function calculateExpirationDate(plan) {
+                const days = {
+                    mensal: 30,
+                    trimestral: 90,
+                    semestral: 180,
+                    anual: 365
+                };
+                const addDays = days[plan] || 30;
+                const date = new Date();
+                date.setDate(date.getDate() + addDays);
+                return date.toLocaleDateString('pt-BR');
+            }
+
+            // Função para gerar código de acesso
+            function generateAccessCode() {
+                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                let code = 'KARAOKE-';
+                for (let i = 0; i < 8; i++) {
+                    code += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+                return code;
+            }
+
+            // Obter dados da URL
+            const params = getUrlParams();
+            const externalData = parseExternalReference(params.external_reference);
             
-            // Atualizar informações na página
-            const planNames = {
-                'mensal': 'Plano Mensal',
-                'trimestral': 'Plano Trimestral'
-            };
-            
-            const planPrices = {
-                'mensal': 'R$ 11,90',
-                'trimestral': 'R$ 24,90'
-            };
-            
-            const validityDates = {
-                'mensal': '<?php echo date("d/m/Y", strtotime("+1 month")); ?>',
-                'trimestral': '<?php echo date("d/m/Y", strtotime("+3 months")); ?>'
-            };
-            
-            document.getElementById('success-plan').textContent = planNames[plan] || 'Plano Trimestral';
-            document.getElementById('success-price').textContent = planPrices[plan] || 'R$ 24,90';
-            document.getElementById('success-email').textContent = decodeURIComponent(email);
-            document.getElementById('validity-date').textContent = validityDates[plan] || '<?php echo date("d/m/Y", strtotime("+3 months")); ?>';
+            // Determinar valores
+            const plan = externalData.plan || 'mensal';
+            const email = externalData.email || 'não informado';
+            const planName = formatPlanName(plan);
+            const planPrice = getPlanPrice(plan);
+            const transactionId = params.payment_id || 'não informado';
+            const currentDate = new Date().toLocaleDateString('pt-BR') + ' ' + 
+                               new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+            const expirationDate = calculateExpirationDate(plan);
+            const accessCode = generateAccessCode();
+
+            // Preencher os campos na página
+            document.getElementById('success-plan').textContent = planName;
+            document.getElementById('success-price').textContent = planPrice;
+            document.getElementById('transaction-id').textContent = transactionId;
+            document.getElementById('transaction-date').textContent = currentDate;
+            document.getElementById('success-email').textContent = email;
+            document.getElementById('access-code').textContent = accessCode;
+            document.getElementById('validity-date').textContent = expirationDate;
         });
     </script>
 </body>
