@@ -414,7 +414,7 @@
                 <h2>Seu Pedido</h2>
                 <div class="plan-details">
                     <div class="plan-name" id="planName">Plano Trimestral</div>
-                    <div class="plan-price" id="planPrice">R$ 24,90</div>
+                    <div class="plan-price" id="planPrice">R$ 49,90</div>
                     <div class="plan-description" id="planDescription">Válido por 3 meses • Economize R$ 10,80</div>
                     <ul class="plan-features" id="planFeatures">
                         <li>Salas ilimitadas</li>
@@ -437,7 +437,7 @@
                     </div>
                     <div class="price-row total">
                         <span>Total</span>
-                        <span id="total">R$ 24,90</span>
+                        <span id="total">R$ 49,90</span>
                     </div>
                 </div>
 
@@ -520,7 +520,7 @@
 
                 <!-- Botão Pagar -->
                 <button class="btn-pay" onclick="processarPagamento()" id="btnPagar">
-                    💳 Pagar R$ <span id="totalBotao">24,90</span>
+                    💳 Pagar R$ <span id="totalBotao">49,90</span>
                 </button>
 
                 <!-- Selos de Segurança -->
@@ -545,35 +545,37 @@
         // Plano selecionado (inicial)
         let planoSelecionado = 'trimestral';
         
-        // Preços dos planos
+        // ==================================================
+        // ✅ VALORES CORRIGIDOS - PREÇOS REAIS DOS PLANOS
+        // ==================================================
         const plans = {
             mensal: { 
                 name: 'Plano Mensal', 
-                price: 19.90, 
-                originalPrice: 24.90, 
+                price: 24.90,                 // ← CORRIGIDO (era 19.90)
+                originalPrice: 24.90,          // Sem desconto
                 description: 'Válido por 1 mês',
-                save: 'Economize R$ 5,00'
+                save: 'Pagamento mensal'
             },
             trimestral: { 
                 name: 'Plano Trimestral', 
-                price: 24.90, 
-                originalPrice: 35.70, 
+                price: 49.90,                  // ← CORRIGIDO (era 24.90)
+                originalPrice: 74.70,           // 3x 24.90
                 description: 'Válido por 3 meses',
-                save: 'Economize R$ 10,80'
+                save: 'Economize R$ 24,80'
             },
             semestral: { 
                 name: 'Plano Semestral', 
-                price: 44.90, 
-                originalPrice: 71.40, 
+                price: 89.90,                  // ← CORRIGIDO (era 44.90)
+                originalPrice: 149.40,          // 6x 24.90
                 description: 'Válido por 6 meses',
-                save: 'Economize R$ 26,50'
+                save: 'Economize R$ 59,50'
             },
             anual: { 
                 name: 'Plano Anual', 
-                price: 79.90, 
-                originalPrice: 142.80, 
+                price: 159.90,                 // ← CORRIGIDO (era 79.90)
+                originalPrice: 298.80,          // 12x 24.90
                 description: 'Válido por 12 meses',
-                save: 'Economize R$ 62,90'
+                save: 'Economize R$ 138,90'
             }
         };
 
