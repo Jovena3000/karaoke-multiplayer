@@ -397,6 +397,30 @@
         .mp-info-box i {
             margin-right: 5px;
         }
+        .pix-info {
+            background: #e8f5e8;
+            color: #2e7d32;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #4CAF50;
+            margin: 20px 0;
+            text-align: left;
+        }
+        .pix-info i {
+            color: #4CAF50;
+            margin-right: 8px;
+        }
+        .pix-key-display {
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px dashed #4CAF50;
+            font-family: monospace;
+            font-size: 20px;
+            margin: 15px 0;
+            color: #333;
+            word-break: break-all;
+        }
     </style>
 </head>
 <body>
@@ -491,7 +515,7 @@
                     </div>
                 </div>
 
-                <!-- 🔥 CORREÇÃO: Formulário Cartão de Crédito - SEM CAMPOS -->
+                <!-- Formulário Cartão de Crédito -->
                 <div id="cardForm" class="payment-form active">
                     <div class="mp-info-box">
                         <h3><i class="fas fa-shield-alt"></i> Pagamento via Mercado Pago</h3>
@@ -504,15 +528,32 @@
                 <!-- Área PIX -->
                 <div id="pixForm" class="payment-form">
                     <div class="pix-area">
-                        <h3>Pagamento via PIX</h3>
-                        <div class="qrcode" id="qrcode">
-                            <!-- QR Code será gerado aqui -->
-                            [QR CODE PIX]
+                        <h3><i class="fas fa-pix" style="color: #32BCAD;"></i> Pagamento via PIX</h3>
+                        
+                        <div class="pix-info">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Chave PIX oficial:</strong> Após confirmar, você pagará diretamente para:
                         </div>
-                        <p>Gerado após confirmação</p>
-                        <p>Escaneie o QR Code acima com o app do seu banco</p>
-                        <div class="pix-key" id="pixKey">dominio3003@gmail.com</div>
-                        <p>Pagamento válido por 30 minutos</p>
+                        
+                        <div class="pix-key-display" id="pixKeyDisplay">
+                            pix@karaokemultiplayer.com.br
+                        </div>
+                        
+                        <div class="qrcode" id="qrcode">
+                            <!-- QR Code será gerado pelo Mercado Pago -->
+                            <i class="fas fa-qrcode" style="font-size: 80px; color: #666;"></i>
+                        </div>
+                        
+                        <p>🔹 Escaneie o QR Code com o app do seu banco</p>
+                        <p>🔹 Ou copie a chave PIX acima e pague no seu internet banking</p>
+                        <p>⏱️ Pagamento válido por <strong>30 minutos</strong></p>
+                        
+                        <div style="margin-top: 20px; padding: 15px; background: #e3f2fd; border-radius: 8px;">
+                            <p style="margin: 0; color: #1976d2;">
+                                <i class="fas fa-check-circle"></i>
+                                Seu pagamento será confirmado automaticamente em até 1 minuto.
+                            </p>
+                        </div>
                     </div>
                 </div>
 
@@ -552,9 +593,7 @@
         // Plano selecionado (inicial)
         let planoSelecionado = 'trimestral';
         
-        // ==================================================
-        // ✅ VALORES CORRIGIDOS - PREÇOS REAIS DOS PLANOS
-        // ==================================================
+        // Preços dos planos
         const plans = {
             mensal: { 
                 name: 'Plano Mensal', 
@@ -669,7 +708,9 @@
 
         // Gerar PIX (simulado)
         function gerarPix() {
-            document.getElementById('pixKey').textContent = `karaoke-${Date.now()}@mp.com`;
+            // A chave PIX oficial é mostrada diretamente no HTML
+            // Esta função apenas garante que a área PIX seja exibida
+            console.log('Área PIX exibida - Chave oficial: pix@karaokemultiplayer.com.br');
         }
 
         // Função principal de pagamento
@@ -710,13 +751,28 @@
                     }));
 
                     if (metodoAtual === 'pix') {
-                        // Para PIX, mostrar QR Code (simulado)
-                        mostrarAlerta('PIX gerado! Escaneie o QR Code com seu banco', 'success');
+                        // Para PIX, mostrar QR Code e chave
+                        mostrarAlerta('PIX gerado! Use a chave pix@karaokemultiplayer.com.br ou escaneie o QR Code', 'success');
+                        
+                        // Criar link para pagamento PIX
+                        const pixLink = `https://pix.mercadopago.com.br/${data.id}`;
+                        
                         document.getElementById('qrcode').innerHTML = `
                             <div style="background: white; padding: 10px;">
-                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${data.id}" style="width: 150px; height: 150px;">
+                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${pixLink}" 
+                                     style="width: 150px; height: 150px; border-radius: 8px;">
+                                <p style="margin-top: 10px; font-size: 12px; color: #666;">
+                                    Escaneie com o app do seu banco
+                                </p>
                             </div>
                         `;
+                        
+                        document.getElementById('pixKeyDisplay').innerHTML = `
+                            <strong style="font-size: 22px;">pix@karaokemultiplayer.com.br</strong>
+                            <br>
+                            <small style="font-size: 12px;">Chave PIX oficial</small>
+                        `;
+                        
                         document.getElementById('loading').classList.remove('active');
                         document.getElementById('btnPagar').disabled = false;
                     } else {
