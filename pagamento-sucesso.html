@@ -6,7 +6,6 @@
     <title>Pagamento Confirmado - Karaokê Multiplayer</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Mesmos estilos da página anterior, com algumas adaptações */
         :root {
             --primary: #FF4D94;
             --secondary: #6C63FF;
@@ -14,14 +13,12 @@
             --light: #FFFFFF;
             --success: #4CAF50;
         }
-        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        
         body {
             background-color: var(--dark);
             color: var(--light);
@@ -31,7 +28,6 @@
             justify-content: center;
             padding: 20px;
         }
-        
         .success-container {
             max-width: 600px;
             width: 100%;
@@ -41,7 +37,6 @@
             padding: 50px 40px;
             border: 1px solid rgba(255,255,255,0.1);
         }
-        
         .success-icon {
             width: 100px;
             height: 100px;
@@ -54,25 +49,21 @@
             font-size: 40px;
             animation: pulse 2s infinite;
         }
-        
         @keyframes pulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.05); }
             100% { transform: scale(1); }
         }
-        
         h1 {
             font-size: 36px;
             margin-bottom: 20px;
             color: var(--success);
         }
-        
         .subtitle {
             font-size: 20px;
             margin-bottom: 30px;
             color: rgba(255,255,255,0.8);
         }
-        
         .order-details {
             background: rgba(255,255,255,0.03);
             border-radius: 15px;
@@ -80,18 +71,15 @@
             margin: 30px 0;
             text-align: left;
         }
-        
         .detail-row {
             display: flex;
             justify-content: space-between;
             padding: 12px 0;
             border-bottom: 1px dashed rgba(255,255,255,0.1);
         }
-        
         .detail-row:last-child {
             border-bottom: none;
         }
-        
         .access-card {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             border-radius: 15px;
@@ -99,7 +87,6 @@
             margin: 30px 0;
             text-align: center;
         }
-        
         .access-code {
             font-size: 28px;
             font-weight: bold;
@@ -110,7 +97,6 @@
             margin: 20px 0;
             font-family: monospace;
         }
-        
         .btn {
             display: inline-block;
             background: var(--primary);
@@ -123,29 +109,24 @@
             margin: 15px 10px;
             transition: all 0.3s;
         }
-        
         .btn:hover {
             background: #ff3d8a;
             transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(255, 77, 148, 0.4);
+            box-shadow: 0 5px 15px rgba(255,77,148,0.4);
         }
-        
         .btn-secondary {
             background: rgba(255,255,255,0.1);
         }
-        
         .btn-secondary:hover {
             background: rgba(255,255,255,0.2);
         }
-        
         .email-note {
             margin-top: 30px;
             padding: 20px;
-            background: rgba(255, 166, 0, 0.1);
+            background: rgba(255,166,0,0.1);
             border-radius: 10px;
             border-left: 4px solid #FF9800;
         }
-        
         .footer {
             margin-top: 40px;
             color: rgba(255,255,255,0.6);
@@ -154,14 +135,13 @@
     </style>
 </head>
 <body>
-    <div class="success-container">
+    <div class="success-container" id="container">
         <div class="success-icon">
             <i class="fas fa-check"></i>
         </div>
-        
         <h1>Pagamento Confirmado!</h1>
         <div class="subtitle">Seu acesso ao Karaokê Multiplayer Premium já está liberado</div>
-        
+
         <div class="order-details">
             <div class="detail-row">
                 <span>Plano:</span>
@@ -184,130 +164,127 @@
                 <span id="success-email">Carregando...</span>
             </div>
         </div>
-        
+
         <div class="access-card">
             <h3><i class="fas fa-key"></i> SEU ACESSO PREMIUM</h3>
-            <p>Use este código para acessar recursos exclusivos:</p>
-            <div class="access-code" id="access-code">CARREGANDO...</div>
+            <p>Enviamos um código de acesso para o e-mail cadastrado. Use-o para fazer login.</p>
+            <div class="access-code" id="access-code">📧 Código enviado por e-mail</div>
             <p>Validade: <strong id="validity-date">Carregando...</strong></p>
         </div>
-        
+
         <div class="email-note">
-            <i class="fas fa-envelope"></i> Enviamos os detalhes do seu acesso para o e-mail cadastrado. Verifique sua caixa de entrada e spam.
+            <i class="fas fa-envelope"></i>
+            Enviamos os detalhes do seu acesso para o e-mail cadastrado. Verifique sua caixa de entrada e spam.
         </div>
-        
+
         <div>
-            <a href="https://karaoke-multiplayer.pages.dev" class="btn">
-                <i class="fas fa-microphone"></i> COMEÇAR A CANTAR AGORA
+            <a href="https://karaokemultiplayer.com.br" class="btn">
+                <i class="fas fa-microphone"></i> COMEÇAR A CANTAR
             </a>
-            <a href="#" class="btn btn-secondary" onclick="window.print(); return false;">
+            <a href="#" class="btn btn-secondary" onclick="window.print();return false;">
                 <i class="fas fa-download"></i> BAIXAR COMPROVANTE
             </a>
         </div>
-        
+
         <div class="footer">
-            <p>Obrigado por escolher o Karaokê Multiplayer! Em caso de dúvidas, contate nosso suporte: suporte@karaokemultiplayer.com.br</p>
+            Obrigado por escolher o Karaokê Multiplayer
         </div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Função para obter parâmetros da URL
-            function getUrlParams() {
-                const params = new URLSearchParams(window.location.search);
-                return {
-                    collection_id: params.get('collection_id'),
-                    payment_id: params.get('payment_id'),
-                    status: params.get('status'),
-                    external_reference: params.get('external_reference'),
-                    payment_type: params.get('payment_type')
-                };
+        // Função para obter parâmetros da URL
+        function getUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                collection_id: params.get('collection_id'),
+                payment_id: params.get('payment_id'),
+                status: params.get('status'),
+                external_reference: params.get('external_reference')
+            };
+        }
+
+        // Função para decodificar o external_reference
+        function parseExternalReference(extRef) {
+            if (!extRef) return { email: null, plan: null };
+            try {
+                const decoded = decodeURIComponent(extRef);
+                return JSON.parse(decoded);
+            } catch (e) {
+                console.error("Erro ao processar external_reference:", e);
+                return { email: null, plan: null };
             }
+        }
 
-            // Função para decodificar o external_reference
-            function parseExternalReference(extRef) {
-                if (!extRef) return { email: null, plan: null };
-                try {
-                    // O parâmetro external_reference vem como string JSON codificada
-                    // Ex: {%22email%22:%22dominio3002@gmail.com%22,%22plan%22:%22mensal%22}
-                    const decodedJson = decodeURIComponent(extRef);
-                    return JSON.parse(decodedJson);
-                } catch (e) {
-                    console.error("Erro ao processar external_reference:", e);
-                    return { email: null, plan: null };
-                }
-            }
+        // Função para formatar o nome do plano
+        function formatPlanName(plan) {
+            const plans = {
+                mensal: "Plano Mensal",
+                trimestral: "Plano Trimestral",
+                semestral: "Plano Semestral",
+                anual: "Plano Anual"
+            };
+            return plans[plan] || "Plano Mensal";
+        }
 
-            // Função para formatar o nome do plano
-            function formatPlanName(plan) {
-                const plans = {
-                    mensal: "Plano Mensal",
-                    trimestral: "Plano Trimestral",
-                    semestral: "Plano Semestral",
-                    anual: "Plano Anual"
-                };
-                return plans[plan] || "Plano não identificado";
-            }
+        // Função para obter o preço do plano
+        function getPlanPrice(plan) {
+            const prices = {
+                mensal: "R$ 24,90",
+                trimestral: "R$ 49,90",
+                semestral: "R$ 89,90",
+                anual: "R$ 159,90"
+            };
+            return prices[plan] || "R$ 24,90";
+        }
 
-            // Função para obter o preço do plano
-            function getPlanPrice(plan) {
-                const prices = {
-                    mensal: "R$ 24,90",
-                    trimestral: "R$ 49,90",
-                    semestral: "R$ 89,90",
-                    anual: "R$ 159,90"
-                };
-                return prices[plan] || "R$ 24,90";
-            }
+        // Função para calcular a data de expiração
+        function calculateExpirationDate(plan) {
+            const days = {
+                mensal: 30,
+                trimestral: 90,
+                semestral: 180,
+                anual: 365
+            };
+            const addDays = days[plan] || 30;
+            const date = new Date();
+            date.setDate(date.getDate() + addDays);
+            return date.toLocaleDateString('pt-BR');
+        }
 
-            // Função para calcular data de validade
-            function calculateExpirationDate(plan) {
-                const days = {
-                    mensal: 30,
-                    trimestral: 90,
-                    semestral: 180,
-                    anual: 365
-                };
-                const addDays = days[plan] || 30;
-                const date = new Date();
-                date.setDate(date.getDate() + addDays);
-                return date.toLocaleDateString('pt-BR');
-            }
+        // Obter parâmetros
+        const params = getUrlParams();
 
-            // Função para gerar código de acesso
-            function generateAccessCode() {
-                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-                let code = 'KARAOKE-';
-                for (let i = 0; i < 8; i++) {
-                    code += chars.charAt(Math.floor(Math.random() * chars.length));
-                }
-                return code;
-            }
+        // Verificar se o pagamento foi aprovado
+        if (params.status !== "approved") {
+            document.getElementById("container").innerHTML = `
+                <h1 style="color:#ff4d4d">Pagamento não confirmado</h1>
+                <p>O pagamento ainda não foi aprovado.</p>
+                <br>
+                <a href="https://karaokemultiplayer.com.br" class="btn">Voltar ao site</a>
+            `;
+            throw new Error("Pagamento não aprovado");
+        }
 
-            // Obter dados da URL
-            const params = getUrlParams();
-            const externalData = parseExternalReference(params.external_reference);
-            
-            // Determinar valores
-            const plan = externalData.plan || 'mensal';
-            const email = externalData.email || 'não informado';
-            const planName = formatPlanName(plan);
-            const planPrice = getPlanPrice(plan);
-            const transactionId = params.payment_id || 'não informado';
-            const currentDate = new Date().toLocaleDateString('pt-BR') + ' ' + 
-                               new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
-            const expirationDate = calculateExpirationDate(plan);
-            const accessCode = generateAccessCode();
+        // Processar dados externos
+        const externalData = parseExternalReference(params.external_reference);
+        const plan = externalData.plan || "mensal";
+        const email = externalData.email || "não informado";
+        const transactionId = params.payment_id || params.collection_id || "não informado";
 
-            // Preencher os campos na página
-            document.getElementById('success-plan').textContent = planName;
-            document.getElementById('success-price').textContent = planPrice;
-            document.getElementById('transaction-id').textContent = transactionId;
-            document.getElementById('transaction-date').textContent = currentDate;
-            document.getElementById('success-email').textContent = email;
-            document.getElementById('access-code').textContent = accessCode;
-            document.getElementById('validity-date').textContent = expirationDate;
-        });
+        // Data e hora atuais
+        const date = new Date();
+        const currentDate = date.toLocaleDateString('pt-BR') + " " + date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+        // Preencher campos
+        document.getElementById("success-plan").textContent = formatPlanName(plan);
+        document.getElementById("success-price").textContent = getPlanPrice(plan);
+        document.getElementById("transaction-id").textContent = transactionId;
+        document.getElementById("transaction-date").textContent = currentDate;
+        document.getElementById("success-email").textContent = email;
+        document.getElementById("validity-date").textContent = calculateExpirationDate(plan);
+
+        // Apenas uma mensagem informativa sobre o código de acesso
+        document.getElementById("access-code").innerHTML = "✅ Código enviado para " + email;
     </script>
 </body>
 </html>
