@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Finalizar Compra - Karaokê Multiplayer</title>
     <style>
+        /* ===== ESTILOS COMPLETOS ===== */
         * {
             margin: 0;
             padding: 0;
@@ -57,15 +58,17 @@
             justify-content: center;
             margin: 0 auto 5px;
         }
-        
-        /* ===== SELETOR DE PLANOS ===== */
         .plan-selector {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 15px;
             margin-bottom: 30px;
         }
-        
+        @media (max-width: 768px) {
+            .plan-selector {
+                grid-template-columns: 1fr;
+            }
+        }
         .plan-option {
             background: white;
             border: 2px solid #ddd;
@@ -75,22 +78,18 @@
             transition: all 0.3s;
             text-align: center;
         }
-        
         .plan-option:hover {
             transform: translateY(-3px);
             box-shadow: 0 5px 20px rgba(0,0,0,0.1);
         }
-        
         .plan-option.selected {
             border-color: #667eea;
             background: #f0f3ff;
         }
-        
         .plan-option.recommended {
             position: relative;
             border-color: #ffd700;
         }
-        
         .plan-option.recommended::after {
             content: "⭐ RECOMENDADO";
             position: absolute;
@@ -103,27 +102,23 @@
             border-radius: 12px;
             font-weight: bold;
         }
-        
         .plan-option-name {
             font-size: 1.2rem;
             font-weight: bold;
             color: #333;
             margin-bottom: 5px;
         }
-        
         .plan-option-price {
             font-size: 1.5rem;
             color: #667eea;
             font-weight: bold;
             margin-bottom: 5px;
         }
-        
         .plan-option-price small {
             font-size: 0.8rem;
             color: #999;
             font-weight: normal;
         }
-        
         .plan-option-save {
             background: #4CAF50;
             color: white;
@@ -133,13 +128,11 @@
             display: inline-block;
             margin-top: 5px;
         }
-        
         .plan-option-period {
             font-size: 0.8rem;
             color: #666;
             margin-top: 5px;
         }
-        
         .checkout-content {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -149,16 +142,11 @@
             padding: 30px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.1);
         }
-        
         @media (max-width: 768px) {
             .checkout-content {
                 grid-template-columns: 1fr;
             }
-            .plan-selector {
-                grid-template-columns: 1fr;
-            }
         }
-        
         .order-summary {
             background: #f8f9fa;
             padding: 20px;
@@ -312,14 +300,45 @@
             margin: 20px auto;
             padding: 10px;
             border: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .pix-key {
-            background: #eee;
-            padding: 10px;
-            border-radius: 4px;
+        .pix-key-display {
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px dashed #4CAF50;
             font-family: monospace;
-            font-size: 18px;
-            margin: 10px 0;
+            font-size: 20px;
+            margin: 15px 0;
+            color: #333;
+            word-break: break-all;
+        }
+        .pix-info {
+            background: #e8f5e8;
+            color: #2e7d32;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #4CAF50;
+            margin: 20px 0;
+            text-align: left;
+        }
+        .pix-info i {
+            color: #4CAF50;
+            margin-right: 8px;
+        }
+        .mp-info-box {
+            background: #e3f2fd;
+            color: #0d47a1;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #1976d2;
+            margin-bottom: 20px;
+        }
+        .mp-info-box h3 {
+            margin-top: 0;
+            color: #1976d2;
         }
         .security-badge {
             margin-top: 30px;
@@ -378,49 +397,6 @@
             border: 1px solid #c3e6cb;
             display: block;
         }
-        .mp-info-box {
-            background: #e3f2fd;
-            color: #0d47a1;
-            padding: 20px;
-            border-radius: 8px;
-            border-left: 4px solid #1976d2;
-            margin-bottom: 20px;
-        }
-        .mp-info-box h3 {
-            margin-top: 0;
-            color: #1976d2;
-        }
-        .mp-info-box p {
-            margin-bottom: 10px;
-            line-height: 1.5;
-        }
-        .mp-info-box i {
-            margin-right: 5px;
-        }
-        .pix-info {
-            background: #e8f5e8;
-            color: #2e7d32;
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 4px solid #4CAF50;
-            margin: 20px 0;
-            text-align: left;
-        }
-        .pix-info i {
-            color: #4CAF50;
-            margin-right: 8px;
-        }
-        .pix-key-display {
-            background: #fff;
-            padding: 15px;
-            border-radius: 8px;
-            border: 2px dashed #4CAF50;
-            font-family: monospace;
-            font-size: 20px;
-            margin: 15px 0;
-            color: #333;
-            word-break: break-all;
-        }
     </style>
 </head>
 <body>
@@ -445,7 +421,7 @@
             </div>
         </div>
 
-        <!-- SELETOR DE PLANOS -->
+        <!-- SELETOR DE PLANOS (será preenchido via JS) -->
         <div style="margin-bottom: 20px;">
             <h2 style="color: white; text-align: center; margin-bottom: 20px;">Escolha seu plano:</h2>
             <div class="plan-selector" id="planSelector"></div>
@@ -495,7 +471,7 @@
             <div class="payment-section">
                 <h2>Forma de pagamento</h2>
                 
-                <!-- Email do usuário (OBRIGATÓRIO) -->
+                <!-- Email do usuário -->
                 <div class="form-group">
                     <label>📧 Seu melhor e-mail (para receber a senha de acesso)</label>
                     <input type="email" id="emailCliente" placeholder="exemplo@email.com" required>
@@ -515,7 +491,7 @@
                     </div>
                 </div>
 
-                <!-- Formulário Cartão de Crédito -->
+                <!-- Formulário Cartão de Crédito (apenas informações) -->
                 <div id="cardForm" class="payment-form active">
                     <div class="mp-info-box">
                         <h3><i class="fas fa-shield-alt"></i> Pagamento via Mercado Pago</h3>
@@ -540,7 +516,6 @@
                         </div>
                         
                         <div class="qrcode" id="qrcode">
-                            <!-- QR Code será gerado pelo Mercado Pago -->
                             <i class="fas fa-qrcode" style="font-size: 80px; color: #666;"></i>
                         </div>
                         
@@ -590,10 +565,10 @@
         // ================= CONFIGURAÇÕES =================
         const API_URL = 'https://karaoke-api-backend3.vercel.app/api';
         
-        // Plano selecionado (inicial)
         let planoSelecionado = 'trimestral';
-        
-        // Preços dos planos
+        let metodoAtual = 'card';
+
+        // Preços dos planos (CORRIGIDOS: mensal R$24,90)
         const plans = {
             mensal: { 
                 name: 'Plano Mensal', 
@@ -628,6 +603,7 @@
         // Criar seletor de planos
         function criarSeletorPlanos() {
             const selector = document.getElementById('planSelector');
+            if (!selector) return;
             let html = '';
             
             for (const [key, plan] of Object.entries(plans)) {
@@ -639,7 +615,7 @@
                          onclick="selecionarPlano('${key}')">
                         <div class="plan-option-name">${plan.name}</div>
                         <div class="plan-option-price">
-                            R$ ${plan.price.toFixed(2)} 
+                            R$ ${plan.price.toFixed(2).replace('.', ',')} 
                             <small>/mês</small>
                         </div>
                         <div class="plan-option-period">${plan.description}</div>
@@ -652,7 +628,7 @@
         }
 
         // Selecionar plano
-        function selecionarPlano(plano) {
+        window.selecionarPlano = function(plano) {
             planoSelecionado = plano;
             
             // Atualizar classes
@@ -660,39 +636,34 @@
                 el.classList.remove('selected');
             });
             
-            // Adicionar classe selected no plano escolhido
             const options = document.querySelectorAll('.plan-option');
             const index = Object.keys(plans).indexOf(plano);
             if (options[index]) {
                 options[index].classList.add('selected');
             }
             
-            // Atualizar resumo do pedido
             atualizarResumo();
-        }
+        };
 
         // Atualizar resumo do pedido
         function atualizarResumo() {
             const plan = plans[planoSelecionado];
             
             document.getElementById('planName').textContent = plan.name;
-            document.getElementById('planPrice').textContent = `R$ ${plan.price.toFixed(2)}`;
+            document.getElementById('planPrice').textContent = `R$ ${plan.price.toFixed(2).replace('.', ',')}`;
             document.getElementById('planDescription').textContent = `${plan.description} • ${plan.save}`;
-            document.getElementById('subtotal').textContent = `R$ ${plan.originalPrice.toFixed(2)}`;
+            document.getElementById('subtotal').textContent = `R$ ${plan.originalPrice.toFixed(2).replace('.', ',')}`;
             
-            const desconto = plan.originalPrice - plan.price;
-            document.getElementById('discount').textContent = `-R$ ${desconto.toFixed(2)}`;
-            document.getElementById('total').textContent = `R$ ${plan.price.toFixed(2)}`;
-            document.getElementById('totalBotao').textContent = plan.price.toFixed(2);
+            const desconto = (plan.originalPrice - plan.price).toFixed(2).replace('.', ',');
+            document.getElementById('discount').textContent = `-R$ ${desconto}`;
+            document.getElementById('total').textContent = `R$ ${plan.price.toFixed(2).replace('.', ',')}`;
+            document.getElementById('totalBotao').textContent = plan.price.toFixed(2).replace('.', ',');
         }
 
-        // Método de pagamento selecionado
-        let metodoAtual = 'card';
-
-        function selectMethod(method) {
+        // Selecionar método de pagamento
+        window.selectMethod = function(method) {
             metodoAtual = method;
             
-            // Atualizar classes ativas
             document.querySelectorAll('.payment-method').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.payment-form').forEach(el => el.classList.remove('active'));
             
@@ -702,33 +673,22 @@
             } else {
                 document.querySelectorAll('.payment-method')[1].classList.add('active');
                 document.getElementById('pixForm').classList.add('active');
-                gerarPix();
             }
-        }
-
-        // Gerar PIX (simulado)
-        function gerarPix() {
-            // A chave PIX oficial é mostrada diretamente no HTML
-            // Esta função apenas garante que a área PIX seja exibida
-            console.log('Área PIX exibida - Chave oficial: pix@karaokemultiplayer.com.br');
-        }
+        };
 
         // Função principal de pagamento
         async function processarPagamento() {
             const email = document.getElementById('emailCliente').value;
             
-            // Validar email
             if (!email || !email.includes('@')) {
                 mostrarAlerta('Por favor, digite um e-mail válido para receber sua senha de acesso', 'error');
                 return;
             }
 
-            // Mostrar loading
             document.getElementById('loading').classList.add('active');
             document.getElementById('btnPagar').disabled = true;
 
             try {
-                // Chamar a API para criar pagamento
                 const response = await fetch(`${API_URL}/criar-pagamento`, {
                     method: 'POST',
                     headers: {
@@ -736,14 +696,14 @@
                     },
                     body: JSON.stringify({
                         plan: planoSelecionado,
-                        email: email
+                        email: email,
+                        metodo: metodoAtual   // ← ENVIA O MÉTODO SELECIONADO
                     })
                 });
 
                 const data = await response.json();
 
                 if (data.sucesso) {
-                    // Salvar informações no localStorage para usar depois
                     localStorage.setItem('pagamento_pendente', JSON.stringify({
                         email: email,
                         plan: planoSelecionado,
@@ -751,39 +711,42 @@
                     }));
 
                     if (metodoAtual === 'pix') {
-  mostrarAlerta('PIX gerado! Escaneie o QR Code para pagar', 'success');
-  
-  // ✅ Exibe o QR Code real em base64
-  document.getElementById('qrcode').innerHTML = `
-    <div style="background: white; padding: 10px; text-align: center;">
-      <img src="data:image/jpeg;base64,${data.qr_code_base64}" 
-           style="width: 200px; height: 200px; border-radius: 8px;">
-      <p style="margin-top: 10px; font-size: 12px; color: #666;">
-        Escaneie com o app do seu banco
-      </p>
-    </div>
-  `;
-  
-  // ✅ Exibe o código Pix Copia e Cola
-  document.getElementById('pixKeyDisplay').innerHTML = `
-    <div style="background: #f5f5f5; padding: 15px; border-radius: 8px;">
-      <strong style="font-size: 14px;">Código Pix Copia e Cola:</strong>
-      <div style="background: #fff; padding: 10px; margin: 10px 0; 
-                  border: 1px dashed #4CAF50; word-break: break-all;">
-        ${data.qr_code}
-      </div>
-      <button onclick="navigator.clipboard.writeText('${data.qr_code}')" 
-              style="background: #4CAF50; color: white; border: none;
-                     padding: 8px 16px; border-radius: 4px; cursor: pointer;">
-        Copiar código
-      </button>
-    </div>
-  `;
-  
-  document.getElementById('loading').classList.remove('active');
-  document.getElementById('btnPagar').disabled = false;
-}
- 
+                        // PIX: exibe QR Code real ou simulado
+                        mostrarAlerta('PIX gerado! Escaneie o QR Code para pagar', 'success');
+                        
+                        if (data.qr_code_base64) {
+                            // QR Code real (base64) retornado pelo backend
+                            document.getElementById('qrcode').innerHTML = `
+                                <img src="data:image/jpeg;base64,${data.qr_code_base64}" 
+                                     style="width: 200px; height: 200px; border-radius: 8px;">
+                            `;
+                        } else {
+                            // Fallback: QR Code simulado com link do Mercado Pago
+                            const pixLink = `https://pix.mercadopago.com.br/${data.id}`;
+                            document.getElementById('qrcode').innerHTML = `
+                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${pixLink}" 
+                                     style="width: 150px; height: 150px; border-radius: 8px;">
+                            `;
+                        }
+                        
+                        // Sempre exibe a chave PIX oficial
+                        document.getElementById('pixKeyDisplay').innerHTML = `
+                            <strong style="font-size: 22px;">pix@karaokemultiplayer.com.br</strong>
+                            <br>
+                            <small style="font-size: 12px;">Chave PIX oficial</small>
+                        `;
+                        
+                        document.getElementById('loading').classList.remove('active');
+                        document.getElementById('btnPagar').disabled = false;
+                    } else {
+                        // Cartão: redireciona para o Mercado Pago
+                        window.location.href = data.init_point;
+                    }
+                } else {
+                    mostrarAlerta('Erro ao criar pagamento: ' + (data.erro || 'Tente novamente'), 'error');
+                    document.getElementById('loading').classList.remove('active');
+                    document.getElementById('btnPagar').disabled = false;
+                }
             } catch (error) {
                 console.error('Erro:', error);
                 mostrarAlerta('Erro ao conectar com o servidor. Verifique sua conexão.', 'error');
@@ -803,7 +766,7 @@
             }, 5000);
         }
 
-        // Verificar pagamento pendente
+        // Verificar pagamento pendente no localStorage
         function verificarPagamentoPendente() {
             const pendente = localStorage.getItem('pagamento_pendente');
             if (pendente) {
@@ -818,7 +781,6 @@
             atualizarResumo();
             verificarPagamentoPendente();
             
-            // Verificar se veio da URL
             const urlParams = new URLSearchParams(window.location.search);
             const planFromUrl = urlParams.get('plan');
             if (planFromUrl && plans[planFromUrl]) {
@@ -826,5 +788,7 @@
             }
         };
     </script>
+    <!-- Font Awesome para ícones (caso use) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </body>
 </html>
