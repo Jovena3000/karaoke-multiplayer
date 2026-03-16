@@ -8,7 +8,7 @@ const CONFIG = {
     
     // Planos disponíveis
     PLANS: {
-        mensal: { name: 'Plano Mensal', price: 19.90 },
+        mensal: { name: 'Plano Mensal', price: 5.00 },
         trimestral: { name: 'Plano Trimestral', price: 49.90 },
         semestral: { name: 'Plano Semestral', price: 89.90 },
         anual: { name: 'Plano Anual', price: 159.90 }
