@@ -731,9 +731,11 @@
                         
                         // Sempre exibe a chave PIX oficial
                         document.getElementById('pixKeyDisplay').innerHTML = `
-                            <strong style="font-size: 22px;">pix@karaokemultiplayer.com.br</strong>
-                            <br>
-                            <small style="font-size: 12px;">Chave PIX oficial</small>
+    <strong style="font-size: 14px; word-break: break-all;">
+        ${data.qr_code || 'Código PIX não disponível'}
+    </strong>
+    <br>
+    <small style="font-size: 12px;">Copia e cola PIX</small>
                         `;
                         
                         document.getElementById('loading').classList.remove('active');
