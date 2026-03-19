@@ -314,6 +314,7 @@
             margin: 15px 0;
             color: #333;
             word-break: break-all;
+            position: relative;
         }
         .pix-info {
             background: #e8f5e8;
@@ -396,6 +397,21 @@
             color: #155724;
             border: 1px solid #c3e6cb;
             display: block;
+        }
+        /* Estilo para o botão de copiar */
+        .copy-pix-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+            transition: background 0.3s;
+        }
+        .copy-pix-btn:hover {
+            background: #45a049;
         }
     </style>
 </head>
@@ -501,7 +517,7 @@
                     </div>
                 </div>
 
-                <!-- Área PIX (modificada com o novo bloco e botão de copiar) -->
+                <!-- Área PIX -->
                 <div id="pixForm" class="payment-form">
                     <div class="pix-area">
                         <h3><i class="fas fa-pix" style="color: #32BCAD;"></i> Pagamento via PIX</h3>
@@ -511,16 +527,17 @@
                             <strong>Chave PIX oficial:</strong> Após confirmar, você pagará diretamente para:
                         </div>
                         
-                        <!-- NOVO BLOCO: código PIX com borda e botão copiar -->
-                        <div style="border:2px dashed #4CAF50; padding:15px; border-radius:10px; margin-bottom:20px;">
-                            <p><b>Chave PIX oficial:</b></p>
-                            <p id="pixCode" style="word-break: break-all;"></p>
-                            <button onclick="copiarPix()" style="background:#4CAF50; color:white; border:none; padding:10px 20px; border-radius:5px; cursor:pointer; font-size:16px;">📋 Copiar código</button>
+                        <div class="pix-key-display" id="pixKeyDisplay">
+                            pix@karaokemultiplayer.com.br
                         </div>
                         
-                        <!-- QR Code -->
+                        <!-- Botão de copiar PIX (aparecerá após gerar o PIX) -->
+                        <button class="copy-pix-btn" id="copyPixBtn" onclick="copiarPix()" style="display: none;">
+                            📋 Copiar chave PIX
+                        </button>
+                        
                         <div class="qrcode" id="qrcode">
-                            <img id="qrImage" style="width:200px;height:200px; display:none;">
+                            <i class="fas fa-qrcode" style="font-size: 80px; color: #666;"></i>
                         </div>
                         
                         <p>🔹 Escaneie o QR Code com o app do seu banco</p>
@@ -567,166 +584,252 @@
 
     <script>
         // ================= CONFIGURAÇÕES =================
-const API_URL = 'https://karaoke-api-backend3.vercel.app/api';
+        const API_URL = 'https://karaoke-api-backend3.vercel.app/api';
+        
+        let planoSelecionado = 'trimestral';
+        let metodoAtual = 'card';
 
-let planoSelecionado = 'trimestral';
-let metodoAtual = 'card';
-
-const plans = {
-    mensal: { name: 'Plano Mensal', price: 5.00, originalPrice: 5.00, description: 'Válido por 1 mês', save: 'Pagamento mensal' },
-    trimestral: { name: 'Plano Trimestral', price: 49.90, originalPrice: 74.70, description: 'Válido por 3 meses', save: 'Economize R$ 24,80' },
-    semestral: { name: 'Plano Semestral', price: 89.90, originalPrice: 149.40, description: 'Válido por 6 meses', save: 'Economize R$ 59,50' },
-    anual: { name: 'Plano Anual', price: 159.90, originalPrice: 298.80, description: 'Válido por 12 meses', save: 'Economize R$ 138,90' }
-};
-
-function criarSeletorPlanos() {
-    const selector = document.getElementById('planSelector');
-    let html = '';
-
-    for (const [key, plan] of Object.entries(plans)) {
-        html += `
-            <div class="plan-option ${key === planoSelecionado ? 'selected' : ''}" 
-                 onclick="selecionarPlano('${key}')">
-                <div class="plan-option-name">${plan.name}</div>
-                <div class="plan-option-price">
-                    R$ ${plan.price.toFixed(2).replace('.', ',')}
-                </div>
-                <div class="plan-option-period">${plan.description}</div>
-                <div class="plan-option-save">${plan.save}</div>
-            </div>
-        `;
-    }
-
-    selector.innerHTML = html;
-}
-
-window.selecionarPlano = function(plano) {
-    planoSelecionado = plano;
-
-    document.querySelectorAll('.plan-option').forEach(el => {
-        el.classList.remove('selected');
-    });
-
-    const index = Object.keys(plans).indexOf(plano);
-    document.querySelectorAll('.plan-option')[index].classList.add('selected');
-
-    atualizarResumo();
-};
-
-// FUNÇÃO CORRIGIDA: atualiza todos os valores do resumo
-function atualizarResumo() {
-    const plan = plans[planoSelecionado];
-
-    // Atualiza nome e preço do plano
-    document.getElementById('planName').textContent = plan.name;
-    document.getElementById('planPrice').textContent = `R$ ${plan.price.toFixed(2).replace('.', ',')}`;
-    document.getElementById('totalBotao').textContent = plan.price.toFixed(2).replace('.', ',');
-
-    // Atualiza subtotal, desconto e total
-    document.getElementById('subtotal').textContent = `R$ ${plan.originalPrice.toFixed(2).replace('.', ',')}`;
-    const desconto = plan.originalPrice - plan.price;
-    document.getElementById('discount').textContent = `-R$ ${desconto.toFixed(2).replace('.', ',')}`;
-    document.getElementById('total').textContent = `R$ ${plan.price.toFixed(2).replace('.', ',')}`;
-}
-
-window.selectMethod = function(method) {
-    metodoAtual = method;
-
-    document.querySelectorAll('.payment-method').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.payment-form').forEach(el => el.classList.remove('active'));
-
-    if (method === 'card') {
-        document.querySelectorAll('.payment-method')[0].classList.add('active');
-        document.getElementById('cardForm').classList.add('active');
-    } else {
-        document.querySelectorAll('.payment-method')[1].classList.add('active');
-        document.getElementById('pixForm').classList.add('active');
-    }
-};
-
-async function processarPagamento() {
-    const email = document.getElementById('emailCliente').value;
-
-    if (!email || !email.includes('@')) {
-        mostrarAlerta('Digite um e-mail válido', 'error');
-        return;
-    }
-
-    document.getElementById('loading').classList.add('active');
-    document.getElementById('btnPagar').disabled = true;
-
-    try {
-        const response = await fetch(`${API_URL}/criar-pagamento`, {
-            method: 'POST',
-            credentials: 'include', // 🔥 CORREÇÃO IMPORTANTE
-            headers: {
-                'Content-Type': 'application/json',
+        // Preços dos planos (CORRIGIDOS: mensal R$24,90)
+        const plans = {
+            mensal: { 
+                name: 'Plano Mensal', 
+                price: 5.00,
+                originalPrice: 5.00,
+                description: 'Válido por 1 mês',
+                save: 'Pagamento mensal'
             },
-            body: JSON.stringify({
-                plan: planoSelecionado,
-                email: email,
-                metodo: metodoAtual
-            })
-        });
-
-        const data = await response.json();
-
-        if (data.sucesso) {
-
-            if (metodoAtual === 'pix') {
-
-                mostrarAlerta('PIX gerado! Escaneie o QR Code', 'success');
-
-                // 🔥 MOSTRAR CÓDIGO PIX no novo elemento pixCode
-                document.getElementById("pixCode").innerText = data.qr_code;
-
-                // 🔥 MOSTRAR QR CODE usando o elemento qrImage
-                const qrImg = document.getElementById("qrImage");
-                qrImg.src = "data:image/png;base64," + data.qr_code_base64;
-                qrImg.style.display = "block";
-
-                document.getElementById('loading').classList.remove('active');
-                document.getElementById('btnPagar').disabled = false;
-
-            } else {
-                window.location.href = data.init_point;
+            trimestral: { 
+                name: 'Plano Trimestral', 
+                price: 49.90,
+                originalPrice: 74.70,
+                description: 'Válido por 3 meses',
+                save: 'Economize R$ 24,80'
+            },
+            semestral: { 
+                name: 'Plano Semestral', 
+                price: 89.90,
+                originalPrice: 149.40,
+                description: 'Válido por 6 meses',
+                save: 'Economize R$ 59,50'
+            },
+            anual: { 
+                name: 'Plano Anual', 
+                price: 159.90,
+                originalPrice: 298.80,
+                description: 'Válido por 12 meses',
+                save: 'Economize R$ 138,90'
             }
+        };
 
-        } else {
-            mostrarAlerta(data.erro || 'Erro ao pagar', 'error');
+        // Criar seletor de planos
+        function criarSeletorPlanos() {
+            const selector = document.getElementById('planSelector');
+            if (!selector) return;
+            let html = '';
+            
+            for (const [key, plan] of Object.entries(plans)) {
+                const isRecommended = key === 'trimestral';
+                const isSelected = key === planoSelecionado;
+                
+                html += `
+                    <div class="plan-option ${isRecommended ? 'recommended' : ''} ${isSelected ? 'selected' : ''}" 
+                         onclick="selecionarPlano('${key}')">
+                        <div class="plan-option-name">${plan.name}</div>
+                        <div class="plan-option-price">
+                            R$ ${plan.price.toFixed(2).replace('.', ',')} 
+                            <small>/mês</small>
+                        </div>
+                        <div class="plan-option-period">${plan.description}</div>
+                        <div class="plan-option-save">${plan.save}</div>
+                    </div>
+                `;
+            }
+            
+            selector.innerHTML = html;
         }
 
-    } catch (err) {
-        mostrarAlerta('Erro de conexão com servidor', 'error');
-    }
+        // Selecionar plano
+        window.selecionarPlano = function(plano) {
+            planoSelecionado = plano;
+            
+            // Atualizar classes
+            document.querySelectorAll('.plan-option').forEach(el => {
+                el.classList.remove('selected');
+            });
+            
+            const options = document.querySelectorAll('.plan-option');
+            const index = Object.keys(plans).indexOf(plano);
+            if (options[index]) {
+                options[index].classList.add('selected');
+            }
+            
+            atualizarResumo();
+        };
 
-    document.getElementById('loading').classList.remove('active');
-    document.getElementById('btnPagar').disabled = false;
-}
+        // Atualizar resumo do pedido
+        function atualizarResumo() {
+            const plan = plans[planoSelecionado];
+            
+            document.getElementById('planName').textContent = plan.name;
+            document.getElementById('planPrice').textContent = `R$ ${plan.price.toFixed(2).replace('.', ',')}`;
+            document.getElementById('planDescription').textContent = `${plan.description} • ${plan.save}`;
+            document.getElementById('subtotal').textContent = `R$ ${plan.originalPrice.toFixed(2).replace('.', ',')}`;
+            
+            const desconto = (plan.originalPrice - plan.price).toFixed(2).replace('.', ',');
+            document.getElementById('discount').textContent = `-R$ ${desconto}`;
+            document.getElementById('total').textContent = `R$ ${plan.price.toFixed(2).replace('.', ',')}`;
+            document.getElementById('totalBotao').textContent = plan.price.toFixed(2).replace('.', ',');
+        }
 
-function mostrarAlerta(msg, tipo) {
-    const el = document.getElementById('alertMessage');
-    el.textContent = msg;
-    el.className = `alert ${tipo}`;
+        // Selecionar método de pagamento
+        window.selectMethod = function(method) {
+            metodoAtual = method;
+            
+            document.querySelectorAll('.payment-method').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.payment-form').forEach(el => el.classList.remove('active'));
+            
+            if (method === 'card') {
+                document.querySelector('.payment-method').classList.add('active');
+                document.getElementById('cardForm').classList.add('active');
+            } else {
+                document.querySelectorAll('.payment-method')[1].classList.add('active');
+                document.getElementById('pixForm').classList.add('active');
+            }
+        };
 
-    setTimeout(() => el.className = 'alert', 5000);
-}
+        // Função para copiar o PIX
+        window.copiarPix = function() {
+            const pixKey = document.getElementById('pixKeyDisplay').innerText;
+            
+            // Usando a API moderna de clipboard
+            navigator.clipboard.writeText(pixKey).then(() => {
+                mostrarAlerta('Chave PIX copiada com sucesso!', 'success');
+            }).catch(err => {
+                // Fallback para navegadores antigos
+                const textArea = document.createElement('textarea');
+                textArea.value = pixKey;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                mostrarAlerta('Chave PIX copiada com sucesso!', 'success');
+            });
+        };
 
-// 🔥 NOVA FUNÇÃO PARA COPIAR O CÓDIGO PIX
-window.copiarPix = function() {
-    const texto = document.getElementById("pixCode").innerText;
-    if (texto) {
-        navigator.clipboard.writeText(texto);
-        alert("Código PIX copiado!");
-    } else {
-        alert("Nenhum código PIX disponível ainda.");
-    }
-};
+        // Função principal de pagamento
+        async function processarPagamento() {
+            const email = document.getElementById('emailCliente').value;
+            
+            if (!email || !email.includes('@')) {
+                mostrarAlerta('Por favor, digite um e-mail válido para receber sua senha de acesso', 'error');
+                return;
+            }
 
-window.onload = function() {
-    criarSeletorPlanos();
-    atualizarResumo();
-};
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('btnPagar').disabled = true;
+
+            try {
+                const response = await fetch(`${API_URL}/criar-pagamento`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        plan: planoSelecionado,
+                        email: email,
+                        metodo: metodoAtual   // ← ENVIA O MÉTODO SELECIONADO
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.sucesso) {
+                    localStorage.setItem('pagamento_pendente', JSON.stringify({
+                        email: email,
+                        plan: planoSelecionado,
+                        id: data.id
+                    }));
+
+                    if (metodoAtual === 'pix') {
+                        // PIX: exibe QR Code real ou simulado
+                        mostrarAlerta('PIX gerado! Escaneie o QR Code para pagar', 'success');
+                        
+                        if (data.qr_code_base64) {
+                            // QR Code real (base64) retornado pelo backend
+                            document.getElementById('qrcode').innerHTML = `
+                                <img src="data:image/jpeg;base64,${data.qr_code_base64}" 
+                                     style="width: 200px; height: 200px; border-radius: 8px;">
+                            `;
+                        } else {
+                            // Fallback: QR Code simulado com link do Mercado Pago
+                            const pixLink = `https://pix.mercadopago.com.br/${data.id}`;
+                            document.getElementById('qrcode').innerHTML = `
+                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${pixLink}" 
+                                     style="width: 150px; height: 150px; border-radius: 8px;">
+                            `;
+                        }
+                        
+                        // Exibe a chave PIX oficial e o botão de copiar
+                        document.getElementById('pixKeyDisplay').innerHTML = `
+                            <strong style="font-size: 22px;">pix@karaokemultiplayer.com.br</strong>
+                            <br>
+                            <small style="font-size: 12px;">Chave PIX oficial</small>
+                        `;
+                        
+                        // Mostra o botão de copiar
+                        document.getElementById('copyPixBtn').style.display = 'inline-block';
+                        
+                        document.getElementById('loading').classList.remove('active');
+                        document.getElementById('btnPagar').disabled = false;
+                    } else {
+                        // Cartão: redireciona para o Mercado Pago
+                        window.location.href = data.init_point;
+                    }
+                } else {
+                    mostrarAlerta('Erro ao criar pagamento: ' + (data.erro || 'Tente novamente'), 'error');
+                    document.getElementById('loading').classList.remove('active');
+                    document.getElementById('btnPagar').disabled = false;
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                mostrarAlerta('Erro ao conectar com o servidor. Verifique sua conexão.', 'error');
+                document.getElementById('loading').classList.remove('active');
+                document.getElementById('btnPagar').disabled = false;
+            }
+        }
+
+        // Mostrar alertas
+        function mostrarAlerta(mensagem, tipo) {
+            const alertEl = document.getElementById('alertMessage');
+            alertEl.textContent = mensagem;
+            alertEl.className = `alert ${tipo}`;
+            
+            setTimeout(() => {
+                alertEl.className = 'alert';
+            }, 5000);
+        }
+
+        // Verificar pagamento pendente no localStorage
+        function verificarPagamentoPendente() {
+            const pendente = localStorage.getItem('pagamento_pendente');
+            if (pendente) {
+                const dados = JSON.parse(pendente);
+                mostrarAlerta(`Você tem um pagamento pendente para ${dados.email}. Após a confirmação, a senha será enviada.`, 'success');
+            }
+        }
+
+        // Inicializar página
+        window.onload = function() {
+            criarSeletorPlanos();
+            atualizarResumo();
+            verificarPagamentoPendente();
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const planFromUrl = urlParams.get('plan');
+            if (planFromUrl && plans[planFromUrl]) {
+                selecionarPlano(planFromUrl);
+            }
+        };
     </script>
     <!-- Font Awesome para ícones (caso use) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
