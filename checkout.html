@@ -314,7 +314,6 @@
             margin: 15px 0;
             color: #333;
             word-break: break-all;
-            position: relative;
         }
         .pix-info {
             background: #e8f5e8;
@@ -397,21 +396,6 @@
             color: #155724;
             border: 1px solid #c3e6cb;
             display: block;
-        }
-        /* Estilo para o botão de copiar */
-        .copy-pix-btn {
-            background: #4CAF50;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-            margin-top: 10px;
-            transition: background 0.3s;
-        }
-        .copy-pix-btn:hover {
-            background: #45a049;
         }
     </style>
 </head>
@@ -530,11 +514,6 @@
                         <div class="pix-key-display" id="pixKeyDisplay">
                             pix@karaokemultiplayer.com.br
                         </div>
-                        
-                        <!-- Botão de copiar PIX (aparecerá após gerar o PIX) -->
-                        <button class="copy-pix-btn" id="copyPixBtn" onclick="copiarPix()" style="display: none;">
-                            📋 Copiar chave PIX
-                        </button>
                         
                         <div class="qrcode" id="qrcode">
                             <i class="fas fa-qrcode" style="font-size: 80px; color: #666;"></i>
@@ -697,25 +676,6 @@
             }
         };
 
-        // Função para copiar o PIX
-        window.copiarPix = function() {
-            const pixKey = document.getElementById('pixKeyDisplay').innerText;
-            
-            // Usando a API moderna de clipboard
-            navigator.clipboard.writeText(pixKey).then(() => {
-                mostrarAlerta('Chave PIX copiada com sucesso!', 'success');
-            }).catch(err => {
-                // Fallback para navegadores antigos
-                const textArea = document.createElement('textarea');
-                textArea.value = pixKey;
-                document.body.appendChild(textArea);
-                textArea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textArea);
-                mostrarAlerta('Chave PIX copiada com sucesso!', 'success');
-            });
-        };
-
         // Função principal de pagamento
         async function processarPagamento() {
             const email = document.getElementById('emailCliente').value;
@@ -769,15 +729,12 @@
                             `;
                         }
                         
-                        // Exibe a chave PIX oficial e o botão de copiar
+                        // Sempre exibe a chave PIX oficial
                         document.getElementById('pixKeyDisplay').innerHTML = `
                             <strong style="font-size: 22px;">pix@karaokemultiplayer.com.br</strong>
                             <br>
                             <small style="font-size: 12px;">Chave PIX oficial</small>
                         `;
-                        
-                        // Mostra o botão de copiar
-                        document.getElementById('copyPixBtn').style.display = 'inline-block';
                         
                         document.getElementById('loading').classList.remove('active');
                         document.getElementById('btnPagar').disabled = false;
