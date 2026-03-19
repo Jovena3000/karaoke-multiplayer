@@ -310,10 +310,11 @@
             border-radius: 8px;
             border: 2px dashed #4CAF50;
             font-family: monospace;
-            font-size: 20px;
+            font-size: 16px;
             margin: 15px 0;
             color: #333;
             word-break: break-all;
+            display: none; /* Inicialmente oculto */
         }
         .pix-info {
             background: #e8f5e8;
@@ -396,6 +397,22 @@
             color: #155724;
             border: 1px solid #c3e6cb;
             display: block;
+        }
+        /* Estilo para o botão de copiar */
+        .copy-pix-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+            transition: background 0.3s;
+            display: none;
+        }
+        .copy-pix-btn:hover {
+            background: #45a049;
         }
     </style>
 </head>
@@ -501,26 +518,32 @@
                     </div>
                 </div>
 
-                <!-- Área PIX -->
+                <!-- Área PIX (MODIFICADA) -->
                 <div id="pixForm" class="payment-form">
                     <div class="pix-area">
                         <h3><i class="fas fa-pix" style="color: #32BCAD;"></i> Pagamento via PIX</h3>
                         
-                        <div class="pix-info">
+                        <!-- NOVO: Mensagem amigável antes de gerar -->
+                        <div class="pix-info" style="margin-bottom: 25px;">
                             <i class="fas fa-info-circle"></i>
-                            <strong>Chave PIX oficial:</strong> Após confirmar, você pagará diretamente para:
+                            <strong>Clique no botão PAGAR abaixo para gerar seu QR Code PIX</strong>
                         </div>
                         
-                        <div class="pix-key-display" id="pixKeyDisplay">
-                            pix@karaokemultiplayer.com.br
-                        </div>
-                        
+                        <!-- Área do QR Code (inicialmente vazia) -->
                         <div class="qrcode" id="qrcode">
-                            <i class="fas fa-qrcode" style="font-size: 80px; color: #666;"></i>
+                            <i class="fas fa-qrcode" style="font-size: 80px; color: #ccc;"></i>
                         </div>
+                        
+                        <!-- Área da chave PIX (inicialmente oculta) -->
+                        <div class="pix-key-display" id="pixKeyDisplay"></div>
+                        
+                        <!-- Botão de copiar (inicialmente oculto) -->
+                        <button class="copy-pix-btn" id="copyPixBtn" onclick="copiarPix()">
+                            📋 Copiar chave PIX
+                        </button>
                         
                         <p>🔹 Escaneie o QR Code com o app do seu banco</p>
-                        <p>🔹 Ou copie a chave PIX acima e pague no seu internet banking</p>
+                        <p>🔹 Após gerar, você poderá copiar a chave PIX</p>
                         <p>⏱️ Pagamento válido por <strong>30 minutos</strong></p>
                         
                         <div style="margin-top: 20px; padding: 15px; background: #e3f2fd; border-radius: 8px;">
@@ -568,7 +591,7 @@
         let planoSelecionado = 'trimestral';
         let metodoAtual = 'card';
 
-        // Preços dos planos (CORRIGIDOS: mensal R$24,90)
+        // Preços dos planos
         const plans = {
             mensal: { 
                 name: 'Plano Mensal', 
@@ -631,7 +654,6 @@
         window.selecionarPlano = function(plano) {
             planoSelecionado = plano;
             
-            // Atualizar classes
             document.querySelectorAll('.plan-option').forEach(el => {
                 el.classList.remove('selected');
             });
@@ -676,6 +698,23 @@
             }
         };
 
+        // Função para copiar o PIX
+        window.copiarPix = function() {
+            const pixKey = document.getElementById('pixKeyDisplay').innerText;
+            
+            navigator.clipboard.writeText(pixKey).then(() => {
+                mostrarAlerta('Chave PIX copiada com sucesso!', 'success');
+            }).catch(err => {
+                const textArea = document.createElement('textarea');
+                textArea.value = pixKey;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                mostrarAlerta('Chave PIX copiada com sucesso!', 'success');
+            });
+        };
+
         // Função principal de pagamento
         async function processarPagamento() {
             const email = document.getElementById('emailCliente').value;
@@ -697,7 +736,7 @@
                     body: JSON.stringify({
                         plan: planoSelecionado,
                         email: email,
-                        metodo: metodoAtual   // ← ENVIA O MÉTODO SELECIONADO
+                        metodo: metodoAtual
                     })
                 });
 
@@ -711,17 +750,15 @@
                     }));
 
                     if (metodoAtual === 'pix') {
-                        // PIX: exibe QR Code real ou simulado
                         mostrarAlerta('PIX gerado! Escaneie o QR Code para pagar', 'success');
                         
+                        // Gerar QR Code
                         if (data.qr_code_base64) {
-                            // QR Code real (base64) retornado pelo backend
                             document.getElementById('qrcode').innerHTML = `
                                 <img src="data:image/jpeg;base64,${data.qr_code_base64}" 
                                      style="width: 200px; height: 200px; border-radius: 8px;">
                             `;
                         } else {
-                            // Fallback: QR Code simulado com link do Mercado Pago
                             const pixLink = `https://pix.mercadopago.com.br/${data.id}`;
                             document.getElementById('qrcode').innerHTML = `
                                 <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${pixLink}" 
@@ -729,19 +766,21 @@
                             `;
                         }
                         
-                        // Sempre exibe a chave PIX oficial
+                        // Mostrar a chave PIX e o botão de copiar
+                        document.getElementById('pixKeyDisplay').style.display = 'block';
                         document.getElementById('pixKeyDisplay').innerHTML = `
-    <strong style="font-size: 14px; word-break: break-all;">
-        ${data.qr_code || 'Código PIX não disponível'}
-    </strong>
-    <br>
-    <small style="font-size: 12px;">Copia e cola PIX</small>
+                            <strong style="font-size: 14px; word-break: break-all;">
+                                ${data.qr_code || 'Código PIX não disponível'}
+                            </strong>
+                            <br>
+                            <small style="font-size: 12px;">Copia e cola PIX</small>
                         `;
+                        
+                        document.getElementById('copyPixBtn').style.display = 'inline-block';
                         
                         document.getElementById('loading').classList.remove('active');
                         document.getElementById('btnPagar').disabled = false;
                     } else {
-                        // Cartão: redireciona para o Mercado Pago
                         window.location.href = data.init_point;
                     }
                 } else {
