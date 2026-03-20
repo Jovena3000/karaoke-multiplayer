@@ -215,6 +215,7 @@
             margin-bottom: 24px;
         }
 
+        /* TIMER COM EFEITO PULSANTE */
         .countdown {
             display: flex;
             align-items: center;
@@ -224,19 +225,54 @@
             padding: 8px 8px 8px 20px;
             margin-bottom: 20px;
             border: 1px solid rgba(255, 215, 0, 0.3);
+            transition: all 0.3s;
+            animation: pulseTimer 1.5s ease-in-out infinite;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+        }
+
+        @keyframes pulseTimer {
+            0% {
+                transform: scale(1);
+                border-color: rgba(255, 215, 0, 0.3);
+                box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+            }
+            50% {
+                transform: scale(1.02);
+                border-color: rgba(255, 215, 0, 0.8);
+                box-shadow: 0 0 25px rgba(255, 215, 0, 0.5);
+            }
+            100% {
+                transform: scale(1);
+                border-color: rgba(255, 215, 0, 0.3);
+                box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+            }
         }
 
         .countdown-icon {
             color: #FFD700;
             font-size: 20px;
+            animation: rotateIcon 2s linear infinite;
+        }
+
+        @keyframes rotateIcon {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         .countdown-timer {
             flex: 1;
-            font-size: 20px;
+            font-size: 24px;
             font-weight: 700;
-            color: white;
+            color: #FFD700;
             letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            animation: pulseText 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulseText {
+            0% { opacity: 1; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
+            50% { opacity: 1; text-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
+            100% { opacity: 1; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
         }
 
         .countdown-text {
@@ -246,6 +282,7 @@
             border-radius: 40px;
             font-size: 14px;
             font-weight: 600;
+            white-space: nowrap;
         }
 
         .button-group {
@@ -368,6 +405,15 @@
             h1 {
                 font-size: 28px;
             }
+            
+            .countdown-timer {
+                font-size: 20px;
+            }
+            
+            .countdown-text {
+                font-size: 12px;
+                padding: 4px 12px;
+            }
         }
     </style>
 </head>
@@ -412,19 +458,19 @@
                 Sua oferta especial continua ativa. Aproveite agora para garantir seu acesso Premium.
             </div>
             
-            <!-- Contador de urgência -->
+            <!-- TIMER PULSANTE -->
             <div class="countdown" id="countdown">
                 <span class="countdown-icon"><i class="fa-regular fa-hourglass-half"></i></span>
                 <span class="countdown-timer" id="timer">15:00</span>
-                <span class="countdown-text">desconto exclusivo</span>
+                <span class="countdown-text" id="countdown-label">desconto exclusivo</span>
             </div>
 
             <!-- Botões principais -->
             <div class="button-group">
-                <a href="https://karaokemultiplayer.com.br/checkout" class="btn btn-primary">
+                <a href="/checkout.html" class="btn btn-primary" id="btn-tentar">
                     <i class="fa-regular fa-arrow-right"></i> Tentar novamente
                 </a>
-                <a href="https://wa.me/5541998409607?text=Olá!%20Tive%20problema%20no%20pagamento.%20Plano:%20" class="btn btn-secondary" target="_blank">
+                <a href="#" id="whatsappLink" class="btn btn-secondary" target="_blank">
                     <i class="fa-brands fa-whatsapp"></i> Ajuda rápida
                 </a>
             </div>
@@ -433,7 +479,7 @@
         <!-- Alternativas e links de suporte -->
         <div class="help-links">
             <a href="#" onclick="abrirPixDireto()"><i class="fa-regular fa-qrcode"></i> Pagar com PIX</a>
-            <a href="mailto:suporte@karaokemultiplayer.com.br"><i class="fa-regular fa-envelope"></i> Suporte</a>
+            <a href="Bruna:suporte@karaokemultiplayer.com.br"><i class="fa-regular fa-envelope"></i> Suporte</a>
             <a href="#" onclick="tentarCartaoOutro()"><i class="fa-regular fa-credit-card"></i> Trocar cartão</a>
         </div>
 
@@ -446,28 +492,48 @@
     <script>
         // ===== FUNÇÕES PARA MELHORAR CONVERSÃO =====
         
-        // Função para tentar PIX diretamente (simulação)
+        // Função para tentar PIX diretamente
         function abrirPixDireto() {
             const planoSalvo = localStorage.getItem('plano_desejado') || 'mensal';
-            window.location.href = `https://karaokemultiplayer.com.br/checkout?plan=${planoSalvo}&method=pix`;
+            window.location.href = `/checkout.html?plan=${planoSalvo}&method=pix`;
         }
 
         // Função para tentar outro cartão
         function tentarCartaoOutro() {
             const planoSalvo = localStorage.getItem('plano_desejado') || 'trimestral';
-            window.location.href = `https://karaokemultiplayer.com.br/checkout?plan=${planoSalvo}&method=card`;
+            window.location.href = `/checkout.html?plan=${planoSalvo}&method=card`;
         }
 
-        // ===== CONTADOR REGRESSIVO URGÊNCIA =====
+        // Função para atualizar link do WhatsApp
+        function atualizarWhatsAppLink() {
+            const plano = localStorage.getItem('plano_desejado') || 'não informado';
+            const email = localStorage.getItem('email_usuario') || 'não informado';
+            const preco = localStorage.getItem('plano_preco') || 'R$ 5,00';
+            
+            const link = `https://wa.me/5541998409607?text=Olá!%20Tive%20problema%20no%20pagamento.%0A%0A📋%20Plano:%20${plano}%0A💰%20Valor:%20${preco}%0A📧%20Email:%20${email}`;
+            
+            const whatsappLink = document.getElementById('whatsappLink');
+            if (whatsappLink) {
+                whatsappLink.href = link;
+            }
+        }
+
+        // ===== CONTADOR REGRESSIVO URGÊNCIA COM EFEITO PULSANTE =====
         function iniciarContador(minutes = 15) {
             const timerElement = document.getElementById('timer');
+            const countdownLabel = document.getElementById('countdown-label');
+            const countdownDiv = document.querySelector('.countdown');
+            const btnPrimary = document.getElementById('btn-tentar');
+            
             let totalSeconds = minutes * 60;
             
             function updateTimer() {
                 if (totalSeconds <= 0) {
                     timerElement.textContent = "00:00";
-                    document.querySelector('.countdown-text').textContent = "oferta expirada";
-                    document.querySelector('.countdown').style.borderColor = '#FF4D4D';
+                    countdownLabel.textContent = "oferta expirada";
+                    countdownDiv.style.borderColor = '#FF4D4D';
+                    countdownDiv.style.animation = 'none'; // Para a animação pulsante
+                    btnPrimary.innerHTML = '<i class="fa-regular fa-clock"></i> Ver preços atuais';
                     return;
                 }
                 
@@ -486,14 +552,31 @@
             const urlParams = new URLSearchParams(window.location.search);
             const plan = urlParams.get('plan');
             const email = urlParams.get('email');
+            const valor = urlParams.get('valor');
             
             if (plan) {
                 localStorage.setItem('plano_desejado', plan);
+                
+                // Salvar preço do plano
+                const prices = {
+                    mensal: "R$ 5,00",
+                    trimestral: "R$ 49,90",
+                    semestral: "R$ 89,90",
+                    anual: "R$ 159,90"
+                };
+                localStorage.setItem('plano_preco', prices[plan] || "R$ 5,00");
             }
             
             if (email) {
                 localStorage.setItem('email_usuario', email);
             }
+            
+            if (valor) {
+                localStorage.setItem('valor_plano', valor);
+            }
+            
+            // Atualizar link do WhatsApp
+            atualizarWhatsAppLink();
         }
 
         // ===== INICIALIZAR =====
