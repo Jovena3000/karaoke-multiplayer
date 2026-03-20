@@ -53,7 +53,7 @@
             100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
         }
 
-        /* Floating Emojis - NOVOS EMOJIS BASEADOS NA IMAGEM */
+        /* Floating Emojis */
         .floating-emojis-container {
             position: fixed;
             top: 0;
@@ -96,7 +96,6 @@
             color: #ff4757;
         }
 
-        /* Posicionamento dos emojis */
         .emoji-1 { top: 15%; left: 5%; animation-delay: 0s; }
         .emoji-2 { top: 25%; right: 8%; animation-delay: 1s; animation-name: float-side; }
         .emoji-3 { top: 60%; left: 10%; animation-delay: 2s; }
@@ -160,6 +159,8 @@
             cursor: pointer;
             transition: all 0.3s;
             font-size: 0.9rem;
+            text-decoration: none;
+            display: inline-block;
         }
 
         .btn-login {
@@ -243,6 +244,7 @@
             cursor: pointer;
             transition: all 0.3s;
             text-decoration: none;
+            display: inline-block;
         }
 
         .btn-primary {
@@ -621,6 +623,8 @@
             cursor: pointer;
             transition: all 0.3s;
             font-size: 0.9rem;
+            text-decoration: none;
+            display: inline-block;
         }
 
         .btn-selfie {
@@ -777,6 +781,8 @@
             cursor: pointer;
             transition: all 0.3s;
             width: 100%;
+            text-decoration: none;
+            display: inline-block;
         }
 
         .btn-plan:hover {
@@ -986,50 +992,32 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <!-- Floating Emojis Section - NOVOS EMOJIS BASEADOS NA IMAGEM -->
+    <!-- Floating Emojis Section -->
     <div class="floating-emojis-container">
-        <!-- Bom +1 -->
         <div class="floating-emoji emoji-1">
             😀 <span class="positive">+1</span>
-        </div>
-        
-        <!-- Muito Bom +2 -->
-        <div class="floating-emoji emoji-2">
-            😂 <span class="positive">+1</span>
-        </div>
-        
-        <!-- Engraçado +1 -->
+        </div>        
         <div class="floating-emoji emoji-3">
             😂 <span class="positive">+1</span>
         </div>
-        
-        <!-- Ruim -1 -->
         <div class="floating-emoji emoji-4">
             👎 <span class="negative">-1</span>
         </div>
-        
-        <!-- Péssimo -2 -->
         <div class="floating-emoji emoji-5">
             😡 <span class="negative">-2</span>
         </div>
-        
-        <!-- Mais alguns emojis extras para dar vida -->
         <div class="floating-emoji emoji-6">
             🎤 <span class="positive">+1</span>
         </div>
-        
         <div class="floating-emoji emoji-7">
             ⭐ <span class="positive">+2</span>
         </div>
-        
         <div class="floating-emoji emoji-8">
             😍 <span class="positive">+1</span>
         </div>
-        
         <div class="floating-emoji emoji-9">
             😢 <span class="negative">-1</span>
         </div>
-        
         <div class="floating-emoji emoji-10">
             🎉 <span class="positive">+1</span>
         </div>
@@ -1043,8 +1031,8 @@
                 <h1>Karaokê Multiplayer</h1>
             </div>
             <div class="nav-buttons">
-                <button class="https://karaokemultiplayer.com.br/login">Entrar</button>
-                <button class="https://karaokemultiplayer.com.br/checkout">Criar Conta</button>
+                <a href="https://karaokemultiplayer.com.br/login" class="btn-nav btn-login">Entrar</a>
+                <a href="https://karaokemultiplayer.com.br/checkout" class="btn-nav btn-signup">Criar Conta</a>
             </div>
         </div>
     </header>
@@ -1060,12 +1048,12 @@
             </p>
             
             <div class="hero-buttons">
-                <button class="https://karaokemultiplayer.com.br/checkout" onclick="document.querySelector('.plans').scrollIntoView({behavior: 'smooth'})">
+                <a href="https://karaokemultiplayer.com.br/checkout" class="btn-hero btn-primary">
                     🎵 Começar Agora
-                </button>
-                <button class="https://uploads.onecompiler.io/43xkytw48/44gvhqscq/img-03.png">
+                </a>
+                <a href="https://uploads.onecompiler.io/43xkytw48/44gvhqscq/img-03.png" class="btn-hero btn-secondary" target="_blank">
                     ▶️ Ver Demonstração
-                </button>
+                </a>
             </div>
 
             <!-- Preview Cards -->
@@ -1201,9 +1189,9 @@
                             <button class="btn-score-action btn-selfie" onclick="abrirSelfie()">
                                 <i class="fas fa-camera"></i> Selfie
                             </button>
-                            <button class="https://uploads.onecompiler.io/43xkytw48/44gvhqscq/img-04.png">
+                            <a href="https://uploads.onecompiler.io/43xkytw48/44gvhqscq/img-04.png" class="btn-score-action btn-next" target="_blank">
                                 <i class="fas fa-step-forward"></i> Próxima
-                            </button>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -1230,7 +1218,7 @@
                     <li>Pontuação por emojis</li>
                     <li>Reações em tempo real</li>
                 </ul>
-                <button class="https://karaokemultiplayer.com.br/checkout">Assinar Agora</button>
+                <a href="https://karaokemultiplayer.com.br/checkout" class="btn-plan">Assinar Agora</a>
             </div>
 
             <!-- Plano Trimestral (RECOMENDADO) -->
@@ -1246,7 +1234,7 @@
                     <li>Temas exclusivos</li>
                     <li>Suporte prioritário</li>
                 </ul>
-                <button class="https://karaokemultiplayer.com.br/checkout">Assinar Agora</button>
+                <a href="https://karaokemultiplayer.com.br/checkout" class="btn-plan">Assinar Agora</a>
             </div>
 
             <!-- Plano Semestral -->
@@ -1261,7 +1249,7 @@
                     <li>Downloads das performances</li>
                     <li>Efeitos especiais</li>
                 </ul>
-                <button class="https://karaokemultiplayer.com.br/checkout">Assinar Agora</button>
+                <a href="https://karaokemultiplayer.com.br/checkout" class="btn-plan">Assinar Agora</a>
             </div>
 
             <!-- Plano Anual -->
@@ -1277,7 +1265,7 @@
                     <li>Badges especiais</li>
                     <li>Destaque na comunidade</li>
                 </ul>
-                <button class="https://karaokemultiplayer.com.br/checkout">Assinar Agora</button>
+                <a href="https://karaokemultiplayer.com.br/checkout" class="btn-plan">Assinar Agora</a>
             </div>
         </div>
     </section>
