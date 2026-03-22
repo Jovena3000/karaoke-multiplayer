@@ -1338,7 +1338,7 @@
             
             if (token && usuarioLogado) {
                 // Se já estiver logado, vai para o dashboard
-                window.location.href = '/dashboard.html';
+                window.location.href = '/app.html';
             } else {
                 // Vai para a página de login
                 window.location.href = '/login.html';
@@ -1368,7 +1368,7 @@
             // Se estiver logado e estiver na landing page, redirecionar para o dashboard
             const currentPath = window.location.pathname;
             if (token && usuarioLogado && (currentPath === '/' || currentPath === '/index.html' || currentPath === '')) {
-                window.location.href = '/dashboard.html';
+                window.location.href = '/app.html';
             }
             
             // Verificar se há redirect pendente após login
