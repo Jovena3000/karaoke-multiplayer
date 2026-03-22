@@ -314,7 +314,7 @@
             margin: 15px 0;
             color: #333;
             word-break: break-all;
-            display: none; /* Inicialmente oculto */
+            display: none;
         }
         .pix-info {
             background: #e8f5e8;
@@ -341,24 +341,153 @@
             margin-top: 0;
             color: #1976d2;
         }
+        
+        /* ===== SELOS DE SEGURANÇA - VERSÃO PROFISSIONAL ===== */
         .security-badge {
             margin-top: 30px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            text-align: center;
-            color: #666;
+            padding: 25px;
+            background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+            border-radius: 16px;
+            border: 1px solid rgba(102, 126, 234, 0.1);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.03);
         }
-        .security-badge img {
-            width: 100px;
-            margin-bottom: 10px;
+        
+        .security-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eef2ff;
         }
+        
+        .ssl-badge {
+            width: 55px;
+            height: auto;
+            background: #f0f3ff;
+            padding: 10px;
+            border-radius: 14px;
+        }
+        
+        .security-text {
+            flex: 1;
+            text-align: left;
+        }
+        
+        .security-text p {
+            font-size: 0.95rem;
+            color: #1e293b;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        .security-text small {
+            font-size: 0.75rem;
+            color: #64748b;
+            line-height: 1.5;
+            display: block;
+        }
+        
         .security-icons {
             display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-top: 10px;
+            justify-content: space-around;
+            gap: 25px;
+            margin-top: 20px;
+            flex-wrap: wrap;
         }
+        
+        .security-item {
+            text-align: center;
+            flex: 1;
+            min-width: 100px;
+            transition: transform 0.3s ease;
+        }
+        
+        .security-item:hover {
+            transform: translateY(-5px);
+        }
+        
+        .icon-circle {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #f0f3ff 0%, #e9ecff 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+        }
+        
+        .security-item:hover .icon-circle {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.25);
+        }
+        
+        .icon-circle img {
+            width: 38px;
+            height: 38px;
+            object-fit: contain;
+            transition: filter 0.3s ease;
+        }
+        
+        .security-item:hover .icon-circle img {
+            filter: brightness(0) invert(1);
+        }
+        
+        .security-item h4 {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+        
+        .security-item p {
+            font-size: 0.7rem;
+            color: #64748b;
+            margin: 0;
+        }
+        
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .security-badge {
+                padding: 20px;
+            }
+            
+            .security-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 12px;
+            }
+            
+            .security-text {
+                text-align: center;
+            }
+            
+            .ssl-badge {
+                width: 48px;
+            }
+            
+            .security-icons {
+                gap: 20px;
+            }
+            
+            .icon-circle {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .icon-circle img {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .security-item h4 {
+                font-size: 0.75rem;
+            }
+        }
+        
         .loading {
             display: none;
             text-align: center;
@@ -398,7 +527,6 @@
             border: 1px solid #c3e6cb;
             display: block;
         }
-        /* Estilo para o botão de copiar */
         .copy-pix-btn {
             background: #4CAF50;
             color: white;
@@ -518,26 +646,22 @@
                     </div>
                 </div>
 
-                <!-- Área PIX (MODIFICADA) -->
+                <!-- Área PIX -->
                 <div id="pixForm" class="payment-form">
                     <div class="pix-area">
                         <h3><i class="fas fa-pix" style="color: #32BCAD;"></i> Pagamento via PIX</h3>
                         
-                        <!-- NOVO: Mensagem amigável antes de gerar -->
                         <div class="pix-info" style="margin-bottom: 25px;">
                             <i class="fas fa-info-circle"></i>
                             <strong>Clique no botão PAGAR abaixo para gerar seu QR Code PIX</strong>
                         </div>
                         
-                        <!-- Área do QR Code (inicialmente vazia) -->
                         <div class="qrcode" id="qrcode">
                             <i class="fas fa-qrcode" style="font-size: 80px; color: #ccc;"></i>
                         </div>
                         
-                        <!-- Área da chave PIX (inicialmente oculta) -->
                         <div class="pix-key-display" id="pixKeyDisplay"></div>
                         
-                        <!-- Botão de copiar (inicialmente oculto) -->
                         <button class="copy-pix-btn" id="copyPixBtn" onclick="copiarPix()">
                             📋 Copiar chave PIX
                         </button>
@@ -569,20 +693,55 @@
                     💳 Pagar R$ <span id="totalBotao">49,90</span>
                 </button>
 
-                <!-- Selos de Segurança -->
-                <div class="security-badge">
-                    <img src="https://uploads.onecompiler.io/43xkytw48/44f54gs67/ssl.png" alt="SSL">
-                    <p>Seus dados estão protegidos</p>
-                    <small>Utilizamos criptografia SSL de 256-bit. Não armazenamos dados do seu cartão em nossos servidores. Todas as transações são processadas por meio de gateways de pagamento seguros.</small>
-                    <div class="security-icons">
-                        <span>🔒 Proteção de Dados</span>
-                        <span>↩️ Reembolso em 7 dias</span>
-                        <span>🆘 Suporte 24/7</span>
-                    </div>
-                </div>
-            </div>
+                <!-- SELOS DE SEGURANÇA - VERSÃO PROFISSIONAL COM IMAGENS -->
+                <!-- Imagem de Garantia - Selo de Confiança -->
+<div style="text-align: center; margin: 20px 0 15px 0;">
+    <img src="https://uploads.onecompiler.io/43xkytw48/44gyc8tha/7.png" 
+         alt="Garantia de 7 dias - Risco Zero"
+         style="max-width: 280px; width: 100%; height: auto; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); transition: transform 0.3s ease;"
+         onmouseover="this.style.transform='scale(1.02)'"
+         onmouseout="this.style.transform='scale(1)'">
+</div>
+
+<!-- SELOS DE SEGURANÇA - VERSÃO PROFISSIONAL COM IMAGENS -->
+<div class="security-badge">
+    <div class="security-header">
+        <img src="https://uploads.onecompiler.io/43xkytw48/44f54gs67/ssl.png" alt="SSL Secure" class="ssl-badge">
+        <div class="security-text">
+            <p><strong>🔒 Seus dados estão protegidos</strong></p>
+            <small>Utilizamos criptografia SSL de 256-bit. Não armazenamos dados do seu cartão em nossos servidores. Todas as transações são processadas por meio de gateways de pagamento seguros.</small>
         </div>
     </div>
+
+    <div class="security-icons">
+        <div class="security-item">
+            <div class="icon-circle">
+                <img src="https://uploads.onecompiler.io/43xkytw48/44gyc8tha/Servi%C3%A7os%20e%20pol%C3%ADticas%20em%20destaque.png" 
+                     alt="Proteção de Dados">
+            </div>
+            <h4>Proteção de Dados</h4>
+            <p>LGPD compliant</p>
+        </div>
+
+        <div class="security-item">
+            <div class="icon-circle">
+                <img src="https://uploads.onecompiler.io/43xkytw48/44gyc8tha/politicas.png" 
+                     alt="Reembolso em 7 dias">
+            </div>
+            <h4>Reembolso em 7 dias</h4>
+            <p>Garantia incondicional</p>
+        </div>
+
+        <div class="security-item">
+            <div class="icon-circle">
+                <img src="https://uploads.onecompiler.io/43xkytw48/44gyc8tha/Servi%C3%A7os.png" 
+                     alt="Suporte 24/7">
+            </div>
+            <h4>Suporte 24/7</h4>
+            <p>Atendimento humanizado</p>
+        </div>
+    </div>
+</div>
 
     <script>
         // ================= CONFIGURAÇÕES =================
