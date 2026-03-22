@@ -1337,7 +1337,7 @@
             const usuarioLogado = localStorage.getItem('usuario');
             
             if (token && usuarioLogado) {
-                // Se já estiver logado, vai para o dashboard
+                // Se já estiver logado, vai para o APP (não dashboard)
                 window.location.href = '/app.html';
             } else {
                 // Vai para a página de login
@@ -1365,7 +1365,7 @@
             const token = localStorage.getItem('token');
             const usuarioLogado = localStorage.getItem('usuario');
             
-            // Se estiver logado e estiver na landing page, redirecionar para o dashboard
+            // Se estiver logado e estiver na landing page, redirecionar para o APP
             const currentPath = window.location.pathname;
             if (token && usuarioLogado && (currentPath === '/' || currentPath === '/index.html' || currentPath === '')) {
                 window.location.href = '/app.html';
