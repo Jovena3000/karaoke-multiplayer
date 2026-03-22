@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Finalizar Compra - Karaokê Multiplayer</title>
     <style>
         /* ===== ESTILOS COMPLETOS ===== */
@@ -11,43 +11,60 @@
             padding: 0;
             box-sizing: border-box;
         }
+        
         body {
-            font-family: Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
         }
+        
         .container {
             max-width: 1200px;
             margin: 0 auto;
         }
+        
+        /* Header Responsivo */
         .header {
             text-align: center;
             color: white;
             margin-bottom: 30px;
         }
+        
         .header h1 {
-            font-size: 2.5em;
+            font-size: clamp(1.5rem, 5vw, 2.5rem);
             margin-bottom: 10px;
         }
+        
+        .header p {
+            font-size: clamp(0.8rem, 3vw, 1rem);
+        }
+        
+        /* Progress Steps Responsivo */
         .progress {
             display: flex;
             justify-content: center;
-            gap: 50px;
+            gap: clamp(20px, 5vw, 50px);
             color: white;
             margin: 30px 0;
+            flex-wrap: wrap;
         }
+        
         .progress-step {
             text-align: center;
             opacity: 0.7;
+            font-size: clamp(0.7rem, 3vw, 0.9rem);
         }
+        
         .progress-step.active {
             opacity: 1;
             font-weight: bold;
         }
+        
         .progress-step.active .step-number {
             background: #4CAF50;
         }
+        
         .step-number {
             background: rgba(255,255,255,0.2);
             width: 30px;
@@ -58,17 +75,21 @@
             justify-content: center;
             margin: 0 auto 5px;
         }
+        
+        /* Plan Selector Responsivo */
         .plan-selector {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 15px;
             margin-bottom: 30px;
         }
+        
         @media (max-width: 768px) {
             .plan-selector {
                 grid-template-columns: 1fr;
             }
         }
+        
         .plan-option {
             background: white;
             border: 2px solid #ddd;
@@ -78,18 +99,22 @@
             transition: all 0.3s;
             text-align: center;
         }
+        
         .plan-option:hover {
             transform: translateY(-3px);
             box-shadow: 0 5px 20px rgba(0,0,0,0.1);
         }
+        
         .plan-option.selected {
             border-color: #667eea;
             background: #f0f3ff;
         }
+        
         .plan-option.recommended {
             position: relative;
             border-color: #ffd700;
         }
+        
         .plan-option.recommended::after {
             content: "⭐ RECOMENDADO";
             position: absolute;
@@ -102,23 +127,27 @@
             border-radius: 12px;
             font-weight: bold;
         }
+        
         .plan-option-name {
-            font-size: 1.2rem;
+            font-size: clamp(1rem, 4vw, 1.2rem);
             font-weight: bold;
             color: #333;
             margin-bottom: 5px;
         }
+        
         .plan-option-price {
-            font-size: 1.5rem;
+            font-size: clamp(1.2rem, 5vw, 1.5rem);
             color: #667eea;
             font-weight: bold;
             margin-bottom: 5px;
         }
+        
         .plan-option-price small {
             font-size: 0.8rem;
             color: #999;
             font-weight: normal;
         }
+        
         .plan-option-save {
             background: #4CAF50;
             color: white;
@@ -128,92 +157,117 @@
             display: inline-block;
             margin-top: 5px;
         }
+        
         .plan-option-period {
             font-size: 0.8rem;
             color: #666;
             margin-top: 5px;
         }
+        
+        /* Checkout Content Responsivo */
         .checkout-content {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 30px;
             background: white;
             border-radius: 10px;
-            padding: 30px;
+            padding: clamp(20px, 4vw, 30px);
             box-shadow: 0 10px 40px rgba(0,0,0,0.1);
         }
+        
         @media (max-width: 768px) {
             .checkout-content {
                 grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 20px;
             }
         }
+        
         .order-summary {
             background: #f8f9fa;
             padding: 20px;
             border-radius: 8px;
         }
+        
         .order-summary h2 {
             margin-bottom: 20px;
             color: #333;
+            font-size: clamp(1.2rem, 4vw, 1.5rem);
         }
+        
         .plan-details {
             background: white;
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 20px;
         }
+        
         .plan-name {
-            font-size: 1.3em;
+            font-size: clamp(1.1rem, 4vw, 1.3rem);
             font-weight: bold;
             color: #333;
         }
+        
         .plan-price {
-            font-size: 2em;
+            font-size: clamp(1.5rem, 6vw, 2rem);
             color: #667eea;
             margin: 10px 0;
         }
+        
         .plan-price small {
             font-size: 0.5em;
             color: #666;
         }
+        
         .plan-features {
             list-style: none;
             padding: 0;
         }
+        
         .plan-features li {
             padding: 5px 0;
             color: #555;
+            font-size: clamp(0.8rem, 3vw, 0.9rem);
         }
+        
         .plan-features li:before {
             content: "✓";
             color: #4CAF50;
             margin-right: 10px;
         }
+        
         .price-details {
             border-top: 1px solid #ddd;
             padding-top: 20px;
         }
+        
         .price-row {
             display: flex;
             justify-content: space-between;
             margin: 10px 0;
             color: #666;
+            font-size: clamp(0.8rem, 3vw, 0.9rem);
         }
+        
         .price-row.total {
             font-weight: bold;
-            font-size: 1.2em;
+            font-size: clamp(1rem, 4vw, 1.2rem);
             color: #333;
             border-top: 2px solid #ddd;
             padding-top: 10px;
             margin-top: 10px;
         }
+        
         .payment-section {
             padding: 20px;
         }
+        
         .payment-section h2 {
             margin-bottom: 20px;
             color: #333;
+            font-size: clamp(1.2rem, 4vw, 1.5rem);
         }
+        
         .bonus-banner {
             background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
             padding: 15px;
@@ -221,14 +275,20 @@
             margin-bottom: 20px;
             text-align: center;
             font-weight: bold;
+            font-size: clamp(0.8rem, 3vw, 0.9rem);
         }
+        
+        /* Payment Methods Responsivo */
         .payment-methods {
             display: flex;
             gap: 20px;
             margin-bottom: 30px;
+            flex-wrap: wrap;
         }
+        
         .payment-method {
             flex: 1;
+            min-width: 120px;
             padding: 15px;
             border: 2px solid #ddd;
             border-radius: 8px;
@@ -236,66 +296,83 @@
             cursor: pointer;
             transition: all 0.3s;
         }
+        
         .payment-method.active {
             border-color: #667eea;
             background: #f0f3ff;
         }
+        
         .payment-method img {
             width: 40px;
             height: 40px;
             margin-bottom: 10px;
         }
+        
+        .payment-method div {
+            font-size: clamp(0.8rem, 3vw, 0.9rem);
+        }
+        
         .payment-form {
             display: none;
         }
+        
         .payment-form.active {
             display: block;
         }
+        
         .form-group {
             margin-bottom: 20px;
         }
+        
         .form-group label {
             display: block;
             margin-bottom: 5px;
             color: #555;
+            font-size: clamp(0.8rem, 3vw, 0.9rem);
         }
+        
         .form-group input, .form-group select {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 16px;
         }
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
+        
         .btn-pay {
             background: #4CAF50;
             color: white;
             border: none;
             padding: 15px;
             border-radius: 8px;
-            font-size: 18px;
+            font-size: clamp(1rem, 4vw, 1.125rem);
             font-weight: bold;
             width: 100%;
             cursor: pointer;
             transition: background 0.3s;
             margin-top: 20px;
         }
+        
         .btn-pay:hover {
             background: #45a049;
         }
+        
+        .btn-pay:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        /* PIX Area Responsivo */
         .pix-area {
             text-align: center;
-            padding: 30px;
+            padding: clamp(20px, 5vw, 30px);
             background: #f8f9fa;
             border-radius: 8px;
         }
+        
         .qrcode {
-            width: 200px;
-            height: 200px;
+            width: clamp(180px, 40vw, 200px);
+            height: clamp(180px, 40vw, 200px);
             background: white;
             margin: 20px auto;
             padding: 10px;
@@ -304,18 +381,26 @@
             align-items: center;
             justify-content: center;
         }
+        
+        .qrcode img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
         .pix-key-display {
             background: #fff;
             padding: 15px;
             border-radius: 8px;
             border: 2px dashed #4CAF50;
             font-family: monospace;
-            font-size: 16px;
+            font-size: clamp(12px, 3vw, 14px);
             margin: 15px 0;
             color: #333;
             word-break: break-all;
             display: none;
         }
+        
         .pix-info {
             background: #e8f5e8;
             color: #2e7d32;
@@ -324,11 +409,9 @@
             border-left: 4px solid #4CAF50;
             margin: 20px 0;
             text-align: left;
+            font-size: clamp(0.8rem, 3vw, 0.9rem);
         }
-        .pix-info i {
-            color: #4CAF50;
-            margin-right: 8px;
-        }
+        
         .mp-info-box {
             background: #e3f2fd;
             color: #0d47a1;
@@ -336,16 +419,19 @@
             border-radius: 8px;
             border-left: 4px solid #1976d2;
             margin-bottom: 20px;
+            font-size: clamp(0.8rem, 3vw, 0.9rem);
         }
+        
         .mp-info-box h3 {
             margin-top: 0;
             color: #1976d2;
+            font-size: clamp(1rem, 4vw, 1.1rem);
         }
         
-        /* ===== SELOS DE SEGURANÇA - VERSÃO PROFISSIONAL ===== */
+        /* Security Badge Responsivo */
         .security-badge {
             margin-top: 30px;
-            padding: 25px;
+            padding: clamp(20px, 4vw, 25px);
             background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
             border-radius: 16px;
             border: 1px solid rgba(102, 126, 234, 0.1);
@@ -375,14 +461,14 @@
         }
         
         .security-text p {
-            font-size: 0.95rem;
+            font-size: clamp(0.85rem, 3vw, 0.95rem);
             color: #1e293b;
             margin-bottom: 5px;
             font-weight: 600;
         }
         
         .security-text small {
-            font-size: 0.75rem;
+            font-size: clamp(0.7rem, 2.5vw, 0.75rem);
             color: #64748b;
             line-height: 1.5;
             display: block;
@@ -399,7 +485,7 @@
         .security-item {
             text-align: center;
             flex: 1;
-            min-width: 100px;
+            min-width: 90px;
             transition: transform 0.3s ease;
         }
         
@@ -408,8 +494,8 @@
         }
         
         .icon-circle {
-            width: 70px;
-            height: 70px;
+            width: clamp(60px, 12vw, 70px);
+            height: clamp(60px, 12vw, 70px);
             background: linear-gradient(135deg, #f0f3ff 0%, #e9ecff 100%);
             border-radius: 50%;
             display: flex;
@@ -426,8 +512,8 @@
         }
         
         .icon-circle img {
-            width: 38px;
-            height: 38px;
+            width: clamp(32px, 7vw, 38px);
+            height: clamp(32px, 7vw, 38px);
             object-fit: contain;
             transition: filter 0.3s ease;
         }
@@ -437,22 +523,106 @@
         }
         
         .security-item h4 {
-            font-size: 0.85rem;
+            font-size: clamp(0.7rem, 3vw, 0.85rem);
             font-weight: 700;
             color: #1e293b;
             margin-bottom: 4px;
         }
         
         .security-item p {
-            font-size: 0.7rem;
+            font-size: clamp(0.6rem, 2.5vw, 0.7rem);
             color: #64748b;
             margin: 0;
         }
         
-        /* Responsividade */
+        /* Loading e Alertas */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .loading.active {
+            display: block;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+            font-size: clamp(0.8rem, 3vw, 0.9rem);
+        }
+        
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+        
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+        
+        .copy-pix-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: clamp(14px, 4vw, 16px);
+            margin: 10px 0;
+            transition: background 0.3s;
+            display: none;
+        }
+        
+        .copy-pix-btn:hover {
+            background: #45a049;
+        }
+        
+        /* Responsividade para Tablets */
+        @media (max-width: 1024px) and (min-width: 769px) {
+            .checkout-content {
+                gap: 20px;
+            }
+            
+            .security-icons {
+                gap: 15px;
+            }
+            
+            .security-item {
+                min-width: 80px;
+            }
+        }
+        
+        /* Responsividade para Celulares */
         @media (max-width: 768px) {
-            .security-badge {
-                padding: 20px;
+            body {
+                padding: 15px;
+            }
+            
+            .progress {
+                gap: 15px;
             }
             
             .security-header {
@@ -473,74 +643,62 @@
                 gap: 20px;
             }
             
-            .icon-circle {
-                width: 60px;
-                height: 60px;
+            .payment-methods {
+                gap: 10px;
             }
             
-            .icon-circle img {
+            .payment-method {
+                min-width: 100px;
+                padding: 12px;
+            }
+            
+            .payment-method img {
                 width: 32px;
                 height: 32px;
             }
+        }
+        
+        /* Responsividade para Celulares Pequenos */
+        @media (max-width: 480px) {
+            .progress {
+                gap: 10px;
+            }
             
-            .security-item h4 {
-                font-size: 0.75rem;
+            .progress-step {
+                font-size: 0.7rem;
+            }
+            
+            .step-number {
+                width: 25px;
+                height: 25px;
+                font-size: 0.8rem;
+            }
+            
+            .payment-methods {
+                flex-direction: column;
+            }
+            
+            .payment-method {
+                width: 100%;
+            }
+            
+            .security-icons {
+                gap: 15px;
+            }
+            
+            .security-item {
+                min-width: 70px;
             }
         }
         
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 20px;
-        }
-        .loading.active {
-            display: block;
-        }
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .alert {
-            padding: 15px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-            display: none;
-        }
-        .alert.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-            display: block;
-        }
-        .alert.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-            display: block;
-        }
-        .copy-pix-btn {
-            background: #4CAF50;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            margin: 10px 0;
-            transition: background 0.3s;
-            display: none;
-        }
-        .copy-pix-btn:hover {
-            background: #45a049;
+        /* Ajustes para Touch Screen */
+        @media (hover: none) {
+            .plan-option:hover,
+            .security-item:hover,
+            .btn-pay:hover,
+            .copy-pix-btn:hover {
+                transform: none;
+            }
         }
     </style>
 </head>
@@ -568,7 +726,7 @@
 
         <!-- SELETOR DE PLANOS (será preenchido via JS) -->
         <div style="margin-bottom: 20px;">
-            <h2 style="color: white; text-align: center; margin-bottom: 20px;">Escolha seu plano:</h2>
+            <h2 style="color: white; text-align: center; margin-bottom: 20px; font-size: clamp(1.2rem, 5vw, 1.8rem);">Escolha seu plano:</h2>
             <div class="plan-selector" id="planSelector"></div>
         </div>
 
@@ -620,7 +778,7 @@
                 <div class="form-group">
                     <label>📧 Seu melhor e-mail (para receber a senha de acesso)</label>
                     <input type="email" id="emailCliente" placeholder="exemplo@email.com" required>
-                    <small style="color: #666;">Após a confirmação, enviaremos sua senha para este e-mail</small>
+                    <small style="color: #666; display: block; margin-top: 5px; font-size: clamp(0.7rem, 2.5vw, 0.8rem);">Após a confirmação, enviaremos sua senha para este e-mail</small>
                 </div>
 
                 <!-- Métodos de pagamento -->
@@ -693,55 +851,57 @@
                     💳 Pagar R$ <span id="totalBotao">49,90</span>
                 </button>
 
-                <!-- SELOS DE SEGURANÇA - VERSÃO PROFISSIONAL COM IMAGENS -->
                 <!-- Imagem de Garantia - Selo de Confiança -->
-<div style="text-align: center; margin: 20px 0 15px 0;">
-    <img src="https://uploads.onecompiler.io/43xkytw48/44gyc8tha/7.png" 
-         alt="Garantia de 7 dias - Risco Zero"
-         style="max-width: 280px; width: 100%; height: auto; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); transition: transform 0.3s ease;"
-         onmouseover="this.style.transform='scale(1.02)'"
-         onmouseout="this.style.transform='scale(1)'">
-</div>
+                <div style="text-align: center; margin: 20px 0 15px 0;">
+                    <img src="https://uploads.onecompiler.io/43xkytw48/44gyc8tha/7.png" 
+                         alt="Garantia de 7 dias - Risco Zero"
+                         style="max-width: 280px; width: 100%; height: auto; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); transition: transform 0.3s ease;"
+                         onmouseover="this.style.transform='scale(1.02)'"
+                         onmouseout="this.style.transform='scale(1)'">
+                </div>
 
-<!-- SELOS DE SEGURANÇA - VERSÃO PROFISSIONAL COM IMAGENS -->
-<div class="security-badge">
-    <div class="security-header">
-        <img src="https://uploads.onecompiler.io/43xkytw48/44f54gs67/ssl.png" alt="SSL Secure" class="ssl-badge">
-        <div class="security-text">
-            <p><strong>🔒 Seus dados estão protegidos</strong></p>
-            <small>Utilizamos criptografia SSL de 256-bit. Não armazenamos dados do seu cartão em nossos servidores. Todas as transações são processadas por meio de gateways de pagamento seguros.</small>
+                <!-- SELOS DE SEGURANÇA - VERSÃO PROFISSIONAL COM IMAGENS -->
+                <div class="security-badge">
+                    <div class="security-header">
+                        <img src="https://uploads.onecompiler.io/43xkytw48/44f54gs67/ssl.png" alt="SSL Secure" class="ssl-badge">
+                        <div class="security-text">
+                            <p><strong>🔒 Seus dados estão protegidos</strong></p>
+                            <small>Utilizamos criptografia SSL de 256-bit. Não armazenamos dados do seu cartão em nossos servidores. Todas as transações são processadas por meio de gateways de pagamento seguros.</small>
+                        </div>
+                    </div>
+
+                    <div class="security-icons">
+                        <div class="security-item">
+                            <div class="icon-circle">
+                                <img src="https://uploads.onecompiler.io/43xkytw48/44gyc8tha/Servi%C3%A7os%20e%20pol%C3%ADticas%20em%20destaque.png" 
+                                     alt="Proteção de Dados">
+                            </div>
+                            <h4>Proteção de Dados</h4>
+                            <p>LGPD compliant</p>
+                        </div>
+
+                        <div class="security-item">
+                            <div class="icon-circle">
+                                <img src="https://uploads.onecompiler.io/43xkytw48/44gyc8tha/politicas.png" 
+                                     alt="Reembolso em 7 dias">
+                            </div>
+                            <h4>Reembolso em 7 dias</h4>
+                            <p>Garantia incondicional</p>
+                        </div>
+
+                        <div class="security-item">
+                            <div class="icon-circle">
+                                <img src="https://uploads.onecompiler.io/43xkytw48/44gyc8tha/Servi%C3%A7os.png" 
+                                     alt="Suporte 24/7">
+                            </div>
+                            <h4>Suporte 24/7</h4>
+                            <p>Atendimento humanizado</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-
-    <div class="security-icons">
-        <div class="security-item">
-            <div class="icon-circle">
-                <img src="https://uploads.onecompiler.io/43xkytw48/44gyc8tha/Servi%C3%A7os%20e%20pol%C3%ADticas%20em%20destaque.png" 
-                     alt="Proteção de Dados">
-            </div>
-            <h4>Proteção de Dados</h4>
-            <p>LGPD compliant</p>
-        </div>
-
-        <div class="security-item">
-            <div class="icon-circle">
-                <img src="https://uploads.onecompiler.io/43xkytw48/44gyc8tha/politicas.png" 
-                     alt="Reembolso em 7 dias">
-            </div>
-            <h4>Reembolso em 7 dias</h4>
-            <p>Garantia incondicional</p>
-        </div>
-
-        <div class="security-item">
-            <div class="icon-circle">
-                <img src="https://uploads.onecompiler.io/43xkytw48/44gyc8tha/Servi%C3%A7os.png" 
-                     alt="Suporte 24/7">
-            </div>
-            <h4>Suporte 24/7</h4>
-            <p>Atendimento humanizado</p>
-        </div>
-    </div>
-</div>
 
     <script>
         // ================= CONFIGURAÇÕES =================
@@ -915,24 +1075,24 @@
                         if (data.qr_code_base64) {
                             document.getElementById('qrcode').innerHTML = `
                                 <img src="data:image/jpeg;base64,${data.qr_code_base64}" 
-                                     style="width: 200px; height: 200px; border-radius: 8px;">
+                                     style="width: 100%; height: 100%; border-radius: 8px; object-fit: contain;">
                             `;
                         } else {
                             const pixLink = `https://pix.mercadopago.com.br/${data.id}`;
                             document.getElementById('qrcode').innerHTML = `
                                 <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${pixLink}" 
-                                     style="width: 150px; height: 150px; border-radius: 8px;">
+                                     style="width: 100%; height: 100%; border-radius: 8px; object-fit: contain;">
                             `;
                         }
                         
                         // Mostrar a chave PIX e o botão de copiar
                         document.getElementById('pixKeyDisplay').style.display = 'block';
                         document.getElementById('pixKeyDisplay').innerHTML = `
-                            <strong style="font-size: 14px; word-break: break-all;">
+                            <strong style="font-size: clamp(12px, 3vw, 14px); word-break: break-all;">
                                 ${data.qr_code || 'Código PIX não disponível'}
                             </strong>
                             <br>
-                            <small style="font-size: 12px;">Copia e cola PIX</small>
+                            <small style="font-size: clamp(10px, 2.5vw, 12px);">Copia e cola PIX</small>
                         `;
                         
                         document.getElementById('copyPixBtn').style.display = 'inline-block';
@@ -988,7 +1148,7 @@
             }
         };
     </script>
-    <!-- Font Awesome para ícones (caso use) -->
+    <!-- Font Awesome para ícones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </body>
 </html>
