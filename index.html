@@ -1005,7 +1005,7 @@
         <div class="floating-emoji emoji-9">
             😢 <span class="negative">-1</span>
         </div>
-        </div>
+    </div>
         
     <!-- Header -->
     <header class="header">
@@ -1015,8 +1015,8 @@
                 <h1>Karaokê Multiplayer</h1>
             </div>
             <div class="nav-buttons">
-                <a href="https://karaokemultiplayer.com.br/login" class="btn-nav btn-login">Entrar</a>
-                <a href="https://karaokemultiplayer.com.br/checkout" class="btn-nav btn-signup">Criar Conta</a>
+                <a href="javascript:void(0)" onclick="irParaLogin()" class="btn-nav btn-login">Entrar</a>
+                <a href="javascript:void(0)" onclick="irParaCheckout()" class="btn-nav btn-signup">Criar Conta</a>
             </div>
         </div>
     </header>
@@ -1032,7 +1032,7 @@
             </p>
             
             <div class="hero-buttons">
-                <a href="https://karaokemultiplayer.com.br/checkout" class="btn-hero btn-primary">
+                <a href="javascript:void(0)" onclick="irParaCheckout()" class="btn-hero btn-primary">
                     🎵 Começar Agora
                 </a>
                 <a href="https://uploads.onecompiler.io/43xkytw48/44gvhqscq/img-03.png" class="btn-hero btn-secondary" target="_blank">
@@ -1202,7 +1202,7 @@
                     <li>Pontuação por emojis</li>
                     <li>Reações em tempo real</li>
                 </ul>
-                <a href="https://karaokemultiplayer.com.br/checkout" class="btn-plan">Assinar Agora</a>
+                <a href="javascript:void(0)" onclick="irParaCheckout()" class="btn-plan">Assinar Agora</a>
             </div>
 
             <!-- Plano Trimestral (RECOMENDADO) -->
@@ -1218,7 +1218,7 @@
                     <li>Temas exclusivos</li>
                     <li>Suporte prioritário</li>
                 </ul>
-                <a href="https://karaokemultiplayer.com.br/checkout" class="btn-plan">Assinar Agora</a>
+                <a href="javascript:void(0)" onclick="irParaCheckout()" class="btn-plan">Assinar Agora</a>
             </div>
 
             <!-- Plano Semestral -->
@@ -1233,7 +1233,7 @@
                     <li>Downloads das performances</li>
                     <li>Efeitos especiais</li>
                 </ul>
-                <a href="https://karaokemultiplayer.com.br/checkout" class="btn-plan">Assinar Agora</a>
+                <a href="javascript:void(0)" onclick="irParaCheckout()" class="btn-plan">Assinar Agora</a>
             </div>
 
             <!-- Plano Anual -->
@@ -1249,7 +1249,7 @@
                     <li>Badges especiais</li>
                     <li>Destaque na comunidade</li>
                 </ul>
-                <a href="https://karaokemultiplayer.com.br/checkout" class="btn-plan">Assinar Agora</a>
+                <a href="javascript:void(0)" onclick="irParaCheckout()" class="btn-plan">Assinar Agora</a>
             </div>
         </div>
     </section>
@@ -1329,6 +1329,58 @@
     </footer>
 
     <script>
+        // ========== FUNÇÕES DE REDIRECIONAMENTO CORRIGIDAS ==========
+        
+        function irParaLogin() {
+            // Verifica se o usuário já está logado
+            const token = localStorage.getItem('token');
+            const usuarioLogado = localStorage.getItem('usuario');
+            
+            if (token && usuarioLogado) {
+                // Se já estiver logado, vai para o dashboard
+                window.location.href = '/dashboard.html';
+            } else {
+                // Vai para a página de login
+                window.location.href = '/login.html';
+            }
+        }
+
+        function irParaCheckout() {
+            // Verifica se o usuário já está logado
+            const token = localStorage.getItem('token');
+            const usuarioLogado = localStorage.getItem('usuario');
+            
+            if (token && usuarioLogado) {
+                // Se já estiver logado, vai direto para o checkout
+                window.location.href = '/checkout.html';
+            } else {
+                // Salva onde o usuário queria ir e redireciona para login
+                localStorage.setItem('redirectAfterLogin', '/checkout.html');
+                window.location.href = '/login.html';
+            }
+        }
+
+        // Verificar se o usuário já está logado ao carregar a página
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('token');
+            const usuarioLogado = localStorage.getItem('usuario');
+            
+            // Se estiver logado e estiver na landing page, redirecionar para o dashboard
+            const currentPath = window.location.pathname;
+            if (token && usuarioLogado && (currentPath === '/' || currentPath === '/index.html' || currentPath === '')) {
+                window.location.href = '/dashboard.html';
+            }
+            
+            // Verificar se há redirect pendente após login
+            const redirectUrl = localStorage.getItem('redirectAfterLogin');
+            if (redirectUrl && token && usuarioLogado) {
+                localStorage.removeItem('redirectAfterLogin');
+                window.location.href = redirectUrl;
+            }
+        });
+
+        // ========== FUNÇÕES EXISTENTES ==========
+        
         function copiarLink() {
             const link = 'https://karaoke.com.br/sala/7K4GPP';
             navigator.clipboard.writeText(link).then(() => {
@@ -1375,16 +1427,6 @@
                 setTimeout(() => confete.remove(), 3000);
             }
         }
-
-        // Adicionar keyframe de confete
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes confetti {
-                0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-                100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
-            }
-        `;
-        document.head.appendChild(style);
     </script>
 </body>
 </html>
