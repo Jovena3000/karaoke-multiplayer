@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Karaokê Multiplayer - Cante, Pontue, Compartilhe!</title>
     <style>
         * {
@@ -67,7 +67,7 @@
 
         .floating-emoji {
             position: absolute;
-            font-size: 2.5rem;
+            font-size: clamp(1.2rem, 4vw, 2.5rem);
             filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
             animation: float 8s ease-in-out infinite;
             white-space: nowrap;
@@ -76,13 +76,13 @@
             gap: 5px;
             background: rgba(255,255,255,0.2);
             backdrop-filter: blur(5px);
-            padding: 8px 15px;
+            padding: clamp(4px, 2vw, 8px) clamp(8px, 3vw, 15px);
             border-radius: 50px;
             border: 2px solid rgba(255,255,255,0.3);
         }
 
         .floating-emoji span {
-            font-size: 1rem;
+            font-size: clamp(0.7rem, 2.5vw, 1rem);
             font-weight: bold;
             color: white;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
@@ -102,6 +102,12 @@
         .emoji-6 { bottom: 20%; right: 5%; animation-delay: 5s; }
         .emoji-8 { top: 30%; left: 40%; animation-delay: 7s; animation-name: float-side; }
         .emoji-9 { top: 50%; right: 25%; animation-delay: 8s; }
+        
+        @media (max-width: 768px) {
+            .emoji-1, .emoji-2, .emoji-4, .emoji-6, .emoji-8, .emoji-9 {
+                display: none;
+            }
+        }
         
         /* Header */
         .header {
@@ -275,6 +281,20 @@
             animation: slideIn 1s ease-out;
         }
 
+        @media (max-width: 1024px) {
+            .preview-showcase {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .preview-showcase {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+
         .preview-card {
             background: white;
             border-radius: 20px;
@@ -282,6 +302,8 @@
             box-shadow: 0 20px 40px rgba(0,0,0,0.2);
             transition: all 0.3s;
             border: 1px solid rgba(255,255,255,0.3);
+            display: flex;
+            flex-direction: column;
         }
 
         .preview-card:hover {
@@ -324,11 +346,28 @@
             font-size: 0.9rem;
         }
 
-        /* Card 1 - Tela Principal */
+        .main-screen, .queue-screen, .score-screen {
+            flex: 1;
+        }
+
         .main-screen {
             background: #1a1a2e;
             color: white;
             padding: 20px;
+        }
+
+        .queue-screen {
+            background: white;
+            padding: 20px;
+        }
+
+        .score-screen {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 25px;
+            color: white;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
         }
 
         .song-player {
@@ -428,22 +467,6 @@
             color: white;
         }
 
-        .participant-name {
-            font-weight: 500;
-        }
-
-        .participant-status {
-            margin-left: auto;
-            font-size: 0.7rem;
-            color: #4CAF50;
-        }
-
-        /* Card 2 - Fila de Espera */
-        .queue-screen {
-            background: white;
-            padding: 20px;
-        }
-
         .queue-header {
             display: flex;
             justify-content: space-between;
@@ -491,62 +514,6 @@
             justify-content: center;
             font-weight: bold;
             color: #333;
-        }
-
-        .queue-info {
-            flex: 1;
-        }
-
-        .queue-song {
-            font-weight: bold;
-            color: #333;
-        }
-
-        .queue-user {
-            font-size: 0.8rem;
-            color: #666;
-        }
-
-        .queue-thumb {
-            width: 40px;
-            height: 40px;
-            background: #e0e0e0;
-            border-radius: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #999;
-            font-size: 0.7rem;
-        }
-
-        /* Card 3 - Pontuação Final */
-        .score-screen {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 25px;
-            color: white;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .score-screen::before {
-            content: "🎤";
-            position: absolute;
-            top: -10px;
-            left: -10px;
-            font-size: 100px;
-            opacity: 0.1;
-            transform: rotate(-15deg);
-        }
-
-        .score-screen::after {
-            content: "⭐";
-            position: absolute;
-            bottom: -10px;
-            right: -10px;
-            font-size: 100px;
-            opacity: 0.1;
-            transform: rotate(15deg);
         }
 
         .performer {
@@ -673,17 +640,54 @@
             margin: 0 auto;
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
+            gap: 25px;
+        }
+
+        @media (max-width: 1024px) and (min-width: 769px) {
+            .plans-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .plans-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn-hero {
+                width: 100%;
+                max-width: 280px;
+                text-align: center;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 10px;
+            }
         }
 
         .plan-card {
             background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
             border-radius: 15px;
-            padding: 30px 20px;
+            padding: 25px 20px;
             text-align: center;
             transition: all 0.3s;
             position: relative;
             border: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
         }
 
         .plan-card:hover {
@@ -694,8 +698,14 @@
 
         .plan-card.recommended {
             border: 3px solid #ffd700;
-            transform: scale(1.05);
+            transform: scale(1.02);
             background: linear-gradient(135deg, #fff9e6 0%, #fff2cc 100%);
+        }
+
+        @media (max-width: 768px) {
+            .plan-card.recommended {
+                transform: scale(1);
+            }
         }
 
         .plan-card.recommended::before {
@@ -708,7 +718,7 @@
             color: #333;
             padding: 5px 20px;
             border-radius: 20px;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: bold;
             white-space: nowrap;
         }
@@ -721,35 +731,37 @@
         }
 
         .plan-price {
-            font-size: 2.5rem;
+            font-size: 2rem;
             color: #667eea;
             margin-bottom: 5px;
         }
 
         .plan-price small {
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             color: #999;
         }
 
         .plan-period {
             color: #666;
             margin-bottom: 15px;
+            font-size: 0.85rem;
         }
 
         .plan-save {
             background: #4CAF50;
             color: white;
-            padding: 5px 15px;
+            padding: 5px 12px;
             border-radius: 20px;
-            font-size: 0.8rem;
+            font-size: 0.7rem;
             display: inline-block;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .plan-features {
             list-style: none;
-            margin: 20px 0;
+            margin: 15px 0 20px;
             text-align: left;
+            flex: 1;
         }
 
         .plan-features li {
@@ -759,6 +771,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            font-size: 0.85rem;
         }
 
         .plan-features li:before {
@@ -771,7 +784,7 @@
             background: #667eea;
             color: white;
             border: none;
-            padding: 12px 30px;
+            padding: 12px 20px;
             border-radius: 25px;
             font-weight: bold;
             cursor: pointer;
@@ -779,11 +792,13 @@
             width: 100%;
             text-decoration: none;
             display: inline-block;
+            font-size: 0.95rem;
+            margin-top: auto;
         }
 
         .btn-plan:hover {
             background: #5a67d8;
-            transform: scale(1.05);
+            transform: scale(1.02);
         }
 
         /* Selfie Modal */
@@ -848,10 +863,11 @@
             display: flex;
             gap: 15px;
             justify-content: center;
+            flex-wrap: wrap;
         }
 
         .btn-selfie-action {
-            padding: 12px 25px;
+            padding: 10px 20px;
             border: none;
             border-radius: 25px;
             font-weight: bold;
@@ -874,8 +890,182 @@
             color: #333;
         }
 
-        .btn-download:hover, .btn-share:hover {
+        /* Modal para imagem */
+        .imagem-modal {
+            display: none;
+            position: fixed;
+            z-index: 3000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.95);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .imagem-modal.active {
+            display: flex;
+        }
+
+        .imagem-modal-content {
+            position: relative;
+            max-width: 90%;
+            max-height: 90%;
+            margin: auto;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .imagem-modal-content img {
+            width: 100%;
+            height: auto;
+            max-height: 85vh;
+            object-fit: contain;
+            border-radius: 12px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+        }
+
+        .imagem-modal-close {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            color: white;
+            font-size: 35px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .imagem-modal-close:hover {
+            color: #ffd700;
+        }
+
+        .imagem-modal-caption {
+            text-align: center;
+            margin-top: 20px;
+            color: white;
+        }
+
+        .imagem-modal-caption h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #ffd700;
+        }
+
+        .imagem-modal-caption p {
+            margin-bottom: 15px;
+            font-size: 1rem;
+        }
+
+        .btn-share-modal {
+            background: #ffd700;
+            color: #333;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .btn-share-modal:hover {
             transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(255,215,0,0.4);
+        }
+
+        /* ===== NOVA SEÇÃO: CHAMADAS PARA AÇÃO ===== */
+        .cta-showcase {
+            margin: 60px 0 40px;
+            padding: 0 20px;
+        }
+
+        .cta-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+        }
+
+        .cta-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.98) 100%);
+            border-radius: 20px;
+            padding: 28px 24px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(102, 126, 234, 0.15);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            backdrop-filter: blur(2px);
+        }
+
+        .cta-card:hover {
+            transform: translateY(-8px);
+            border-color: #667eea;
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.15);
+        }
+
+        .cta-card.cta-highlight {
+            background: linear-gradient(135deg, #fff9e6 0%, #fff2cc 100%);
+            border-left: 4px solid #ffd700;
+            position: relative;
+        }
+
+        .cta-card.cta-highlight::before {
+            content: "✨ MAIS POPULAR ✨";
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ffd700;
+            color: #333;
+            font-size: 0.7rem;
+            font-weight: bold;
+            padding: 3px 12px;
+            border-radius: 20px;
+            white-space: nowrap;
+        }
+
+        .cta-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .cta-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 12px;
+            color: #1e293b;
+            font-weight: 700;
+        }
+
+        .cta-card p {
+            color: #475569;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .cta-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 28px;
+            border-radius: 40px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .cta-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
         }
 
         /* Footer */
@@ -891,6 +1081,48 @@
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 30px;
+        }
+
+        @media (max-width: 1024px) {
+            .footer-content {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 30px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 30px;
+                text-align: center;
+            }
+            
+            .social-links {
+                justify-content: center;
+            }
+            
+            .cta-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .cta-card {
+                padding: 22px 20px;
+            }
+            
+            .cta-card h3 {
+                font-size: 1.2rem;
+            }
+            
+            .cta-icon {
+                font-size: 2.5rem;
+            }
+            
+            .cta-card.cta-highlight::before {
+                font-size: 0.6rem;
+                padding: 2px 10px;
+                white-space: nowrap;
+            }
         }
 
         .footer-column h4 {
@@ -942,45 +1174,14 @@
             color: #a0a0a0;
         }
 
-        /* Responsive */
-        @media (max-width: 1024px) {
-            .preview-showcase {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .plans-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .footer-content {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .hero-title {
-                font-size: 2.5rem;
-            }
-            
-            .hero-buttons {
-                flex-direction: column;
-            }
-            
-            .preview-showcase {
-                grid-template-columns: 1fr;
-            }
-            
-            .plans-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .footer-content {
-                grid-template-columns: 1fr;
-            }
-            
-            .floating-emoji {
-                font-size: 1.5rem;
-                padding: 4px 10px;
+        /* Ajustes para Touch Screen */
+        @media (hover: none) {
+            .plan-card:hover,
+            .preview-card:hover,
+            .btn-plan:hover,
+            .btn-hero:hover,
+            .cta-card:hover {
+                transform: none;
             }
         }
     </style>
@@ -1140,7 +1341,7 @@
                     </div>
                 </div>
 
-                <!-- Card 3: Pontuação Final -->
+                <!-- Card 3: Pontuação Final - COM BOTÃO PRÓXIMA MODIFICADO -->
                 <div class="preview-card">
                     <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
                         <span class="room-tag">FINAL</span>
@@ -1173,12 +1374,97 @@
                             <button class="btn-score-action btn-selfie" onclick="abrirSelfie()">
                                 <i class="fas fa-camera"></i> Selfie
                             </button>
-                            <a href="https://uploads.onecompiler.io/43xkytw48/44gvhqscq/img-04.png" class="btn-score-action btn-next" target="_blank">
+                            <button class="btn-score-action btn-next" onclick="abrirModalImagem()">
                                 <i class="fas fa-step-forward"></i> Próxima
-                            </a>
+                            </button>
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- NOVA SEÇÃO: CHAMADAS PARA AÇÃO IRRESISTÍVEIS -->
+    <section class="cta-showcase">
+        <div class="cta-grid">
+            <!-- CTA 1: Sem microfone -->
+            <div class="cta-card cta-highlight">
+                <div class="cta-icon">🎤➖</div>
+                <h3>Sem microfone? Sem problema!</h3>
+                <p>No Karaokê Multiplayer, quem te dá a nota é a galera — com emojis em tempo real. Cante do sofá, da TV ou do celular. Sua plateia decide se você é lenda ou meme.</p>
+                <a href="javascript:void(0)" onclick="irParaCheckout()" class="cta-btn">Começar a Brilhar →</a>
+            </div>
+
+            <!-- CTA 2: Multi-telas -->
+            <div class="cta-card">
+                <div class="cta-icon">📱💻📺</div>
+                <h3>De qualquer lugar, em qualquer tela</h3>
+                <p>Computador, tablet, celular ou Smart TV — seu palco está onde você estiver. A plateia participa pelo celular, mandando emojis que valem pontos.</p>
+                <a href="javascript:void(0)" onclick="irParaCheckout()" class="cta-btn">Criar Minha Sala →</a>
+            </div>
+
+            <!-- CTA 3: Plateia que pontua -->
+            <div class="cta-card">
+                <div class="cta-icon">👥➡️⭐</div>
+                <h3>Agora quem decide é a galera</h3>
+                <p>Cada emoji vale nota. Quanto mais a plateia se emocionar, mais alta sua pontuação. No final, o resultado vira uma selfie para guardar ou postar.</p>
+                <a href="javascript:void(0)" onclick="irParaCheckout()" class="cta-btn">Ativar Minha Plateia →</a>
+            </div>
+
+            <!-- CTA 4: Selfie lendária -->
+            <div class="cta-card cta-highlight">
+                <div class="cta-icon">📸✨</div>
+                <h3>Cante, pontue, vire estrela</h3>
+                <p>Sua performance vira um momento único: ao final, veja sua pontuação, tire uma selfie e compartilhe sua carreira brilhante. O público decide, você brilha.</p>
+                <a href="javascript:void(0)" onclick="irParaCheckout()" class="cta-btn">Quero Minha Selfie Lendária →</a>
+            </div>
+
+            <!-- CTA 5: Festa em qualquer lugar -->
+            <div class="cta-card">
+                <div class="cta-icon">🎉🏠</div>
+                <h3>O karaokê que se adapta à sua vida</h3>
+                <p>De casa, da festa ou na fila do banco? Sim, dá pra cantar e pontuar de onde quiser, com quem quiser. A festa acontece onde você estiver.</p>
+                <a href="javascript:void(0)" onclick="irParaCheckout()" class="cta-btn">Liberar Meu Acesso →</a>
+            </div>
+
+            <!-- CTA 6: Show inesquecível -->
+            <div class="cta-card">
+                <div class="cta-icon">🎭🎤</div>
+                <h3>Transforme qualquer festa em um SHOW inesquecível</h3>
+                <p>Com karaokê sincronizado, pontuação colaborativa e selfie final, seu evento vira hit nas redes. Tudo em um só lugar.</p>
+                <a href="javascript:void(0)" onclick="irParaCheckout()" class="cta-btn">Criar Evento →</a>
+            </div>
+
+            <!-- CTA 7: Sem equipamentos -->
+            <div class="cta-card">
+                <div class="cta-icon">🎧🚫</div>
+                <h3>Nada de equipamentos caros</h3>
+                <p>Só você, seus amigos e a vontade de cantar. Acesse pelo navegador, compartilhe o link da sala e comece a receber emojis — e pontos — de quem está assistindo.</p>
+                <a href="javascript:void(0)" onclick="irParaCheckout()" class="cta-btn">Quero Cantar Agora →</a>
+            </div>
+
+            <!-- CTA 8: Emoção do público -->
+            <div class="cta-card cta-highlight">
+                <div class="cta-icon">😍🔥👏</div>
+                <h3>Cada emoji vale nota</h3>
+                <p>Quanto mais a plateia se emocionar, mais alta sua pontuação. No final, o resultado vira uma selfie para guardar ou postar.</p>
+                <a href="javascript:void(0)" onclick="irParaCheckout()" class="cta-btn">Ativar Minha Plateia →</a>
+            </div>
+
+            <!-- CTA 9: Carreira brilhante -->
+            <div class="cta-card">
+                <div class="cta-icon">⭐🌟⭐</div>
+                <h3>Cante como se ninguém estivesse vendo — mas eles estão</h3>
+                <p>Sua pontuação final vira um troféu digital que você pode postar e dizer: "Essa foi minha performance lendária!"</p>
+                <a href="javascript:void(0)" onclick="irParaCheckout()" class="cta-btn">Viver Minha Estrela →</a>
+            </div>
+
+            <!-- CTA 10: Liberdade total -->
+            <div class="cta-card">
+                <div class="cta-icon">🌍🎶</div>
+                <h3>Karaokê sem fronteiras</h3>
+                <p>Conecte amigos de qualquer lugar, em qualquer dispositivo. Cantem juntos, pontuem juntos e criem memórias inesquecíveis.</p>
+                <a href="javascript:void(0)" onclick="irParaCheckout()" class="cta-btn">Começar Agora →</a>
             </div>
         </div>
     </section>
@@ -1202,7 +1488,7 @@
                     <li>Pontuação por emojis</li>
                     <li>Reações em tempo real</li>
                 </ul>
-                <a href="javascript:void(0)" onclick="irParaCheckout()" class="btn-plan">Assinar Agora</a>
+                <a href="javascript:void(0)" onclick="irParaCheckoutComPlano('mensal')" class="btn-plan">Assinar Agora</a>
             </div>
 
             <!-- Plano Trimestral (RECOMENDADO) -->
@@ -1218,7 +1504,7 @@
                     <li>Temas exclusivos</li>
                     <li>Suporte prioritário</li>
                 </ul>
-                <a href="javascript:void(0)" onclick="irParaCheckout()" class="btn-plan">Assinar Agora</a>
+                <a href="javascript:void(0)" onclick="irParaCheckoutComPlano('trimestral')" class="btn-plan">Assinar Agora</a>
             </div>
 
             <!-- Plano Semestral -->
@@ -1233,7 +1519,7 @@
                     <li>Downloads das performances</li>
                     <li>Efeitos especiais</li>
                 </ul>
-                <a href="javascript:void(0)" onclick="irParaCheckout()" class="btn-plan">Assinar Agora</a>
+                <a href="javascript:void(0)" onclick="irParaCheckoutComPlano('semestral')" class="btn-plan">Assinar Agora</a>
             </div>
 
             <!-- Plano Anual -->
@@ -1249,7 +1535,7 @@
                     <li>Badges especiais</li>
                     <li>Destaque na comunidade</li>
                 </ul>
-                <a href="javascript:void(0)" onclick="irParaCheckout()" class="btn-plan">Assinar Agora</a>
+                <a href="javascript:void(0)" onclick="irParaCheckoutComPlano('anual')" class="btn-plan">Assinar Agora</a>
             </div>
         </div>
     </section>
@@ -1279,6 +1565,21 @@
                 </button>
                 <button class="btn-selfie-action btn-close" onclick="fecharSelfie()">
                     <i class="fas fa-times"></i> Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para exibir imagem em tamanho grande -->
+    <div id="imagemModal" class="imagem-modal">
+        <div class="imagem-modal-content">
+            <span class="imagem-modal-close" onclick="fecharModalImagem()">&times;</span>
+            <img id="modalImagem" src="" alt="Performance Finalizada">
+            <div class="imagem-modal-caption">
+                <h3>🎤 Performance Lendária! 🎤</h3>
+                <p>Compartilhe esse momento épico com seus amigos!</p>
+                <button class="btn-share-modal" onclick="compartilharImagem()">
+                    <i class="fas fa-share-alt"></i> Compartilhar
                 </button>
             </div>
         </div>
@@ -1329,53 +1630,113 @@
     </footer>
 
     <script>
-        // ========== FUNÇÕES DE REDIRECIONAMENTO CORRIGIDAS ==========
+        // ========== FUNÇÕES DE REDIRECIONAMENTO ==========
         
         function irParaLogin() {
-            // Verifica se o usuário já está logado
             const token = localStorage.getItem('token');
             const usuarioLogado = localStorage.getItem('usuario');
             
             if (token && usuarioLogado) {
-                // Se já estiver logado, vai para o APP (não dashboard)
                 window.location.href = '/app.html';
             } else {
-                // Vai para a página de login
                 window.location.href = '/login.html';
             }
         }
 
         function irParaCheckout() {
-            // Verifica se o usuário já está logado
             const token = localStorage.getItem('token');
             const usuarioLogado = localStorage.getItem('usuario');
             
             if (token && usuarioLogado) {
-                // Se já estiver logado, vai direto para o checkout
                 window.location.href = '/checkout.html';
             } else {
-                // Salva onde o usuário queria ir e redireciona para login
                 localStorage.setItem('redirectAfterLogin', '/checkout.html');
                 window.location.href = '/login.html';
             }
         }
 
-        // Verificar se o usuário já está logado ao carregar a página
+        function irParaCheckoutComPlano(plano) {
+            const token = localStorage.getItem('token');
+            const usuarioLogado = localStorage.getItem('usuario');
+            
+            if (token && usuarioLogado) {
+                window.location.href = `/checkout.html?plan=${plano}`;
+            } else {
+                localStorage.setItem('redirectAfterLogin', `/checkout.html?plan=${plano}`);
+                window.location.href = '/login.html';
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             const token = localStorage.getItem('token');
             const usuarioLogado = localStorage.getItem('usuario');
             
-            // Se estiver logado e estiver na landing page, redirecionar para o APP
             const currentPath = window.location.pathname;
             if (token && usuarioLogado && (currentPath === '/' || currentPath === '/index.html' || currentPath === '')) {
                 window.location.href = '/app.html';
             }
             
-            // Verificar se há redirect pendente após login
             const redirectUrl = localStorage.getItem('redirectAfterLogin');
             if (redirectUrl && token && usuarioLogado) {
                 localStorage.removeItem('redirectAfterLogin');
                 window.location.href = redirectUrl;
+            }
+        });
+
+        // ========== FUNÇÕES DO MODAL DE IMAGEM ==========
+
+        function abrirModalImagem() {
+            const modal = document.getElementById('imagemModal');
+            const img = document.getElementById('modalImagem');
+            img.src = 'https://uploads.onecompiler.io/43xkytw48/44gvhqscq/img-04.png';
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function fecharModalImagem() {
+            const modal = document.getElementById('imagemModal');
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function compartilharImagem() {
+            const imagemUrl = 'https://uploads.onecompiler.io/43xkytw48/44gvhqscq/img-04.png';
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Minha Performance no Karaokê!',
+                    text: 'Olha só minha pontuação no Karaokê Multiplayer! 🎤✨',
+                    url: imagemUrl
+                }).catch(() => {
+                    copiarLinkImagem(imagemUrl);
+                });
+            } else {
+                copiarLinkImagem(imagemUrl);
+            }
+        }
+
+        function copiarLinkImagem(url) {
+            navigator.clipboard.writeText(url).then(() => {
+                alert('📸 Link da imagem copiado! Compartilhe com seus amigos.');
+            }).catch(() => {
+                alert('📸 Compartilhe esta imagem: ' + url);
+            });
+        }
+
+        // Fechar modal ao clicar fora da imagem
+        document.addEventListener('click', function(event) {
+            const modal = document.getElementById('imagemModal');
+            if (modal && modal.classList.contains('active')) {
+                if (event.target === modal) {
+                    fecharModalImagem();
+                }
+            }
+        });
+
+        // Fechar modal com tecla ESC
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                fecharModalImagem();
             }
         });
 
