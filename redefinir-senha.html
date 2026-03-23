@@ -182,17 +182,14 @@
             
             try {
                 const response = await fetch(`${API_URL}/auth/redefinir-senha`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        token: token,
-                        email: email,
-                        novaSenha: novaSenha
-                    })
-                });
-                
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+        token: token,
+        email: email,
+        novaSenha: novaSenha
+    })
+});                
                 const data = await response.json();
                 
                 if (data.sucesso) {
