@@ -95,12 +95,6 @@
             border: 1px solid #c3e6cb;
             display: block;
         }
-        .alert.info {
-            background: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
-            display: block;
-        }
 
         /* Modal de Recuperação de Senha */
         .modal {
@@ -126,7 +120,6 @@
             max-width: 450px;
             position: relative;
             animation: slideIn 0.3s ease-out;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
         }
         @keyframes slideIn {
             from {
@@ -282,7 +275,6 @@
             const email = document.getElementById('email').value;
             const senha = document.getElementById('senha').value;
 
-            // Desabilitar botão para evitar múltiplos envios
             const submitBtn = document.querySelector('#loginForm button');
             submitBtn.disabled = true;
             submitBtn.textContent = 'Entrando...';
@@ -299,13 +291,11 @@
                 const data = await response.json();
 
                 if (data.sucesso) {
-                    // Salvar token e dados do usuário
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('usuario', JSON.stringify(data.usuario));
                     
                     mostrarAlerta('Login realizado com sucesso!', 'success');
                     
-                    // Verificar se há redirect pendente
                     const redirectUrl = localStorage.getItem('redirectAfterLogin');
                     if (redirectUrl) {
                         localStorage.removeItem('redirectAfterLogin');
@@ -346,81 +336,103 @@
             if (event) event.preventDefault();
             const modal = document.getElementById('modalRecuperarSenha');
             const emailInput = document.getElementById('recuperarEmail');
-            emailInput.value = '';
-            emailInput.focus();
-            
-            // Limpar mensagens anteriores
             const modalAlert = document.getElementById('modalAlert');
-            modalAlert.style.display = 'none';
-            modalAlert.innerHTML = '';
             
-            // Resetar botão
-            const btn = document.getElementById('btnRecuperarSenha');
-            btn.disabled = false;
-            btn.textContent = 'Enviar';
-            
-            modal.classList.add('active');
+            if (modal) {
+                if (emailInput) emailInput.value = '';
+                if (modalAlert) {
+                    modalAlert.style.display = 'none';
+                    modalAlert.innerHTML = '';
+                }
+                modal.classList.add('active');
+                if (emailInput) emailInput.focus();
+            } else {
+                console.error('Modal não encontrado');
+                alert('Erro ao abrir recuperação de senha. Tente novamente.');
+            }
         }
 
         function fecharModalRecuperarSenha() {
             const modal = document.getElementById('modalRecuperarSenha');
-            modal.classList.remove('active');
+            if (modal) {
+                modal.classList.remove('active');
+            }
         }
 
-       async function enviarRecuperacaoSenha() {
-    const email = document.getElementById('recuperarEmail').value;
-    const modalAlert = document.getElementById('modalAlert');
-    const btn = document.getElementById('btnRecuperarSenha');
-    
-    // Validação básica
-    if (!email || !email.includes('@')) {
-        modalAlert.innerHTML = '<span style="color: #dc3545;">❌ Por favor, digite um e-mail válido.</span>';
-        modalAlert.style.display = 'block';
-        return;
-    }
-    
-    // Desabilitar botão durante o envio
-    btn.disabled = true;
-    btn.innerHTML = '<span class="loading-spinner"></span> Enviando...';
-    modalAlert.style.display = 'block';
-    modalAlert.innerHTML = '<span style="color: #667eea;">⏳ Enviando solicitação...</span>';
-    
-    try {
-        // 🔥 CHAMADA REAL PARA A API 🔥
-        const response = await fetch(`${API_URL}/auth/recuperar-senha`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ email })
+        async function enviarRecuperacaoSenha() {
+            const email = document.getElementById('recuperarEmail').value;
+            const modalAlert = document.getElementById('modalAlert');
+            const btn = document.getElementById('btnRecuperarSenha');
+            
+            if (!email || !email.includes('@')) {
+                modalAlert.innerHTML = '<span style="color: #dc3545;">❌ Por favor, digite um e-mail válido.</span>';
+                modalAlert.style.display = 'block';
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading-spinner"></span> Enviando...';
+            modalAlert.style.display = 'block';
+            modalAlert.innerHTML = '<span style="color: #667eea;">⏳ Enviando solicitação...</span>';
+            
+            try {
+                // Chamada real para a API
+                const response = await fetch(`${API_URL}/auth/recuperar-senha`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email })
+                });
+                
+                const data = await response.json();
+                
+                if (data.sucesso) {
+                    modalAlert.innerHTML = `
+                        <div style="text-align: center;">
+                            <div class="email-sent-icon">📧✨</div>
+                            <div class="success-message">${data.mensagem || 'E-mail de recuperação enviado!'}</div>
+                            <p style="color: #28a745; margin-top: 10px;">Verifique sua caixa de entrada e siga as instruções para redefinir sua senha.</p>
+                            <p style="color: #666; font-size: 0.8rem; margin-top: 10px;">Não recebeu? Verifique a pasta de spam.</p>
+                        </div>
+                    `;
+                    
+                    setTimeout(() => {
+                        fecharModalRecuperarSenha();
+                    }, 4000);
+                } else {
+                    modalAlert.innerHTML = `<span style="color: #dc3545;">❌ ${data.mensagem || 'E-mail não encontrado em nosso sistema.'}</span>`;
+                    btn.disabled = false;
+                    btn.innerHTML = 'Enviar';
+                }
+                
+            } catch (error) {
+                console.error('Erro na recuperação:', error);
+                modalAlert.innerHTML = '<span style="color: #dc3545;">❌ Erro ao conectar com o servidor. Tente novamente mais tarde.</span>';
+                btn.disabled = false;
+                btn.innerHTML = 'Enviar';
+            }
+        }
+
+        // Fechar modal ao clicar fora
+        window.onclick = function(event) {
+            const modal = document.getElementById('modalRecuperarSenha');
+            if (event.target === modal) {
+                fecharModalRecuperarSenha();
+            }
+        }
+
+        // Fechar modal com tecla ESC
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                fecharModalRecuperarSenha();
+            }
         });
 
-        const data = await response.json();
-
-        if (data.sucesso) {
-            modalAlert.innerHTML = `
-                <div style="text-align: center;">
-                    <div class="email-sent-icon">📧✨</div>
-                    <div class="success-message">${data.mensagem || 'E-mail de recuperação enviado!'}</div>
-                    <p style="color: #28a745; margin-top: 10px;">Verifique sua caixa de entrada e siga as instruções para redefinir sua senha.</p>
-                    <p style="color: #666; font-size: 0.8rem; margin-top: 10px;">Não recebeu? Verifique a pasta de spam.</p>
-                </div>
-            `;
-            
-            // Fechar modal automaticamente após 4 segundos
-            setTimeout(() => {
-                fecharModalRecuperarSenha();
-            }, 4000);
-        } else {
-            modalAlert.innerHTML = `<span style="color: #dc3545;">❌ ${data.mensagem || 'E-mail não encontrado em nosso sistema.'}</span>`;
-            btn.disabled = false;
-            btn.innerHTML = 'Enviar';
+        // Verificar se já está logado e redirecionar
+        if (localStorage.getItem('token')) {
+            window.location.href = '/app.html';
         }
-        
-    } catch (error) {
-        console.error('Erro na recuperação:', error);
-        modalAlert.innerHTML = '<span style="color: #dc3545;">❌ Erro ao conectar com o servidor. Tente novamente mais tarde.</span>';
-        btn.disabled = false;
-        btn.innerHTML = 'Enviar';
-    }
-}
+    </script>
+</body>
+</html>
