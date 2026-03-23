@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redefinir Senha - Karaokê Multiplayer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 450px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 0.9rem;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #764ba2;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .alert {
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #fff;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin-right: 8px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .password-requirements {
+            font-size: 0.75rem;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎤 Redefinir Senha</h1>
+        <p class="subtitle">Digite sua nova senha</p>
+        
+        <div id="alertMessage" class="alert"></div>
+        
+        <form id="resetForm" onsubmit="redefinirSenha(event)">
+            <div class="form-group">
+                <label>Nova Senha</label>
+                <input type="password" id="novaSenha" required placeholder="Digite sua nova senha">
+                <div class="password-requirements">Mínimo de 6 caracteres</div>
+            </div>
+            <div class="form-group">
+                <label>Confirmar Senha</label>
+                <input type="password" id="confirmarSenha" required placeholder="Confirme sua nova senha">
+            </div>
+            <button type="submit">Redefinir Senha</button>
+        </form>
+        
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="/login.html" style="color: #667eea; text-decoration: none;">← Voltar para o login</a>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://karaoke-api-backend3.vercel.app/api';
+        
+        // Pegar token e email da URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+        const email = urlParams.get('email');
+        
+        // Verificar se token e email existem
+        if (!token || !email) {
+            document.getElementById('alertMessage').innerHTML = '❌ Link inválido. Solicite uma nova recuperação de senha.';
+            document.getElementById('alertMessage').className = 'alert error';
+            document.querySelector('form').style.display = 'none';
+        }
+        
+        async function redefinirSenha(event) {
+            event.preventDefault();
+            
+            const novaSenha = document.getElementById('novaSenha').value;
+            const confirmarSenha = document.getElementById('confirmarSenha').value;
+            
+            // Validar senha
+            if (novaSenha.length < 6) {
+                mostrarAlerta('A senha deve ter no mínimo 6 caracteres', 'error');
+                return;
+            }
+            
+            if (novaSenha !== confirmarSenha) {
+                mostrarAlerta('As senhas não coincidem', 'error');
+                return;
+            }
+            
+            const submitBtn = document.querySelector('button');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="loading-spinner"></span> Redefinindo...';
+            
+            try {
+                const response = await fetch(`${API_URL}/auth/redefinir-senha`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        token: token,
+                        email: email,
+                        novaSenha: novaSenha
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.sucesso) {
+                    mostrarAlerta('✅ Senha redefinida com sucesso! Redirecionando para o login...', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/login.html';
+                    }, 3000);
+                } else {
+                    mostrarAlerta(data.mensagem || 'Erro ao redefinir senha', 'error');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Redefinir Senha';
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                mostrarAlerta('Erro ao conectar com o servidor', 'error');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Redefinir Senha';
+            }
+        }
+        
+        function mostrarAlerta(mensagem, tipo) {
+            const alertEl = document.getElementById('alertMessage');
+            alertEl.textContent = mensagem;
+            alertEl.className = `alert ${tipo}`;
+            
+            setTimeout(() => {
+                alertEl.className = 'alert';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
