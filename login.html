@@ -17,6 +17,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            position: relative;
         }
         .login-container {
             background: white;
@@ -60,6 +61,10 @@
         button:hover {
             background: #764ba2;
         }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
         .links {
             text-align: center;
             margin-top: 20px;
@@ -67,6 +72,10 @@
         .links a {
             color: #667eea;
             text-decoration: none;
+            cursor: pointer;
+        }
+        .links a:hover {
+            text-decoration: underline;
         }
         .alert {
             padding: 10px;
@@ -86,6 +95,134 @@
             border: 1px solid #c3e6cb;
             display: block;
         }
+        .alert.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+            display: block;
+        }
+
+        /* Modal de Recuperação de Senha */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            width: 90%;
+            max-width: 450px;
+            position: relative;
+            animation: slideIn 0.3s ease-out;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .modal-header h3 {
+            color: #333;
+            font-size: 1.3rem;
+        }
+        .modal-close {
+            font-size: 28px;
+            cursor: pointer;
+            color: #999;
+            transition: color 0.3s;
+            line-height: 1;
+        }
+        .modal-close:hover {
+            color: #333;
+        }
+        .modal-body {
+            margin-bottom: 25px;
+        }
+        .modal-body p {
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+        .modal-footer {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+        }
+        .btn-modal {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-modal-cancel {
+            background: #f0f0f0;
+            color: #666;
+        }
+        .btn-modal-cancel:hover {
+            background: #e0e0e0;
+        }
+        .btn-modal-submit {
+            background: #667eea;
+            color: white;
+        }
+        .btn-modal-submit:hover {
+            background: #764ba2;
+        }
+        .btn-modal-submit:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #fff;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin-right: 8px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .email-sent-icon {
+            text-align: center;
+            font-size: 3rem;
+            margin: 20px 0;
+        }
+        .success-message {
+            text-align: center;
+            color: #28a745;
+            font-weight: bold;
+            margin: 15px 0;
+        }
     </style>
 </head>
 <body>
@@ -97,29 +234,58 @@
         <form id="loginForm" onsubmit="fazerLogin(event)">
             <div class="form-group">
                 <label>E-mail</label>
-                <input type="email" id="email" required>
+                <input type="email" id="email" required placeholder="seu@email.com">
             </div>
             <div class="form-group">
                 <label>Senha</label>
-                <input type="password" id="senha" required>
+                <input type="password" id="senha" required placeholder="Digite sua senha">
             </div>
             <button type="submit">Entrar</button>
         </form>
         
         <div class="links">
             <p>Não tem acesso? <a href="/checkout.html">Comprar um plano</a></p>
-            <p><a href="#" onclick="esqueciSenha()">Esqueci minha senha</a></p>
+            <p><a href="#" onclick="abrirModalRecuperarSenha(event)">Esqueci minha senha</a></p>
+        </div>
+    </div>
+
+    <!-- Modal de Recuperação de Senha -->
+    <div id="modalRecuperarSenha" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🔐 Recuperar Senha</h3>
+                <span class="modal-close" onclick="fecharModalRecuperarSenha()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>Digite seu e-mail cadastrado para receber as instruções de recuperação de senha.</p>
+                <div class="form-group">
+                    <label>E-mail</label>
+                    <input type="email" id="recuperarEmail" placeholder="seu@email.com" autocomplete="off">
+                </div>
+                <div id="modalAlert" style="font-size: 0.85rem; margin-top: 10px; display: none;"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-modal btn-modal-cancel" onclick="fecharModalRecuperarSenha()">Cancelar</button>
+                <button class="btn-modal btn-modal-submit" id="btnRecuperarSenha" onclick="enviarRecuperacaoSenha()">Enviar</button>
+            </div>
         </div>
     </div>
 
     <script>
         const API_URL = 'https://karaoke-api-backend3.vercel.app/api';
 
+        // ========== FUNÇÕES DE LOGIN ==========
+        
         async function fazerLogin(event) {
             event.preventDefault();
             
             const email = document.getElementById('email').value;
             const senha = document.getElementById('senha').value;
+
+            // Desabilitar botão para evitar múltiplos envios
+            const submitBtn = document.querySelector('#loginForm button');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Entrando...';
 
             try {
                 const response = await fetch(`${API_URL}/auth/login`, {
@@ -139,16 +305,28 @@
                     
                     mostrarAlerta('Login realizado com sucesso!', 'success');
                     
-                    // Redirecionar para o karaokê
-                    setTimeout(() => {
-                        window.location.href = '/';
-                    }, 1000);
+                    // Verificar se há redirect pendente
+                    const redirectUrl = localStorage.getItem('redirectAfterLogin');
+                    if (redirectUrl) {
+                        localStorage.removeItem('redirectAfterLogin');
+                        setTimeout(() => {
+                            window.location.href = redirectUrl;
+                        }, 1000);
+                    } else {
+                        setTimeout(() => {
+                            window.location.href = '/app.html';
+                        }, 1000);
+                    }
                 } else {
-                    mostrarAlerta('E-mail ou senha inválidos', 'error');
+                    mostrarAlerta(data.mensagem || 'E-mail ou senha inválidos', 'error');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Entrar';
                 }
             } catch (error) {
                 console.error('Erro:', error);
                 mostrarAlerta('Erro ao conectar com o servidor', 'error');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Entrar';
             }
         }
 
@@ -156,15 +334,152 @@
             const alertEl = document.getElementById('alertMessage');
             alertEl.textContent = mensagem;
             alertEl.className = `alert ${tipo}`;
+            
+            setTimeout(() => {
+                alertEl.className = 'alert';
+            }, 5000);
         }
 
-        function esqueciSenha() {
-            alert('Entre em contato pelo e-mail de confirmação do pagamento.');
+        // ========== FUNÇÕES DE RECUPERAÇÃO DE SENHA ==========
+        
+        function abrirModalRecuperarSenha(event) {
+            if (event) event.preventDefault();
+            const modal = document.getElementById('modalRecuperarSenha');
+            const emailInput = document.getElementById('recuperarEmail');
+            emailInput.value = '';
+            emailInput.focus();
+            
+            // Limpar mensagens anteriores
+            const modalAlert = document.getElementById('modalAlert');
+            modalAlert.style.display = 'none';
+            modalAlert.innerHTML = '';
+            
+            // Resetar botão
+            const btn = document.getElementById('btnRecuperarSenha');
+            btn.disabled = false;
+            btn.textContent = 'Enviar';
+            
+            modal.classList.add('active');
         }
 
-        // Verificar se já está logado
+        function fecharModalRecuperarSenha() {
+            const modal = document.getElementById('modalRecuperarSenha');
+            modal.classList.remove('active');
+        }
+
+        async function enviarRecuperacaoSenha() {
+            const email = document.getElementById('recuperarEmail').value;
+            const modalAlert = document.getElementById('modalAlert');
+            const btn = document.getElementById('btnRecuperarSenha');
+            
+            // Validação básica
+            if (!email || !email.includes('@')) {
+                modalAlert.innerHTML = '<span style="color: #dc3545;">❌ Por favor, digite um e-mail válido.</span>';
+                modalAlert.style.display = 'block';
+                return;
+            }
+            
+            // Desabilitar botão durante o envio
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading-spinner"></span> Enviando...';
+            modalAlert.style.display = 'block';
+            modalAlert.innerHTML = '<span style="color: #667eea;">⏳ Enviando solicitação...</span>';
+            
+            try {
+                // Simulação de envio (substitua pela chamada real da API quando disponível)
+                // const response = await fetch(`${API_URL}/auth/recuperar-senha`, {
+                //     method: 'POST',
+                //     headers: { 'Content-Type': 'application/json' },
+                //     body: JSON.stringify({ email })
+                // });
+                // const data = await response.json();
+                
+                // SIMULAÇÃO DE RESPOSTA (REMOVA ESTA PARTE QUANDO A API ESTIVER PRONTA)
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                // Simular sucesso (sempre funciona para demonstração)
+                const sucesso = true;
+                const mensagem = sucesso ? 'E-mail de recuperação enviado!' : 'E-mail não encontrado em nosso sistema.';
+                
+                if (sucesso) {
+                    modalAlert.innerHTML = `
+                        <div style="text-align: center;">
+                            <div class="email-sent-icon">📧✨</div>
+                            <div class="success-message">${mensagem}</div>
+                            <p style="color: #28a745; margin-top: 10px;">Verifique sua caixa de entrada e siga as instruções para redefinir sua senha.</p>
+                            <p style="color: #666; font-size: 0.8rem; margin-top: 10px;">Não recebeu? Verifique a pasta de spam.</p>
+                        </div>
+                    `;
+                    modalAlert.style.color = '#155724';
+                    
+                    // Fechar modal automaticamente após 4 segundos
+                    setTimeout(() => {
+                        fecharModalRecuperarSenha();
+                    }, 4000);
+                } else {
+                    modalAlert.innerHTML = `<span style="color: #dc3545;">❌ ${mensagem}</span>`;
+                    btn.disabled = false;
+                    btn.innerHTML = 'Enviar';
+                }
+                
+                // CÓDIGO REAL DA API - DESCOMENTE QUANDO A API ESTIVER PRONTA
+                /*
+                const response = await fetch(`${API_URL}/auth/recuperar-senha`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email })
+                });
+
+                const data = await response.json();
+
+                if (data.sucesso) {
+                    modalAlert.innerHTML = `
+                        <div style="text-align: center;">
+                            <div class="email-sent-icon">📧✨</div>
+                            <div class="success-message">E-mail de recuperação enviado!</div>
+                            <p style="color: #28a745; margin-top: 10px;">Verifique sua caixa de entrada e siga as instruções para redefinir sua senha.</p>
+                            <p style="color: #666; font-size: 0.8rem; margin-top: 10px;">Não recebeu? Verifique a pasta de spam.</p>
+                        </div>
+                    `;
+                    
+                    setTimeout(() => {
+                        fecharModalRecuperarSenha();
+                    }, 4000);
+                } else {
+                    modalAlert.innerHTML = `<span style="color: #dc3545;">❌ ${data.mensagem || 'E-mail não encontrado em nosso sistema.'}</span>`;
+                    btn.disabled = false;
+                    btn.innerHTML = 'Enviar';
+                }
+                */
+                
+            } catch (error) {
+                console.error('Erro na recuperação:', error);
+                modalAlert.innerHTML = '<span style="color: #dc3545;">❌ Erro ao conectar com o servidor. Tente novamente mais tarde.</span>';
+                btn.disabled = false;
+                btn.innerHTML = 'Enviar';
+            }
+        }
+
+        // Fechar modal ao clicar fora
+        window.onclick = function(event) {
+            const modal = document.getElementById('modalRecuperarSenha');
+            if (event.target === modal) {
+                fecharModalRecuperarSenha();
+            }
+        }
+
+        // Fechar modal com tecla ESC
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                fecharModalRecuperarSenha();
+            }
+        });
+
+        // Verificar se já está logado e redirecionar
         if (localStorage.getItem('token')) {
-            window.location.href = '/';
+            window.location.href = '/app.html';
         }
     </script>
 </body>
