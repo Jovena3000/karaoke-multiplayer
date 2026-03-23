@@ -53,61 +53,91 @@
             100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
         }
 
-        /* Floating Emojis */
-        .floating-emojis-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 999;
-            overflow: hidden;
-        }
+        /* Floating Emojis - Responsivo */
+.floating-emojis-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 999;
+    overflow: hidden;
+}
 
-        .floating-emoji {
-            position: absolute;
-            font-size: clamp(1.2rem, 4vw, 2.5rem);
-            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
-            animation: float 8s ease-in-out infinite;
-            white-space: nowrap;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            background: rgba(255,255,255,0.2);
-            backdrop-filter: blur(5px);
-            padding: clamp(4px, 2vw, 8px) clamp(8px, 3vw, 15px);
-            border-radius: 50px;
-            border: 2px solid rgba(255,255,255,0.3);
-        }
+.floating-emoji {
+    position: absolute;
+    font-size: clamp(1rem, 4vw, 2.5rem);
+    filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
+    animation: float 8s ease-in-out infinite;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(255,255,255,0.2);
+    backdrop-filter: blur(5px);
+    padding: clamp(4px, 2vw, 8px) clamp(8px, 3vw, 15px);
+    border-radius: 50px;
+    border: 2px solid rgba(255,255,255,0.3);
+}
 
-        .floating-emoji span {
-            font-size: clamp(0.7rem, 2.5vw, 1rem);
-            font-weight: bold;
-            color: white;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-        }
+.floating-emoji span {
+    font-size: clamp(0.6rem, 2.5vw, 1rem);
+    font-weight: bold;
+    color: white;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
 
-        .floating-emoji .positive {
-            color: #4CAF50;
-        }
+.floating-emoji .positive {
+    color: #4CAF50;
+}
 
-        .floating-emoji .negative {
-            color: #ff4757;
-        }
+.floating-emoji .negative {
+    color: #ff4757;
+}
 
-        .emoji-1 { top: 15%; left: 5%; animation-delay: 0s; }
-        .emoji-2 { top: 25%; right: 8%; animation-delay: 1s; animation-name: float-side; }
-        .emoji-4 { top: 70%; right: 15%; animation-delay: 3s; animation-name: float-side; }
-        .emoji-6 { bottom: 20%; right: 5%; animation-delay: 5s; }
-        .emoji-8 { top: 30%; left: 40%; animation-delay: 7s; animation-name: float-side; }
-        .emoji-9 { top: 50%; right: 25%; animation-delay: 8s; }
-        
-        @media (max-width: 768px) {
-            .emoji-1, .emoji-2, .emoji-4, .emoji-6, .emoji-8, .emoji-9 {
-                display: none;
-            }
-        }
+/* Posicionamento dos 4 emojis */
+.emoji-1 { top: 10%; left: 2%; animation-delay: 0s; }
+.emoji-2 { top: 20%; right: 2%; animation-delay: 1s; animation-name: float-side; }
+.emoji-3 { top: 70%; left: 3%; animation-delay: 2s; }
+.emoji-4 { top: 80%; right: 3%; animation-delay: 3s; animation-name: float-side; }
+
+/* Ajustes para tablets */
+@media (max-width: 1024px) and (min-width: 769px) {
+    .floating-emoji {
+        font-size: clamp(1rem, 3vw, 2rem);
+        padding: 4px 12px;
+    }
+}
+
+/* Ajustes para celulares */
+@media (max-width: 768px) {
+    .floating-emoji {
+        font-size: 0.9rem;
+        padding: 3px 8px;
+        gap: 3px;
+        opacity: 0.7;
+    }
+    .floating-emoji span {
+        font-size: 0.7rem;
+    }
+    /* Reposicionar para não atrapalhar o conteúdo */
+    .emoji-1 { top: 8%; left: 1%; }
+    .emoji-2 { top: 15%; right: 1%; }
+    .emoji-3 { top: 70%; left: 2%; }
+    .emoji-4 { top: 80%; right: 2%; }
+}
+
+/* Ajustes para celulares pequenos */
+@media (max-width: 480px) {
+    .floating-emoji {
+        font-size: 0.8rem;
+        padding: 2px 6px;
+    }
+    .floating-emoji span {
+        font-size: 0.6rem;
+    }
+}
         
         /* Header */
         .header {
@@ -1189,24 +1219,21 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <!-- Floating Emojis Section -->
+    <!-- Floating Emojis Section - MAIS EMOJIS E VISÍVEIS EM CELULAR -->
     <div class="floating-emojis-container">
         <div class="floating-emoji emoji-1">
             😀 <span class="positive">+1</span>
-        </div>        
+        </div>
+        <div class="floating-emoji emoji-2">
+            🎤 <span class="positive">+5</span>
+        </div>
         <div class="floating-emoji emoji-3">
             😂 <span class="positive">+1</span>
         </div>
-        <div class="floating-emoji emoji-6">
-            🎤 <span class="positive">+1</span>
+        <div class="floating-emoji emoji-4">
+            😍 <span class="positive">+3</span>
         </div>
-        <div class="floating-emoji emoji-8">
-            😍 <span class="positive">+1</span>
         </div>
-        <div class="floating-emoji emoji-9">
-            😢 <span class="negative">-1</span>
-        </div>
-    </div>
         
     <!-- Header -->
     <header class="header">
