@@ -1584,67 +1584,91 @@
     // ============================================
     // FUNÇÃO ADICIONAR À FILA (COM BUSCA DE TÍTULO)
     // ============================================
-    async function addToQueue() {
-        const input = document.getElementById('videoInput');
-        const url = input.value.trim();
-        
-        if (!url) {
-            showToast('Digite ou cole um link do YouTube!', true);
-            return;
-        }
-        
-        const videoId = extractVideoId(url);
-        if (!videoId) {
-            showToast('Link inválido!', true);
-            return;
-        }
-        
-        // Mostrar loading no botão
-        const addBtn = document.querySelector('#videoModal .modal-btn:first-child');
-        const originalText = addBtn.innerText;
-        addBtn.innerText = '⏳ Buscando...';
-        addBtn.disabled = true;
+    // ============================================
+// FUNÇÃO ADICIONAR À FILA (CORRIGIDA)
+// ============================================
+async function addToQueue() {
+    const input = document.getElementById('videoInput');
+    const url = input.value.trim();
+    
+    if (!url) {
+        showToast('Digite ou cole um link do YouTube!', true);
+        return;
+    }
+    
+    const videoId = extractVideoId(url);
+    if (!videoId) {
+        showToast('Link inválido! Use um link do YouTube válido.', true);
+        return;
+    }
+    
+    // Mostrar loading no botão
+    const addBtn = document.querySelector('#videoModal .modal-btn:first-child');
+    const originalText = addBtn.innerText;
+    addBtn.innerText = '⏳ Buscando...';
+    addBtn.disabled = true;
+    
+    try {
+        // Buscar informações do vídeo
+        let videoTitle = '';
+        let thumbnail = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
         
         try {
-            // Buscar informações do vídeo (título real)
-            const videoInfo = await fetchVideoInfo(videoId);
-            
-            closeVideoModal();
-            
-            const queueItem = {
-                room_id: roomId,
-                video_id: videoId,
-                video_title: videoInfo.title,
-                thumbnail: videoInfo.thumbnail,
-                added_by: odUserId,
-                added_by_name: userName,
-                status: 'waiting',
-                order: songQueue.length
-            };
-            
-            // Adicionar localmente
-            songQueue.push(queueItem);
-            updateQueueDisplay();
-            
-            // Salvar no Supabase
-            await saveQueueToSupabase();
-            
-            showToast(`"${videoInfo.title.substring(0, 50)}" adicionado à fila! 🎵`);
-            addActivity('➕', `${userName} adicionou música à fila`);
-            
-            if (currentQueuePosition === -1) {
-                showToast('Música adicionada. Clique em "▶️" na fila para tocar!');
+            // Tentar buscar título com noembed.com (mais rápido)
+            const response = await fetch(`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${videoId}`);
+            const data = await response.json();
+            if (data && data.title) {
+                videoTitle = data.title;
             }
-            
-        } catch (error) {
-            console.error('Erro ao adicionar música:', error);
-            showToast('Erro ao adicionar música. Tente novamente.', true);
-        } finally {
-            addBtn.innerText = originalText;
-            addBtn.disabled = false;
-            document.getElementById('videoInput').value = '';
+        } catch (e) {
+            console.warn('Erro ao buscar título, usando fallback:', e);
         }
+        
+        // Se não conseguiu título, usar o ID
+        if (!videoTitle) {
+            videoTitle = `Vídeo (${videoId})`;
+        }
+        
+        // Fechar modal ANTES de processar
+        closeVideoModal();
+        
+        const queueItem = {
+            room_id: roomId,
+            video_id: videoId,
+            video_title: videoTitle,
+            thumbnail: thumbnail,
+            added_by: odUserId,
+            added_by_name: userName,
+            status: 'waiting',
+            order: songQueue.length
+        };
+        
+        // Adicionar localmente
+        songQueue.push(queueItem);
+        updateQueueDisplay();
+        
+        // Salvar no Supabase
+        if (isSupabaseConnected && roomChannel) {
+            await saveQueueToSupabase();
+        }
+        
+        showToast(`"${videoTitle.substring(0, 50)}" adicionado à fila! 🎵`);
+        addActivity('➕', `${userName} adicionou música à fila`);
+        
+        if (currentQueuePosition === -1) {
+            showToast('Música adicionada. Clique em "▶️" na fila para tocar!');
+        }
+        
+    } catch (error) {
+        console.error('Erro ao adicionar música:', error);
+        showToast('Erro ao adicionar música. Tente novamente.', true);
+    } finally {
+        // Garantir que o botão volte ao normal
+        addBtn.innerText = originalText;
+        addBtn.disabled = false;
+        document.getElementById('videoInput').value = '';
     }
+}
 
     async function removeFromQueue(index) {
         if (index < 0 || index >= songQueue.length) return;
