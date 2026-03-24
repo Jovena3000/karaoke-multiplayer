@@ -1581,12 +1581,9 @@
         queueList.innerHTML = html;
     }
 
+       // ============================================
+    // FUNÇÃO ADICIONAR À FILA (CORRIGIDA)
     // ============================================
-    // FUNÇÃO ADICIONAR À FILA (COM BUSCA DE TÍTULO)
-    // ============================================
-    // ============================================
-// FUNÇÃO ADICIONAR À FILA (CORRIGIDA)
-// ============================================
 async function addToQueue() {
     const input = document.getElementById('videoInput');
     const url = input.value.trim();
@@ -1609,12 +1606,12 @@ async function addToQueue() {
     addBtn.disabled = true;
     
     try {
-        // Buscar informações do vídeo
+        // Buscar informações do vídeo (título real)
         let videoTitle = '';
         let thumbnail = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
         
         try {
-            // Tentar buscar título com noembed.com (mais rápido)
+            // Tentar buscar título com noembed.com
             const response = await fetch(`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${videoId}`);
             const data = await response.json();
             if (data && data.title) {
@@ -1647,7 +1644,7 @@ async function addToQueue() {
         songQueue.push(queueItem);
         updateQueueDisplay();
         
-        // Salvar no Supabase
+        // Salvar no Supabase (se conectado)
         if (isSupabaseConnected && roomChannel) {
             await saveQueueToSupabase();
         }
