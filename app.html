@@ -1145,10 +1145,10 @@
                     </div>
                 </div>
 
-                <!-- LEADERBOARD -->
+                <!-- LEADERBOARD - PLACAR DE LÍDERES -->
                 <div class="leaderboard-section">
                     <div class="leaderboard-header">
-                        <i class="fas fa-trophy"></i> Placar de Líderes
+                        🏆 Placar de Líderes
                     </div>
                     <div class="leaderboard-list" id="leaderboardList">
                         <div class="empty-leaderboard">🎵 Ninguém pontuou nesta música ainda</div>
@@ -1737,9 +1737,9 @@
                         ${thumbnailHtml}
                     </div>
                     <div class="queue-info">
-                        <div class="queue-video-title">${item.video_title || 'Vídeo do YouTube'}</div>
+                        <div class="queue-video-title">${escapeHtml(item.video_title) || 'Vídeo do YouTube'}</div>
                         <div class="queue-added-by">
-                            <span>👤 ${item.added_by_name}</span>
+                            <span>👤 ${escapeHtml(item.added_by_name)}</span>
                             ${isPlaying ? '<span style="color:var(--accent-green);margin-left:0.5rem;">▶️ Tocando agora</span>' : ''}
                         </div>
                     </div>
@@ -2092,6 +2092,8 @@
                 leftPresences.forEach(pres => {
                     participants = participants.filter(p => p.odUserId !== pres.odUserId);
                     showToast(`${pres.odUserName} saiu`);
+                    // Atualizar placar quando alguém sai
+                    updateLeaderboard();
                 });
                 updateParticipantsList();
             })
