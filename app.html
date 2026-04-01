@@ -34,14 +34,13 @@
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎤 Karaokê Online - Scores e Fila</title>
+    <title>🎤 Karaokê Premium - Controle Total</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
     
     <!-- Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
-        /* ===== ESTILOS (MANTIDOS IGUAIS AO SEU ORIGINAL) ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         
         :root {
@@ -351,6 +350,92 @@
         .emoji-points { font-size: 0.75rem; font-weight: 700; }
         .emoji-points.positive { color: var(--accent-green); }
         .emoji-points.negative { color: #ff4757; }
+
+        /* ===== LEADERBOARD ===== */
+        .leaderboard-section {
+            background: var(--bg-card);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            border: 1px solid rgba(157,78,221,0.2);
+        }
+
+        .leaderboard-header {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--accent-orange);
+        }
+
+        .leaderboard-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .leaderboard-item {
+            background: var(--bg-lighter);
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.3s;
+            border-left: 4px solid transparent;
+        }
+
+        .leaderboard-item.rank-1 {
+            border-left-color: gold;
+            background: linear-gradient(135deg, var(--bg-lighter), rgba(255,215,0,0.1));
+        }
+        .leaderboard-item.rank-2 {
+            border-left-color: silver;
+        }
+        .leaderboard-item.rank-3 {
+            border-left-color: #cd7f32;
+        }
+
+        .leaderboard-rank {
+            font-size: 1.5rem;
+            font-weight: 800;
+            width: 50px;
+            text-align: center;
+        }
+
+        .leaderboard-rank .medal {
+            font-size: 1.8rem;
+        }
+
+        .leaderboard-info {
+            flex: 1;
+        }
+
+        .leaderboard-name {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .leaderboard-score {
+            font-size: 0.85rem;
+            color: var(--accent-green);
+        }
+
+        .leaderboard-score-value {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--accent-green);
+        }
+
+        .empty-leaderboard {
+            text-align: center;
+            padding: 1rem;
+            color: var(--text-secondary);
+            background: var(--bg-lighter);
+            border-radius: 0.75rem;
+        }
 
         /* ===== FILA DE ESPERA ===== */
         .queue-section {
@@ -980,7 +1065,7 @@
 
     <header class="header">
         <div class="header-content">
-            <div class="logo">🎤 Karaokê Online</div>
+            <div class="logo">🎤 Karaokê Premium</div>
             <div class="room-info">
                 <span style="color: var(--text-secondary);">Sala:</span>
                 <span class="room-id" id="headerRoomId">------</span>
@@ -995,7 +1080,7 @@
 
     <div class="container">
         <div class="main-grid">
-            <!-- COLUNA ESQUERDA (Player → Pontuação → Emojis → Fila) -->
+            <!-- COLUNA ESQUERDA -->
             <div class="left-column">
                 <div class="video-section">
                     <div class="video-header">
@@ -1060,6 +1145,16 @@
                     </div>
                 </div>
 
+                <!-- LEADERBOARD -->
+                <div class="leaderboard-section">
+                    <div class="leaderboard-header">
+                        <i class="fas fa-trophy"></i> Placar de Líderes
+                    </div>
+                    <div class="leaderboard-list" id="leaderboardList">
+                        <div class="empty-leaderboard">🏆 Ninguém pontuou ainda</div>
+                    </div>
+                </div>
+
                 <!-- FILA DE ESPERA -->
                 <div class="queue-section">
                     <div class="queue-header">
@@ -1079,7 +1174,7 @@
                 </div>
             </div>
 
-            <!-- COLUNA DIREITA (inalterada) -->
+            <!-- COLUNA DIREITA -->
             <div class="right-column">
                 <div class="card">
                     <h3 class="card-title">📱 Compartilhar Sala</h3>
@@ -1247,6 +1342,9 @@
     // DEBOUNCE PARA EVITAR O "PISCAR" DA FILA
     let queueUpdateTimeout = null;
 
+    // ===== PLACAR DE LÍDERES =====
+    let userScores = {};
+
     // ============================================
     // FUNÇÃO PARA BUSCAR TÍTULO DO YOUTUBE
     // ============================================
@@ -1254,7 +1352,6 @@
         try {
             const response = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
             const data = await response.json();
-            
             if (data && data.title) {
                 return {
                     title: data.title,
@@ -1264,7 +1361,6 @@
         } catch (error) {
             console.warn('Erro ao buscar título via oEmbed:', error);
         }
-        
         return {
             title: `Vídeo do YouTube (${videoId.substring(0, 8)}...)`,
             thumbnail: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`
@@ -1280,6 +1376,66 @@
             updateQueueDisplay();
             queueUpdateTimeout = null;
         }, 100);
+    }
+
+    // ===== FUNÇÃO PARA ESCAPAR HTML =====
+    function escapeHtml(text) {
+        if (!text) return '';
+        return text.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // ===== FUNÇÃO PARA ATUALIZAR O PLACAR =====
+    function updateLeaderboard() {
+        const container = document.getElementById('leaderboardList');
+        if (!container) return;
+
+        // Filtrar apenas os participantes que ainda estão na sala
+        const activeUsers = participants.map(p => p.odUserId);
+        const scoresList = Object.entries(userScores)
+            .filter(([userId]) => activeUsers.includes(userId))
+            .map(([userId, score]) => {
+                const user = participants.find(p => p.odUserId === userId);
+                return {
+                    userId,
+                    name: user?.odUserName || 'Anônimo',
+                    score
+                };
+            })
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 3);
+
+        if (scoresList.length === 0) {
+            container.innerHTML = '<div class="empty-leaderboard">🏆 Ninguém pontuou ainda</div>';
+            return;
+        }
+
+        const medals = ['🥇', '🥈', '🥉'];
+        let html = '';
+        scoresList.forEach((item, idx) => {
+            const isYou = item.userId === odUserId;
+            const medal = medals[idx] || `${idx + 1}º`;
+            html += `
+                <div class="leaderboard-item rank-${idx + 1}">
+                    <div class="leaderboard-rank">
+                        ${medal}
+                    </div>
+                    <div class="leaderboard-info">
+                        <div class="leaderboard-name">
+                            ${escapeHtml(item.name)} ${isYou ? '<span style="font-size:0.7rem;">(você)</span>' : ''}
+                        </div>
+                        <div class="leaderboard-score">
+                            Pontuação: <span class="leaderboard-score-value">${item.score}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
     }
 
     // ============================================
@@ -1383,6 +1539,8 @@
                 '</div>';
         });
         el.innerHTML = html;
+        // Atualizar placar quando a lista de participantes mudar
+        updateLeaderboard();
     }
 
     function addActivity(emoji, text) {
@@ -1996,9 +2154,7 @@
                 }
             })
             .on('broadcast', { event: 'queue-update' }, ({ payload, from }) => {
-                // IGNORAR MENSAGENS DO PRÓPRIO USUÁRIO (EVITA LOOP)
                 if (from === odUserId) return;
-                
                 songQueue = payload.queue;
                 currentQueuePosition = payload.currentPosition;
                 safeUpdateQueueDisplay();
@@ -2019,6 +2175,11 @@
                 if (points > 0) scores.positive += points;
                 else scores.negative += Math.abs(points);
                 updateScoreDisplay();
+                
+                // Atualizar pontuação individual do remetente para o placar
+                if (!userScores[userId]) userScores[userId] = 0;
+                userScores[userId] += points;
+                updateLeaderboard();
                 
                 saveRoomState();
                 saveScoresToSupabase();
@@ -2256,6 +2417,12 @@
         if (points > 0) scores.positive += points;
         else scores.negative += Math.abs(points);
         updateScoreDisplay();
+        
+        // Atualizar pontuação individual para o placar
+        if (!userScores[odUserId]) userScores[odUserId] = 0;
+        userScores[odUserId] += points;
+        updateLeaderboard();
+        
         const pt = points > 0 ? '+' + points : String(points);
         addActivity(emoji, userName + ' reagiu (' + pt + ')');
         await sendEmojiToSupabase(emoji, points);
@@ -2274,10 +2441,12 @@
         scores = { total: 0, positive: 0, negative: 0 };
         emojiCounts = {};
         totalReactions = 0;
+        userScores = {};
         activities = [];
         
         updateScoreDisplay();
         updateActivityFeed();
+        updateLeaderboard();
         
         await resetScoresSupabase();
         
