@@ -1487,8 +1487,10 @@
     }
 
     function getShareUrl() {
-        const base = window.location.origin + window.location.pathname;
-        return base + '?room=' + roomId + '#' + roomId;
+    // Usar o domínio base sem o nome do arquivo
+    const base = window.location.origin;
+    // Redirecionar para guest.html (página pública)
+    return base + '/guest.html?room=' + roomId + '#' + roomId;
     }
 
     function extractVideoId(url) {
