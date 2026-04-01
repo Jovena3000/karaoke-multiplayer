@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <!-- PRIMEIRO: Verificação de autenticação -->
+    <!-- Autenticação -->
     <script>
         (function() {
             const paginasPublicas = ['/login.html', '/checkout.html', '/checkout'];
@@ -33,6 +33,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
+        /* ==================== ESTILOS COMPLETOS (idênticos aos originais) ==================== */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         :root {
             --bg-dark: #0a0e27;
@@ -681,14 +682,8 @@
             animation: slideIn 0.3s ease;
         }
         @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateX(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
         }
         .activity-emoji {
             font-size: 1.5rem;
@@ -875,12 +870,8 @@
             display: flex;
         }
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
         .result-container {
             text-align: center;
@@ -1037,14 +1028,8 @@
             z-index: 5001;
         }
         @keyframes confettiFall {
-            0% {
-                transform: translateY(0) rotate(0deg);
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(100vh) rotate(720deg);
-                opacity: 0;
-            }
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
         }
         .end-song-btn {
             background: linear-gradient(135deg, #ff9500, #ff6b00);
@@ -1305,7 +1290,7 @@
     let currentSingerId = null;
     let hasReceivedInitialState = false;
     let queueUpdateTimeout = null;
-    let leaderboardScores = {};          // Pontuação recebida por cada cantor
+    let leaderboardScores = {};
 
     // ==================== FUNÇÕES AUXILIARES ====================
     async function fetchVideoInfo(videoId) {
@@ -1449,6 +1434,7 @@
         activities.unshift({ emoji, text });
         if (activities.length > 20) activities.pop();
         const el = document.getElementById('activityFeed');
+        if (!el) return; // previne erro se elemento não existir
         if (!activities.length) { el.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:1rem;">Nenhuma atividade</div>'; return; }
         let html = '';
         activities.forEach(a => { html += `<div class="activity-item"><span class="activity-emoji">${a.emoji}</span><span>${a.text}</span></div>`; });
@@ -1589,12 +1575,14 @@
     }
 
     async function addToQueue() {
+        console.log('🔍 addToQueue chamada');
         const input = document.getElementById('videoInput');
         const url = input.value.trim();
         if (!url) { showToast('Digite ou cole um link do YouTube!', true); return; }
         const videoId = extractVideoId(url);
         if (!videoId) { showToast('Link inválido!', true); return; }
         const addBtn = document.querySelector('#videoModal .modal-btn:first-child');
+        if (!addBtn) { console.error('Botão não encontrado'); return; }
         const originalText = addBtn.innerText;
         addBtn.innerText = '⏳ Buscando...';
         addBtn.disabled = true;
@@ -1611,7 +1599,7 @@
             showToast(`"${videoInfo.title.substring(0,50)}" adicionado! 🎵`);
             addActivity('➕', `${userName} adicionou música à fila`);
             if (currentQueuePosition === -1) showToast('Música adicionada. Clique em "▶️" na fila para tocar!');
-        } catch(e) { showToast('Erro ao adicionar música.', true); }
+        } catch(e) { console.error(e); showToast('Erro ao adicionar música.', true); }
         finally { addBtn.innerText = originalText; addBtn.disabled = false; document.getElementById('videoInput').value = ''; }
     }
 
