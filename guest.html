@@ -973,7 +973,7 @@
                         <i class="fas fa-trophy"></i> Placar de Líderes
                     </div>
                     <div class="leaderboard-list" id="leaderboardList">
-                        <div class="empty-leaderboard">🏆 Ninguém pontuou ainda</div>
+                        <div class="empty-leaderboard">🎵 Ninguém pontuou nesta música ainda</div>
                     </div>
                 </div>
 
@@ -1136,8 +1136,9 @@
     // DEBOUNCE
     let queueUpdateTimeout = null;
 
-    // ===== PLACAR DE LÍDERES =====
-    let userScores = {};
+    // ===== PLACAR DE LÍDERES (APENAS PARA A MÚSICA ATUAL) =====
+    let currentSongScores = {};
+    let currentSongId = null;
 
     // ============================================
     // FUNÇÃO PARA BUSCAR TÍTULO DO YOUTUBE
@@ -1190,7 +1191,7 @@
 
         // Filtrar apenas os participantes que ainda estão na sala
         const activeUsers = participants.map(p => p.odUserId);
-        const scoresList = Object.entries(userScores)
+        const scoresList = Object.entries(currentSongScores)
             .filter(([userId]) => activeUsers.includes(userId))
             .map(([userId, score]) => {
                 const user = participants.find(p => p.odUserId === userId);
@@ -1203,8 +1204,8 @@
             .sort((a, b) => b.score - a.score)
             .slice(0, 3);
 
-        if (scoresList.length === 0) {
-            container.innerHTML = '<div class="empty-leaderboard">🏆 Ninguém pontuou ainda</div>';
+        if (scoresList.length === 0 || !currentSongId) {
+            container.innerHTML = '<div class="empty-leaderboard">🎵 Ninguém pontuou nesta música ainda</div>';
             return;
         }
 
@@ -1223,7 +1224,7 @@
                             ${escapeHtml(item.name)} ${isYou ? '<span style="font-size:0.7rem;">(você)</span>' : ''}
                         </div>
                         <div class="leaderboard-score">
-                            Pontuação: <span class="leaderboard-score-value">${item.score}</span>
+                            🎤 Pontos: <span class="leaderboard-score-value">${item.score}</span>
                         </div>
                     </div>
                 </div>
@@ -1281,9 +1282,8 @@
     }
 
     function getShareUrl() {
-    const base = window.location.origin;
-    // Manter para guest.html (ou app.html se quiser compartilhar link do convidado)
-    return base + '/guest.html?room=' + roomId + '#' + roomId;
+        const base = window.location.origin;
+        return base + '/guest.html?room=' + roomId + '#' + roomId;
     }
 
     function extractVideoId(url) {
@@ -1439,6 +1439,11 @@
         
         currentSinger = userName;
         currentVideoId = videoId;
+        
+        // ===== RESETAR PLACAR DA MÚSICA ATUAL =====
+        currentSongId = videoId + '_' + Date.now();
+        currentSongScores = {};
+        updateLeaderboard();
         
         emojiCounts = {};
         totalReactions = 0;
@@ -1611,6 +1616,8 @@
             currentSinger: currentSinger || null,
             queue: songQueue,
             currentQueuePosition: currentQueuePosition,
+            currentSongScores: currentSongScores,
+            currentSongId: currentSongId,
             updatedAt: Date.now()
         };
         await roomChannel.send({
@@ -1646,6 +1653,8 @@
             totalReactions: totalReactions,
             queue: songQueue,
             currentQueuePosition: currentQueuePosition,
+            currentSongScores: currentSongScores,
+            currentSongId: currentSongId,
             timestamp: Date.now()
         };
         
@@ -1758,6 +1767,12 @@
                         playVideo(state.currentVideoId);
                     }
                     
+                    if (state.currentSongScores) {
+                        currentSongScores = state.currentSongScores;
+                        currentSongId = state.currentSongId;
+                        updateLeaderboard();
+                    }
+                    
                     if (state.emojiCounts) {
                         emojiCounts = state.emojiCounts;
                         totalReactions = state.totalReactions || 0;
@@ -1787,6 +1802,12 @@
                         currentSinger = payload.currentSinger;
                         playVideo(payload.currentVideoId);
                     }
+                    
+                    if (payload.currentSongScores) {
+                        currentSongScores = payload.currentSongScores;
+                        currentSongId = payload.currentSongId;
+                        updateLeaderboard();
+                    }
                 }
             })
             .on('broadcast', { event: 'queue-update' }, ({ payload, from }) => {
@@ -1811,10 +1832,12 @@
                 else scores.negative += Math.abs(points);
                 updateScoreDisplay();
                 
-                // Atualizar pontuação individual do remetente para o placar
-                if (!userScores[userId]) userScores[userId] = 0;
-                userScores[userId] += points;
-                updateLeaderboard();
+                // Atualizar pontuação da música atual para o remetente
+                if (currentSongId) {
+                    if (!currentSongScores[userId]) currentSongScores[userId] = 0;
+                    currentSongScores[userId] += points;
+                    updateLeaderboard();
+                }
                 
                 saveRoomState();
                 saveScoresToSupabase();
@@ -1844,7 +1867,12 @@
                 scores = { total: 0, positive: 0, negative: 0 };
                 emojiCounts = {};
                 totalReactions = 0;
+                currentSongScores = {};
+                currentSongId = null;
+                
                 updateScoreDisplay();
+                updateLeaderboard();
+                
                 showToast('Pontuação resetada! 🔄');
             });
 
@@ -2018,10 +2046,12 @@
         else scores.negative += Math.abs(points);
         updateScoreDisplay();
         
-        // Atualizar pontuação individual para o placar
-        if (!userScores[odUserId]) userScores[odUserId] = 0;
-        userScores[odUserId] += points;
-        updateLeaderboard();
+        // Atualizar pontuação da música atual
+        if (currentSongId) {
+            if (!currentSongScores[odUserId]) currentSongScores[odUserId] = 0;
+            currentSongScores[odUserId] += points;
+            updateLeaderboard();
+        }
         
         await sendEmojiToSupabase(emoji, points);
         inCooldown = true;
