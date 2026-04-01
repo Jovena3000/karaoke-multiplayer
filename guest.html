@@ -496,8 +496,6 @@
             text-align: center;
         }
         
-        /* SEM BOTÕES DE AÇÃO PARA CONVIDADOS */
-        
         .empty-queue {
             text-align: center;
             padding: 2rem;
@@ -967,10 +965,10 @@
                     </div>
                 </div>
 
-                <!-- LEADERBOARD -->
+                <!-- LEADERBOARD - PLACAR DE LÍDERES -->
                 <div class="leaderboard-section">
                     <div class="leaderboard-header">
-                        <i class="fas fa-trophy"></i> Placar de Líderes
+                        🏆 Placar de Líderes
                     </div>
                     <div class="leaderboard-list" id="leaderboardList">
                         <div class="empty-leaderboard">🎵 Ninguém pontuou nesta música ainda</div>
@@ -1234,7 +1232,7 @@
     }
 
     // ============================================
-    // FUNÇÕES DE UI (MESMAS DO APP.HTML)
+    // FUNÇÕES DE UI
     // ============================================
     function showToast(msg, isError) {
         const toast = document.getElementById('toast');
@@ -1297,10 +1295,6 @@
             if (match && match[1]) return match[1];
         }
         return null;
-    }
-
-    function getYouTubeThumbnail(videoId, quality = 'mqdefault') {
-        return `https://img.youtube.com/vi/${videoId}/${quality}.jpg`;
     }
 
     function updateScoreDisplay() {
@@ -1485,9 +1479,9 @@
                         ${thumbnailHtml}
                     </div>
                     <div class="queue-info">
-                        <div class="queue-video-title">${item.video_title || 'Vídeo do YouTube'}</div>
+                        <div class="queue-video-title">${escapeHtml(item.video_title) || 'Vídeo do YouTube'}</div>
                         <div class="queue-added-by">
-                            <span>👤 ${item.added_by_name}</span>
+                            <span>👤 ${escapeHtml(item.added_by_name)}</span>
                             ${isPlaying ? '<span style="color:var(--accent-green);margin-left:0.5rem;">▶️ Tocando agora</span>' : ''}
                         </div>
                     </div>
@@ -1996,7 +1990,6 @@
         roomId = code;
         isNewRoom = false;
         document.getElementById('headerRoomId').textContent = code;
-        document.getElementById('qrRoomId').textContent = code;
         document.getElementById('modalRoomId').textContent = code;
         const modeEl = document.getElementById('modalMode');
         modeEl.textContent = '🚪 Entrando em sala existente';
@@ -2080,7 +2073,6 @@
         }
         
         document.getElementById('headerRoomId').textContent = roomId;
-        document.getElementById('qrRoomId').textContent = roomId;
         document.getElementById('modalRoomId').textContent = roomId;
         
         const modeEl = document.getElementById('modalMode');
