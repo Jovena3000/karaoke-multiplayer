@@ -1662,65 +1662,71 @@
     }
 
     function playVideo(videoId, title = 'Vídeo do YouTube') {
-        if (!videoId) return;
-        
-        const wrapper = document.getElementById('playerWrapper');
-        const placeholder = document.getElementById('placeholder');
-        const emojiContainer = document.getElementById('emojiContainer');
-        
-        const oldIframe = wrapper.querySelector('iframe');
-        if (oldIframe) oldIframe.remove();
-        
-        const embedUrl = 'https://www.youtube.com/embed/' + videoId + '?autoplay=1&rel=0';
-        
-        const iframe = document.createElement('iframe');
-        iframe.src = embedUrl;
-        iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
-        iframe.allowFullscreen = true;
-        iframe.id = 'ytPlayer';
-        iframe.style.position = 'absolute';
-        iframe.style.top = '0';
-        iframe.style.left = '0';
-        iframe.style.width = '100%';
-        iframe.style.height = '100%';
-        iframe.style.border = 'none';
-        iframe.style.zIndex = '1';
-        
-        wrapper.insertBefore(iframe, emojiContainer);
-        placeholder.classList.add('hidden');
-        
-        if (emojiContainer) {
-            emojiContainer.style.zIndex = '1000';
-            emojiContainer.style.position = 'absolute';
-            emojiContainer.style.top = '0';
-            emojiContainer.style.left = '0';
-            emojiContainer.style.width = '100%';
-            emojiContainer.style.height = '100%';
-            emojiContainer.style.pointerEvents = 'none';
-            emojiContainer.style.overflow = 'hidden';
-        }
-        
-        document.getElementById('endSongBtn').style.display = 'inline-block';
-        
-        // Atualiza o cantor atual
-        currentSinger = userName;
-        // Encontra o ID do cantor atual
-        const singerParticipant = participants.find(p => p.odUserName === currentSinger);
-        currentSingerId = singerParticipant ? singerParticipant.odUserId : odUserId;
-        currentVideoId = videoId;
-        
-        // ===== RESETAR PLACAR DA MÚSICA ATUAL =====
-        currentSongId = videoId + '_' + Date.now();
-        currentSongScores = {};
-        updateLeaderboard();
-        
-        emojiCounts = {};
-        totalReactions = 0;
-        
-        saveRoomState();
-        
-        addActivity('🎬', `${userName} começou: ${title}`);
+    if (!videoId) return;
+    
+    const wrapper = document.getElementById('playerWrapper');
+    const placeholder = document.getElementById('placeholder');
+    const emojiContainer = document.getElementById('emojiContainer');
+    
+    const oldIframe = wrapper.querySelector('iframe');
+    if (oldIframe) oldIframe.remove();
+    
+    const embedUrl = 'https://www.youtube.com/embed/' + videoId + '?autoplay=1&rel=0';
+    
+    const iframe = document.createElement('iframe');
+    iframe.src = embedUrl;
+    iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+    iframe.allowFullscreen = true;
+    iframe.id = 'ytPlayer';
+    iframe.style.position = 'absolute';
+    iframe.style.top = '0';
+    iframe.style.left = '0';
+    iframe.style.width = '100%';
+    iframe.style.height = '100%';
+    iframe.style.border = 'none';
+    iframe.style.zIndex = '1';
+    
+    wrapper.insertBefore(iframe, emojiContainer);
+    placeholder.classList.add('hidden');
+    
+    if (emojiContainer) {
+        emojiContainer.style.zIndex = '1000';
+        emojiContainer.style.position = 'absolute';
+        emojiContainer.style.top = '0';
+        emojiContainer.style.left = '0';
+        emojiContainer.style.width = '100%';
+        emojiContainer.style.height = '100%';
+        emojiContainer.style.pointerEvents = 'none';
+        emojiContainer.style.overflow = 'hidden';
     }
+    
+    document.getElementById('endSongBtn').style.display = 'inline-block';
+    
+    // Atualiza o cantor atual
+    currentSinger = userName;
+    currentVideoId = videoId;
+    
+    // Encontra o ID do cantor atual na lista de participantes
+    const singerParticipant = participants.find(p => p.odUserName === currentSinger);
+    currentSingerId = singerParticipant ? singerParticipant.odUserId : odUserId;
+    
+    // ===== RESETAR PLACAR DA MÚSICA ATUAL =====
+    currentSongId = videoId + '_' + Date.now();
+    currentSongScores = {};
+    
+    console.log(`🎬 NOVA MÚSICA: ${title}`);
+    console.log(`🎤 Cantor: ${currentSinger} (ID: ${currentSingerId})`);
+    console.log(`🆕 ID da música: ${currentSongId}`);
+    
+    updateLeaderboard();
+    
+    emojiCounts = {};
+    totalReactions = 0;
+    
+    saveRoomState();
+    
+    addActivity('🎬', `${userName} começou: ${title}`);
+}
 
     // ============================================
     // FUNÇÕES DA FILA
@@ -2139,63 +2145,73 @@
                 }
             })
             .on('broadcast', { event: 'room-state' }, ({ payload }) => {
-                if (payload.updatedAt > (lastStateUpdate || 0)) {
-                    lastStateUpdate = payload.updatedAt;
-                    
-                    if (payload.scores) {
-                        scores = payload.scores;
-                        updateScoreDisplay();
-                    }
-                    if (payload.queue) {
-                        songQueue = payload.queue;
-                        currentQueuePosition = payload.currentQueuePosition !== undefined ? payload.currentQueuePosition : -1;
-                        safeUpdateQueueDisplay();
-                    }
-                    if (payload.currentVideoId && payload.currentVideoId !== currentVideoId) {
-                        currentVideoId = payload.currentVideoId;
-                        currentSinger = payload.currentSinger;
-                        currentSingerId = payload.currentSingerId;
-                        playVideo(payload.currentVideoId);
-                    }
-                    if (payload.currentSongScores) {
-                        currentSongScores = payload.currentSongScores;
-                        currentSongId = payload.currentSongId;
-                        updateLeaderboard();
-                    }
-                }
-            })
-            .on('broadcast', { event: 'queue-update' }, ({ payload, from }) => {
-                if (from === odUserId) return;
-                songQueue = payload.queue;
-                currentQueuePosition = payload.currentPosition;
-                safeUpdateQueueDisplay();
-            })
-            .on('broadcast', { event: 'new-emoji' }, ({ payload }) => {
-                const { emoji, points, targetUserId, userName: emojiUserName, emojiId } = payload;
-                if (processedEmojis.has(emojiId)) return;
-                processedEmojis.add(emojiId);
-                
-                createFloatingEmoji(emoji);
-                showEmojiNotification(emoji, emojiUserName);
-                flashScoreCard(points);
-                addActivity(emoji, `${emojiUserName} reagiu (${points > 0 ? '+' + points : points})`);
-                trackEmoji(emoji);
-                
-                scores.total += points;
-                if (points > 0) scores.positive += points;
-                else scores.negative += Math.abs(points);
-                updateScoreDisplay();
-                
-                // Os pontos vão para o CANTOR (targetUserId)
-                if (currentSongId && targetUserId) {
-                    if (!currentSongScores[targetUserId]) currentSongScores[targetUserId] = 0;
-                    currentSongScores[targetUserId] += points;
-                    updateLeaderboard();
-                }
-                
-                saveRoomState();
-                saveScoresToSupabase();
-            })
+    if (payload.updatedAt > (lastStateUpdate || 0)) {
+        lastStateUpdate = payload.updatedAt;
+        
+        if (payload.scores) {
+            scores = payload.scores;
+            updateScoreDisplay();
+        }
+        if (payload.queue) {
+            songQueue = payload.queue;
+            currentQueuePosition = payload.currentQueuePosition !== undefined ? payload.currentQueuePosition : -1;
+            safeUpdateQueueDisplay();
+        }
+        if (payload.currentVideoId && payload.currentVideoId !== currentVideoId) {
+            currentVideoId = payload.currentVideoId;
+            currentSinger = payload.currentSinger;
+            currentSingerId = payload.currentSingerId;
+            playVideo(payload.currentVideoId);
+        }
+        if (payload.currentSongScores) {
+            currentSongScores = payload.currentSongScores;
+            currentSongId = payload.currentSongId;
+            updateLeaderboard();
+        }
+    }
+})
+.on('broadcast', { event: 'queue-update' }, ({ payload, from }) => {
+    if (from === odUserId) return;
+    songQueue = payload.queue;
+    currentQueuePosition = payload.currentPosition;
+    safeUpdateQueueDisplay();
+})
+.on('broadcast', { event: 'new-emoji' }, ({ payload }) => {
+    const { emoji, points, targetUserId, userName: emojiUserName, emojiId } = payload;
+    if (processedEmojis.has(emojiId)) return;
+    processedEmojis.add(emojiId);
+    
+    console.log(`📨 Recebido emoji: ${emoji} (${points} pts) de ${emojiUserName} para targetUserId: ${targetUserId}`);
+    
+    createFloatingEmoji(emoji);
+    showEmojiNotification(emoji, emojiUserName);
+    flashScoreCard(points);
+    
+    // Encontra o nome do cantor para exibir na atividade
+    const targetParticipant = participants.find(p => p.odUserId === targetUserId);
+    const targetName = targetParticipant ? targetParticipant.odUserName : 'cantor';
+    
+    addActivity(emoji, `${emojiUserName} → ${targetName}: ${points > 0 ? '+' + points : points}`);
+    trackEmoji(emoji);
+    
+    scores.total += points;
+    if (points > 0) scores.positive += points;
+    else scores.negative += Math.abs(points);
+    updateScoreDisplay();
+    
+    // Os pontos vão para o CANTOR (targetUserId)
+    if (currentSongId && targetUserId) {
+        if (!currentSongScores[targetUserId]) {
+            currentSongScores[targetUserId] = 0;
+        }
+        currentSongScores[targetUserId] += points;
+        console.log(`📊 Placar: ${targetName} agora tem ${currentSongScores[targetUserId]} pontos`);
+        updateLeaderboard();
+    }
+    
+    saveRoomState();
+    saveScoresToSupabase();
+})
             .on('broadcast', { event: 'new-video' }, ({ payload }) => {
                 const { videoId, loadedBy, title } = payload;
                 if (videoId && videoId !== currentVideoId) {
@@ -2406,51 +2422,82 @@
     }
 
     async function sendEmoji(emoji, points) {
-        if (!userName) {
-            showToast('Entre na sala primeiro!', true);
-            return;
-        }
-        if (inCooldown) {
-            showToast('Aguarde 1 segundo!', true);
-            return;
-        }
-        if (!currentSingerId && currentSinger) {
-            const singerParticipant = participants.find(p => p.odUserName === currentSinger);
-            currentSingerId = singerParticipant ? singerParticipant.odUserId : null;
-        }
-        if (!currentSingerId) {
-            showToast('Nenhuma música tocando no momento.', true);
-            return;
-        }
-        
-        const targetUserId = currentSingerId;
-        
-        trackEmoji(emoji);
-        createFloatingEmoji(emoji);
-        flashScoreCard(points);
-        
-        scores.total += points;
-        if (points > 0) scores.positive += points;
-        else scores.negative += Math.abs(points);
-        updateScoreDisplay();
-        
-        if (currentSongId && targetUserId) {
-            if (!currentSongScores[targetUserId]) currentSongScores[targetUserId] = 0;
-            currentSongScores[targetUserId] += points;
-            updateLeaderboard();
-        }
-        
-        addActivity(emoji, userName + ' reagiu (' + (points > 0 ? '+' + points : points) + ')');
-        await sendEmojiToSupabase(emoji, points, targetUserId);
-        
-        inCooldown = true;
-        const btns = document.querySelectorAll('.emoji-btn');
-        btns.forEach(btn => btn.classList.add('cooldown'));
-        setTimeout(() => {
-            inCooldown = false;
-            btns.forEach(btn => btn.classList.remove('cooldown'));
-        }, 1000);
+    if (!userName) {
+        showToast('Entre na sala primeiro!', true);
+        return;
     }
+    if (inCooldown) {
+        showToast('Aguarde 1 segundo!', true);
+        return;
+    }
+    
+    // Verifica se tem música tocando
+    if (!currentVideoId) {
+        showToast('Nenhuma música tocando no momento!', true);
+        return;
+    }
+    
+    // Encontra o cantor atual na lista de participantes
+    let targetUserId = null;
+    let targetUserName = currentSinger;
+    
+    // Se não encontrou pelo nome, tenta encontrar quem está tocando
+    if (!targetUserName && currentVideoId) {
+        targetUserName = userName; // assume que quem tocou é o cantor
+    }
+    
+    // Procura o ID do cantor na lista de participantes
+    const singerParticipant = participants.find(p => p.odUserName === targetUserName);
+    if (singerParticipant) {
+        targetUserId = singerParticipant.odUserId;
+    } else {
+        // Se não encontrou, usa o próprio ID como fallback
+        targetUserId = odUserId;
+        targetUserName = userName;
+    }
+    
+    console.log(`🎤 Cantor atual: ${targetUserName} (ID: ${targetUserId})`);
+    console.log(`🎯 ${userName} enviou ${emoji} (${points} pts) para ${targetUserName}`);
+    
+    // Efeitos visuais
+    trackEmoji(emoji);
+    createFloatingEmoji(emoji);
+    flashScoreCard(points);
+    
+    // Atualiza o total da música
+    scores.total += points;
+    if (points > 0) scores.positive += points;
+    else scores.negative += Math.abs(points);
+    updateScoreDisplay();
+    
+    // CRUCIAL: Adiciona os pontos ao CANTOR no placar
+    if (currentSongId && targetUserId) {
+        if (!currentSongScores[targetUserId]) {
+            currentSongScores[targetUserId] = 0;
+        }
+        currentSongScores[targetUserId] += points;
+        console.log(`📊 Placar atualizado: ${targetUserName} agora tem ${currentSongScores[targetUserId]} pontos`);
+        updateLeaderboard();
+    } else {
+        console.log('⚠️ currentSongId ou targetUserId inválido:', { currentSongId, targetUserId });
+    }
+    
+    // Adiciona à atividade
+    const ptText = points > 0 ? '+' + points : String(points);
+    addActivity(emoji, `${userName} → ${targetUserName}: ${ptText}`);
+    
+    // Envia para o Supabase
+    await sendEmojiToSupabase(emoji, points, targetUserId);
+    
+    // Cooldown
+    inCooldown = true;
+    const btns = document.querySelectorAll('.emoji-btn');
+    btns.forEach(btn => btn.classList.add('cooldown'));
+    setTimeout(() => {
+        inCooldown = false;
+        btns.forEach(btn => btn.classList.remove('cooldown'));
+    }, 1000);
+}
 
     async function resetScores() {
         if (!confirm('Resetar pontuação?')) return;
