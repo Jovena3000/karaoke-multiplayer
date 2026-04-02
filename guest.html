@@ -1182,54 +1182,53 @@
         });
     }
 
-    // ===== FUNÇÃO PARA ATUALIZAR O PLACAR =====
-    function updateLeaderboard() {
-        const container = document.getElementById('leaderboardList');
-        if (!container) return;
+    // ===== FUNÇÃO PARA ATUALIZAR O PLACAR (MOSTRA OS CANTORES QUE MAIS RECEBERAM PONTOS) =====
+function updateLeaderboard() {
+    const container = document.getElementById('leaderboardList');
+    if (!container) return;
 
-        // Filtrar apenas os participantes que ainda estão na sala
-        const activeUsers = participants.map(p => p.odUserId);
-        const scoresList = Object.entries(currentSongScores)
-            .filter(([userId]) => activeUsers.includes(userId))
-            .map(([userId, score]) => {
-                const user = participants.find(p => p.odUserId === userId);
-                return {
-                    userId,
-                    name: user?.odUserName || 'Anônimo',
-                    score
-                };
-            })
-            .sort((a, b) => b.score - a.score)
-            .slice(0, 3);
+    // currentSongScores armazena: { userId: pontos_recebidos }
+    // Isso mostra QUEM RECEBEU pontos (os cantores), não quem deu
+    const scoresList = Object.entries(currentSongScores)
+        .map(([userId, score]) => {
+            const user = participants.find(p => p.odUserId === userId);
+            return {
+                userId,
+                name: user?.odUserName || 'Anônimo',
+                score: score
+            };
+        })
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 3);
 
-        if (scoresList.length === 0 || !currentSongId) {
-            container.innerHTML = '<div class="empty-leaderboard">🎵 Ninguém pontuou nesta música ainda</div>';
-            return;
-        }
+    if (scoresList.length === 0 || !currentSongId) {
+        container.innerHTML = '<div class="empty-leaderboard">🎵 Ninguém recebeu pontos nesta música ainda</div>';
+        return;
+    }
 
-        const medals = ['🥇', '🥈', '🥉'];
-        let html = '';
-        scoresList.forEach((item, idx) => {
-            const isYou = item.userId === odUserId;
-            const medal = medals[idx] || `${idx + 1}º`;
-            html += `
-                <div class="leaderboard-item rank-${idx + 1}">
-                    <div class="leaderboard-rank">
-                        ${medal}
+    const medals = ['🥇', '🥈', '🥉'];
+    let html = '';
+    scoresList.forEach((item, idx) => {
+        const isYou = item.userId === odUserId;
+        const medal = medals[idx] || `${idx + 1}º`;
+        html += `
+            <div class="leaderboard-item rank-${idx + 1}">
+                <div class="leaderboard-rank">
+                    ${medal}
+                </div>
+                <div class="leaderboard-info">
+                    <div class="leaderboard-name">
+                        🎤 ${escapeHtml(item.name)} ${isYou ? '<span style="font-size:0.7rem;">(você)</span>' : ''}
                     </div>
-                    <div class="leaderboard-info">
-                        <div class="leaderboard-name">
-                            ${escapeHtml(item.name)} ${isYou ? '<span style="font-size:0.7rem;">(você)</span>' : ''}
-                        </div>
-                        <div class="leaderboard-score">
-                            🎤 Pontos: <span class="leaderboard-score-value">${item.score}</span>
-                        </div>
+                    <div class="leaderboard-score">
+                        ⭐ Pontuação Recebida: <span class="leaderboard-score-value">${item.score}</span>
                     </div>
                 </div>
-            `;
-        });
-        container.innerHTML = html;
-    }
+            </div>
+        `;
+    });
+    container.innerHTML = html;
+}
 
     // ============================================
     // FUNÇÕES DE UI
