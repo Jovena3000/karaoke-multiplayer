@@ -1052,8 +1052,8 @@
             transform: scale(1.05);
             box-shadow: 0 5px 20px rgba(0,212,255,0.4);
         }
-		
-		/* Botão Auto Player */
+        
+        /* Botão Auto Player */
         .auto-player-btn {
             background: linear-gradient(135deg, var(--accent-orange), #ff6b00);
             border: none;
@@ -1072,10 +1072,6 @@
             transform: scale(1.05);
             box-shadow: 0 5px 20px rgba(255,149,0,0.4);
         }
-
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: var(--bg-dark); }
-        ::-webkit-scrollbar-thumb { background: var(--accent-purple); border-radius: 3px; }
 
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: var(--bg-dark); }
@@ -1172,33 +1168,34 @@
                 <!-- LEADERBOARD - PLACAR DE LÍDERES -->
                 <div class="leaderboard-section">
                     <div class="leaderboard-header">
-                        🏆 Placar de Líderes
+                        🏆 Placar de Líderes (Cantores mais avaliados)
                     </div>
                     <div class="leaderboard-list" id="leaderboardList">
-                        <div class="empty-leaderboard">🎵 Ninguém pontuou nesta música ainda</div>
+                        <div class="empty-leaderboard">🎵 Ninguém recebeu pontos nesta música ainda</div>
                     </div>
                 </div>
 
                 <!-- FILA DE ESPERA -->
-<div class="queue-section">
-    <div class="queue-header">
-        <div class="queue-title">
-            📋 Fila de Espera
-            <span class="queue-count" id="queueCount">0</span>
-        </div>
-        <div>
-            <button class="add-to-queue-btn" onclick="openVideoModal(true)">➕ Adicionar</button>
-            <button class="auto-player-btn" id="autoPlayerBtn" onclick="toggleAutoPlayer()" style="margin-left: 0.5rem;">▶️ Auto Player</button>
-        </div>
-    </div>
-    <div class="queue-list" id="queueList">
-        <div class="empty-queue">
-            <div style="font-size: 3rem; margin-bottom: 0.5rem;">🎵</div>
-            <p>Nenhuma música na fila</p>
-            <small>Adicione links do YouTube para começar</small>
-        </div>
-    </div>
-</div>
+                <div class="queue-section">
+                    <div class="queue-header">
+                        <div class="queue-title">
+                            📋 Fila de Espera
+                            <span class="queue-count" id="queueCount">0</span>
+                        </div>
+                        <div>
+                            <button class="add-to-queue-btn" onclick="openVideoModal(true)">➕ Adicionar</button>
+                            <button class="auto-player-btn" id="autoPlayerBtn" onclick="toggleAutoPlayer()" style="margin-left: 0.5rem;">▶️ Auto Player</button>
+                        </div>
+                    </div>
+                    <div class="queue-list" id="queueList">
+                        <div class="empty-queue">
+                            <div style="font-size: 3rem; margin-bottom: 0.5rem;">🎵</div>
+                            <p>Nenhuma música na fila</p>
+                            <small>Adicione links do YouTube para começar</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <!-- COLUNA DIREITA -->
             <div class="right-column">
@@ -1352,7 +1349,7 @@
     let activities = [];
     let processedEmojis = new Set();
     let lastStateUpdate = 0;
-	let autoPlayerActive = false;
+    let autoPlayerActive = false;
     
     // Variáveis da fila
     let songQueue = [];
@@ -1362,6 +1359,7 @@
     let emojiCounts = {};
     let totalReactions = 0;
     let currentSinger = '';
+    let currentSingerId = null;  // ID do cantor atual
 
     // Flag para controle de sincronização inicial
     let hasReceivedInitialState = false;
@@ -1369,7 +1367,7 @@
     // DEBOUNCE PARA EVITAR O "PISCAR" DA FILA
     let queueUpdateTimeout = null;
 
-    // ===== PLACAR DE LÍDERES (APENAS PARA A MÚSICA ATUAL) =====
+    // ===== PLACAR DE LÍDERES (PONTOS RECEBIDOS POR CADA CANTOR) =====
     let currentSongScores = {};
     let currentSongId = null;
 
@@ -1417,53 +1415,50 @@
         });
     }
 
-        // ===== FUNÇÃO PARA ATUALIZAR O PLACAR (MOSTRA OS CANTORES QUE MAIS RECEBERAM PONTOS) =====
-function updateLeaderboard() {
-    const container = document.getElementById('leaderboardList');
-    if (!container) return;
+    // ===== FUNÇÃO PARA ATUALIZAR O PLACAR (CANTORES QUE MAIS RECEBERAM PONTOS) =====
+    function updateLeaderboard() {
+        const container = document.getElementById('leaderboardList');
+        if (!container) return;
 
-    // currentSongScores armazena: { userId: pontos_recebidos }
-    // Isso mostra QUEM RECEBEU pontos (os cantores), não quem deu
-    const scoresList = Object.entries(currentSongScores)
-        .map(([userId, score]) => {
-            const user = participants.find(p => p.odUserId === userId);
-            return {
-                userId,
-                name: user?.odUserName || 'Anônimo',
-                score: score
-            };
-        })
-        .sort((a, b) => b.score - a.score)
-        .slice(0, 3);
+        const scoresList = Object.entries(currentSongScores)
+            .map(([userId, score]) => {
+                const user = participants.find(p => p.odUserId === userId);
+                return {
+                    userId,
+                    name: user?.odUserName || 'Anônimo',
+                    score: score
+                };
+            })
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 5);
 
-    if (scoresList.length === 0 || !currentSongId) {
-        container.innerHTML = '<div class="empty-leaderboard">🎵 Ninguém recebeu pontos nesta música ainda</div>';
-        return;
+        if (scoresList.length === 0 || !currentSongId) {
+            container.innerHTML = '<div class="empty-leaderboard">🎵 Ninguém recebeu pontos nesta música ainda</div>';
+            return;
+        }
+
+        const medals = ['🥇', '🥈', '🥉'];
+        let html = '';
+        scoresList.forEach((item, idx) => {
+            const isYou = item.userId === odUserId;
+            const medal = medals[idx] || `${idx + 1}º`;
+            html += `
+                <div class="leaderboard-item rank-${idx + 1}">
+                    <div class="leaderboard-rank">${medal}</div>
+                    <div class="leaderboard-info">
+                        <div class="leaderboard-name">
+                            🎤 ${escapeHtml(item.name)} ${isYou ? '<span style="font-size:0.7rem;">(você)</span>' : ''}
+                        </div>
+                        <div class="leaderboard-score">
+                            ⭐ Pontuação Recebida: <span class="leaderboard-score-value">${item.score}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
     }
 
-    const medals = ['🥇', '🥈', '🥉'];
-    let html = '';
-    scoresList.forEach((item, idx) => {
-        const isYou = item.userId === odUserId;
-        const medal = medals[idx] || `${idx + 1}º`;
-        html += `
-            <div class="leaderboard-item rank-${idx + 1}">
-                <div class="leaderboard-rank">
-                    ${medal}
-                </div>
-                <div class="leaderboard-info">
-                    <div class="leaderboard-name">
-                        🎤 ${escapeHtml(item.name)} ${isYou ? '<span style="font-size:0.7rem;">(você)</span>' : ''}
-                    </div>
-                    <div class="leaderboard-score">
-                        ⭐ Pontuação Recebida: <span class="leaderboard-score-value">${item.score}</span>
-                    </div>
-                </div>
-            </div>
-        `;
-    });
-    container.innerHTML = html;
-}
     // ============================================
     // FUNÇÕES DE UI
     // ============================================
@@ -1530,10 +1525,6 @@ function updateLeaderboard() {
         return null;
     }
 
-    function getYouTubeThumbnail(videoId, quality = 'mqdefault') {
-        return `https://img.youtube.com/vi/${videoId}/${quality}.jpg`;
-    }
-
     function updateScoreDisplay() {
         document.getElementById('totalScore').textContent = scores.total;
         document.getElementById('posScore').textContent = scores.positive;
@@ -1565,7 +1556,6 @@ function updateLeaderboard() {
                 '</div>';
         });
         el.innerHTML = html;
-        // Atualizar placar quando a lista de participantes mudar
         updateLeaderboard();
     }
 
@@ -1712,7 +1702,11 @@ function updateLeaderboard() {
         
         document.getElementById('endSongBtn').style.display = 'inline-block';
         
+        // Atualiza o cantor atual
         currentSinger = userName;
+        // Encontra o ID do cantor atual
+        const singerParticipant = participants.find(p => p.odUserName === currentSinger);
+        currentSingerId = singerParticipant ? singerParticipant.odUserId : odUserId;
         currentVideoId = videoId;
         
         // ===== RESETAR PLACAR DA MÚSICA ATUAL =====
@@ -1785,47 +1779,31 @@ function updateLeaderboard() {
     // FUNÇÃO ADICIONAR À FILA
     // ============================================
     async function addToQueue() {
-        console.log('🔍 addToQueue foi chamada!');
-        
         const input = document.getElementById('videoInput');
         if (!input) {
-            console.error('❌ input não encontrado!');
             showToast('Erro: campo de vídeo não encontrado', true);
             return;
         }
         
         const url = input.value.trim();
-        console.log('📝 URL digitada:', url);
-        
         if (!url) {
             showToast('Digite ou cole um link do YouTube!', true);
             return;
         }
         
         const videoId = extractVideoId(url);
-        console.log('🎬 ID extraído:', videoId);
-        
         if (!videoId) {
             showToast('Link inválido! Use um link do YouTube válido.', true);
             return;
         }
         
         const addBtn = document.querySelector('#videoModal .modal-btn');
-        if (!addBtn) {
-            console.error('❌ Botão não encontrado!');
-            showToast('Erro ao encontrar botão', true);
-            return;
-        }
-        
         const originalText = addBtn.innerText;
         addBtn.innerText = '⏳ Buscando título...';
         addBtn.disabled = true;
         
         try {
-            console.log('🔍 Buscando título do vídeo...');
             const videoInfo = await fetchVideoInfo(videoId);
-            console.log('📺 Título encontrado:', videoInfo.title);
-            
             closeVideoModal();
             
             const queueItem = {
@@ -1839,20 +1817,19 @@ function updateLeaderboard() {
                 order: songQueue.length
             };
             
-            console.log('📦 Adicionando item à fila:', queueItem);
-            
             songQueue.push(queueItem);
             safeUpdateQueueDisplay();
             
             if (isSupabaseConnected && roomChannel) {
                 await saveQueueToSupabase();
-                console.log('✅ Salvo no Supabase');
             }
             
             showToast(`"${videoInfo.title.substring(0, 40)}" adicionado! 🎵`);
             addActivity('➕', `${userName} adicionou: ${videoInfo.title.substring(0, 30)}`);
             
-            if (currentQueuePosition === -1) {
+            if (currentQueuePosition === -1 && autoPlayerActive) {
+                playNextInQueue();
+            } else if (currentQueuePosition === -1) {
                 showToast('Música adicionada. Clique em "▶️" na fila para tocar!');
             }
             
@@ -1877,7 +1854,6 @@ function updateLeaderboard() {
         }
         
         songQueue.splice(index, 1);
-        
         songQueue.forEach((item, i) => { item.order = i; });
         
         if (currentQueuePosition > index) currentQueuePosition--;
@@ -1938,19 +1914,19 @@ function updateLeaderboard() {
     }
 
     async function endSongAndPlayNext() {
-    if (totalReactions > 0) {
-        await showResultSupabase();
-        showResultScreen();
-    } else {
-        scores = { total: 0, positive: 0, negative: 0 };
-        emojiCounts = {};
-        totalReactions = 0;
-        updateScoreDisplay();
-        
-        await saveScoresToSupabase();
-        // Se auto player estiver ativo, toca a próxima; senão, só para
-        if (autoPlayerActive) {
-            await playNextInQueue();
+        if (totalReactions > 0) {
+            await showResultSupabase();
+            showResultScreen();
+        } else {
+            scores = { total: 0, positive: 0, negative: 0 };
+            emojiCounts = {};
+            totalReactions = 0;
+            updateScoreDisplay();
+            
+            await saveScoresToSupabase();
+            if (autoPlayerActive) {
+                await playNextInQueue();
+            }
         }
     }
 
@@ -1965,24 +1941,25 @@ function updateLeaderboard() {
         saveScoresToSupabase();
         playNextInQueue();
     }
-	// ===== AUTO PLAYER =====
-function toggleAutoPlayer() {
-    autoPlayerActive = !autoPlayerActive;
-    const btn = document.getElementById('autoPlayerBtn');
-    if (autoPlayerActive) {
-        btn.classList.add('active');
-        btn.innerHTML = '⏸️ Auto Player ON';
-        showToast('Modo Auto Player ativado! Próximas músicas tocarão automaticamente.');
-        
-        if (!currentVideoId && songQueue.length > 0 && currentQueuePosition === -1) {
-            playNextInQueue();
+
+    // ===== AUTO PLAYER =====
+    function toggleAutoPlayer() {
+        autoPlayerActive = !autoPlayerActive;
+        const btn = document.getElementById('autoPlayerBtn');
+        if (autoPlayerActive) {
+            btn.classList.add('active');
+            btn.innerHTML = '⏸️ Auto Player ON';
+            showToast('Modo Auto Player ativado! Próximas músicas tocarão automaticamente.');
+            
+            if (!currentVideoId && songQueue.length > 0 && currentQueuePosition === -1) {
+                playNextInQueue();
+            }
+        } else {
+            btn.classList.remove('active');
+            btn.innerHTML = '▶️ Auto Player';
+            showToast('Modo Auto Player desativado.');
         }
-    } else {
-        btn.classList.remove('active');
-        btn.innerHTML = '▶️ Auto Player';
-        showToast('Modo Auto Player desativado.');
     }
-}
 
     // ============================================
     // FUNÇÕES SUPABASE
@@ -1992,10 +1969,7 @@ function toggleAutoPlayer() {
         await roomChannel.send({
             type: 'broadcast',
             event: 'queue-update',
-            payload: {
-                queue: songQueue,
-                currentPosition: currentQueuePosition
-            }
+            payload: { queue: songQueue, currentPosition: currentQueuePosition }
         });
     }
 
@@ -2014,6 +1988,7 @@ function toggleAutoPlayer() {
             currentVideoId: currentVideoId || null,
             scores: scores,
             currentSinger: currentSinger || null,
+            currentSingerId: currentSingerId || null,
             queue: songQueue,
             currentQueuePosition: currentQueuePosition,
             currentSongScores: currentSongScores,
@@ -2029,27 +2004,22 @@ function toggleAutoPlayer() {
 
     async function requestRoomState() {
         if (!isSupabaseConnected || !roomChannel) return;
-        console.log('🔄 Solicitando estado atual da sala...');
         await roomChannel.send({
             type: 'broadcast',
             event: 'request-state',
-            payload: { 
-                userId: odUserId, 
-                timestamp: Date.now(),
-                isNewUser: true 
-            }
+            payload: { userId: odUserId, timestamp: Date.now(), isNewUser: true }
         });
     }
 
     async function sendStateToUser(targetUserId) {
         if (!isSupabaseConnected || !roomChannel) return;
-        
         if (!currentVideoId && songQueue.length === 0 && scores.total === 0) return;
         
         const roomState = {
             currentVideoId: currentVideoId || null,
             scores: scores,
             currentSinger: currentSinger || null,
+            currentSingerId: currentSingerId || null,
             emojiCounts: emojiCounts,
             totalReactions: totalReactions,
             activities: activities.slice(0, 10),
@@ -2060,39 +2030,27 @@ function toggleAutoPlayer() {
             timestamp: Date.now()
         };
         
-        console.log('📤 Enviando estado para novo usuário:', targetUserId, 'scores:', scores);
-        
         await roomChannel.send({
             type: 'broadcast',
             event: 'initial-state',
-            payload: { 
-                targetUserId: targetUserId, 
-                state: roomState 
-            }
+            payload: { targetUserId: targetUserId, state: roomState }
         });
     }
 
     async function initSupabase() {
-        console.log('%c🔥 Inicializando Supabase...', 'color: #ff9500; font-size: 14px;');
-        if (!SUPABASE_URL || !SUPABASE_ANON_KEY || SUPABASE_URL === "https://seu-projeto.supabase.co") {
-            console.error('%c❌ Configure suas chaves do Supabase no código!', 'color: #ff4757; font-size: 16px;');
+        if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
             updateConnectionStatus('config-error');
             return false;
         }
         try {
             supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            const { data, error } = await supabaseClient.from('rooms').select('count').limit(1);
-            if (error) {
-                console.error('Erro ao conectar:', error);
-                updateConnectionStatus('error');
-                return false;
-            }
-            console.log('%c✅ Conectado ao Supabase!', 'color: #00ff88; font-size: 16px;');
+            const { error } = await supabaseClient.from('rooms').select('count').limit(1);
+            if (error) throw error;
             isSupabaseConnected = true;
             updateConnectionStatus('connected');
             return true;
         } catch (error) {
-            console.error('Erro fatal:', error);
+            console.error('Erro ao conectar:', error);
             updateConnectionStatus('error');
             return false;
         }
@@ -2100,7 +2058,6 @@ function toggleAutoPlayer() {
 
     async function setupSupabaseListeners() {
         if (!isSupabaseConnected || !supabaseClient) return;
-        console.log('Configurando listeners para sala:', roomId);
         roomChannel = supabaseClient.channel(`room:${roomId}`);
 
         roomChannel
@@ -2118,7 +2075,7 @@ function toggleAutoPlayer() {
                 participants = newParticipants;
                 updateParticipantsList();
             })
-            .on('presence', { event: 'join' }, async ({ key, newPresences }) => {
+            .on('presence', { event: 'join' }, async ({ newPresences }) => {
                 for (const pres of newPresences) {
                     if (!participants.find(p => p.odUserId === pres.odUserId)) {
                         participants.push(pres);
@@ -2126,70 +2083,57 @@ function toggleAutoPlayer() {
                         addActivity('👋', `${pres.odUserName} entrou`);
                         
                         if (pres.odUserId !== odUserId && (currentVideoId || songQueue.length > 0 || scores.total !== 0)) {
-                            console.log('📤 Enviando estado atual para novo participante:', pres.odUserName, 'scores:', scores);
                             await sendStateToUser(pres.odUserId);
                         }
                     }
                 }
                 updateParticipantsList();
             })
-            .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
+            .on('presence', { event: 'leave' }, ({ leftPresences }) => {
                 leftPresences.forEach(pres => {
                     participants = participants.filter(p => p.odUserId !== pres.odUserId);
                     showToast(`${pres.odUserName} saiu`);
-                    // Atualizar placar quando alguém sai
                     updateLeaderboard();
                 });
                 updateParticipantsList();
             })
             .on('broadcast', { event: 'request-state' }, async ({ payload }) => {
                 const { userId, isNewUser } = payload;
-                
                 if (userId !== odUserId && isNewUser && (currentVideoId || songQueue.length > 0 || scores.total !== 0)) {
-                    console.log('📤 Respondendo à solicitação de estado de novo usuário:', userId, 'scores:', scores);
                     await sendStateToUser(userId);
                 }
             })
             .on('broadcast', { event: 'initial-state' }, ({ payload }) => {
                 const { targetUserId, state } = payload;
-                
                 if (targetUserId === odUserId) {
-                    console.log('📥 Recebendo estado inicial da sala:', state);
-                    
                     if (state.scores) {
                         scores = state.scores;
                         updateScoreDisplay();
-                        console.log('✅ Scores atualizados:', scores);
                     }
-                    
                     if (state.queue) {
                         songQueue = state.queue;
                         currentQueuePosition = state.currentQueuePosition !== undefined ? state.currentQueuePosition : -1;
                         safeUpdateQueueDisplay();
                     }
-                    
                     if (state.currentVideoId && state.currentVideoId !== currentVideoId) {
                         currentVideoId = state.currentVideoId;
                         currentSinger = state.currentSinger;
+                        currentSingerId = state.currentSingerId;
                         playVideo(state.currentVideoId);
                     }
-                    
                     if (state.currentSongScores) {
                         currentSongScores = state.currentSongScores;
                         currentSongId = state.currentSongId;
                         updateLeaderboard();
                     }
-                    
                     if (state.emojiCounts) {
                         emojiCounts = state.emojiCounts;
                         totalReactions = state.totalReactions || 0;
                     }
-                    
                     if (state.activities) {
                         activities = state.activities;
                         updateActivityFeed();
                     }
-                    
                     hasReceivedInitialState = true;
                     showToast('Sala sincronizada! 🎤');
                 }
@@ -2202,19 +2146,17 @@ function toggleAutoPlayer() {
                         scores = payload.scores;
                         updateScoreDisplay();
                     }
-                    
                     if (payload.queue) {
                         songQueue = payload.queue;
                         currentQueuePosition = payload.currentQueuePosition !== undefined ? payload.currentQueuePosition : -1;
                         safeUpdateQueueDisplay();
                     }
-                    
                     if (payload.currentVideoId && payload.currentVideoId !== currentVideoId) {
                         currentVideoId = payload.currentVideoId;
                         currentSinger = payload.currentSinger;
+                        currentSingerId = payload.currentSingerId;
                         playVideo(payload.currentVideoId);
                     }
-                    
                     if (payload.currentSongScores) {
                         currentSongScores = payload.currentSongScores;
                         currentSongId = payload.currentSongId;
@@ -2229,10 +2171,9 @@ function toggleAutoPlayer() {
                 safeUpdateQueueDisplay();
             })
             .on('broadcast', { event: 'new-emoji' }, ({ payload }) => {
-                const { emoji, points, userId, userName: emojiUserName, emojiId } = payload;
+                const { emoji, points, targetUserId, userName: emojiUserName, emojiId } = payload;
                 if (processedEmojis.has(emojiId)) return;
                 processedEmojis.add(emojiId);
-                if (userId === odUserId) return;
                 
                 createFloatingEmoji(emoji);
                 showEmojiNotification(emoji, emojiUserName);
@@ -2245,10 +2186,10 @@ function toggleAutoPlayer() {
                 else scores.negative += Math.abs(points);
                 updateScoreDisplay();
                 
-                // Atualizar pontuação da música atual para o remetente
-                if (currentSongId) {
-                    if (!currentSongScores[userId]) currentSongScores[userId] = 0;
-                    currentSongScores[userId] += points;
+                // Os pontos vão para o CANTOR (targetUserId)
+                if (currentSongId && targetUserId) {
+                    if (!currentSongScores[targetUserId]) currentSongScores[targetUserId] = 0;
+                    currentSongScores[targetUserId] += points;
                     updateLeaderboard();
                 }
                 
@@ -2260,6 +2201,9 @@ function toggleAutoPlayer() {
                 if (videoId && videoId !== currentVideoId) {
                     currentVideoId = videoId;
                     currentSinger = loadedBy;
+                    // Encontra o ID do cantor
+                    const singerParticipant = participants.find(p => p.odUserName === loadedBy);
+                    currentSingerId = singerParticipant ? singerParticipant.odUserId : null;
                     playVideo(videoId, title);
                     showToast(`${loadedBy} carregou um vídeo! 🎬`);
                     addActivity('🎬', `${loadedBy} carregou vídeo`);
@@ -2295,7 +2239,6 @@ function toggleAutoPlayer() {
 
         roomChannel.subscribe(async (status) => {
             if (status === 'SUBSCRIBED') {
-                console.log('✅ Inscrito no canal da sala');
                 await roomChannel.track({
                     odUserId: odUserId,
                     odUserName: userName,
@@ -2311,24 +2254,15 @@ function toggleAutoPlayer() {
         });
     }
 
-    async function sendEmojiToSupabase(emoji, points) {
+    async function sendEmojiToSupabase(emoji, points, targetUserId) {
         if (!isSupabaseConnected || !roomChannel) return;
         const emojiId = `${odUserId}_${Date.now()}_${Math.random()}`;
         await roomChannel.send({
             type: 'broadcast',
             event: 'new-emoji',
-            payload: { emoji, points, userId: odUserId, userName, emojiId }
+            payload: { emoji, points, targetUserId, userName, emojiId }
         });
         await saveScoresToSupabase();
-    }
-
-    async function updateVideoSupabase(videoId, title) {
-        if (!isSupabaseConnected || !roomChannel) return;
-        await roomChannel.send({
-            type: 'broadcast',
-            event: 'new-video',
-            payload: { videoId, loadedBy: userName, title }
-        });
     }
 
     async function showResultSupabase() {
@@ -2416,10 +2350,7 @@ function toggleAutoPlayer() {
         let breakdownHtml = '';
         const sortedEmojis = Object.keys(emojiCounts).sort((a, b) => emojiCounts[b] - emojiCounts[a]);
         sortedEmojis.forEach(emoji => {
-            breakdownHtml += '<div class="result-emoji-item">' +
-                '<span class="emoji">' + emoji + '</span>' +
-                '<span class="count">×' + emojiCounts[emoji] + '</span>' +
-                '</div>';
+            breakdownHtml += '<div class="result-emoji-item"><span class="emoji">' + emoji + '</span><span class="count">×' + emojiCounts[emoji] + '</span></div>';
         });
         document.getElementById('resultEmojiBreakdown').innerHTML = breakdownHtml;
         const message = getResultMessage(scores.total);
@@ -2483,25 +2414,35 @@ function toggleAutoPlayer() {
             showToast('Aguarde 1 segundo!', true);
             return;
         }
-        console.log('🎯 Enviando emoji:', emoji, 'pontos:', points);
+        if (!currentSingerId && currentSinger) {
+            const singerParticipant = participants.find(p => p.odUserName === currentSinger);
+            currentSingerId = singerParticipant ? singerParticipant.odUserId : null;
+        }
+        if (!currentSingerId) {
+            showToast('Nenhuma música tocando no momento.', true);
+            return;
+        }
+        
+        const targetUserId = currentSingerId;
+        
         trackEmoji(emoji);
         createFloatingEmoji(emoji);
         flashScoreCard(points);
+        
         scores.total += points;
         if (points > 0) scores.positive += points;
         else scores.negative += Math.abs(points);
         updateScoreDisplay();
         
-        // Atualizar pontuação da música atual
-        if (currentSongId) {
-            if (!currentSongScores[odUserId]) currentSongScores[odUserId] = 0;
-            currentSongScores[odUserId] += points;
+        if (currentSongId && targetUserId) {
+            if (!currentSongScores[targetUserId]) currentSongScores[targetUserId] = 0;
+            currentSongScores[targetUserId] += points;
             updateLeaderboard();
         }
         
-        const pt = points > 0 ? '+' + points : String(points);
-        addActivity(emoji, userName + ' reagiu (' + pt + ')');
-        await sendEmojiToSupabase(emoji, points);
+        addActivity(emoji, userName + ' reagiu (' + (points > 0 ? '+' + points : points) + ')');
+        await sendEmojiToSupabase(emoji, points, targetUserId);
+        
         inCooldown = true;
         const btns = document.querySelectorAll('.emoji-btn');
         btns.forEach(btn => btn.classList.add('cooldown'));
@@ -2535,7 +2476,6 @@ function toggleAutoPlayer() {
     // INICIALIZAÇÃO
     // ============================================
     async function init() {
-        console.log('%c🚀 Iniciando Karaokê Online...', 'color: #00d4ff; font-size: 16px;');
         await initSupabase();
         
         const urlRoom = getRoomFromUrl();
