@@ -965,13 +965,13 @@
                     </div>
                 </div>
 
-                <!-- LEADERBOARD - PLACAR DE LÍDERES -->
+                <!-- LEADERBOARD - PLACAR DE LÍDERES (TOP 3 DA FESTA) -->
                 <div class="leaderboard-section">
                     <div class="leaderboard-header">
-                        🏆 Placar de Líderes
+                        🏆 Placar de Líderes (Top 3 da Festa)
                     </div>
                     <div class="leaderboard-list" id="leaderboardList">
-                        <div class="empty-leaderboard">🎵 Ninguém pontuou nesta música ainda</div>
+                        <div class="empty-leaderboard">🎵 Ninguém recebeu pontos ainda</div>
                     </div>
                 </div>
 
@@ -1127,6 +1127,7 @@
     let emojiCounts = {};
     let totalReactions = 0;
     let currentSinger = '';
+    let currentSingerId = null;
 
     // Flag para controle de sincronização inicial
     let hasReceivedInitialState = false;
@@ -1134,7 +1135,8 @@
     // DEBOUNCE
     let queueUpdateTimeout = null;
 
-    // ===== PLACAR DE LÍDERES (APENAS PARA A MÚSICA ATUAL) =====
+    // ===== PLACAR DE LÍDERES (PONTOS RECEBIDOS DURANTE TODA A FESTA) =====
+    let globalLeaderboard = {};
     let currentSongScores = {};
     let currentSongId = null;
 
@@ -1182,53 +1184,49 @@
         });
     }
 
-    // ===== FUNÇÃO PARA ATUALIZAR O PLACAR (MOSTRA OS CANTORES QUE MAIS RECEBERAM PONTOS) =====
-function updateLeaderboard() {
-    const container = document.getElementById('leaderboardList');
-    if (!container) return;
+    // ===== FUNÇÃO PARA ATUALIZAR O PLACAR (TOP 3 DA FESTA) =====
+    function updateLeaderboard() {
+        const container = document.getElementById('leaderboardList');
+        if (!container) return;
 
-    // currentSongScores armazena: { userId: pontos_recebidos }
-    // Isso mostra QUEM RECEBEU pontos (os cantores), não quem deu
-    const scoresList = Object.entries(currentSongScores)
-        .map(([userId, score]) => {
-            const user = participants.find(p => p.odUserId === userId);
-            return {
-                userId,
-                name: user?.odUserName || 'Anônimo',
-                score: score
-            };
-        })
-        .sort((a, b) => b.score - a.score)
-        .slice(0, 3);
+        const scoresList = Object.entries(globalLeaderboard)
+            .map(([userId, score]) => {
+                const user = participants.find(p => p.odUserId === userId);
+                return {
+                    userId,
+                    name: user?.odUserName || 'Anônimo',
+                    score: score
+                };
+            })
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 3);
 
-    if (scoresList.length === 0 || !currentSongId) {
-        container.innerHTML = '<div class="empty-leaderboard">🎵 Ninguém recebeu pontos nesta música ainda</div>';
-        return;
+        if (scoresList.length === 0) {
+            container.innerHTML = '<div class="empty-leaderboard">🎵 Ninguém recebeu pontos ainda</div>';
+            return;
+        }
+
+        const medals = ['🥇', '🥈', '🥉'];
+        let html = '';
+        scoresList.forEach((item, idx) => {
+            const isYou = item.userId === odUserId;
+            const medal = medals[idx];
+            html += `
+                <div class="leaderboard-item rank-${idx + 1}">
+                    <div class="leaderboard-rank">${medal}</div>
+                    <div class="leaderboard-info">
+                        <div class="leaderboard-name">
+                            🎤 ${escapeHtml(item.name)} ${isYou ? '<span style="font-size:0.7rem;">(você)</span>' : ''}
+                        </div>
+                        <div class="leaderboard-score">
+                            ⭐ Pontuação Total: <span class="leaderboard-score-value">${item.score}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
     }
-
-    const medals = ['🥇', '🥈', '🥉'];
-    let html = '';
-    scoresList.forEach((item, idx) => {
-        const isYou = item.userId === odUserId;
-        const medal = medals[idx] || `${idx + 1}º`;
-        html += `
-            <div class="leaderboard-item rank-${idx + 1}">
-                <div class="leaderboard-rank">
-                    ${medal}
-                </div>
-                <div class="leaderboard-info">
-                    <div class="leaderboard-name">
-                        🎤 ${escapeHtml(item.name)} ${isYou ? '<span style="font-size:0.7rem;">(você)</span>' : ''}
-                    </div>
-                    <div class="leaderboard-score">
-                        ⭐ Pontuação Recebida: <span class="leaderboard-score-value">${item.score}</span>
-                    </div>
-                </div>
-            </div>
-        `;
-    });
-    container.innerHTML = html;
-}
 
     // ============================================
     // FUNÇÕES DE UI
@@ -1327,7 +1325,6 @@ function updateLeaderboard() {
                 '</div>';
         });
         el.innerHTML = html;
-        // Atualizar placar quando a lista de participantes mudar
         updateLeaderboard();
     }
 
@@ -1433,10 +1430,11 @@ function updateLeaderboard() {
         currentSinger = userName;
         currentVideoId = videoId;
         
-        // ===== RESETAR PLACAR DA MÚSICA ATUAL =====
+        const singerParticipant = participants.find(p => p.odUserName === currentSinger);
+        currentSingerId = singerParticipant ? singerParticipant.odUserId : odUserId;
+        
         currentSongId = videoId + '_' + Date.now();
         currentSongScores = {};
-        updateLeaderboard();
         
         emojiCounts = {};
         totalReactions = 0;
@@ -1495,47 +1493,31 @@ function updateLeaderboard() {
     // FUNÇÃO ADICIONAR À FILA (CONVIDADO PODE ADICIONAR)
     // ============================================
     async function addToQueue() {
-        console.log('🔍 addToQueue foi chamada!');
-        
         const input = document.getElementById('videoInput');
         if (!input) {
-            console.error('❌ input não encontrado!');
             showToast('Erro: campo de vídeo não encontrado', true);
             return;
         }
         
         const url = input.value.trim();
-        console.log('📝 URL digitada:', url);
-        
         if (!url) {
             showToast('Digite ou cole um link do YouTube!', true);
             return;
         }
         
         const videoId = extractVideoId(url);
-        console.log('🎬 ID extraído:', videoId);
-        
         if (!videoId) {
             showToast('Link inválido! Use um link do YouTube válido.', true);
             return;
         }
         
         const addBtn = document.querySelector('#videoModal .modal-btn');
-        if (!addBtn) {
-            console.error('❌ Botão não encontrado!');
-            showToast('Erro ao encontrar botão', true);
-            return;
-        }
-        
         const originalText = addBtn.innerText;
         addBtn.innerText = '⏳ Buscando título...';
         addBtn.disabled = true;
         
         try {
-            console.log('🔍 Buscando título do vídeo...');
             const videoInfo = await fetchVideoInfo(videoId);
-            console.log('📺 Título encontrado:', videoInfo.title);
-            
             closeVideoModal();
             
             const queueItem = {
@@ -1549,14 +1531,11 @@ function updateLeaderboard() {
                 order: songQueue.length
             };
             
-            console.log('📦 Adicionando item à fila:', queueItem);
-            
             songQueue.push(queueItem);
             safeUpdateQueueDisplay();
             
             if (isSupabaseConnected && roomChannel) {
                 await saveQueueToSupabase();
-                console.log('✅ Salvo no Supabase');
             }
             
             showToast(`"${videoInfo.title.substring(0, 40)}" adicionado! 🎵`);
@@ -1585,10 +1564,7 @@ function updateLeaderboard() {
         await roomChannel.send({
             type: 'broadcast',
             event: 'queue-update',
-            payload: {
-                queue: songQueue,
-                currentPosition: currentQueuePosition
-            }
+            payload: { queue: songQueue, currentPosition: currentQueuePosition }
         });
     }
 
@@ -1607,10 +1583,12 @@ function updateLeaderboard() {
             currentVideoId: currentVideoId || null,
             scores: scores,
             currentSinger: currentSinger || null,
+            currentSingerId: currentSingerId || null,
             queue: songQueue,
             currentQueuePosition: currentQueuePosition,
             currentSongScores: currentSongScores,
             currentSongId: currentSongId,
+            globalLeaderboard: globalLeaderboard,
             updatedAt: Date.now()
         };
         await roomChannel.send({
@@ -1622,15 +1600,10 @@ function updateLeaderboard() {
 
     async function requestRoomState() {
         if (!isSupabaseConnected || !roomChannel) return;
-        console.log('🔄 Solicitando estado atual da sala...');
         await roomChannel.send({
             type: 'broadcast',
             event: 'request-state',
-            payload: { 
-                userId: odUserId, 
-                timestamp: Date.now(),
-                isNewUser: true 
-            }
+            payload: { userId: odUserId, timestamp: Date.now(), isNewUser: true }
         });
     }
 
@@ -1642,48 +1615,38 @@ function updateLeaderboard() {
             currentVideoId: currentVideoId || null,
             scores: scores,
             currentSinger: currentSinger || null,
+            currentSingerId: currentSingerId || null,
             emojiCounts: emojiCounts,
             totalReactions: totalReactions,
             queue: songQueue,
             currentQueuePosition: currentQueuePosition,
             currentSongScores: currentSongScores,
             currentSongId: currentSongId,
+            globalLeaderboard: globalLeaderboard,
             timestamp: Date.now()
         };
-        
-        console.log('📤 Enviando estado para novo usuário:', targetUserId, 'scores:', scores);
         
         await roomChannel.send({
             type: 'broadcast',
             event: 'initial-state',
-            payload: { 
-                targetUserId: targetUserId, 
-                state: roomState 
-            }
+            payload: { targetUserId: targetUserId, state: roomState }
         });
     }
 
     async function initSupabase() {
-        console.log('%c🔥 Inicializando Supabase...', 'color: #ff9500; font-size: 14px;');
-        if (!SUPABASE_URL || !SUPABASE_ANON_KEY || SUPABASE_URL === "https://seu-projeto.supabase.co") {
-            console.error('%c❌ Configure suas chaves do Supabase no código!', 'color: #ff4757; font-size: 16px;');
+        if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
             updateConnectionStatus('config-error');
             return false;
         }
         try {
             supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            const { data, error } = await supabaseClient.from('rooms').select('count').limit(1);
-            if (error) {
-                console.error('Erro ao conectar:', error);
-                updateConnectionStatus('error');
-                return false;
-            }
-            console.log('%c✅ Conectado ao Supabase!', 'color: #00ff88; font-size: 16px;');
+            const { error } = await supabaseClient.from('rooms').select('count').limit(1);
+            if (error) throw error;
             isSupabaseConnected = true;
             updateConnectionStatus('connected');
             return true;
         } catch (error) {
-            console.error('Erro fatal:', error);
+            console.error('Erro ao conectar:', error);
             updateConnectionStatus('error');
             return false;
         }
@@ -1691,7 +1654,6 @@ function updateLeaderboard() {
 
     async function setupSupabaseListeners() {
         if (!isSupabaseConnected || !supabaseClient) return;
-        console.log('Configurando listeners para sala:', roomId);
         roomChannel = supabaseClient.channel(`room:${roomId}`);
 
         roomChannel
@@ -1709,68 +1671,63 @@ function updateLeaderboard() {
                 participants = newParticipants;
                 updateParticipantsList();
             })
-            .on('presence', { event: 'join' }, async ({ key, newPresences }) => {
+            .on('presence', { event: 'join' }, async ({ newPresences }) => {
                 for (const pres of newPresences) {
                     if (!participants.find(p => p.odUserId === pres.odUserId)) {
                         participants.push(pres);
                         showToast(`${pres.odUserName} entrou! 👋`);
                         
                         if (pres.odUserId !== odUserId && (currentVideoId || songQueue.length > 0 || scores.total !== 0)) {
-                            console.log('📤 Enviando estado atual para novo participante:', pres.odUserName, 'scores:', scores);
                             await sendStateToUser(pres.odUserId);
                         }
                     }
                 }
                 updateParticipantsList();
             })
-            .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
+            .on('presence', { event: 'leave' }, ({ leftPresences }) => {
                 leftPresences.forEach(pres => {
                     participants = participants.filter(p => p.odUserId !== pres.odUserId);
                     showToast(`${pres.odUserName} saiu`);
+                    updateLeaderboard();
                 });
                 updateParticipantsList();
             })
             .on('broadcast', { event: 'request-state' }, async ({ payload }) => {
                 const { userId, isNewUser } = payload;
                 if (userId !== odUserId && isNewUser && (currentVideoId || songQueue.length > 0 || scores.total !== 0)) {
-                    console.log('📤 Respondendo à solicitação de estado de novo usuário:', userId, 'scores:', scores);
                     await sendStateToUser(userId);
                 }
             })
             .on('broadcast', { event: 'initial-state' }, ({ payload }) => {
                 const { targetUserId, state } = payload;
                 if (targetUserId === odUserId) {
-                    console.log('📥 Recebendo estado inicial da sala:', state);
-                    
                     if (state.scores) {
                         scores = state.scores;
                         updateScoreDisplay();
-                        console.log('✅ Scores atualizados:', scores);
                     }
-                    
                     if (state.queue) {
                         songQueue = state.queue;
                         currentQueuePosition = state.currentQueuePosition !== undefined ? state.currentQueuePosition : -1;
                         safeUpdateQueueDisplay();
                     }
-                    
                     if (state.currentVideoId && state.currentVideoId !== currentVideoId) {
                         currentVideoId = state.currentVideoId;
                         currentSinger = state.currentSinger;
+                        currentSingerId = state.currentSingerId;
                         playVideo(state.currentVideoId);
                     }
-                    
                     if (state.currentSongScores) {
                         currentSongScores = state.currentSongScores;
                         currentSongId = state.currentSongId;
+                    }
+                    if (state.globalLeaderboard) {
+                        globalLeaderboard = state.globalLeaderboard;
                         updateLeaderboard();
                     }
-                    
                     if (state.emojiCounts) {
                         emojiCounts = state.emojiCounts;
                         totalReactions = state.totalReactions || 0;
                     }
-                    
                     hasReceivedInitialState = true;
                     showToast('Sala sincronizada! 🎤');
                 }
@@ -1783,22 +1740,23 @@ function updateLeaderboard() {
                         scores = payload.scores;
                         updateScoreDisplay();
                     }
-                    
                     if (payload.queue) {
                         songQueue = payload.queue;
                         currentQueuePosition = payload.currentQueuePosition !== undefined ? payload.currentQueuePosition : -1;
                         safeUpdateQueueDisplay();
                     }
-                    
                     if (payload.currentVideoId && payload.currentVideoId !== currentVideoId) {
                         currentVideoId = payload.currentVideoId;
                         currentSinger = payload.currentSinger;
+                        currentSingerId = payload.currentSingerId;
                         playVideo(payload.currentVideoId);
                     }
-                    
                     if (payload.currentSongScores) {
                         currentSongScores = payload.currentSongScores;
                         currentSongId = payload.currentSongId;
+                    }
+                    if (payload.globalLeaderboard) {
+                        globalLeaderboard = payload.globalLeaderboard;
                         updateLeaderboard();
                     }
                 }
@@ -1810,14 +1768,17 @@ function updateLeaderboard() {
                 safeUpdateQueueDisplay();
             })
             .on('broadcast', { event: 'new-emoji' }, ({ payload }) => {
-                const { emoji, points, userId, userName: emojiUserName, emojiId } = payload;
+                const { emoji, points, targetUserId, userName: emojiUserName, emojiId } = payload;
                 if (processedEmojis.has(emojiId)) return;
                 processedEmojis.add(emojiId);
-                if (userId === odUserId) return;
                 
                 createFloatingEmoji(emoji);
                 showEmojiNotification(emoji, emojiUserName);
                 flashScoreCard(points);
+                
+                const targetParticipant = participants.find(p => p.odUserId === targetUserId);
+                const targetName = targetParticipant ? targetParticipant.odUserName : 'cantor';
+                
                 trackEmoji(emoji);
                 
                 scores.total += points;
@@ -1825,12 +1786,18 @@ function updateLeaderboard() {
                 else scores.negative += Math.abs(points);
                 updateScoreDisplay();
                 
-                // Atualizar pontuação da música atual para o remetente
-                if (currentSongId) {
-                    if (!currentSongScores[userId]) currentSongScores[userId] = 0;
-                    currentSongScores[userId] += points;
-                    updateLeaderboard();
+                if (currentSongId && targetUserId) {
+                    if (!currentSongScores[targetUserId]) {
+                        currentSongScores[targetUserId] = 0;
+                    }
+                    currentSongScores[targetUserId] += points;
                 }
+                
+                if (!globalLeaderboard[targetUserId]) {
+                    globalLeaderboard[targetUserId] = 0;
+                }
+                globalLeaderboard[targetUserId] += points;
+                updateLeaderboard();
                 
                 saveRoomState();
                 saveScoresToSupabase();
@@ -1840,6 +1807,8 @@ function updateLeaderboard() {
                 if (videoId && videoId !== currentVideoId) {
                     currentVideoId = videoId;
                     currentSinger = loadedBy;
+                    const singerParticipant = participants.find(p => p.odUserName === loadedBy);
+                    currentSingerId = singerParticipant ? singerParticipant.odUserId : null;
                     playVideo(videoId, title);
                     showToast(`${loadedBy} carregou um vídeo! 🎬`);
                     saveRoomState();
@@ -1862,6 +1831,7 @@ function updateLeaderboard() {
                 totalReactions = 0;
                 currentSongScores = {};
                 currentSongId = null;
+                globalLeaderboard = {};
                 
                 updateScoreDisplay();
                 updateLeaderboard();
@@ -1871,7 +1841,6 @@ function updateLeaderboard() {
 
         roomChannel.subscribe(async (status) => {
             if (status === 'SUBSCRIBED') {
-                console.log('✅ Inscrito no canal da sala');
                 await roomChannel.track({
                     odUserId: odUserId,
                     odUserName: userName,
@@ -1887,13 +1856,13 @@ function updateLeaderboard() {
         });
     }
 
-    async function sendEmojiToSupabase(emoji, points) {
+    async function sendEmojiToSupabase(emoji, points, targetUserId) {
         if (!isSupabaseConnected || !roomChannel) return;
         const emojiId = `${odUserId}_${Date.now()}_${Math.random()}`;
         await roomChannel.send({
             type: 'broadcast',
             event: 'new-emoji',
-            payload: { emoji, points, userId: odUserId, userName, emojiId }
+            payload: { emoji, points, targetUserId, userName, emojiId }
         });
         await saveScoresToSupabase();
     }
@@ -1965,10 +1934,7 @@ function updateLeaderboard() {
         let breakdownHtml = '';
         const sortedEmojis = Object.keys(emojiCounts).sort((a, b) => emojiCounts[b] - emojiCounts[a]);
         sortedEmojis.forEach(emoji => {
-            breakdownHtml += '<div class="result-emoji-item">' +
-                '<span class="emoji">' + emoji + '</span>' +
-                '<span class="count">×' + emojiCounts[emoji] + '</span>' +
-                '</div>';
+            breakdownHtml += '<div class="result-emoji-item"><span class="emoji">' + emoji + '</span><span class="count">×' + emojiCounts[emoji] + '</span></div>';
         });
         document.getElementById('resultEmojiBreakdown').innerHTML = breakdownHtml;
         const message = getResultMessage(scores.total);
@@ -2029,23 +1995,49 @@ function updateLeaderboard() {
             showToast('Aguarde 1 segundo!', true);
             return;
         }
-        console.log('🎯 Enviando emoji:', emoji, 'pontos:', points);
+        
+        if (!currentVideoId) {
+            showToast('Nenhuma música tocando no momento!', true);
+            return;
+        }
+        
+        let targetUserId = currentSingerId;
+        let targetUserName = currentSinger;
+        
+        if (!targetUserId && targetUserName) {
+            const singerParticipant = participants.find(p => p.odUserName === targetUserName);
+            targetUserId = singerParticipant ? singerParticipant.odUserId : odUserId;
+        }
+        
+        if (!targetUserId) {
+            targetUserId = odUserId;
+            targetUserName = userName;
+        }
+        
         trackEmoji(emoji);
         createFloatingEmoji(emoji);
         flashScoreCard(points);
+        
         scores.total += points;
         if (points > 0) scores.positive += points;
         else scores.negative += Math.abs(points);
         updateScoreDisplay();
         
-        // Atualizar pontuação da música atual
-        if (currentSongId) {
-            if (!currentSongScores[odUserId]) currentSongScores[odUserId] = 0;
-            currentSongScores[odUserId] += points;
-            updateLeaderboard();
+        if (currentSongId && targetUserId) {
+            if (!currentSongScores[targetUserId]) {
+                currentSongScores[targetUserId] = 0;
+            }
+            currentSongScores[targetUserId] += points;
         }
         
-        await sendEmojiToSupabase(emoji, points);
+        if (!globalLeaderboard[targetUserId]) {
+            globalLeaderboard[targetUserId] = 0;
+        }
+        globalLeaderboard[targetUserId] += points;
+        updateLeaderboard();
+        
+        await sendEmojiToSupabase(emoji, points, targetUserId);
+        
         inCooldown = true;
         const btns = document.querySelectorAll('.emoji-btn');
         btns.forEach(btn => btn.classList.add('cooldown'));
@@ -2059,7 +2051,6 @@ function updateLeaderboard() {
     // INICIALIZAÇÃO
     // ============================================
     async function init() {
-        console.log('%c🚀 Iniciando Karaokê Convidado...', 'color: #00d4ff; font-size: 16px;');
         await initSupabase();
         
         const urlRoom = getRoomFromUrl();
