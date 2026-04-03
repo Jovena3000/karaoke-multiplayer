@@ -1416,86 +1416,56 @@
         });
     }
 
-        // ===== FUNÇÃO PARA ATUALIZAR O PLACAR (TOP 3 DA FESTA) - CORRIGIDA =====
     function updateLeaderboard() {
-        const container = document.getElementById('leaderboardList');
-        if (!container) return;
+    const container = document.getElementById('leaderboardList');
+    if (!container) return;
 
-        // Pega todos os participantes que estão na sala atualmente
-        const activeUserIds = participants.map(p => p.odUserId);
-        
-        // Constrói a lista com TODOS os participantes que têm pontos > 0
-        let allScores = [];
-        
-        // Adiciona os pontos do globalLeaderboard
-        for (const [userId, score] of Object.entries(globalLeaderboard)) {
-            if (score !== 0) {
-                const user = participants.find(p => p.odUserId === userId);
-                allScores.push({
-                    userId: userId,
-                    name: user?.odUserName || 'Anônimo',
-                    score: score
-                });
-            }
-        }
-        
-        // Também adiciona participantes ativos que podem não ter pontos ainda
-        for (const userId of activeUserIds) {
-            if (!allScores.find(s => s.userId === userId)) {
-                const user = participants.find(p => p.odUserId === userId);
-                if (user) {
-                    allScores.push({
-                        userId: userId,
-                        name: user.odUserName || 'Anônimo',
-                        score: 0
-                    });
-                }
-            }
-        }
-        
-        // Ordena por pontuação (maior para menor)
-        allScores.sort((a, b) => b.score - a.score);
-        
-        // Pega apenas o TOP 3
-        const top3 = allScores.slice(0, 3);
-        
-        // Verifica se tem algum ponto
-        const hasAnyPoints = allScores.some(s => s.score > 0);
-        
-        if (!hasAnyPoints) {
-            container.innerHTML = '<div class="empty-leaderboard">🎵 Ninguém recebeu pontos ainda</div>';
-            return;
-        }
+    // Converte o objeto globalLeaderboard em array e ordena
+    let scoresList = Object.entries(globalLeaderboard)
+        .map(([userId, score]) => {
+            const user = participants.find(p => p.odUserId === userId);
+            return {
+                userId,
+                name: user?.odUserName || 'Anônimo',
+                score: score
+            };
+        })
+        .filter(item => item.score > 0)  // mostra apenas quem tem pontos > 0
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 3);
 
-        const medals = ['🥇', '🥈', '🥉'];
-        let html = '';
-        
-        top3.forEach((item, idx) => {
-            const isYou = item.userId === odUserId;
-            const medal = medals[idx];
-            const scoreDisplay = item.score > 0 ? item.score : '0';
-            html += `
-                <div class="leaderboard-item rank-${idx + 1}">
-                    <div class="leaderboard-rank">${medal}</div>
-                    <div class="leaderboard-info">
-                        <div class="leaderboard-name">
-                            🎤 ${escapeHtml(item.name)} ${isYou ? '<span style="font-size:0.7rem;">(você)</span>' : ''}
-                        </div>
-                        <div class="leaderboard-score">
-                            ⭐ Pontuação Total: <span class="leaderboard-score-value">${scoreDisplay}</span>
-                        </div>
+    // Se não houver pontos, mostra mensagem
+    if (scoresList.length === 0) {
+        container.innerHTML = '<div class="empty-leaderboard">🎵 Ninguém recebeu pontos ainda</div>';
+        return;
+    }
+
+    const medals = ['🥇', '🥈', '🥉'];
+    let html = '';
+    scoresList.forEach((item, idx) => {
+        const isYou = item.userId === odUserId;
+        const medal = medals[idx];
+        html += `
+            <div class="leaderboard-item rank-${idx + 1}">
+                <div class="leaderboard-rank">${medal}</div>
+                <div class="leaderboard-info">
+                    <div class="leaderboard-name">
+                        🎤 ${escapeHtml(item.name)} ${isYou ? '<span style="font-size:0.7rem;">(você)</span>' : ''}
+                    </div>
+                    <div class="leaderboard-score">
+                        ⭐ Pontuação Total: <span class="leaderboard-score-value">${item.score}</span>
                     </div>
                 </div>
-            `;
-        });
-        
-        container.innerHTML = html;
-        
-        // Log para debug (opcional - pode remover depois)
-        console.log('📊 PLACAR ATUALIZADO:', top3);
-        console.log('📊 TOTAL DE PONTOS NO PLACAR:', top3.reduce((sum, item) => sum + item.score, 0));
-        console.log('📊 TOTAL GERAL (scores.total):', scores.total);
-    }
+            </div>
+        `;
+    });
+    container.innerHTML = html;
+    
+    // Log para debug
+    console.log('📊 Placar atualizado:', scoresList);
+    console.log('📊 Total de pontos no placar:', scoresList.reduce((sum, i) => sum + i.score, 0));
+    console.log('📊 scores.total (total de reações):', scores.total);
+}
 
     // ============================================
     // FUNÇÕES DE UI
@@ -1700,68 +1670,68 @@
     }
 
     function playVideo(videoId, title = 'Vídeo do YouTube') {
-    if (!videoId) return;
-    
-    const wrapper = document.getElementById('playerWrapper');
-    const placeholder = document.getElementById('placeholder');
-    const emojiContainer = document.getElementById('emojiContainer');
-    
-    const oldIframe = wrapper.querySelector('iframe');
-    if (oldIframe) oldIframe.remove();
-    
-    const embedUrl = 'https://www.youtube.com/embed/' + videoId + '?autoplay=1&rel=0';
-    
-    const iframe = document.createElement('iframe');
-    iframe.src = embedUrl;
-    iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
-    iframe.allowFullscreen = true;
-    iframe.id = 'ytPlayer';
-    iframe.style.position = 'absolute';
-    iframe.style.top = '0';
-    iframe.style.left = '0';
-    iframe.style.width = '100%';
-    iframe.style.height = '100%';
-    iframe.style.border = 'none';
-    iframe.style.zIndex = '1';
-    
-    wrapper.insertBefore(iframe, emojiContainer);
-    placeholder.classList.add('hidden');
-    
-    if (emojiContainer) {
-        emojiContainer.style.zIndex = '1000';
-        emojiContainer.style.position = 'absolute';
-        emojiContainer.style.top = '0';
-        emojiContainer.style.left = '0';
-        emojiContainer.style.width = '100%';
-        emojiContainer.style.height = '100%';
-        emojiContainer.style.pointerEvents = 'none';
-        emojiContainer.style.overflow = 'hidden';
+        if (!videoId) return;
+        
+        const wrapper = document.getElementById('playerWrapper');
+        const placeholder = document.getElementById('placeholder');
+        const emojiContainer = document.getElementById('emojiContainer');
+        
+        const oldIframe = wrapper.querySelector('iframe');
+        if (oldIframe) oldIframe.remove();
+        
+        const embedUrl = 'https://www.youtube.com/embed/' + videoId + '?autoplay=1&rel=0';
+        
+        const iframe = document.createElement('iframe');
+        iframe.src = embedUrl;
+        iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+        iframe.allowFullscreen = true;
+        iframe.id = 'ytPlayer';
+        iframe.style.position = 'absolute';
+        iframe.style.top = '0';
+        iframe.style.left = '0';
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.border = 'none';
+        iframe.style.zIndex = '1';
+        
+        wrapper.insertBefore(iframe, emojiContainer);
+        placeholder.classList.add('hidden');
+        
+        if (emojiContainer) {
+            emojiContainer.style.zIndex = '1000';
+            emojiContainer.style.position = 'absolute';
+            emojiContainer.style.top = '0';
+            emojiContainer.style.left = '0';
+            emojiContainer.style.width = '100%';
+            emojiContainer.style.height = '100%';
+            emojiContainer.style.pointerEvents = 'none';
+            emojiContainer.style.overflow = 'hidden';
+        }
+        
+        document.getElementById('endSongBtn').style.display = 'inline-block';
+        
+        // Atualiza o cantor atual
+        currentSinger = userName;
+        currentVideoId = videoId;
+        
+        // Encontra o ID do cantor atual
+        const singerParticipant = participants.find(p => p.odUserName === currentSinger);
+        currentSingerId = singerParticipant ? singerParticipant.odUserId : odUserId;
+        
+        // ===== RESETAR APENAS OS PONTOS DA MÚSICA ATUAL =====
+        currentSongId = videoId + '_' + Date.now();
+        currentSongScores = {};
+        
+        console.log(`🎬 NOVA MÚSICA: ${title}`);
+        console.log(`🎤 Cantor: ${currentSinger} (ID: ${currentSingerId})`);
+        
+        emojiCounts = {};
+        totalReactions = 0;
+        
+        saveRoomState();
+        
+        addActivity('🎬', `${userName} começou: ${title}`);
     }
-    
-    document.getElementById('endSongBtn').style.display = 'inline-block';
-    
-    // ===== CRUCIAL: Define o cantor atual como quem está tocando =====
-    currentSinger = userName;
-    currentVideoId = videoId;
-    
-    // Encontra o ID do cantor atual na lista de participantes
-    const singerParticipant = participants.find(p => p.odUserName === currentSinger);
-    currentSingerId = singerParticipant ? singerParticipant.odUserId : odUserId;
-    
-    console.log(`🎬 NOVA MÚSICA: ${title}`);
-    console.log(`🎤 CANTOR ATUAL: ${currentSinger} (ID: ${currentSingerId})`);
-    
-    // Resetar apenas os pontos da música atual (o global continua)
-    currentSongId = videoId + '_' + Date.now();
-    currentSongScores = {};
-    
-    emojiCounts = {};
-    totalReactions = 0;
-    
-    saveRoomState();
-    
-    addActivity('🎬', `${userName} começou: ${title}`);
-}
 
     // ============================================
     // FUNÇÕES DA FILA
@@ -2228,7 +2198,7 @@
     const targetParticipant = participants.find(p => p.odUserId === targetUserId);
     const targetName = targetParticipant ? targetParticipant.odUserName : 'cantor';
     
-    console.log(`📨 ${emojiUserName} enviou ${emoji} (${points} pts) para o cantor: ${targetName}`);
+    console.log(`📨 ${emojiUserName} enviou ${emoji} (${points} pts) para o cantor: ${targetName} (ID: ${targetUserId})`);
     
     createFloatingEmoji(emoji);
     showEmojiNotification(emoji, emojiUserName);
@@ -2251,7 +2221,7 @@
         currentSongScores[targetUserId] += points;
     }
     
-    // ===== CRUCIAL: Atualiza o PLACAR GLOBAL para o CANTOR =====
+    // Atualiza o PLACAR GLOBAL para o CANTOR
     if (!globalLeaderboard[targetUserId]) {
         globalLeaderboard[targetUserId] = 0;
     }
@@ -2262,23 +2232,18 @@
     saveScoresToSupabase();
 })
             .on('broadcast', { event: 'new-video' }, ({ payload }) => {
-    const { videoId, loadedBy, title } = payload;
-    if (videoId && videoId !== currentVideoId) {
-        currentVideoId = videoId;
-        currentSinger = loadedBy;
-        
-        // ===== CRUCIAL: Encontra o ID do cantor que iniciou a música =====
-        const singerParticipant = participants.find(p => p.odUserName === loadedBy);
-        currentSingerId = singerParticipant ? singerParticipant.odUserId : null;
-        
-        console.log(`📺 Novo vídeo carregado por: ${loadedBy} (ID: ${currentSingerId})`);
-        
-        playVideo(videoId, title);
-        showToast(`${loadedBy} carregou um vídeo! 🎬`);
-        addActivity('🎬', `${loadedBy} carregou vídeo`);
-        saveRoomState();
-    }
-})
+                const { videoId, loadedBy, title } = payload;
+                if (videoId && videoId !== currentVideoId) {
+                    currentVideoId = videoId;
+                    currentSinger = loadedBy;
+                    const singerParticipant = participants.find(p => p.odUserName === loadedBy);
+                    currentSingerId = singerParticipant ? singerParticipant.odUserId : null;
+                    playVideo(videoId, title);
+                    showToast(`${loadedBy} carregou um vídeo! 🎬`);
+                    addActivity('🎬', `${loadedBy} carregou vídeo`);
+                    saveRoomState();
+                }
+            })
             .on('broadcast', { event: 'show-result' }, ({ payload }) => {
                 const { singer, emojiCounts: counts, totalReactions: reactions } = payload;
                 currentSinger = singer;
@@ -2490,16 +2455,22 @@
         return;
     }
     
-    // ===== CRUCIAL: O cantor que recebe os pontos é o currentSingerId =====
+    // O cantor que recebe os pontos é o currentSingerId
     if (!currentSingerId) {
-        showToast('Erro: Identifique o cantor atual.', true);
-        return;
+        // Tenta encontrar o cantor atual novamente
+        const singerParticipant = participants.find(p => p.odUserName === currentSinger);
+        if (singerParticipant) {
+            currentSingerId = singerParticipant.odUserId;
+        } else {
+            showToast('Erro: Identifique o cantor atual.', true);
+            return;
+        }
     }
     
     const targetUserId = currentSingerId;
     const targetUserName = currentSinger;
     
-    console.log(`🎤 Enviando ${emoji} (${points} pts) para o cantor: ${targetUserName} (ID: ${targetUserId})`);
+    console.log(`🎤 ${userName} enviou ${emoji} (${points} pts) para o cantor: ${targetUserName} (ID: ${targetUserId})`);
     
     // Efeitos visuais
     trackEmoji(emoji);
@@ -2512,7 +2483,7 @@
     else scores.negative += Math.abs(points);
     updateScoreDisplay();
     
-    // Atualiza pontos da música atual (para estatísticas)
+    // Atualiza pontos da música atual (estatísticas)
     if (currentSongId && targetUserId) {
         if (!currentSongScores[targetUserId]) {
             currentSongScores[targetUserId] = 0;
@@ -2520,7 +2491,7 @@
         currentSongScores[targetUserId] += points;
     }
     
-    // ===== CRUCIAL: Atualiza o PLACAR GLOBAL para o CANTOR =====
+    // Atualiza o PLACAR GLOBAL para o CANTOR
     if (!globalLeaderboard[targetUserId]) {
         globalLeaderboard[targetUserId] = 0;
     }
