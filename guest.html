@@ -1116,7 +1116,6 @@
     let currentVideoId = null;
     let scores = { total: 0, positive: 0, negative: 0 };
     let participants = [];
-    let activities = [];
     let processedEmojis = new Set();
     let lastStateUpdate = 0;
     
@@ -1185,71 +1184,88 @@
         });
     }
 
-    // ===== FUNÇÃO PARA ATUALIZAR O PLACAR (TOP 3 DA FESTA) =====
-    function updateLeaderboard() {
-        const container = document.getElementById('leaderboardList');
-        if (!container) return;
+    // ===== FUNÇÃO PARA ATUALIZAR O PLACAR (TOP 3 DA FESTA) - CORRIGIDA =====
+function updateLeaderboard() {
+    const container = document.getElementById('leaderboardList');
+    if (!container) return;
 
-        const scoresList = Object.entries(globalLeaderboard)
-            .map(([userId, score]) => {
-                const user = participants.find(p => p.odUserId === userId);
-                return {
-                    userId,
-                    name: user?.odUserName || 'Anônimo',
-                    score: score
-                };
-            })
-            .sort((a, b) => b.score - a.score)
-            .slice(0, 3);
-
-        if (scoresList.length === 0) {
-            container.innerHTML = '<div class="empty-leaderboard">🎵 Ninguém recebeu pontos ainda</div>';
-            return;
+    // Pega todos os participantes que estão na sala atualmente
+    const activeUserIds = participants.map(p => p.odUserId);
+    
+    // Constrói a lista com TODOS os participantes que têm pontos > 0
+    // ou que estão ativos na sala
+    let allScores = [];
+    
+    // Adiciona os pontos do globalLeaderboard
+    for (const [userId, score] of Object.entries(globalLeaderboard)) {
+        if (score !== 0) {
+            const user = participants.find(p => p.odUserId === userId);
+            allScores.push({
+                userId: userId,
+                name: user?.odUserName || 'Anônimo',
+                score: score
+            });
         }
+    }
+    
+    // Também adiciona participantes ativos que podem não ter pontos ainda
+    for (const userId of activeUserIds) {
+        if (!allScores.find(s => s.userId === userId)) {
+            const user = participants.find(p => p.odUserId === userId);
+            if (user) {
+                allScores.push({
+                    userId: userId,
+                    name: user.odUserName || 'Anônimo',
+                    score: 0
+                });
+            }
+        }
+    }
+    
+    // Ordena por pontuação (maior para menor)
+    allScores.sort((a, b) => b.score - a.score);
+    
+    // Pega apenas o TOP 3
+    const top3 = allScores.slice(0, 3);
+    
+    // Verifica se tem algum ponto ou se tem música tocando
+    const hasAnyPoints = allScores.some(s => s.score > 0);
+    
+    if (!hasAnyPoints) {
+        container.innerHTML = '<div class="empty-leaderboard">🎵 Ninguém recebeu pontos ainda</div>';
+        return;
+    }
 
-        const medals = ['🥇', '🥈', '🥉'];
-        let html = '';
-        scoresList.forEach((item, idx) => {
-            const isYou = item.userId === odUserId;
-            const medal = medals[idx];
-            html += `
-                <div class="leaderboard-item rank-${idx + 1}">
-                    <div class="leaderboard-rank">${medal}</div>
-                    <div class="leaderboard-info">
-                        <div class="leaderboard-name">
-                            🎤 ${escapeHtml(item.name)} ${isYou ? '<span style="font-size:0.7rem;">(você)</span>' : ''}
-                        </div>
-                        <div class="leaderboard-score">
-                            ⭐ Pontuação Total: <span class="leaderboard-score-value">${item.score}</span>
-                        </div>
+    const medals = ['🥇', '🥈', '🥉'];
+    let html = '';
+    
+    top3.forEach((item, idx) => {
+        const isYou = item.userId === odUserId;
+        const medal = medals[idx];
+        // Mostra todos, inclusive quem tem 0 pontos
+        const scoreDisplay = item.score > 0 ? item.score : '0';
+        html += `
+            <div class="leaderboard-item rank-${idx + 1}">
+                <div class="leaderboard-rank">${medal}</div>
+                <div class="leaderboard-info">
+                    <div class="leaderboard-name">
+                        🎤 ${escapeHtml(item.name)} ${isYou ? '<span style="font-size:0.7rem;">(você)</span>' : ''}
+                    </div>
+                    <div class="leaderboard-score">
+                        ⭐ Pontuação Total: <span class="leaderboard-score-value">${scoreDisplay}</span>
                     </div>
                 </div>
-            `;
-        });
-        container.innerHTML = html;
-    }
-
-    // ===== FUNÇÃO PARA ADICIONAR ATIVIDADE =====
-    function addActivity(emoji, text) {
-        activities.unshift({ emoji: emoji, text: text });
-        if (activities.length > 20) activities.pop();
-        updateActivityFeed();
-    }
-
-    function updateActivityFeed() {
-        const el = document.getElementById('activityFeed');
-        if (!el) return;
-        
-        if (!activities.length) {
-            el.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:1rem;">Nenhuma atividade</div>';
-            return;
-        }
-        let html = '';
-        activities.forEach(a => {
-            html += '<div class="activity-item"><span class="activity-emoji">' + a.emoji + '</span><span>' + a.text + '</span></div>';
-        });
-        el.innerHTML = html;
-    }
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+    
+    // Log para debug (opcional - remove depois que funcionar)
+    console.log('📊 PLACAR ATUALIZADO:', top3);
+    console.log('📊 TOTAL DE PONTOS NO PLACAR:', top3.reduce((sum, item) => sum + item.score, 0));
+    console.log('📊 TOTAL GERAL (scores.total):', scores.total);
+}
 
     // ============================================
     // FUNÇÕES DE UI
@@ -1412,63 +1428,68 @@
     }
 
     function playVideo(videoId, title = 'Vídeo do YouTube') {
-        if (!videoId) return;
-        
-        const wrapper = document.getElementById('playerWrapper');
-        const placeholder = document.getElementById('placeholder');
-        const emojiContainer = document.getElementById('emojiContainer');
-        
-        const oldIframe = wrapper.querySelector('iframe');
-        if (oldIframe) oldIframe.remove();
-        
-        const embedUrl = 'https://www.youtube.com/embed/' + videoId + '?autoplay=1&rel=0';
-        
-        const iframe = document.createElement('iframe');
-        iframe.src = embedUrl;
-        iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
-        iframe.allowFullscreen = true;
-        iframe.id = 'ytPlayer';
-        iframe.style.position = 'absolute';
-        iframe.style.top = '0';
-        iframe.style.left = '0';
-        iframe.style.width = '100%';
-        iframe.style.height = '100%';
-        iframe.style.border = 'none';
-        iframe.style.zIndex = '1';
-        
-        wrapper.insertBefore(iframe, emojiContainer);
-        placeholder.classList.add('hidden');
-        
-        if (emojiContainer) {
-            emojiContainer.style.zIndex = '1000';
-            emojiContainer.style.position = 'absolute';
-            emojiContainer.style.top = '0';
-            emojiContainer.style.left = '0';
-            emojiContainer.style.width = '100%';
-            emojiContainer.style.height = '100%';
-            emojiContainer.style.pointerEvents = 'none';
-            emojiContainer.style.overflow = 'hidden';
-        }
-        
-        currentSinger = userName;
-        currentVideoId = videoId;
-        
-        const singerParticipant = participants.find(p => p.odUserName === currentSinger);
-        currentSingerId = singerParticipant ? singerParticipant.odUserId : odUserId;
-        
-        console.log(`🎬 NOVA MÚSICA: ${title}`);
-        console.log(`🎤 CANTOR ATUAL: ${currentSinger} (ID: ${currentSingerId})`);
-        
-        currentSongId = videoId + '_' + Date.now();
-        currentSongScores = {};
-        
-        emojiCounts = {};
-        totalReactions = 0;
-        
-        saveRoomState();
-        
-        addActivity('🎬', `${userName} começou: ${title}`);
+    if (!videoId) return;
+    
+    const wrapper = document.getElementById('playerWrapper');
+    const placeholder = document.getElementById('placeholder');
+    const emojiContainer = document.getElementById('emojiContainer');
+    
+    const oldIframe = wrapper.querySelector('iframe');
+    if (oldIframe) oldIframe.remove();
+    
+    const embedUrl = 'https://www.youtube.com/embed/' + videoId + '?autoplay=1&rel=0';
+    
+    const iframe = document.createElement('iframe');
+    iframe.src = embedUrl;
+    iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+    iframe.allowFullscreen = true;
+    iframe.id = 'ytPlayer';
+    iframe.style.position = 'absolute';
+    iframe.style.top = '0';
+    iframe.style.left = '0';
+    iframe.style.width = '100%';
+    iframe.style.height = '100%';
+    iframe.style.border = 'none';
+    iframe.style.zIndex = '1';
+    
+    wrapper.insertBefore(iframe, emojiContainer);
+    placeholder.classList.add('hidden');
+    
+    if (emojiContainer) {
+        emojiContainer.style.zIndex = '1000';
+        emojiContainer.style.position = 'absolute';
+        emojiContainer.style.top = '0';
+        emojiContainer.style.left = '0';
+        emojiContainer.style.width = '100%';
+        emojiContainer.style.height = '100%';
+        emojiContainer.style.pointerEvents = 'none';
+        emojiContainer.style.overflow = 'hidden';
     }
+    
+    document.getElementById('endSongBtn').style.display = 'inline-block';
+    
+    // ===== CRUCIAL: Define o cantor atual como quem está tocando =====
+    currentSinger = userName;
+    currentVideoId = videoId;
+    
+    // Encontra o ID do cantor atual na lista de participantes
+    const singerParticipant = participants.find(p => p.odUserName === currentSinger);
+    currentSingerId = singerParticipant ? singerParticipant.odUserId : odUserId;
+    
+    console.log(`🎬 NOVA MÚSICA: ${title}`);
+    console.log(`🎤 CANTOR ATUAL: ${currentSinger} (ID: ${currentSingerId})`);
+    
+    // Resetar apenas os pontos da música atual (o global continua)
+    currentSongId = videoId + '_' + Date.now();
+    currentSongScores = {};
+    
+    emojiCounts = {};
+    totalReactions = 0;
+    
+    saveRoomState();
+    
+    addActivity('🎬', `${userName} começou: ${title}`);
+}
 
     // ============================================
     // FUNÇÕES DA FILA (VISUALIZAÇÃO APENAS)
@@ -1646,7 +1667,6 @@
             currentSingerId: currentSingerId || null,
             emojiCounts: emojiCounts,
             totalReactions: totalReactions,
-            activities: activities.slice(0, 10),
             queue: songQueue,
             currentQueuePosition: currentQueuePosition,
             currentSongScores: currentSongScores,
@@ -1705,7 +1725,6 @@
                     if (!participants.find(p => p.odUserId === pres.odUserId)) {
                         participants.push(pres);
                         showToast(`${pres.odUserName} entrou! 👋`);
-                        addActivity('👋', `${pres.odUserName} entrou`);
                         
                         if (pres.odUserId !== odUserId && (currentVideoId || songQueue.length > 0 || scores.total !== 0)) {
                             await sendStateToUser(pres.odUserId);
@@ -1758,10 +1777,6 @@
                         emojiCounts = state.emojiCounts;
                         totalReactions = state.totalReactions || 0;
                     }
-                    if (state.activities) {
-                        activities = state.activities;
-                        updateActivityFeed();
-                    }
                     hasReceivedInitialState = true;
                     showToast('Sala sincronizada! 🎤');
                 }
@@ -1793,10 +1808,6 @@
                         globalLeaderboard = payload.globalLeaderboard;
                         updateLeaderboard();
                     }
-                    if (payload.activities) {
-                        activities = payload.activities;
-                        updateActivityFeed();
-                    }
                 }
             })
             .on('broadcast', { event: 'queue-update' }, ({ payload, from }) => {
@@ -1806,60 +1817,65 @@
                 safeUpdateQueueDisplay();
             })
             .on('broadcast', { event: 'new-emoji' }, ({ payload }) => {
-                const { emoji, points, targetUserId, userName: emojiUserName, emojiId } = payload;
-                if (processedEmojis.has(emojiId)) return;
-                processedEmojis.add(emojiId);
-                
-                const targetParticipant = participants.find(p => p.odUserId === targetUserId);
-                const targetName = targetParticipant ? targetParticipant.odUserName : 'cantor';
-                
-                console.log(`📨 ${emojiUserName} enviou ${emoji} (${points} pts) para o cantor: ${targetName}`);
-                
-                createFloatingEmoji(emoji);
-                showEmojiNotification(emoji, emojiUserName);
-                flashScoreCard(points);
-                
-                addActivity(emoji, `${emojiUserName} → ${targetName}: ${points > 0 ? '+' + points : points}`);
-                trackEmoji(emoji);
-                
-                scores.total += points;
-                if (points > 0) scores.positive += points;
-                else scores.negative += Math.abs(points);
-                updateScoreDisplay();
-                
-                if (currentSongId && targetUserId) {
-                    if (!currentSongScores[targetUserId]) {
-                        currentSongScores[targetUserId] = 0;
-                    }
-                    currentSongScores[targetUserId] += points;
-                }
-                
-                if (!globalLeaderboard[targetUserId]) {
-                    globalLeaderboard[targetUserId] = 0;
-                }
-                globalLeaderboard[targetUserId] += points;
-                updateLeaderboard();
-                
-                saveRoomState();
-                saveScoresToSupabase();
-            })
+    const { emoji, points, targetUserId, userName: emojiUserName, emojiId } = payload;
+    if (processedEmojis.has(emojiId)) return;
+    processedEmojis.add(emojiId);
+    
+    // Encontra o nome do cantor (targetUserId é o cantor)
+    const targetParticipant = participants.find(p => p.odUserId === targetUserId);
+    const targetName = targetParticipant ? targetParticipant.odUserName : 'cantor';
+    
+    console.log(`📨 ${emojiUserName} enviou ${emoji} (${points} pts) para o cantor: ${targetName}`);
+    
+    createFloatingEmoji(emoji);
+    showEmojiNotification(emoji, emojiUserName);
+    flashScoreCard(points);
+    
+    addActivity(emoji, `${emojiUserName} → ${targetName}: ${points > 0 ? '+' + points : points}`);
+    trackEmoji(emoji);
+    
+    // Atualiza o total da música
+    scores.total += points;
+    if (points > 0) scores.positive += points;
+    else scores.negative += Math.abs(points);
+    updateScoreDisplay();
+    
+    // Atualiza pontos da música atual
+    if (currentSongId && targetUserId) {
+        if (!currentSongScores[targetUserId]) {
+            currentSongScores[targetUserId] = 0;
+        }
+        currentSongScores[targetUserId] += points;
+    }
+    
+    // ===== CRUCIAL: Atualiza o PLACAR GLOBAL para o CANTOR =====
+    if (!globalLeaderboard[targetUserId]) {
+        globalLeaderboard[targetUserId] = 0;
+    }
+    globalLeaderboard[targetUserId] += points;
+    updateLeaderboard();
+    
+    saveRoomState();
+    saveScoresToSupabase();
+})
             .on('broadcast', { event: 'new-video' }, ({ payload }) => {
-                const { videoId, loadedBy, title } = payload;
-                if (videoId && videoId !== currentVideoId) {
-                    currentVideoId = videoId;
-                    currentSinger = loadedBy;
-                    
-                    const singerParticipant = participants.find(p => p.odUserName === loadedBy);
-                    currentSingerId = singerParticipant ? singerParticipant.odUserId : null;
-                    
-                    console.log(`📺 Novo vídeo carregado por: ${loadedBy} (ID: ${currentSingerId})`);
-                    
-                    playVideo(videoId, title);
-                    showToast(`${loadedBy} carregou um vídeo! 🎬`);
-                    addActivity('🎬', `${loadedBy} carregou vídeo`);
-                    saveRoomState();
-                }
-            })
+    const { videoId, loadedBy, title } = payload;
+    if (videoId && videoId !== currentVideoId) {
+        currentVideoId = videoId;
+        currentSinger = loadedBy;
+        
+        // ===== CRUCIAL: Encontra o ID do cantor que iniciou a música =====
+        const singerParticipant = participants.find(p => p.odUserName === loadedBy);
+        currentSingerId = singerParticipant ? singerParticipant.odUserId : null;
+        
+        console.log(`📺 Novo vídeo carregado por: ${loadedBy} (ID: ${currentSingerId})`);
+        
+        playVideo(videoId, title);
+        showToast(`${loadedBy} carregou um vídeo! 🎬`);
+        addActivity('🎬', `${loadedBy} carregou vídeo`);
+        saveRoomState();
+    }
+})
             .on('broadcast', { event: 'show-result' }, ({ payload }) => {
                 const { singer, emojiCounts: counts, totalReactions: reactions } = payload;
                 currentSinger = singer;
@@ -1875,17 +1891,14 @@
                 scores = { total: 0, positive: 0, negative: 0 };
                 emojiCounts = {};
                 totalReactions = 0;
-                activities = [];
                 currentSongScores = {};
                 currentSongId = null;
                 globalLeaderboard = {};
                 
                 updateScoreDisplay();
-                updateActivityFeed();
                 updateLeaderboard();
                 
                 showToast('Pontuação resetada! 🔄');
-                addActivity('🔄', 'Pontuação total resetada');
             });
 
         roomChannel.subscribe(async (status) => {
@@ -2036,64 +2049,73 @@
     }
 
     async function sendEmoji(emoji, points) {
-        if (!userName) {
-            showToast('Entre na sala primeiro!', true);
-            return;
-        }
-        if (inCooldown) {
-            showToast('Aguarde 1 segundo!', true);
-            return;
-        }
-        
-        if (!currentVideoId) {
-            showToast('Nenhuma música tocando no momento!', true);
-            return;
-        }
-        
-        if (!currentSingerId) {
-            showToast('Erro: Identifique o cantor atual.', true);
-            return;
-        }
-        
-        const targetUserId = currentSingerId;
-        const targetUserName = currentSinger;
-        
-        console.log(`🎤 Enviando ${emoji} (${points} pts) para o cantor: ${targetUserName} (ID: ${targetUserId})`);
-        
-        trackEmoji(emoji);
-        createFloatingEmoji(emoji);
-        flashScoreCard(points);
-        
-        scores.total += points;
-        if (points > 0) scores.positive += points;
-        else scores.negative += Math.abs(points);
-        updateScoreDisplay();
-        
-        if (currentSongId && targetUserId) {
-            if (!currentSongScores[targetUserId]) {
-                currentSongScores[targetUserId] = 0;
-            }
-            currentSongScores[targetUserId] += points;
-        }
-        
-        if (!globalLeaderboard[targetUserId]) {
-            globalLeaderboard[targetUserId] = 0;
-        }
-        globalLeaderboard[targetUserId] += points;
-        updateLeaderboard();
-        
-        addActivity(emoji, `${userName} → ${targetUserName}: ${points > 0 ? '+' + points : points}`);
-        
-        await sendEmojiToSupabase(emoji, points, targetUserId);
-        
-        inCooldown = true;
-        const btns = document.querySelectorAll('.emoji-btn');
-        btns.forEach(btn => btn.classList.add('cooldown'));
-        setTimeout(() => {
-            inCooldown = false;
-            btns.forEach(btn => btn.classList.remove('cooldown'));
-        }, 1000);
+    if (!userName) {
+        showToast('Entre na sala primeiro!', true);
+        return;
     }
+    if (inCooldown) {
+        showToast('Aguarde 1 segundo!', true);
+        return;
+    }
+    
+    if (!currentVideoId) {
+        showToast('Nenhuma música tocando no momento!', true);
+        return;
+    }
+    
+    // ===== CRUCIAL: O cantor que recebe os pontos é o currentSingerId =====
+    if (!currentSingerId) {
+        showToast('Erro: Identifique o cantor atual.', true);
+        return;
+    }
+    
+    const targetUserId = currentSingerId;
+    const targetUserName = currentSinger;
+    
+    console.log(`🎤 Enviando ${emoji} (${points} pts) para o cantor: ${targetUserName} (ID: ${targetUserId})`);
+    
+    // Efeitos visuais
+    trackEmoji(emoji);
+    createFloatingEmoji(emoji);
+    flashScoreCard(points);
+    
+    // Atualiza o total da música
+    scores.total += points;
+    if (points > 0) scores.positive += points;
+    else scores.negative += Math.abs(points);
+    updateScoreDisplay();
+    
+    // Atualiza pontos da música atual (para estatísticas)
+    if (currentSongId && targetUserId) {
+        if (!currentSongScores[targetUserId]) {
+            currentSongScores[targetUserId] = 0;
+        }
+        currentSongScores[targetUserId] += points;
+    }
+    
+    // ===== CRUCIAL: Atualiza o PLACAR GLOBAL para o CANTOR =====
+    if (!globalLeaderboard[targetUserId]) {
+        globalLeaderboard[targetUserId] = 0;
+    }
+    globalLeaderboard[targetUserId] += points;
+    updateLeaderboard();
+    
+    // Adiciona à atividade
+    const ptText = points > 0 ? '+' + points : String(points);
+    addActivity(emoji, `${userName} → ${targetUserName}: ${ptText}`);
+    
+    // Envia para o Supabase
+    await sendEmojiToSupabase(emoji, points, targetUserId);
+    
+    // Cooldown
+    inCooldown = true;
+    const btns = document.querySelectorAll('.emoji-btn');
+    btns.forEach(btn => btn.classList.add('cooldown'));
+    setTimeout(() => {
+        inCooldown = false;
+        btns.forEach(btn => btn.classList.remove('cooldown'));
+    }, 1000);
+}
 
     // ============================================
     // INICIALIZAÇÃO
