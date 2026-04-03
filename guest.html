@@ -1189,61 +1189,31 @@ function updateLeaderboard() {
     const container = document.getElementById('leaderboardList');
     if (!container) return;
 
-    // Pega todos os participantes que estão na sala atualmente
-    const activeUserIds = participants.map(p => p.odUserId);
-    
-    // Constrói a lista com TODOS os participantes que têm pontos > 0
-    // ou que estão ativos na sala
-    let allScores = [];
-    
-    // Adiciona os pontos do globalLeaderboard
-    for (const [userId, score] of Object.entries(globalLeaderboard)) {
-        if (score !== 0) {
+    // Converte o objeto globalLeaderboard em array e ordena
+    let scoresList = Object.entries(globalLeaderboard)
+        .map(([userId, score]) => {
             const user = participants.find(p => p.odUserId === userId);
-            allScores.push({
-                userId: userId,
+            return {
+                userId,
                 name: user?.odUserName || 'Anônimo',
                 score: score
-            });
-        }
-    }
-    
-    // Também adiciona participantes ativos que podem não ter pontos ainda
-    for (const userId of activeUserIds) {
-        if (!allScores.find(s => s.userId === userId)) {
-            const user = participants.find(p => p.odUserId === userId);
-            if (user) {
-                allScores.push({
-                    userId: userId,
-                    name: user.odUserName || 'Anônimo',
-                    score: 0
-                });
-            }
-        }
-    }
-    
-    // Ordena por pontuação (maior para menor)
-    allScores.sort((a, b) => b.score - a.score);
-    
-    // Pega apenas o TOP 3
-    const top3 = allScores.slice(0, 3);
-    
-    // Verifica se tem algum ponto ou se tem música tocando
-    const hasAnyPoints = allScores.some(s => s.score > 0);
-    
-    if (!hasAnyPoints) {
+            };
+        })
+        .filter(item => item.score > 0)  // mostra apenas quem tem pontos > 0
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 3);
+
+    // Se não houver pontos, mostra mensagem
+    if (scoresList.length === 0) {
         container.innerHTML = '<div class="empty-leaderboard">🎵 Ninguém recebeu pontos ainda</div>';
         return;
     }
 
     const medals = ['🥇', '🥈', '🥉'];
     let html = '';
-    
-    top3.forEach((item, idx) => {
+    scoresList.forEach((item, idx) => {
         const isYou = item.userId === odUserId;
         const medal = medals[idx];
-        // Mostra todos, inclusive quem tem 0 pontos
-        const scoreDisplay = item.score > 0 ? item.score : '0';
         html += `
             <div class="leaderboard-item rank-${idx + 1}">
                 <div class="leaderboard-rank">${medal}</div>
@@ -1252,21 +1222,19 @@ function updateLeaderboard() {
                         🎤 ${escapeHtml(item.name)} ${isYou ? '<span style="font-size:0.7rem;">(você)</span>' : ''}
                     </div>
                     <div class="leaderboard-score">
-                        ⭐ Pontuação Total: <span class="leaderboard-score-value">${scoreDisplay}</span>
+                        ⭐ Pontuação Total: <span class="leaderboard-score-value">${item.score}</span>
                     </div>
                 </div>
             </div>
         `;
     });
-    
     container.innerHTML = html;
     
-    // Log para debug (opcional - remove depois que funcionar)
-    console.log('📊 PLACAR ATUALIZADO:', top3);
-    console.log('📊 TOTAL DE PONTOS NO PLACAR:', top3.reduce((sum, item) => sum + item.score, 0));
-    console.log('📊 TOTAL GERAL (scores.total):', scores.total);
+    // Log para debug
+    console.log('📊 Placar atualizado:', scoresList);
+    console.log('📊 Total de pontos no placar:', scoresList.reduce((sum, i) => sum + i.score, 0));
+    console.log('📊 scores.total (total de reações):', scores.total);
 }
-
     // ============================================
     // FUNÇÕES DE UI
     // ============================================
@@ -1825,7 +1793,7 @@ function updateLeaderboard() {
     const targetParticipant = participants.find(p => p.odUserId === targetUserId);
     const targetName = targetParticipant ? targetParticipant.odUserName : 'cantor';
     
-    console.log(`📨 ${emojiUserName} enviou ${emoji} (${points} pts) para o cantor: ${targetName}`);
+    console.log(`📨 ${emojiUserName} enviou ${emoji} (${points} pts) para o cantor: ${targetName} (ID: ${targetUserId})`);
     
     createFloatingEmoji(emoji);
     showEmojiNotification(emoji, emojiUserName);
@@ -1848,7 +1816,7 @@ function updateLeaderboard() {
         currentSongScores[targetUserId] += points;
     }
     
-    // ===== CRUCIAL: Atualiza o PLACAR GLOBAL para o CANTOR =====
+    // Atualiza o PLACAR GLOBAL para o CANTOR
     if (!globalLeaderboard[targetUserId]) {
         globalLeaderboard[targetUserId] = 0;
     }
@@ -2063,16 +2031,22 @@ function updateLeaderboard() {
         return;
     }
     
-    // ===== CRUCIAL: O cantor que recebe os pontos é o currentSingerId =====
+    // O cantor que recebe os pontos é o currentSingerId
     if (!currentSingerId) {
-        showToast('Erro: Identifique o cantor atual.', true);
-        return;
+        // Tenta encontrar o cantor atual novamente
+        const singerParticipant = participants.find(p => p.odUserName === currentSinger);
+        if (singerParticipant) {
+            currentSingerId = singerParticipant.odUserId;
+        } else {
+            showToast('Erro: Identifique o cantor atual.', true);
+            return;
+        }
     }
     
     const targetUserId = currentSingerId;
     const targetUserName = currentSinger;
     
-    console.log(`🎤 Enviando ${emoji} (${points} pts) para o cantor: ${targetUserName} (ID: ${targetUserId})`);
+    console.log(`🎤 ${userName} enviou ${emoji} (${points} pts) para o cantor: ${targetUserName} (ID: ${targetUserId})`);
     
     // Efeitos visuais
     trackEmoji(emoji);
@@ -2085,7 +2059,7 @@ function updateLeaderboard() {
     else scores.negative += Math.abs(points);
     updateScoreDisplay();
     
-    // Atualiza pontos da música atual (para estatísticas)
+    // Atualiza pontos da música atual (estatísticas)
     if (currentSongId && targetUserId) {
         if (!currentSongScores[targetUserId]) {
             currentSongScores[targetUserId] = 0;
@@ -2093,7 +2067,7 @@ function updateLeaderboard() {
         currentSongScores[targetUserId] += points;
     }
     
-    // ===== CRUCIAL: Atualiza o PLACAR GLOBAL para o CANTOR =====
+    // Atualiza o PLACAR GLOBAL para o CANTOR
     if (!globalLeaderboard[targetUserId]) {
         globalLeaderboard[targetUserId] = 0;
     }
