@@ -1416,7 +1416,9 @@
         });
     }
 
-    function updateLeaderboard() {
+   
+    // ===== FUNÇÃO PARA ATUALIZAR O PLACAR (TODOS QUE RECEBERAM PONTOS) =====
+function updateLeaderboard() {
     const container = document.getElementById('leaderboardList');
     if (!container) return;
 
@@ -1430,9 +1432,8 @@
                 score: score
             };
         })
-        .filter(item => item.score > 0)  // mostra apenas quem tem pontos > 0
-        .sort((a, b) => b.score - a.score)
-        .slice(0, 3);
+        .filter(item => item.score > 0)  // mostra apenas quem tem pontos
+        .sort((a, b) => b.score - a.score);  // ordena do maior para o menor (sem limite)
 
     // Se não houver pontos, mostra mensagem
     if (scoresList.length === 0) {
@@ -1440,11 +1441,17 @@
         return;
     }
 
-    const medals = ['🥇', '🥈', '🥉'];
+    // Mostra TODOS os participantes que têm pontos (sem limite de 3)
     let html = '';
     scoresList.forEach((item, idx) => {
         const isYou = item.userId === odUserId;
-        const medal = medals[idx];
+        // Medalhas apenas para os 3 primeiros
+        let medal = '';
+        if (idx === 0) medal = '🥇';
+        else if (idx === 1) medal = '🥈';
+        else if (idx === 2) medal = '🥉';
+        else medal = `${idx + 1}º`;
+        
         html += `
             <div class="leaderboard-item rank-${idx + 1}">
                 <div class="leaderboard-rank">${medal}</div>
@@ -1462,9 +1469,12 @@
     container.innerHTML = html;
     
     // Log para debug
-    console.log('📊 Placar atualizado:', scoresList);
-    console.log('📊 Total de pontos no placar:', scoresList.reduce((sum, i) => sum + i.score, 0));
+    const totalPlacar = scoresList.reduce((sum, i) => sum + i.score, 0);
+    console.log('📊 Placar atualizado - Total no placar:', totalPlacar);
     console.log('📊 scores.total (total de reações):', scores.total);
+    if (totalPlacar !== scores.total) {
+        console.warn('⚠️ INCONSISTÊNCIA: Placar não soma o total geral!');
+    }
 }
 
     // ============================================
