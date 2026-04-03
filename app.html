@@ -1416,34 +1416,64 @@
         });
     }
 
-    // ===== FUNÇÃO PARA ATUALIZAR O PLACAR (TOP 3 DA FESTA) =====
+        // ===== FUNÇÃO PARA ATUALIZAR O PLACAR (TOP 3 DA FESTA) - CORRIGIDA =====
     function updateLeaderboard() {
         const container = document.getElementById('leaderboardList');
         if (!container) return;
 
-        // Converte o objeto globalLeaderboard em array e ordena
-        const scoresList = Object.entries(globalLeaderboard)
-            .map(([userId, score]) => {
+        // Pega todos os participantes que estão na sala atualmente
+        const activeUserIds = participants.map(p => p.odUserId);
+        
+        // Constrói a lista com TODOS os participantes que têm pontos > 0
+        let allScores = [];
+        
+        // Adiciona os pontos do globalLeaderboard
+        for (const [userId, score] of Object.entries(globalLeaderboard)) {
+            if (score !== 0) {
                 const user = participants.find(p => p.odUserId === userId);
-                return {
-                    userId,
+                allScores.push({
+                    userId: userId,
                     name: user?.odUserName || 'Anônimo',
                     score: score
-                };
-            })
-            .sort((a, b) => b.score - a.score)
-            .slice(0, 3);  // Top 3 da festa
-
-        if (scoresList.length === 0) {
+                });
+            }
+        }
+        
+        // Também adiciona participantes ativos que podem não ter pontos ainda
+        for (const userId of activeUserIds) {
+            if (!allScores.find(s => s.userId === userId)) {
+                const user = participants.find(p => p.odUserId === userId);
+                if (user) {
+                    allScores.push({
+                        userId: userId,
+                        name: user.odUserName || 'Anônimo',
+                        score: 0
+                    });
+                }
+            }
+        }
+        
+        // Ordena por pontuação (maior para menor)
+        allScores.sort((a, b) => b.score - a.score);
+        
+        // Pega apenas o TOP 3
+        const top3 = allScores.slice(0, 3);
+        
+        // Verifica se tem algum ponto
+        const hasAnyPoints = allScores.some(s => s.score > 0);
+        
+        if (!hasAnyPoints) {
             container.innerHTML = '<div class="empty-leaderboard">🎵 Ninguém recebeu pontos ainda</div>';
             return;
         }
 
         const medals = ['🥇', '🥈', '🥉'];
         let html = '';
-        scoresList.forEach((item, idx) => {
+        
+        top3.forEach((item, idx) => {
             const isYou = item.userId === odUserId;
             const medal = medals[idx];
+            const scoreDisplay = item.score > 0 ? item.score : '0';
             html += `
                 <div class="leaderboard-item rank-${idx + 1}">
                     <div class="leaderboard-rank">${medal}</div>
@@ -1452,13 +1482,19 @@
                             🎤 ${escapeHtml(item.name)} ${isYou ? '<span style="font-size:0.7rem;">(você)</span>' : ''}
                         </div>
                         <div class="leaderboard-score">
-                            ⭐ Pontuação Total: <span class="leaderboard-score-value">${item.score}</span>
+                            ⭐ Pontuação Total: <span class="leaderboard-score-value">${scoreDisplay}</span>
                         </div>
                     </div>
                 </div>
             `;
         });
+        
         container.innerHTML = html;
+        
+        // Log para debug (opcional - pode remover depois)
+        console.log('📊 PLACAR ATUALIZADO:', top3);
+        console.log('📊 TOTAL DE PONTOS NO PLACAR:', top3.reduce((sum, item) => sum + item.score, 0));
+        console.log('📊 TOTAL GERAL (scores.total):', scores.total);
     }
 
     // ============================================
