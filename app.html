@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+<script src="https://www.youtube.com/iframe_api"></script>
     // Copy & paste the code below into your <head> section [Credit to https://favicongenerator.io]
 <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any">
@@ -1359,6 +1360,8 @@
     let processedEmojis = new Set();
     let lastStateUpdate = 0;
     let autoPlayerActive = false;
+	let ytPlayerInstance = null;
+	let isEndingSong = false;
     
     // Variáveis da fila
     let songQueue = [];
@@ -1689,68 +1692,70 @@ function updateLeaderboard() {
     }
 
     function playVideo(videoId, title = 'Vídeo do YouTube') {
-        if (!videoId) return;
-        
-        const wrapper = document.getElementById('playerWrapper');
-        const placeholder = document.getElementById('placeholder');
-        const emojiContainer = document.getElementById('emojiContainer');
-        
-        const oldIframe = wrapper.querySelector('iframe');
-        if (oldIframe) oldIframe.remove();
-        
-        const embedUrl = 'https://www.youtube.com/embed/' + videoId + '?autoplay=1&rel=0';
-        
-        const iframe = document.createElement('iframe');
-        iframe.src = embedUrl;
-        iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
-        iframe.allowFullscreen = true;
-        iframe.id = 'ytPlayer';
-        iframe.style.position = 'absolute';
-        iframe.style.top = '0';
-        iframe.style.left = '0';
-        iframe.style.width = '100%';
-        iframe.style.height = '100%';
-        iframe.style.border = 'none';
-        iframe.style.zIndex = '1';
-        
-        wrapper.insertBefore(iframe, emojiContainer);
-        placeholder.classList.add('hidden');
-        
-        if (emojiContainer) {
-            emojiContainer.style.zIndex = '1000';
-            emojiContainer.style.position = 'absolute';
-            emojiContainer.style.top = '0';
-            emojiContainer.style.left = '0';
-            emojiContainer.style.width = '100%';
-            emojiContainer.style.height = '100%';
-            emojiContainer.style.pointerEvents = 'none';
-            emojiContainer.style.overflow = 'hidden';
-        }
-        
-        document.getElementById('endSongBtn').style.display = 'inline-block';
-        
-        // Atualiza o cantor atual
-        currentSinger = userName;
-        currentVideoId = videoId;
-        
-        // Encontra o ID do cantor atual
-        const singerParticipant = participants.find(p => p.odUserName === currentSinger);
-        currentSingerId = singerParticipant ? singerParticipant.odUserId : odUserId;
-        
-        // ===== RESETAR APENAS OS PONTOS DA MÚSICA ATUAL =====
-        currentSongId = videoId + '_' + Date.now();
-        currentSongScores = {};
-        
-        console.log(`🎬 NOVA MÚSICA: ${title}`);
-        console.log(`🎤 Cantor: ${currentSinger} (ID: ${currentSingerId})`);
-        
-        emojiCounts = {};
-        totalReactions = 0;
-        
-        saveRoomState();
-        
-        addActivity('🎬', `${userName} começou: ${title}`);
+    if (!videoId) return;
+
+    if (videoEndTimer) {
+        clearTimeout(videoEndTimer);
+        videoEndTimer = null;
     }
+
+    const wrapper = document.getElementById('playerWrapper');
+    const placeholder = document.getElementById('placeholder');
+    const emojiContainer = document.getElementById('emojiContainer');
+
+    // Remove player antigo
+    if (ytPlayerInstance) {
+        ytPlayerInstance.destroy();
+        ytPlayerInstance = null;
+    }
+
+    const playerDiv = document.createElement('div');
+    playerDiv.id = 'ytPlayer';
+    wrapper.insertBefore(playerDiv, emojiContainer);
+
+    placeholder.classList.add('hidden');
+    document.getElementById('endSongBtn').style.display = 'inline-block';
+
+    // ===== CONTROLE =====
+    currentSinger = userName;
+    currentVideoId = videoId;
+
+    const singerParticipant = participants.find(p => p.odUserName === currentSinger);
+    currentSingerId = singerParticipant ? singerParticipant.odUserId : odUserId;
+
+    currentSongId = videoId + '_' + Date.now();
+    currentSongScores = {};
+
+    emojiCounts = {};
+    totalReactions = 0;
+
+    saveRoomState();
+    addActivity('🎬', `${userName} começou: ${title}`);
+
+    console.log(`🎬 NOVA MÚSICA: ${title}`);
+
+    // ===== PLAYER YOUTUBE API =====
+    ytPlayerInstance = new YT.Player('ytPlayer', {
+        videoId: videoId,
+        playerVars: {
+            autoplay: 1,
+            rel: 0
+        },
+        events: {
+            onReady: (event) => {
+                event.target.playVideo();
+            },
+            onStateChange: (event) => {
+                if (event.data === YT.PlayerState.ENDED) {
+                    console.log('🏁 Vídeo terminou (API)');
+                    if (autoPlayerActive && currentVideoId === videoId) {
+                        onVideoEnded();
+                    }
+                }
+            }
+        }
+    });
+}
 
     // ============================================
     // FUNÇÕES DA FILA
@@ -1912,84 +1917,100 @@ function updateLeaderboard() {
     }
 
     async function playNextInQueue() {
-        if (songQueue.length === 0) {
-            currentQueuePosition = -1;
-            currentVideoId = null;
-            document.getElementById('placeholder').classList.remove('hidden');
-            document.getElementById('endSongBtn').style.display = 'none';
-            
-            const wrapper = document.getElementById('playerWrapper');
-            const oldIframe = wrapper.querySelector('iframe');
-            if (oldIframe) oldIframe.remove();
-            
-            showToast('Fila vazia. Adicione mais músicas!');
-            return;
+
+    if (songQueue.length === 0) {
+        currentQueuePosition = -1;
+        currentVideoId = null;
+
+        document.getElementById('placeholder').classList.remove('hidden');
+        document.getElementById('endSongBtn').style.display = 'none';
+
+        if (ytPlayerInstance) {
+            ytPlayerInstance.destroy();
+            ytPlayerInstance = null;
         }
-        
-        if (currentQueuePosition === -1) {
-            currentQueuePosition = 0;
-        } else {
-            currentQueuePosition++;
-            if (currentQueuePosition >= songQueue.length) {
-                currentQueuePosition = -1;
-                playNextInQueue();
-                return;
-            }
-        }
-        
-        const nextItem = songQueue[currentQueuePosition];
-        playVideo(nextItem.video_id, nextItem.video_title);
-        safeUpdateQueueDisplay();
-        await saveQueueToSupabase();
+
+        showToast('Fila vazia. Adicione mais músicas!');
+        return;
     }
+
+    currentQueuePosition++;
+
+    if (currentQueuePosition >= songQueue.length) {
+        currentQueuePosition = 0; // loop
+    }
+
+    const nextItem = songQueue[currentQueuePosition];
+
+    console.log(`🎵 Próxima música: ${nextItem.video_title}`);
+
+    playVideo(nextItem.video_id, nextItem.video_title);
+
+    safeUpdateQueueDisplay();
+    await saveQueueToSupabase();
+}
 
     async function endSongAndPlayNext() {
-        if (totalReactions > 0) {
-            await showResultSupabase();
-            showResultScreen();
-        } else {
-            scores = { total: 0, positive: 0, negative: 0 };
-            emojiCounts = {};
-            totalReactions = 0;
-            updateScoreDisplay();
-            
-            await saveScoresToSupabase();
-            if (autoPlayerActive) {
-                await playNextInQueue();
-            }
-        }
-    }
+    if (isEndingSong) return; // 🔥 evita duplicação
+    isEndingSong = true;
 
-    function closeResultAndPlayNext() {
-        closeResult();
-        
+    if (totalReactions > 0) {
+        await showResultSupabase();
+        showResultScreen();
+    } else {
         scores = { total: 0, positive: 0, negative: 0 };
         emojiCounts = {};
         totalReactions = 0;
         updateScoreDisplay();
         
-        saveScoresToSupabase();
+        await saveScoresToSupabase();
+
+        if (autoPlayerActive) {
+            await playNextInQueue();
+        }
+    }
+
+    isEndingSong = false;
+}
+
+    function closeResultAndPlayNext() {
+    closeResult();
+
+    scores = { total: 0, positive: 0, negative: 0 };
+    emojiCounts = {};
+    totalReactions = 0;
+    updateScoreDisplay();
+
+    saveScoresToSupabase();
+
+    if (autoPlayerActive) {
         playNextInQueue();
     }
+}
 
     // ===== AUTO PLAYER =====
     function toggleAutoPlayer() {
-        autoPlayerActive = !autoPlayerActive;
-        const btn = document.getElementById('autoPlayerBtn');
-        if (autoPlayerActive) {
-            btn.classList.add('active');
-            btn.innerHTML = '⏸️ Auto Player ON';
-            showToast('Modo Auto Player ativado! Próximas músicas tocarão automaticamente.');
-            
-            if (!currentVideoId && songQueue.length > 0 && currentQueuePosition === -1) {
-                playNextInQueue();
-            }
-        } else {
-            btn.classList.remove('active');
-            btn.innerHTML = '▶️ Auto Player';
-            showToast('Modo Auto Player desativado.');
+    autoPlayerActive = !autoPlayerActive;
+    const btn = document.getElementById('autoPlayerBtn');
+
+    if (autoPlayerActive) {
+        btn.classList.add('active');
+        btn.innerHTML = '⏸️ Auto Player ON';
+
+        showToast('Modo Auto Player ativado! Próximas músicas tocarão automaticamente.');
+
+        // 🔥 Só inicia se não tiver nada tocando
+        if (!currentVideoId && songQueue.length > 0) {
+            playNextInQueue();
         }
+
+    } else {
+        btn.classList.remove('active');
+        btn.innerHTML = '▶️ Auto Player';
+
+        showToast('Modo Auto Player desativado.');
     }
+}
 
     // ============================================
     // FUNÇÕES SUPABASE
