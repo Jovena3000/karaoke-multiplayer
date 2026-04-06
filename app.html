@@ -2008,6 +2008,30 @@ function updateLeaderboard() {
         showToast('Modo Auto Player desativado.');
     }
 }
+async function onVideoEnded() {
+    console.log('🏁 onVideoEnded disparado');
+
+    if (isEndingSong) return;
+    isEndingSong = true;
+
+    try {
+        if (totalReactions > 0) {
+            console.log('📊 Mostrando resultado...');
+            await showResultSupabase();
+            showResultScreen();
+        } else {
+            console.log('⏭️ Sem reações, próxima música...');
+            await playNextInQueue();
+        }
+    } catch (err) {
+        console.error('Erro ao finalizar:', err);
+
+        // fallback de segurança
+        await playNextInQueue();
+    }
+
+    isEndingSong = false;
+}
 
     // ============================================
     // FUNÇÕES SUPABASE
