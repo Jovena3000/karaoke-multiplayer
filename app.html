@@ -1481,6 +1481,9 @@ function updateLeaderboard() {
     });
     container.innerHTML = html;
     
+	scores.total = Object.values(emojiCounts).reduce((a, b) => a + b, 0);
+	totalReactions = scores.total;
+	
     // Log para debug
     const totalPlacar = scoresList.reduce((sum, i) => sum + i.score, 0);
     console.log('📊 Placar atualizado - Total no placar:', totalPlacar);
@@ -1742,14 +1745,40 @@ function updateLeaderboard() {
             onReady: (event) => {
                 event.target.playVideo();
             },
-            onStateChange: (event) => {
-                if (event.data === YT.PlayerState.ENDED) {
-                    console.log('🏁 Vídeo terminou (API)');
-                    if (autoPlayerActive && currentVideoId === videoId) {
-                        onVideoEnded();
-                    }
+           onStateChange: (event) => {
+    console.log('📺 Estado do player:', event.data);
+
+    // 🎯 terminou
+    if (event.data === YT.PlayerState.ENDED) {
+        console.log('🏁 Vídeo terminou (API)');
+
+        if (autoPlayerActive && currentVideoId === videoId) {
+            onVideoEnded();
+        }
+    }
+
+    // 🔥 FALLBACK: detecta se travou perto do final
+    if (event.data === YT.PlayerState.PLAYING) {
+        clearInterval(window.__videoCheckInterval);
+
+        window.__videoCheckInterval = setInterval(() => {
+            if (!ytPlayerInstance) return;
+
+            const current = ytPlayerInstance.getCurrentTime();
+            const duration = ytPlayerInstance.getDuration();
+
+            if (duration > 0 && current >= duration - 1) {
+                console.log('⏰ Fim detectado via fallback');
+
+                clearInterval(window.__videoCheckInterval);
+
+                if (autoPlayerActive && currentVideoId === videoId) {
+                    onVideoEnded();
                 }
             }
+        }, 1000);
+    }
+}
         }
     });
 }
