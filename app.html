@@ -1738,9 +1738,11 @@ function updateLeaderboard() {
     ytPlayerInstance = new YT.Player('ytPlayer', {
         videoId: videoId,
         playerVars: {
-            autoplay: 1,
-            rel: 0
-        },
+    autoplay: 1,
+    rel: 0,
+    enablejsapi: 1,
+    origin: window.location.origin
+},
         events: {
             onReady: (event) => {
                 event.target.playVideo();
