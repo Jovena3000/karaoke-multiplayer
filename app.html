@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <script src="https://www.youtube.com/iframe_api"></script>
-    
+    // Copy & paste the code below into your <head> section [Credit to https://favicongenerator.io]
 <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any">
 <link rel="icon" href="/favicon.ico">
@@ -1362,6 +1362,7 @@
     let autoPlayerActive = false;
 	let ytPlayerInstance = null;
 	let isEndingSong = false;
+	let videoEndTimer = null;
     
     // Variáveis da fila
     let songQueue = [];
@@ -1694,11 +1695,7 @@ function updateLeaderboard() {
     function playVideo(videoId, title = 'Vídeo do YouTube') {
     if (!videoId) return;
 
-    if (videoEndTimer) {
-        clearTimeout(videoEndTimer);
-        videoEndTimer = null;
-    }
-
+    
     const wrapper = document.getElementById('playerWrapper');
     const placeholder = document.getElementById('placeholder');
     const emojiContainer = document.getElementById('emojiContainer');
