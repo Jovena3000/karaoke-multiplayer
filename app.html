@@ -2343,7 +2343,7 @@ isEndingSong = false;
                         topEmoji: ''
                     };
                 }
-                globalLeaderboard[targetUserId].score += points;
+               
                 updateLeaderboard();
                 
                 saveRoomState();
@@ -2592,10 +2592,14 @@ isEndingSong = false;
         createFloatingEmoji(emoji);
         flashScoreCard(points);
         
-        scores.total += points;
-        if (points > 0) scores.positive += points;
-        else scores.negative += Math.abs(points);
-        updateScoreDisplay();
+        scores.total += 1; // cada emoji conta como 1
+
+if (!scores.emojis[emoji]) {
+    scores.emojis[emoji] = 0;
+}
+scores.emojis[emoji]++;
+
+updateScoreDisplay();
         
         if (!globalLeaderboard[targetUserId]) {
             globalLeaderboard[targetUserId] = {
@@ -2603,7 +2607,7 @@ isEndingSong = false;
                 topEmoji: ''
             };
         }
-        globalLeaderboard[targetUserId].score += points;
+        
         updateLeaderboard();
         
         const ptText = points > 0 ? '+' + points : String(points);
@@ -2623,9 +2627,11 @@ isEndingSong = false;
     async function resetScores() {
         if (!confirm('Resetar pontuação total da festa?')) return;
         
-        scores = { total: 0, positive: 0, negative: 0 };
-        emojiCounts = {};
-        totalReactions = 0;
+        scores = {
+    total: 0,
+    emojis: {}
+};
+
         globalLeaderboard = {};
         
         updateScoreDisplay();
