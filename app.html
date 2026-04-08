@@ -1434,72 +1434,91 @@
         });
     }
 
-        // ===== FUNÇÃO PARA ATUALIZAR O PLACAR CORRIGIDA =====
-    function updateLeaderboard() {
-        const container = document.getElementById('leaderboardList');
-        if (!container) return;
+    // ===== FUNÇÃO PARA ATUALIZAR O PLACAR CORRIGIDA =====
+function updateLeaderboard() {
+    const container = document.getElementById('leaderboardList');
+    if (!container) return;
 
-        console.log('📊 Atualizando placar com dados:', JSON.parse(JSON.stringify(globalLeaderboard)));
+    console.log('📊 Atualizando placar com dados:', JSON.parse(JSON.stringify(globalLeaderboard)));
+    console.log('📊 Participantes disponíveis:', participants.map(p => ({ id: p.odUserId, name: p.odUserName })));
 
-        let scoresList = Object.entries(globalLeaderboard)
-            .map(([userId, data]) => {
-                const user = participants.find(p => p.odUserId === userId);
-                let scoreValue = 0;
-                let topEmoji = '🎵';
-                
-                if (typeof data === 'number') {
-                    scoreValue = data;
-                } else if (data && typeof data === 'object') {
-                    scoreValue = data.score || 0;
-                    topEmoji = data.topEmoji || '🎵';
+    let scoresList = Object.entries(globalLeaderboard)
+        .map(([userId, data]) => {
+            // 🔥 CORREÇÃO: Buscar o nome do participante de forma mais robusta
+            let userName = 'Anônimo';
+            
+            // Tenta encontrar nos participantes atuais
+            const user = participants.find(p => p.odUserId === userId);
+            if (user && user.odUserName) {
+                userName = user.odUserName;
+            } else {
+                // Se não encontrar, tenta buscar na fila (quem adicionou músicas)
+                const queueUser = songQueue.find(q => q.added_by === userId);
+                if (queueUser && queueUser.added_by_name) {
+                    userName = queueUser.added_by_name;
                 }
-                
-                return {
-                    userId,
-                    name: user?.odUserName || 'Anônimo',
-                    score: scoreValue,
-                    topEmoji: topEmoji
-                };
-            })
-            .filter(item => item.score > 0)
-            .sort((a, b) => b.score - a.score);
+                // Se ainda não achou, tenta no currentSinger
+                else if (currentSingerId === userId && currentSinger) {
+                    userName = currentSinger;
+                }
+            }
+            
+            let scoreValue = 0;
+            let topEmoji = '🎵';
+            
+            if (typeof data === 'number') {
+                scoreValue = data;
+            } else if (data && typeof data === 'object') {
+                scoreValue = data.score || 0;
+                topEmoji = data.topEmoji || '🎵';
+            }
+            
+            return {
+                userId,
+                name: userName,
+                score: scoreValue,
+                topEmoji: topEmoji
+            };
+        })
+        .filter(item => item.score > 0)
+        .sort((a, b) => b.score - a.score);
 
-        if (scoresList.length === 0) {
-            container.innerHTML = '<div class="empty-leaderboard">🎵 Ninguém recebeu pontos ainda</div>';
-            return;
-        }
+    if (scoresList.length === 0) {
+        container.innerHTML = '<div class="empty-leaderboard">🎵 Ninguém recebeu pontos ainda</div>';
+        return;
+    }
 
-        let html = '';
-        scoresList.forEach((item, idx) => {
-            const isYou = item.userId === odUserId;
-            let medal = '';
-            if (idx === 0) medal = '🥇';
-            else if (idx === 1) medal = '🥈';
-            else if (idx === 2) medal = '🥉';
-            else medal = `${idx + 1}º`;
+    let html = '';
+    scoresList.forEach((item, idx) => {
+        const isYou = item.userId === odUserId;
+        let medal = '';
+        if (idx === 0) medal = '🥇';
+        else if (idx === 1) medal = '🥈';
+        else if (idx === 2) medal = '🥉';
+        else medal = `${idx + 1}º`;
 
-            html += `
-                <div class="leaderboard-item rank-${idx + 1}">
-                    <div class="leaderboard-rank">${medal}</div>
-                    <div class="leaderboard-info">
-                        <div class="leaderboard-name">
-                            🎤 ${escapeHtml(item.name)} 
-                            ${isYou ? '<span style="font-size:0.7rem;">(você)</span>' : ''}
-                        </div>
-                        <div class="leaderboard-score">
-                            ⭐ ${item.score} pontos
-                        </div>
-                        <div class="leaderboard-emoji">
-                            🔥 Emoji destaque: ${item.topEmoji}
-                        </div>
+        html += `
+            <div class="leaderboard-item rank-${idx + 1}">
+                <div class="leaderboard-rank">${medal}</div>
+                <div class="leaderboard-info">
+                    <div class="leaderboard-name">
+                        🎤 ${escapeHtml(item.name)} 
+                        ${isYou ? '<span style="font-size:0.7rem;">(você)</span>' : ''}
+                    </div>
+                    <div class="leaderboard-score">
+                        ⭐ ${item.score} pontos
+                    </div>
+                    <div class="leaderboard-emoji">
+                        🔥 Emoji destaque: ${item.topEmoji}
                     </div>
                 </div>
-            `;
-        });
+            </div>
+        `;
+    });
 
-        container.innerHTML = html;
-        console.log('📊 Placar atualizado final:', scoresList);
-    }
+    container.innerHTML = html;
+    console.log('📊 Placar atualizado final:', scoresList);
+}
 
     // ============================================
     // FUNÇÕES DE UI
@@ -2170,19 +2189,21 @@
 
         roomChannel
             .on('presence', { event: 'sync' }, () => {
-                const presenceState = roomChannel.presenceState();
-                const newParticipants = [];
-                Object.keys(presenceState).forEach(key => {
-                    const presences = presenceState[key];
-                    presences.forEach(pres => {
-                        if (!newParticipants.find(part => part.odUserId === pres.odUserId)) {
-                            newParticipants.push(pres);
-                        }
-                    });
-                });
-                participants = newParticipants;
-                updateParticipantsList();
-            })
+    const presenceState = roomChannel.presenceState();
+    const newParticipants = [];
+    Object.keys(presenceState).forEach(key => {
+        const presences = presenceState[key];
+        presences.forEach(pres => {
+            if (!newParticipants.find(part => part.odUserId === pres.odUserId)) {
+                newParticipants.push(pres);
+            }
+        });
+    });
+    participants = newParticipants;
+    console.log('👥 Participantes atualizados:', participants.map(p => ({ id: p.odUserId, name: p.odUserName })));
+    updateParticipantsList();
+    updateLeaderboard(); // 🔥 FORÇA ATUALIZAÇÃO DO PLACAR
+})
             .on('presence', { event: 'join' }, async ({ newPresences }) => {
                 for (const pres of newPresences) {
                     if (!participants.find(p => p.odUserId === pres.odUserId)) {
