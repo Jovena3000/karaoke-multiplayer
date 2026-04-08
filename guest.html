@@ -1503,24 +1503,14 @@
             emojiContainer.style.overflow = 'hidden';
         }
         
-        currentSinger = userName;
-        currentVideoId = videoId;
+        // IMPORTANTE: NÃO define currentSinger como userName do convidado!
+        // currentSinger e currentSingerId devem vir apenas do broadcast 'new-video' ou 'room-state'
+        // O convidado NUNCA deve ser o cantor
         
-        const singerParticipant = participants.find(p => p.odUserName === currentSinger);
-        currentSingerId = singerParticipant ? singerParticipant.odUserId : odUserId;
+        console.log(`🎬 VIDEO CARREGADO: ${title} - (Convidado apenas assiste)`);
         
-        console.log(`🎬 NOVA MÚSICA: ${title}`);
-        console.log(`🎤 CANTOR ATUAL: ${currentSinger} (ID: ${currentSingerId})`);
-        
-        currentSongId = videoId + '_' + Date.now();
-        currentSongScores = {};
-        
-        emojiCounts = {};
-        totalReactions = 0;
-        
+        // Não resetar emojiCounts aqui - isso deve vir do host
         saveRoomState();
-        
-        addActivity('🎬', `${userName} começou: ${title}`);
     }
 
     // ============================================
@@ -1865,7 +1855,7 @@
                 const targetParticipant = participants.find(p => p.odUserId === targetUserId);
                 const targetName = targetParticipant ? targetParticipant.odUserName : 'cantor';
                 
-                console.log(`📨 ${emojiUserName} enviou ${emoji} (${points} pts) para o cantor: ${targetName}`);
+                console.log(`📨 ${emojiUserName} enviou ${emoji} (${points} pts) para o cantor: ${targetName} (ID: ${targetUserId})`);
                 
                 createFloatingEmoji(emoji);
                 showEmojiNotification(emoji, emojiUserName);
@@ -1918,16 +1908,23 @@
                 const { videoId, loadedBy, title } = payload;
                 if (videoId && videoId !== currentVideoId) {
                     currentVideoId = videoId;
+                    // IMPORTANTE: currentSinger é QUEM ESTÁ CANTANDO (vem do host)
                     currentSinger = loadedBy;
                     
                     const singerParticipant = participants.find(p => p.odUserName === loadedBy);
                     currentSingerId = singerParticipant ? singerParticipant.odUserId : null;
                     
-                    console.log(`📺 Novo vídeo carregado por: ${loadedBy} (ID: ${currentSingerId})`);
+                    console.log(`📺 NOVA MÚSICA - Cantor: ${loadedBy} (ID: ${currentSingerId})`);
+                    
+                    // Resetar pontuação da música atual
+                    scores = { total: 0, positive: 0, negative: 0 };
+                    emojiCounts = {};
+                    totalReactions = 0;
+                    updateScoreDisplay();
                     
                     playVideo(videoId, title);
-                    showToast(`${loadedBy} carregou um vídeo! 🎬`);
-                    addActivity('🎬', `${loadedBy} carregou vídeo`);
+                    showToast(`${loadedBy} está cantando! 🎤`);
+                    addActivity('🎬', `${loadedBy} começou a cantar: ${title}`);
                     saveRoomState();
                 }
             })
@@ -2121,14 +2118,11 @@
             return;
         }
         
+        // O CANTOR É SEMPRE O currentSingerId (enviado pelo host)
         if (!currentSingerId) {
-            const singerParticipant = participants.find(p => p.odUserName === currentSinger);
-            if (singerParticipant) {
-                currentSingerId = singerParticipant.odUserId;
-            } else {
-                showToast('Erro: Identifique o cantor atual.', true);
-                return;
-            }
+            console.error('Erro: currentSingerId não definido. Aguardando sincronização...');
+            showToast('Aguardando identificação do cantor...', true);
+            return;
         }
         
         const targetUserId = currentSingerId;
@@ -2152,7 +2146,7 @@
             currentSongScores[targetUserId] += points;
         }
         
-        // Atualiza o placar global
+        // Atualiza o placar global para o CANTOR
         if (!globalLeaderboard[targetUserId]) {
             globalLeaderboard[targetUserId] = { score: 0, topEmoji: emoji, topEmojiCounts: {} };
         } else if (typeof globalLeaderboard[targetUserId] === 'number') {
