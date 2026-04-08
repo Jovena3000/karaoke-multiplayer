@@ -1432,16 +1432,26 @@
         });
     }
 
-    // ===== FUNÇÃO PARA ATUALIZAR O PLACAR (TODOS QUE RECEBERAM PONTOS) =====
+        // ===== FUNÇÃO PARA ATUALIZAR O PLACAR CORRIGIDA =====
     function updateLeaderboard() {
         const container = document.getElementById('leaderboardList');
         if (!container) return;
 
+        console.log('📊 Atualizando placar com dados:', JSON.parse(JSON.stringify(globalLeaderboard)));
+
         let scoresList = Object.entries(globalLeaderboard)
             .map(([userId, data]) => {
                 const user = participants.find(p => p.odUserId === userId);
-                const scoreValue = typeof data === 'number' ? data : (data?.score || 0);
-                const topEmoji = (typeof data === 'object' && data?.topEmoji) ? data.topEmoji : '🎵';
+                let scoreValue = 0;
+                let topEmoji = '🎵';
+                
+                if (typeof data === 'number') {
+                    scoreValue = data;
+                } else if (data && typeof data === 'object') {
+                    scoreValue = data.score || 0;
+                    topEmoji = data.topEmoji || '🎵';
+                }
+                
                 return {
                     userId,
                     name: user?.odUserName || 'Anônimo',
@@ -1458,10 +1468,8 @@
         }
 
         let html = '';
-
         scoresList.forEach((item, idx) => {
             const isYou = item.userId === odUserId;
-
             let medal = '';
             if (idx === 0) medal = '🥇';
             else if (idx === 1) medal = '🥈';
@@ -1488,7 +1496,7 @@
         });
 
         container.innerHTML = html;
-        console.log('📊 Placar atualizado:', scoresList);
+        console.log('📊 Placar atualizado final:', scoresList);
     }
 
     // ============================================
@@ -2279,36 +2287,63 @@
                 safeUpdateQueueDisplay();
             })
             .on('broadcast', { event: 'new-emoji' }, ({ payload }) => {
-                const { emoji, points, targetUserId, userName: emojiUserName, emojiId } = payload;
-                if (processedEmojis.has(emojiId)) return;
-                processedEmojis.add(emojiId);
-                
-                const targetParticipant = participants.find(p => p.odUserId === targetUserId);
-                const targetName = targetParticipant ? targetParticipant.odUserName : 'cantor';
-                
-                console.log(`📨 ${emojiUserName} enviou ${emoji} (${points} pts) para o cantor: ${targetName} (ID: ${targetUserId})`);
-                
-                createFloatingEmoji(emoji);
-                showEmojiNotification(emoji, emojiUserName);
-                flashScoreCard(points);
-                
-                addActivity(emoji, `${emojiUserName} → ${targetName}: ${points > 0 ? '+' + points : points}`);
-                trackEmoji(emoji);
-                
-                scores.total += points;
-                if (points > 0) scores.positive += points;
-                else scores.negative += Math.abs(points);
-                updateScoreDisplay();
-                
-                if (!globalLeaderboard[targetUserId]) {
-                    globalLeaderboard[targetUserId] = 0;
-                }
-                globalLeaderboard[targetUserId] += points;
-                updateLeaderboard();
-                
-                saveRoomState();
-                saveScoresToSupabase();
-            })
+    const { emoji, points, targetUserId, userName: emojiUserName, emojiId } = payload;
+    if (processedEmojis.has(emojiId)) return;
+    processedEmojis.add(emojiId);
+    
+    const targetParticipant = participants.find(p => p.odUserId === targetUserId);
+    const targetName = targetParticipant ? targetParticipant.odUserName : 'cantor';
+    
+    console.log(`📨 ${emojiUserName} enviou ${emoji} (${points} pts) para o cantor: ${targetName} (ID: ${targetUserId})`);
+    
+    createFloatingEmoji(emoji);
+    showEmojiNotification(emoji, emojiUserName);
+    flashScoreCard(points);
+    
+    addActivity(emoji, `${emojiUserName} → ${targetName}: ${points > 0 ? '+' + points : points}`);
+    
+    if (typeof trackEmoji === 'function') {
+        trackEmoji(emoji);
+    } else {
+        if (!emojiCounts[emoji]) emojiCounts[emoji] = 0;
+        emojiCounts[emoji]++;
+        totalReactions++;
+    }
+    
+    scores.total += points;
+    if (points > 0) scores.positive += points;
+    else scores.negative += Math.abs(points);
+    updateScoreDisplay();
+    
+    // 🔥 CORREÇÃO CRÍTICA: Garantir estrutura correta do placar
+    if (!globalLeaderboard[targetUserId]) {
+        globalLeaderboard[targetUserId] = { score: 0, topEmoji: emoji, topEmojiCounts: {} };
+    } else if (typeof globalLeaderboard[targetUserId] === 'number') {
+        globalLeaderboard[targetUserId] = { score: globalLeaderboard[targetUserId], topEmoji: emoji, topEmojiCounts: {} };
+    }
+    
+    globalLeaderboard[targetUserId].score += points;
+    console.log(`💰 ${targetName} agora tem ${globalLeaderboard[targetUserId].score} pontos`);
+    
+    if (!globalLeaderboard[targetUserId].topEmojiCounts) {
+        globalLeaderboard[targetUserId].topEmojiCounts = {};
+    }
+    globalLeaderboard[targetUserId].topEmojiCounts[emoji] = (globalLeaderboard[targetUserId].topEmojiCounts[emoji] || 0) + 1;
+    
+    let maxCount = 0;
+    let topEmoji = emoji;
+    for (const [e, count] of Object.entries(globalLeaderboard[targetUserId].topEmojiCounts)) {
+        if (count > maxCount) {
+            maxCount = count;
+            topEmoji = e;
+        }
+    }
+    globalLeaderboard[targetUserId].topEmoji = topEmoji;
+    
+    updateLeaderboard();
+    saveRoomState();
+    saveScoresToSupabase();
+})
             .on('broadcast', { event: 'new-video' }, ({ payload }) => {
                 const { videoId, loadedBy, title } = payload;
                 if (videoId && videoId !== currentVideoId) {
