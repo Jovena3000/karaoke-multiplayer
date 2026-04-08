@@ -2032,9 +2032,10 @@
     async function endSongAndPlayNext() {
         if (isEndingSong) return;
         isEndingSong = true;
-        window.finalizeSongScoreGlobal();
-
-        if (totalReactions > 0) {
+		
+		finalizeSongScore();
+        
+        if (scores.total > 0)
             await showResultSupabase();
             showResultScreen();
         } else {
@@ -2055,7 +2056,7 @@
 
     function closeResultAndPlayNext() {
         closeResult();
-        window.finalizeSongScoreGlobal();
+        
 
         scores = { total: 0, positive: 0, negative: 0 };
         emojiCounts = {};
@@ -2098,7 +2099,7 @@
         window.finalizeSongScoreGlobal();
 
         try {
-            if (totalReactions > 0) {
+            if (scores.total > 0)
                 console.log('📊 Mostrando resultado...');
                 await showResultSupabase();
                 showResultScreen();
@@ -2167,19 +2168,17 @@
         if (!isSupabaseConnected || !roomChannel) return;
         if (!currentVideoId && songQueue.length === 0 && scores.total === 0) return;
         
-        const roomState = {
-            currentVideoId: currentVideoId || null,
-            scores: scores,
-            currentSinger: currentSinger || null,
-            currentSingerId: currentSingerId || null,
-            emojiCounts: emojiCounts,
-            totalReactions: totalReactions,
-            activities: activities.slice(0, 10),
-            queue: songQueue,
-            currentQueuePosition: currentQueuePosition,
-            globalLeaderboard: globalLeaderboard,
-            timestamp: Date.now()
-        };
+    const roomState = {
+    currentVideoId: currentVideoId || null,
+    scores: scores,
+    currentSinger: currentSinger || null,
+    currentSingerId: currentSingerId || null,
+    activities: activities.slice(0, 10),
+    queue: songQueue,
+    currentQueuePosition: currentQueuePosition,
+    globalLeaderboard: globalLeaderboard,
+    timestamp: Date.now()
+};
         
         await roomChannel.send({
             type: 'broadcast',
