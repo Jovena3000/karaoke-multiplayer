@@ -2517,67 +2517,104 @@
     }
 
     async function sendEmoji(emoji, points) {	
-        if (!userName) {
-            showToast('Entre na sala primeiro!', true);
-            return;
-        }
-        if (inCooldown) {
-            showToast('Aguarde 1 segundo!', true);
-            return;
-        }
-        
-        if (!currentVideoId) {
-            showToast('Nenhuma música tocando no momento!', true);
-            return;
-        }
-        
-        if (!currentSingerId) {
-            const singerParticipant = participants.find(p => p.odUserName === currentSinger);
-            if (singerParticipant) {
-                currentSingerId = singerParticipant.odUserId;
-            } else {
-                showToast('Erro: Identifique o cantor atual.', true);
-                return;
-            }
-        }
-        
-        if (typeof addEmojiReaction === 'function') {
-            addEmojiReaction(emoji);
-        }
-        
-        const targetUserId = currentSingerId;
-        const targetUserName = currentSinger;
-        
-        console.log(`🎤 ${userName} enviou ${emoji} (${points} pts) para o cantor: ${targetUserName} (ID: ${targetUserId})`);
-        
-        trackEmoji(emoji);
-        createFloatingEmoji(emoji);
-        flashScoreCard(points);
-        
-        scores.total += points;
-        if (points > 0) scores.positive += points;
-        else scores.negative += Math.abs(points);
-        updateScoreDisplay();
-        
-        if (!globalLeaderboard[targetUserId]) {
-            globalLeaderboard[targetUserId] = 0;
-        }
-        globalLeaderboard[targetUserId] += points;
-        updateLeaderboard();
-        
-        const ptText = points > 0 ? '+' + points : String(points);
-        addActivity(emoji, `${userName} → ${targetUserName}: ${ptText}`);
-        
-        await sendEmojiToSupabase(emoji, points, targetUserId);
-        
-        inCooldown = true;
-        const btns = document.querySelectorAll('.emoji-btn');
-        btns.forEach(btn => btn.classList.add('cooldown'));
-        setTimeout(() => {
-            inCooldown = false;
-            btns.forEach(btn => btn.classList.remove('cooldown'));
-        }, 1000);
+    if (!userName) {
+        showToast('Entre na sala primeiro!', true);
+        return;
     }
+    if (inCooldown) {
+        showToast('Aguarde 1 segundo!', true);
+        return;
+    }
+    
+    if (!currentVideoId) {
+        showToast('Nenhuma música tocando no momento!', true);
+        return;
+    }
+    
+    // 🔥 CORREÇÃO: Impedir que o cantor envie emoji para si mesmo
+    if (currentSingerId === odUserId) {
+        showToast('🎤 Você não pode reagir à sua própria apresentação!', true);
+        return;
+    }
+    
+    // O cantor que recebe os pontos é o currentSingerId
+    if (!currentSingerId) {
+        const singerParticipant = participants.find(p => p.odUserName === currentSinger);
+        if (singerParticipant) {
+            currentSingerId = singerParticipant.odUserId;
+        } else {
+            showToast('Erro: Identifique o cantor atual.', true);
+            return;
+        }
+    }
+    
+    addEmojiReaction(emoji);
+    
+    const targetUserId = currentSingerId;
+    const targetUserName = currentSinger;
+    
+    console.log(`🎤 ${userName} enviou ${emoji} (${points} pts) para o cantor: ${targetUserName} (ID: ${targetUserId})`);
+    
+    // Efeitos visuais
+    trackEmoji(emoji);
+    createFloatingEmoji(emoji);
+    flashScoreCard(points);
+    
+    // Atualiza o total da música
+    scores.total += points;
+    if (points > 0) scores.positive += points;
+    else scores.negative += Math.abs(points);
+    updateScoreDisplay();
+    
+    // Atualiza pontos da música atual (estatísticas)
+    if (currentSongId && targetUserId) {
+        if (!currentSongScores[targetUserId]) {
+            currentSongScores[targetUserId] = 0;
+        }
+        currentSongScores[targetUserId] += points;
+    }
+    
+    // Atualiza o PLACAR GLOBAL para o CANTOR
+    if (!globalLeaderboard[targetUserId]) {
+        globalLeaderboard[targetUserId] = { score: 0, topEmoji: emoji, topEmojiCounts: {} };
+    } else if (typeof globalLeaderboard[targetUserId] === 'number') {
+        globalLeaderboard[targetUserId] = { score: globalLeaderboard[targetUserId], topEmoji: emoji, topEmojiCounts: {} };
+    }
+    globalLeaderboard[targetUserId].score += points;
+    
+    if (!globalLeaderboard[targetUserId].topEmojiCounts) {
+        globalLeaderboard[targetUserId].topEmojiCounts = {};
+    }
+    globalLeaderboard[targetUserId].topEmojiCounts[emoji] = (globalLeaderboard[targetUserId].topEmojiCounts[emoji] || 0) + 1;
+    
+    let maxCount = 0;
+    let topEmoji = emoji;
+    for (const [e, count] of Object.entries(globalLeaderboard[targetUserId].topEmojiCounts)) {
+        if (count > maxCount) {
+            maxCount = count;
+            topEmoji = e;
+        }
+    }
+    globalLeaderboard[targetUserId].topEmoji = topEmoji;
+    
+    updateLeaderboard();
+    
+    // Adiciona à atividade
+    const ptText = points > 0 ? '+' + points : String(points);
+    addActivity(emoji, `${userName} → ${targetUserName}: ${ptText}`);
+    
+    // Envia para o Supabase
+    await sendEmojiToSupabase(emoji, points, targetUserId);
+    
+    // Cooldown
+    inCooldown = true;
+    const btns = document.querySelectorAll('.emoji-btn');
+    btns.forEach(btn => btn.classList.add('cooldown'));
+    setTimeout(() => {
+        inCooldown = false;
+        btns.forEach(btn => btn.classList.remove('cooldown'));
+    }, 1000);
+}
 
     async function resetScores() {
         if (!confirm('Resetar pontuação total da festa?')) return;
