@@ -367,10 +367,6 @@
             text-align: center;
         }
 
-        .leaderboard-rank .medal {
-            font-size: 1.8rem;
-        }
-
         .leaderboard-info {
             flex: 1;
         }
@@ -389,6 +385,12 @@
             font-weight: 700;
             font-size: 1.2rem;
             color: var(--accent-green);
+        }
+        
+        .leaderboard-emoji {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.2rem;
         }
 
         .empty-leaderboard {
@@ -1179,7 +1181,7 @@
     let queueUpdateTimeout = null;
 
     // ===== PLACAR DE LÍDERES (PONTOS RECEBIDOS DURANTE TODA A FESTA) =====
-    let globalLeaderboard = {};
+    let globalLeaderboard = {};  // { userId: { score: total, topEmoji: 'emoji' } }
     let currentSongScores = {};
     let currentSongId = null;
 
@@ -1233,12 +1235,15 @@
         if (!container) return;
 
         let scoresList = Object.entries(globalLeaderboard)
-            .map(([userId, score]) => {
+            .map(([userId, data]) => {
                 const user = participants.find(p => p.odUserId === userId);
+                const scoreValue = typeof data === 'number' ? data : data.score;
+                const topEmoji = typeof data === 'object' && data.topEmoji ? data.topEmoji : '🎵';
                 return {
                     userId,
                     name: user?.odUserName || 'Anônimo',
-                    score: score
+                    score: scoreValue,
+                    topEmoji: topEmoji
                 };
             })
             .filter(item => item.score > 0)
@@ -1265,13 +1270,16 @@
                         <div class="leaderboard-score">
                             ⭐ Pontuação Total: <span class="leaderboard-score-value">${item.score}</span>
                         </div>
+                        <div class="leaderboard-emoji">
+                            🔥 Emoji destaque: ${item.topEmoji}
+                        </div>
                     </div>
                 </div>
             `;
         });
         container.innerHTML = html;
         
-        console.log('📊 Placar atualizado:', scoresList);
+        console.log('📊 Placar atualizado (guest):', scoresList);
     }
 
     // ===== FUNÇÃO PARA ADICIONAR ATIVIDADE =====
@@ -1880,10 +1888,31 @@
                     currentSongScores[targetUserId] += points;
                 }
                 
+                // Atualiza o placar global (com suporte para objeto ou número)
                 if (!globalLeaderboard[targetUserId]) {
-                    globalLeaderboard[targetUserId] = 0;
+                    globalLeaderboard[targetUserId] = { score: 0, topEmoji: emoji };
+                } else if (typeof globalLeaderboard[targetUserId] === 'number') {
+                    // Converte de número para objeto se necessário
+                    globalLeaderboard[targetUserId] = { score: globalLeaderboard[targetUserId], topEmoji: emoji };
                 }
-                globalLeaderboard[targetUserId] += points;
+                globalLeaderboard[targetUserId].score += points;
+                
+                // Atualiza o emoji destaque (o mais usado)
+                if (!globalLeaderboard[targetUserId].topEmojiCounts) {
+                    globalLeaderboard[targetUserId].topEmojiCounts = {};
+                }
+                globalLeaderboard[targetUserId].topEmojiCounts[emoji] = (globalLeaderboard[targetUserId].topEmojiCounts[emoji] || 0) + 1;
+                
+                let maxCount = 0;
+                let topEmoji = emoji;
+                for (const [e, count] of Object.entries(globalLeaderboard[targetUserId].topEmojiCounts)) {
+                    if (count > maxCount) {
+                        maxCount = count;
+                        topEmoji = e;
+                    }
+                }
+                globalLeaderboard[targetUserId].topEmoji = topEmoji;
+                
                 updateLeaderboard();
                 
                 saveRoomState();
@@ -2127,10 +2156,29 @@
             currentSongScores[targetUserId] += points;
         }
         
+        // Atualiza o placar global
         if (!globalLeaderboard[targetUserId]) {
-            globalLeaderboard[targetUserId] = 0;
+            globalLeaderboard[targetUserId] = { score: 0, topEmoji: emoji, topEmojiCounts: {} };
+        } else if (typeof globalLeaderboard[targetUserId] === 'number') {
+            globalLeaderboard[targetUserId] = { score: globalLeaderboard[targetUserId], topEmoji: emoji, topEmojiCounts: {} };
         }
-        globalLeaderboard[targetUserId] += points;
+        globalLeaderboard[targetUserId].score += points;
+        
+        if (!globalLeaderboard[targetUserId].topEmojiCounts) {
+            globalLeaderboard[targetUserId].topEmojiCounts = {};
+        }
+        globalLeaderboard[targetUserId].topEmojiCounts[emoji] = (globalLeaderboard[targetUserId].topEmojiCounts[emoji] || 0) + 1;
+        
+        let maxCount = 0;
+        let topEmoji = emoji;
+        for (const [e, count] of Object.entries(globalLeaderboard[targetUserId].topEmojiCounts)) {
+            if (count > maxCount) {
+                maxCount = count;
+                topEmoji = e;
+            }
+        }
+        globalLeaderboard[targetUserId].topEmoji = topEmoji;
+        
         updateLeaderboard();
         
         addActivity(emoji, `${userName} → ${targetUserName}: ${points > 0 ? '+' + points : points}`);
