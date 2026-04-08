@@ -2097,21 +2097,20 @@
         window.finalizeSongScoreGlobal();
 
         try {
-            if (scores.total > 0)
-                console.log('📊 Mostrando resultado...');
-                await showResultSupabase();
-                showResultScreen();
-            } else {
-                console.log('⏭️ Sem reações, próxima música...');
-                await playNextInQueue();
-            }
-        } catch (err) {
-            console.error('Erro ao finalizar:', err);
-            await playNextInQueue();
-        }
-
-        isEndingSong = false;
+    if (scores.total > 0) {
+        console.log('📊 Mostrando resultado...');
+        await showResultSupabase();
+        showResultScreen();
+    } else {
+        console.log('⏭️ Sem reações, próxima música...');
+        await playNextInQueue();
     }
+} catch (err) {
+    console.error('Erro ao finalizar:', err);
+    await playNextInQueue();
+}
+
+isEndingSong = false;
 
     // ============================================
     // FUNÇÕES SUPABASE
