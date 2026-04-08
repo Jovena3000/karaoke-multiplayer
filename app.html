@@ -431,6 +431,12 @@
             font-size: 1.2rem;
             color: var(--accent-green);
         }
+        
+        .leaderboard-emoji {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.2rem;
+        }
 
         .empty-leaderboard {
             text-align: center;
@@ -1994,9 +2000,18 @@
                 totalReactions = payload.totalReactions || 0;
                 showResultScreen();
             })
-            .on('broadcast', { event: 'scores-update', 'reset' }, ({ payload }) => {
+            .on('broadcast', { event: 'scores-update' }, ({ payload }) => {
                 if (payload) scores = payload, updateScoreDisplay();
-                else { scores = { total: 0, positive: 0, negative: 0 }; emojiCounts = {}; totalReactions = 0; globalLeaderboard = {}; updateScoreDisplay(); updateLeaderboard(); addActivity('🔄', 'Pontuação total resetada'); showToast('Pontuação total resetada! 🔄'); }
+            })
+            .on('broadcast', { event: 'reset' }, () => {
+                scores = { total: 0, positive: 0, negative: 0 };
+                emojiCounts = {};
+                totalReactions = 0;
+                globalLeaderboard = {};
+                updateScoreDisplay();
+                updateLeaderboard();
+                addActivity('🔄', 'Pontuação total resetada');
+                showToast('Pontuação total resetada! 🔄');
             });
 
         roomChannel.subscribe(async (status) => {
