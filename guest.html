@@ -1254,6 +1254,9 @@
             container.innerHTML = '<div class="empty-leaderboard">🎵 Ninguém recebeu pontos ainda</div>';
             return;
         }
+		if (payload.event === 'leaderboard-update') {
+    updateLeaderboard(payload.payload);
+}
 
         const medals = ['🥇', '🥈', '🥉'];
         let html = '';
@@ -1693,21 +1696,19 @@
         if (!isSupabaseConnected || !roomChannel) return;
         if (!currentVideoId && songQueue.length === 0 && scores.total === 0) return;
         
-        const roomState = {
-            currentVideoId: currentVideoId || null,
-            scores: scores,
-            currentSinger: currentSinger || null,
-            currentSingerId: currentSingerId || null,
-            emojiCounts: emojiCounts,
-            totalReactions: totalReactions,
-            activities: activities.slice(0, 20),
-            queue: songQueue,
-            currentQueuePosition: currentQueuePosition,
-            currentSongScores: currentSongScores,
-            currentSongId: currentSongId,
-            globalLeaderboard: globalLeaderboard,
-            timestamp: Date.now()
-        };
+    const roomState = {
+    currentVideoId: currentVideoId || null,
+    scores: scores,
+    currentSinger: currentSinger || null,
+    currentSingerId: currentSingerId || null,
+    activities: activities.slice(0, 20),
+    queue: songQueue,
+    currentQueuePosition: currentQueuePosition,
+    currentSongScores: currentSongScores,
+    currentSongId: currentSongId,
+    globalLeaderboard: globalLeaderboard,
+    timestamp: Date.now()
+};
         
         await roomChannel.send({
             type: 'broadcast',
