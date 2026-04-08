@@ -367,6 +367,10 @@
             text-align: center;
         }
 
+        .leaderboard-rank .medal {
+            font-size: 1.8rem;
+        }
+
         .leaderboard-info {
             flex: 1;
         }
@@ -385,12 +389,6 @@
             font-weight: 700;
             font-size: 1.2rem;
             color: var(--accent-green);
-        }
-        
-        .leaderboard-emoji {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            margin-top: 0.2rem;
         }
 
         .empty-leaderboard {
@@ -1181,7 +1179,7 @@
     let queueUpdateTimeout = null;
 
     // ===== PLACAR DE LÍDERES (PONTOS RECEBIDOS DURANTE TODA A FESTA) =====
-    let globalLeaderboard = {};  // { userId: { score: total, topEmoji: 'emoji' } }
+    let globalLeaderboard = {};
     let currentSongScores = {};
     let currentSongId = null;
 
@@ -1235,15 +1233,12 @@
         if (!container) return;
 
         let scoresList = Object.entries(globalLeaderboard)
-            .map(([userId, data]) => {
+            .map(([userId, score]) => {
                 const user = participants.find(p => p.odUserId === userId);
-                const scoreValue = typeof data === 'number' ? data : data.score;
-                const topEmoji = typeof data === 'object' && data.topEmoji ? data.topEmoji : '🎵';
                 return {
                     userId,
                     name: user?.odUserName || 'Anônimo',
-                    score: scoreValue,
-                    topEmoji: topEmoji
+                    score: score
                 };
             })
             .filter(item => item.score > 0)
@@ -1254,9 +1249,6 @@
             container.innerHTML = '<div class="empty-leaderboard">🎵 Ninguém recebeu pontos ainda</div>';
             return;
         }
-		if (payload.event === 'leaderboard-update') {
-    updateLeaderboard(payload.payload);
-}
 
         const medals = ['🥇', '🥈', '🥉'];
         let html = '';
@@ -1273,16 +1265,13 @@
                         <div class="leaderboard-score">
                             ⭐ Pontuação Total: <span class="leaderboard-score-value">${item.score}</span>
                         </div>
-                        <div class="leaderboard-emoji">
-                            🔥 Emoji destaque: ${item.topEmoji}
-                        </div>
                     </div>
                 </div>
             `;
         });
         container.innerHTML = html;
         
-        console.log('📊 Placar atualizado (guest):', scoresList);
+        console.log('📊 Placar atualizado:', scoresList);
     }
 
     // ===== FUNÇÃO PARA ADICIONAR ATIVIDADE =====
@@ -1696,19 +1685,21 @@
         if (!isSupabaseConnected || !roomChannel) return;
         if (!currentVideoId && songQueue.length === 0 && scores.total === 0) return;
         
-    const roomState = {
-    currentVideoId: currentVideoId || null,
-    scores: scores,
-    currentSinger: currentSinger || null,
-    currentSingerId: currentSingerId || null,
-    activities: activities.slice(0, 20),
-    queue: songQueue,
-    currentQueuePosition: currentQueuePosition,
-    currentSongScores: currentSongScores,
-    currentSongId: currentSongId,
-    globalLeaderboard: globalLeaderboard,
-    timestamp: Date.now()
-};
+        const roomState = {
+            currentVideoId: currentVideoId || null,
+            scores: scores,
+            currentSinger: currentSinger || null,
+            currentSingerId: currentSingerId || null,
+            emojiCounts: emojiCounts,
+            totalReactions: totalReactions,
+            activities: activities.slice(0, 20),
+            queue: songQueue,
+            currentQueuePosition: currentQueuePosition,
+            currentSongScores: currentSongScores,
+            currentSongId: currentSongId,
+            globalLeaderboard: globalLeaderboard,
+            timestamp: Date.now()
+        };
         
         await roomChannel.send({
             type: 'broadcast',
@@ -1889,31 +1880,10 @@
                     currentSongScores[targetUserId] += points;
                 }
                 
-                // Atualiza o placar global (com suporte para objeto ou número)
                 if (!globalLeaderboard[targetUserId]) {
-                    globalLeaderboard[targetUserId] = { score: 0, topEmoji: emoji };
-                } else if (typeof globalLeaderboard[targetUserId] === 'number') {
-                    // Converte de número para objeto se necessário
-                    globalLeaderboard[targetUserId] = { score: globalLeaderboard[targetUserId], topEmoji: emoji };
+                    globalLeaderboard[targetUserId] = 0;
                 }
-                globalLeaderboard[targetUserId].score += points;
-                
-                // Atualiza o emoji destaque (o mais usado)
-                if (!globalLeaderboard[targetUserId].topEmojiCounts) {
-                    globalLeaderboard[targetUserId].topEmojiCounts = {};
-                }
-                globalLeaderboard[targetUserId].topEmojiCounts[emoji] = (globalLeaderboard[targetUserId].topEmojiCounts[emoji] || 0) + 1;
-                
-                let maxCount = 0;
-                let topEmoji = emoji;
-                for (const [e, count] of Object.entries(globalLeaderboard[targetUserId].topEmojiCounts)) {
-                    if (count > maxCount) {
-                        maxCount = count;
-                        topEmoji = e;
-                    }
-                }
-                globalLeaderboard[targetUserId].topEmoji = topEmoji;
-                
+                globalLeaderboard[targetUserId] += points;
                 updateLeaderboard();
                 
                 saveRoomState();
@@ -2157,29 +2127,10 @@
             currentSongScores[targetUserId] += points;
         }
         
-        // Atualiza o placar global
         if (!globalLeaderboard[targetUserId]) {
-            globalLeaderboard[targetUserId] = { score: 0, topEmoji: emoji, topEmojiCounts: {} };
-        } else if (typeof globalLeaderboard[targetUserId] === 'number') {
-            globalLeaderboard[targetUserId] = { score: globalLeaderboard[targetUserId], topEmoji: emoji, topEmojiCounts: {} };
+            globalLeaderboard[targetUserId] = 0;
         }
-        globalLeaderboard[targetUserId].score += points;
-        
-        if (!globalLeaderboard[targetUserId].topEmojiCounts) {
-            globalLeaderboard[targetUserId].topEmojiCounts = {};
-        }
-        globalLeaderboard[targetUserId].topEmojiCounts[emoji] = (globalLeaderboard[targetUserId].topEmojiCounts[emoji] || 0) + 1;
-        
-        let maxCount = 0;
-        let topEmoji = emoji;
-        for (const [e, count] of Object.entries(globalLeaderboard[targetUserId].topEmojiCounts)) {
-            if (count > maxCount) {
-                maxCount = count;
-                topEmoji = e;
-            }
-        }
-        globalLeaderboard[targetUserId].topEmoji = topEmoji;
-        
+        globalLeaderboard[targetUserId] += points;
         updateLeaderboard();
         
         addActivity(emoji, `${userName} → ${targetUserName}: ${points > 0 ? '+' + points : points}`);
