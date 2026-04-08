@@ -2035,21 +2035,19 @@
 		
 		finalizeSongScore();
         
-        if (scores.total > 0)
-            await showResultSupabase();
-            showResultScreen();
-        } else {
-            scores = { total: 0, positive: 0, negative: 0 };
-            emojiCounts = {};
-            totalReactions = 0;
-            updateScoreDisplay();
-            
-            await saveScoresToSupabase();
+        if (scores.total > 0) {
+    await showResultSupabase();
+    showResultScreen();
+} else {
+    scores = { total: 0, emojis: {} }; // 🔥 corrigido também
+    updateScoreDisplay();
+    
+    await saveScoresToSupabase();
 
-            if (autoPlayerActive) {
-                await playNextInQueue();
-            }
-        }
+    if (autoPlayerActive) {
+        await playNextInQueue();
+    }
+}
 
         isEndingSong = false;
     }
@@ -2058,7 +2056,7 @@
         closeResult();
         
 
-        scores = { total: 0, positive: 0, negative: 0 };
+        scores = { total: 0, emojis: {} };
         emojiCounts = {};
         totalReactions = 0;
         updateScoreDisplay();
