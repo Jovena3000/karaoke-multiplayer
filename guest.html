@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+<script src="https://www.youtube.com/iframe_api"></script>
     
 <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any">
@@ -9,10 +10,41 @@
 <link rel="manifest" href="/site.webmanifest">
 <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)">
-    
+
+    <!-- PRIMEIRO: Verificação de autenticação -->
+    <script>
+        // ================= VERIFICAÇÃO DE AUTENTICAÇÃO =================
+        (function() {
+            const paginasPublicas = ['/login.html', '/checkout.html', '/checkout'];
+            const token = localStorage.getItem('token');
+            const paginaAtual = window.location.pathname;
+            
+            const isPaginaPublica = paginasPublicas.some(pagina => 
+                paginaAtual.includes(pagina)
+            );
+            
+            if (!token && !isPaginaPublica) {
+                console.log('🔒 Redirecionando para login...');
+                window.location.href = '/login.html';
+                return;
+            }
+            
+            if (token) {
+                const originalFetch = window.fetch;
+                window.fetch = function(resource, options = {}) {
+                    if (typeof resource === 'string' && resource.includes('karaoke-api-backend3.vercel.app')) {
+                        options.headers = options.headers || {};
+                        options.headers['Authorization'] = `Bearer ${token}`;
+                    }
+                    return originalFetch(resource, options);
+                };
+            }
+        })();
+    </script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎤 Karaokê - Convidado</title>
+    <title>🎤 Karaokê Premium - Controle Total</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
     
     <!-- Supabase SDK -->
@@ -175,6 +207,22 @@
         
         .video-title { font-size: 1.2rem; font-weight: 600; }
         
+        .change-video-btn {
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+            border: none;
+            padding: 0.5rem 1.25rem;
+            border-radius: 0.5rem;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .change-video-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(157,78,221,0.4);
+        }
+
         .player-wrapper {
             position: relative;
             width: 100%;
@@ -367,6 +415,10 @@
             text-align: center;
         }
 
+        .leaderboard-rank .medal {
+            font-size: 1.8rem;
+        }
+
         .leaderboard-info {
             flex: 1;
         }
@@ -401,7 +453,7 @@
             border-radius: 0.75rem;
         }
 
-        /* ===== FILA DE ESPERA (APENAS VISUALIZAÇÃO) ===== */
+        /* ===== FILA DE ESPERA ===== */
         .queue-section {
             background: var(--bg-card);
             border-radius: 1rem;
@@ -507,6 +559,32 @@
             text-align: center;
         }
         
+        .queue-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .queue-btn {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 0.5rem;
+            padding: 0.3rem 0.6rem;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.8rem;
+        }
+        
+        .queue-btn:hover {
+            background: var(--accent-purple);
+            border-color: var(--accent-purple);
+        }
+        
+        .queue-btn.remove:hover {
+            background: #ff4757;
+            border-color: #ff4757;
+        }
+        
         .empty-queue {
             text-align: center;
             padding: 2rem;
@@ -538,6 +616,62 @@
             align-items: center;
             gap: 0.5rem;
         }
+        
+        .qr-container { text-align: center; }
+        
+        .qr-room-display {
+            background: var(--bg-lighter);
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.75rem;
+            border: 1px solid rgba(255,45,117,0.3);
+        }
+        
+        .qr-room-label { font-size: 0.8rem; color: var(--text-secondary); }
+        
+        .qr-room-id {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--accent-pink);
+            letter-spacing: 4px;
+            font-family: monospace;
+        }
+        
+        .qr-code {
+            background: white;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            display: inline-block;
+            margin: 0.75rem 0;
+        }
+        
+        .qr-code img { display: block; width: 160px; height: 160px; }
+        
+        .share-link {
+            background: var(--bg-lighter);
+            padding: 0.6rem;
+            border-radius: 0.5rem;
+            font-size: 0.65rem;
+            color: var(--accent-blue);
+            word-break: break-all;
+            margin-bottom: 0.75rem;
+            cursor: pointer;
+            border: 1px solid rgba(0,212,255,0.3);
+        }
+        
+        .copy-btn {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            border: none;
+            padding: 0.7rem 1rem;
+            border-radius: 0.5rem;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+        }
+        
+        .copy-btn:hover { transform: scale(1.02); }
 
         .participants-list { max-height: 150px; overflow-y: auto; }
         
@@ -581,11 +715,7 @@
             animation: pulse 1s ease infinite;
         }
 
-        .activity-feed {
-            max-height: 200px;
-            overflow-y: auto;
-            margin-top: 1rem;
-        }
+        .activity-feed { max-height: 200px; overflow-y: auto; }
         
         .activity-item {
             display: flex;
@@ -605,6 +735,18 @@
         }
         
         .activity-emoji { font-size: 1.5rem; }
+        
+        .reset-btn {
+            background: linear-gradient(135deg, #ff4757, #ff6b6b);
+            border: none;
+            padding: 0.6rem;
+            border-radius: 0.5rem;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 0.75rem;
+        }
 
         .modal {
             display: none;
@@ -893,6 +1035,23 @@
             100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
         }
         
+        .end-song-btn {
+            background: linear-gradient(135deg, #ff9500, #ff6b00);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-left: 0.5rem;
+        }
+        
+        .end-song-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(255,149,0,0.4);
+        }
+        
         .add-to-queue-btn {
             background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
             border: none;
@@ -909,6 +1068,26 @@
             transform: scale(1.05);
             box-shadow: 0 5px 20px rgba(0,212,255,0.4);
         }
+        
+        /* Botão Auto Player */
+        .auto-player-btn {
+            background: linear-gradient(135deg, var(--accent-orange), #ff6b00);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .auto-player-btn.active {
+            background: linear-gradient(135deg, #00ff88, #00cc6a);
+            color: #000;
+        }
+        .auto-player-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(255,149,0,0.4);
+        }
 
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: var(--bg-dark); }
@@ -922,7 +1101,7 @@
 
     <header class="header">
         <div class="header-content">
-            <div class="logo">🎤 Karaokê - Convidado</div>
+            <div class="logo">🎤 Karaokê Premium</div>
             <div class="room-info">
                 <span style="color: var(--text-secondary);">Sala:</span>
                 <span class="room-id" id="headerRoomId">------</span>
@@ -943,13 +1122,14 @@
                     <div class="video-header">
                         <h2 class="video-title">🎵 Player de Karaokê</h2>
                         <div>
-                            <button class="add-to-queue-btn" onclick="openVideoModal(true)">➕ Adicionar à Fila</button>
+                            <button class="change-video-btn" onclick="openVideoModal(true)">➕ Adicionar à Fila</button>
+                            <button class="end-song-btn" onclick="endSongAndPlayNext()" id="endSongBtn" style="display:none;">⏭️ Próxima</button>
                         </div>
                     </div>
                     <div class="player-wrapper" id="playerWrapper">
                         <div class="placeholder" id="placeholder">
                             <div class="placeholder-icon">🎬</div>
-                            <div class="placeholder-text">Aguardando música...</div>
+                            <div class="placeholder-text">Adicione músicas à fila para começar</div>
                         </div>
                         <div class="emoji-float-container" id="emojiContainer"></div>
                     </div>
@@ -1011,12 +1191,16 @@
                     </div>
                 </div>
 
-                <!-- FILA DE ESPERA (APENAS VISUALIZAÇÃO) -->
+                <!-- FILA DE ESPERA -->
                 <div class="queue-section">
                     <div class="queue-header">
                         <div class="queue-title">
                             📋 Fila de Espera
                             <span class="queue-count" id="queueCount">0</span>
+                        </div>
+                        <div>
+                            <button class="add-to-queue-btn" onclick="openVideoModal(true)">➕ Adicionar</button>
+                            <button class="auto-player-btn" id="autoPlayerBtn" onclick="toggleAutoPlayer()" style="margin-left: 0.5rem;">▶️ Auto Player</button>
                         </div>
                     </div>
                     <div class="queue-list" id="queueList">
@@ -1032,18 +1216,36 @@
             <!-- COLUNA DIREITA -->
             <div class="right-column">
                 <div class="card">
+                    <h3 class="card-title">📱 Compartilhar Sala</h3>
+                    <div class="qr-container">
+                        <div class="qr-room-display">
+                            <div class="qr-room-label">Código da Sala:</div>
+                            <div class="qr-room-id" id="qrRoomId">------</div>
+                        </div>
+                        <div class="qr-code" id="qrCode">
+                            <div style="padding:2rem;color:#666;">Gerando...</div>
+                        </div>
+                        <p style="font-size: 0.75rem; color: var(--accent-green); margin-bottom: 0.5rem;">
+                            ✅ Funciona entre PC e Celular!
+                        </p>
+                        <div class="share-link" id="shareLink" onclick="copyLink()">...</div>
+                        <button class="copy-btn" onclick="copyLink()">📋 Copiar Link</button>
+                    </div>
+                </div>
+
+                <div class="card">
                     <h3 class="card-title">👥 Participantes Online (<span id="participantCount2">0</span>)</h3>
                     <div class="participants-list" id="participantsList">
                         <div style="text-align:center;color:var(--text-secondary);padding:1rem;">Aguardando...</div>
                     </div>
                 </div>
-                
-                <!-- ATIVIDADE AO VIVO -->
+
                 <div class="card">
                     <h3 class="card-title">⚡ Atividade ao Vivo</h3>
                     <div class="activity-feed" id="activityFeed">
                         <div style="text-align:center;color:var(--text-secondary);padding:1rem;">Nenhuma atividade</div>
                     </div>
+                    <button class="reset-btn" onclick="resetScores()">🔄 Resetar Pontuação Total</button>
                 </div>
             </div>
         </div>
@@ -1133,13 +1335,13 @@
             </div>
             
             <div class="result-buttons-row">
-                <button class="result-btn-next" onclick="closeResult()">🎵 Voltar</button>
-                <button class="result-btn-back" onclick="closeResult()">🎤 Fechar</button>
+                <button class="result-btn-next" onclick="closeResultAndPlayNext()">🎵 Próxima Música</button>
+                <button class="result-btn-back" onclick="closeResult()">🎤 Voltar ao Karaokê</button>
             </div>
         </div>
     </div>
 
-      <script>
+    <script>
     // ============================================
     // CONFIGURAÇÃO SUPABASE
     // ============================================
@@ -1163,7 +1365,15 @@
     let activities = [];
     let processedEmojis = new Set();
     let lastStateUpdate = 0;
-    
+    let autoPlayerActive = false;
+    let ytPlayerInstance = null;
+    let isEndingSong = false;
+    let videoEndTimer = null;
+    let globalLeaderboard = {}; 
+    let currentSongUserId = null;
+	let currentSongOwnerId = null;  // ID de quem ADICIONOU a música
+	let currentSongScores = {};  // Pontuação temporária da música atual
+       
     // Variáveis da fila
     let songQueue = [];
     let currentQueuePosition = -1;
@@ -1173,18 +1383,12 @@
     let totalReactions = 0;
     let currentSinger = '';
     let currentSingerId = null;
-    let currentSongOwnerId = null;  // 🔥 NOVO: Quem ADICIONOU a música
 
     // Flag para controle de sincronização inicial
     let hasReceivedInitialState = false;
     
     // DEBOUNCE
     let queueUpdateTimeout = null;
-
-    // PLACAR DE LÍDERES
-    let globalLeaderboard = {};
-    let currentSongScores = {};
-    let currentSongId = null;
 
     // ============================================
     // FUNÇÃO PARA BUSCAR TÍTULO DO YOUTUBE
@@ -1208,6 +1412,9 @@
         };
     }
 
+    // ============================================
+    // FUNÇÃO PARA ATUALIZAR FILA COM DEBOUNCE
+    // ============================================
     function safeUpdateQueueDisplay() {
         if (queueUpdateTimeout) clearTimeout(queueUpdateTimeout);
         queueUpdateTimeout = setTimeout(() => {
@@ -1216,6 +1423,7 @@
         }, 100);
     }
 
+    // ===== FUNÇÃO PARA ESCAPAR HTML =====
     function escapeHtml(text) {
         if (!text) return '';
         return text.replace(/[&<>]/g, function(m) {
@@ -1226,84 +1434,95 @@
         });
     }
 
-    // ===== FUNÇÃO PARA ATUALIZAR O PLACAR (TOP 3 DA FESTA) =====
-    function updateLeaderboard() {
-        const container = document.getElementById('leaderboardList');
-        if (!container) return;
+    // ===== FUNÇÃO PARA ATUALIZAR O PLACAR CORRIGIDA =====
+function updateLeaderboard() {
+    const container = document.getElementById('leaderboardList');
+    if (!container) return;
 
-        if (!globalLeaderboard) {
-            globalLeaderboard = {};
-        }
+    console.log('📊 Atualizando placar com dados:', JSON.parse(JSON.stringify(globalLeaderboard)));
+    console.log('📊 Participantes disponíveis:', participants.map(p => ({ id: p.odUserId, name: p.odUserName })));
 
-        let scoresList = Object.entries(globalLeaderboard)
-            .map(([userId, data]) => {
-                const user = participants.find(p => p.odUserId === userId);
-                const scoreValue = typeof data === 'number' ? data : (data?.score || 0);
-                const topEmoji = (typeof data === 'object' && data?.topEmoji) ? data.topEmoji : '🎵';
-                return {
-                    userId,
-                    name: user?.odUserName || 'Anônimo',
-                    score: scoreValue,
-                    topEmoji: topEmoji
-                };
-            })
-            .filter(item => item.score > 0)
-            .sort((a, b) => b.score - a.score)
-            .slice(0, 3);
+    let scoresList = Object.entries(globalLeaderboard)
+        .map(([userId, data]) => {
+            // 🔥 CORREÇÃO: Buscar o nome do participante de forma mais robusta
+            let userName = 'Anônimo';
+            
+            // Tenta encontrar nos participantes atuais
+            const user = participants.find(p => p.odUserId === userId);
+            if (user && user.odUserName) {
+                userName = user.odUserName;
+            } else {
+                // Se não encontrar, tenta buscar na fila (quem adicionou músicas)
+                const queueUser = songQueue.find(q => q.added_by === userId);
+                if (queueUser && queueUser.added_by_name) {
+                    userName = queueUser.added_by_name;
+                }
+                // Se ainda não achou, tenta no currentSinger
+                else if (currentSingerId === userId && currentSinger) {
+                    userName = currentSinger;
+                }
+            }
+            
+            let scoreValue = 0;
+            let topEmoji = '🎵';
+            
+            if (typeof data === 'number') {
+                scoreValue = data;
+            } else if (data && typeof data === 'object') {
+                scoreValue = data.score || 0;
+                topEmoji = data.topEmoji || '🎵';
+            }
+            
+            return {
+                userId,
+                name: userName,
+                score: scoreValue,
+                topEmoji: topEmoji
+            };
+        })
+        .filter(item => item.score > 0)
+        .sort((a, b) => b.score - a.score);
 
-        if (scoresList.length === 0) {
-            container.innerHTML = '<div class="empty-leaderboard">🎵 Ninguém recebeu pontos ainda</div>';
-            return;
-        }
+    if (scoresList.length === 0) {
+        container.innerHTML = '<div class="empty-leaderboard">🎵 Ninguém recebeu pontos ainda</div>';
+        return;
+    }
 
-        const medals = ['🥇', '🥈', '🥉'];
-        let html = '';
-        scoresList.forEach((item, idx) => {
-            const isYou = item.userId === odUserId;
-            html += `
-                <div class="leaderboard-item rank-${idx + 1}">
-                    <div class="leaderboard-rank">${medals[idx]}</div>
-                    <div class="leaderboard-info">
-                        <div class="leaderboard-name">
-                            🎤 ${escapeHtml(item.name)} ${isYou ? '<span style="font-size:0.7rem;">(você)</span>' : ''}
-                        </div>
-                        <div class="leaderboard-score">
-                            ⭐ Pontuação Total: <span class="leaderboard-score-value">${item.score}</span>
-                        </div>
-                        <div class="leaderboard-emoji">
-                            🔥 Emoji destaque: ${item.topEmoji}
-                        </div>
+    let html = '';
+    scoresList.forEach((item, idx) => {
+        const isYou = item.userId === odUserId;
+        let medal = '';
+        if (idx === 0) medal = '🥇';
+        else if (idx === 1) medal = '🥈';
+        else if (idx === 2) medal = '🥉';
+        else medal = `${idx + 1}º`;
+
+        html += `
+            <div class="leaderboard-item rank-${idx + 1}">
+                <div class="leaderboard-rank">${medal}</div>
+                <div class="leaderboard-info">
+                    <div class="leaderboard-name">
+                        🎤 ${escapeHtml(item.name)} 
+                        ${isYou ? '<span style="font-size:0.7rem;">(você)</span>' : ''}
+                    </div>
+                    <div class="leaderboard-score">
+                        ⭐ ${item.score} pontos
+                    </div>
+                    <div class="leaderboard-emoji">
+                        🔥 Emoji destaque: ${item.topEmoji}
                     </div>
                 </div>
-            `;
-        });
-        container.innerHTML = html;
-        
-        console.log('📊 Placar atualizado (guest):', scoresList);
-    }
+            </div>
+        `;
+    });
 
-    function addActivity(emoji, text) {
-        if (!activities) activities = [];
-        activities.unshift({ emoji: emoji, text: text });
-        if (activities.length > 20) activities.pop();
-        updateActivityFeed();
-    }
+    container.innerHTML = html;
+    console.log('📊 Placar atualizado final:', scoresList);
+}
 
-    function updateActivityFeed() {
-        const el = document.getElementById('activityFeed');
-        if (!el) return;
-        
-        if (!activities || activities.length === 0) {
-            el.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:1rem;">Nenhuma atividade</div>';
-            return;
-        }
-        let html = '';
-        activities.forEach(a => {
-            html += '<div class="activity-item"><span class="activity-emoji">' + a.emoji + '</span><span>' + a.text + '</span></div>';
-        });
-        el.innerHTML = html;
-    }
-
+    // ============================================
+    // FUNÇÕES DE UI
+    // ============================================
     function showToast(msg, isError) {
         const toast = document.getElementById('toast');
         toast.textContent = msg;
@@ -1368,7 +1587,6 @@
     }
 
     function updateScoreDisplay() {
-        if (!scores) scores = { total: 0, positive: 0, negative: 0 };
         document.getElementById('totalScore').textContent = scores.total;
         document.getElementById('posScore').textContent = scores.positive;
         document.getElementById('negScore').textContent = scores.negative;
@@ -1400,6 +1618,25 @@
         });
         el.innerHTML = html;
         updateLeaderboard();
+    }
+
+    function addActivity(emoji, text) {
+        activities.unshift({ emoji: emoji, text: text });
+        if (activities.length > 20) activities.pop();
+        updateActivityFeed();
+    }
+
+    function updateActivityFeed() {
+        const el = document.getElementById('activityFeed');
+        if (!activities.length) {
+            el.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:1rem;">Nenhuma atividade</div>';
+            return;
+        }
+        let html = '';
+        activities.forEach(a => {
+            html += '<div class="activity-item"><span class="activity-emoji">' + a.emoji + '</span><span>' + a.text + '</span></div>';
+        });
+        el.innerHTML = html;
     }
 
     function createFloatingEmoji(emoji) {
@@ -1451,6 +1688,29 @@
         }
     }
 
+    function generateQRCode() {
+        const shareUrl = getShareUrl();
+        const container = document.getElementById('qrCode');
+        document.getElementById('shareLink').textContent = shareUrl;
+        container.innerHTML = '<div style="padding:2rem;color:#666;">⏳</div>';
+        const img = new Image();
+        img.onload = function() {
+            container.innerHTML = '';
+            img.style.width = '160px';
+            img.style.height = '160px';
+            container.appendChild(img);
+        };
+        img.onerror = function() {
+            container.innerHTML = '<div style="padding:1rem;color:#00d4ff;text-align:center;"><strong style="font-size:1.5rem;">' + roomId + '</strong><br><small>Digite este código</small></div>';
+        };
+        img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=' + encodeURIComponent(shareUrl);
+    }
+
+    function copyLink() {
+        const url = getShareUrl();
+        navigator.clipboard.writeText(url).then(() => showToast('Link copiado!')).catch(() => showToast('Link: ' + url));
+    }
+
     function openVideoModal(addToQueue = true) {
         document.getElementById('videoModal').classList.add('active');
         document.getElementById('videoInput').focus();
@@ -1463,47 +1723,87 @@
     }
 
     function playVideo(videoId, title = 'Vídeo do YouTube') {
-        if (!videoId) return;
-        
-        const wrapper = document.getElementById('playerWrapper');
-        const placeholder = document.getElementById('placeholder');
-        const emojiContainer = document.getElementById('emojiContainer');
-        
-        const oldIframe = wrapper.querySelector('iframe');
-        if (oldIframe) oldIframe.remove();
-        
-        const embedUrl = 'https://www.youtube.com/embed/' + videoId + '?autoplay=1&rel=0';
-        
-        const iframe = document.createElement('iframe');
-        iframe.src = embedUrl;
-        iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
-        iframe.allowFullscreen = true;
-        iframe.id = 'ytPlayer';
-        iframe.style.position = 'absolute';
-        iframe.style.top = '0';
-        iframe.style.left = '0';
-        iframe.style.width = '100%';
-        iframe.style.height = '100%';
-        iframe.style.border = 'none';
-        iframe.style.zIndex = '1';
-        
-        wrapper.insertBefore(iframe, emojiContainer);
-        placeholder.classList.add('hidden');
-        
-        if (emojiContainer) {
-            emojiContainer.style.zIndex = '1000';
-            emojiContainer.style.position = 'absolute';
-            emojiContainer.style.top = '0';
-            emojiContainer.style.left = '0';
-            emojiContainer.style.width = '100%';
-            emojiContainer.style.height = '100%';
-            emojiContainer.style.pointerEvents = 'none';
-            emojiContainer.style.overflow = 'hidden';
-        }
-        
-        console.log(`🎬 VIDEO CARREGADO: ${title}`);
+    if (!videoId) return;
+    
+    const wrapper = document.getElementById('playerWrapper');
+    const placeholder = document.getElementById('placeholder');
+    const emojiContainer = document.getElementById('emojiContainer');
+
+    if (ytPlayerInstance) {
+        ytPlayerInstance.destroy();
+        ytPlayerInstance = null;
     }
 
+    const playerDiv = document.createElement('div');
+    playerDiv.id = 'ytPlayer';
+    wrapper.insertBefore(playerDiv, emojiContainer);
+
+    placeholder.classList.add('hidden');
+    document.getElementById('endSongBtn').style.display = 'inline-block';
+
+    currentVideoId = videoId;
+    
+    // 🔥 CORREÇÃO: Encontrar quem ADICIONOU esta música na fila
+    const queueItem = songQueue.find(item => item.video_id === videoId);
+    if (queueItem && queueItem.added_by) {
+        currentSongOwnerId = queueItem.added_by;  // Quem adicionou (Bru)
+        currentSinger = queueItem.added_by_name;   // Nome de quem adicionou
+    } else {
+        currentSongOwnerId = odUserId;
+        currentSinger = userName;
+    }
+    
+    // Buscar o nome do participante
+    const ownerParticipant = participants.find(p => p.odUserId === currentSongOwnerId);
+    currentSinger = ownerParticipant ? ownerParticipant.odUserName : (queueItem?.added_by_name || userName);
+    currentSingerId = currentSongOwnerId;
+    
+    console.log(`🎬 NOVA MÚSICA: ${title}`);
+    console.log(`👤 Música adicionada por: ${currentSinger} (ID: ${currentSongOwnerId})`);
+    console.log(`⚠️ Pontos irão para quem ADICIONOU, não para quem está na tela!`);
+
+    emojiCounts = {};
+    totalReactions = 0;
+    currentSongId = videoId;
+    
+    if (!currentSongScores) currentSongScores = {};
+    currentSongScores[currentSongOwnerId] = 0;
+
+    saveRoomState();
+    addActivity('🎬', `${currentSinger} começou a música (adicionada por ${currentSinger})`);
+
+    if (typeof YT !== 'undefined' && YT.Player) {
+        ytPlayerInstance = new YT.Player(playerDiv, {
+            videoId: videoId,
+            playerVars: { autoplay: 1, rel: 0, enablejsapi: 1, origin: window.location.origin },
+            events: {
+                onReady: (event) => event.target.playVideo(),
+                onStateChange: (event) => {
+                    if (event.data === YT.PlayerState.ENDED && autoPlayerActive && currentVideoId === videoId) {
+                        onVideoEnded();
+                    }
+                    if (event.data === YT.PlayerState.PLAYING) {
+                        clearInterval(window.__videoCheckInterval);
+                        window.__videoCheckInterval = setInterval(() => {
+                            if (!ytPlayerInstance) return;
+                            const current = ytPlayerInstance.getCurrentTime();
+                            const duration = ytPlayerInstance.getDuration();
+                            if (duration > 0 && current >= duration - 1) {
+                                clearInterval(window.__videoCheckInterval);
+                                if (autoPlayerActive && currentVideoId === videoId) onVideoEnded();
+                            }
+                        }, 1000);
+                    }
+                }
+            }
+        });
+    } else {
+        setTimeout(() => playVideo(videoId, title), 500);
+    }
+}
+    // ============================================
+    // FUNÇÕES DA FILA
+    // ============================================
     function updateQueueDisplay() {
         const queueList = document.getElementById('queueList');
         const queueCount = document.getElementById('queueCount');
@@ -1541,6 +1841,12 @@
                             ${isPlaying ? '<span style="color:var(--accent-green);margin-left:0.5rem;">▶️ Tocando agora</span>' : ''}
                         </div>
                     </div>
+                    <div class="queue-actions">
+                        ${!isPlaying ? `
+                            <button class="queue-btn" onclick="playNow(${index})" title="Tocar agora">▶️</button>
+                            <button class="queue-btn remove" onclick="removeFromQueue(${index})" title="Remover">❌</button>
+                        ` : ''}
+                    </div>
                 </div>
             `;
         });
@@ -1548,6 +1854,9 @@
         queueList.innerHTML = html;
     }
 
+    // ============================================
+    // FUNÇÃO ADICIONAR À FILA
+    // ============================================
     async function addToQueue() {
         const input = document.getElementById('videoInput');
         if (!input) {
@@ -1582,6 +1891,7 @@
                 video_title: videoInfo.title,
                 thumbnail: videoInfo.thumbnail,
                 added_by: odUserId,
+                user_id: odUserId,
                 added_by_name: userName,
                 status: 'waiting',
                 order: songQueue.length
@@ -1595,9 +1905,12 @@
             }
             
             showToast(`"${videoInfo.title.substring(0, 40)}" adicionado! 🎵`);
+            addActivity('➕', `${userName} adicionou: ${videoInfo.title.substring(0, 30)}`);
             
-            if (currentQueuePosition === -1) {
-                showToast('Música adicionada. Aguarde o host iniciar a música!');
+            if (currentQueuePosition === -1 && autoPlayerActive) {
+                playNextInQueue();
+            } else if (currentQueuePosition === -1) {
+                showToast('Música adicionada. Clique em "▶️" na fila para tocar!');
             }
             
         } catch (error) {
@@ -1612,6 +1925,174 @@
         }
     }
 
+    async function removeFromQueue(index) {
+        if (index < 0 || index >= songQueue.length) return;
+        
+        if (index === currentQueuePosition) {
+            showToast('Não é possível remover a música que está tocando!', true);
+            return;
+        }
+        
+        songQueue.splice(index, 1);
+        songQueue.forEach((item, i) => { item.order = i; });
+        
+        if (currentQueuePosition > index) currentQueuePosition--;
+        
+        safeUpdateQueueDisplay();
+        await saveQueueToSupabase();
+        
+        showToast('Música removida da fila');
+        addActivity('❌', `${userName} removeu música da fila`);
+    }
+
+    async function playNow(index) {
+        if (index < 0 || index >= songQueue.length) return;
+        
+        const item = songQueue[index];
+        if (index === currentQueuePosition) return;
+        
+        currentQueuePosition = index;
+        playVideo(item.video_id, item.video_title);
+        
+        safeUpdateQueueDisplay();
+        await saveQueueToSupabase();
+        
+        showToast(`Tocando agora: ${item.video_title}`);
+        addActivity('▶️', `${userName} iniciou música da fila`);
+    }
+
+    async function playNextInQueue() {
+    if (songQueue.length === 0) {
+        currentQueuePosition = -1;
+        currentVideoId = null;
+        currentSongOwnerId = null;
+        document.getElementById('placeholder').classList.remove('hidden');
+        document.getElementById('endSongBtn').style.display = 'none';
+        if (ytPlayerInstance) {
+            ytPlayerInstance.destroy();
+            ytPlayerInstance = null;
+        }
+        showToast('Fila vazia. Adicione mais músicas!');
+        return;
+    }
+
+    currentQueuePosition++;
+    if (currentQueuePosition >= songQueue.length) currentQueuePosition = 0;
+
+    const nextItem = songQueue[currentQueuePosition];
+    
+    // 🔥 Define quem é o dono ANTES de tocar
+    currentSongOwnerId = nextItem.added_by || nextItem.user_id;
+    currentSinger = nextItem.added_by_name || 'Anônimo';
+    currentSingerId = currentSongOwnerId;
+    
+    console.log(`🎵 Próxima música: ${nextItem.video_title}`);
+    console.log(`👤 Adicionada por: ${currentSinger} (ID: ${currentSongOwnerId})`);
+
+    playVideo(nextItem.video_id, nextItem.video_title);
+    safeUpdateQueueDisplay();
+    await saveQueueToSupabase();
+}
+
+    async function endSongAndPlayNext() {
+        if (isEndingSong) return;
+        isEndingSong = true;
+        
+        if (typeof finalizeSongScore === 'function') {
+            finalizeSongScore();
+        }
+
+        if (totalReactions > 0) {
+            await showResultSupabase();
+            showResultScreen();
+        } else {
+            scores = { total: 0, positive: 0, negative: 0 };
+            emojiCounts = {};
+            totalReactions = 0;
+            updateScoreDisplay();
+            
+            await saveScoresToSupabase();
+
+            if (autoPlayerActive) {
+                await playNextInQueue();
+            }
+        }
+
+        isEndingSong = false;
+    }
+
+    function closeResultAndPlayNext() {
+        closeResult();
+        
+        if (typeof finalizeSongScore === 'function') {
+            finalizeSongScore();
+        }
+
+        scores = { total: 0, positive: 0, negative: 0 };
+        emojiCounts = {};
+        totalReactions = 0;
+        updateScoreDisplay();
+
+        saveScoresToSupabase();
+
+        if (autoPlayerActive) {
+            playNextInQueue();
+        }
+    }
+
+    // ===== AUTO PLAYER =====
+    function toggleAutoPlayer() {
+        autoPlayerActive = !autoPlayerActive;
+        const btn = document.getElementById('autoPlayerBtn');
+
+        if (autoPlayerActive) {
+            btn.classList.add('active');
+            btn.innerHTML = '⏸️ Auto Player ON';
+
+            showToast('Modo Auto Player ativado! Próximas músicas tocarão automaticamente.');
+
+            if (!currentVideoId && songQueue.length > 0) {
+                playNextInQueue();
+            }
+
+        } else {
+            btn.classList.remove('active');
+            btn.innerHTML = '▶️ Auto Player';
+
+            showToast('Modo Auto Player desativado.');
+        }
+    }
+
+    async function onVideoEnded() {
+        console.log('🏁 onVideoEnded disparado');
+
+        if (isEndingSong) return;
+        isEndingSong = true;
+        
+        if (typeof finalizeSongScore === 'function') {
+            finalizeSongScore();
+        }
+
+        try {
+            if (totalReactions > 0) {
+                console.log('📊 Mostrando resultado...');
+                await showResultSupabase();
+                showResultScreen();
+            } else {
+                console.log('⏭️ Sem reações, próxima música...');
+                await playNextInQueue();
+            }
+        } catch (err) {
+            console.error('Erro ao finalizar:', err);
+            await playNextInQueue();
+        }
+
+        isEndingSong = false;
+    }
+
+    // ============================================
+    // FUNÇÕES SUPABASE
+    // ============================================
     async function saveQueueToSupabase() {
         if (!isSupabaseConnected || !roomChannel) return;
         await roomChannel.send({
@@ -1637,13 +2118,9 @@
             scores: scores,
             currentSinger: currentSinger || null,
             currentSingerId: currentSingerId || null,
-            currentSongOwnerId: currentSongOwnerId || null,
             queue: songQueue,
             currentQueuePosition: currentQueuePosition,
-            currentSongScores: currentSongScores,
-            currentSongId: currentSongId,
             globalLeaderboard: globalLeaderboard,
-            activities: activities.slice(0, 20),
             updatedAt: Date.now()
         };
         await roomChannel.send({
@@ -1671,12 +2148,11 @@
             scores: scores,
             currentSinger: currentSinger || null,
             currentSingerId: currentSingerId || null,
-            currentSongOwnerId: currentSongOwnerId || null,
-            activities: activities.slice(0, 20),
+            emojiCounts: emojiCounts,
+            totalReactions: totalReactions,
+            activities: activities.slice(0, 10),
             queue: songQueue,
             currentQueuePosition: currentQueuePosition,
-            currentSongScores: currentSongScores,
-            currentSongId: currentSongId,
             globalLeaderboard: globalLeaderboard,
             timestamp: Date.now()
         };
@@ -1707,32 +2183,27 @@
         }
     }
 
-    function trackEmoji(emoji) {
-        if (!emojiCounts) emojiCounts = {};
-        if (!emojiCounts[emoji]) emojiCounts[emoji] = 0;
-        emojiCounts[emoji]++;
-        totalReactions++;
-    }
-
     async function setupSupabaseListeners() {
         if (!isSupabaseConnected || !supabaseClient) return;
         roomChannel = supabaseClient.channel(`room:${roomId}`);
 
         roomChannel
             .on('presence', { event: 'sync' }, () => {
-                const presenceState = roomChannel.presenceState();
-                const newParticipants = [];
-                Object.keys(presenceState).forEach(key => {
-                    const presences = presenceState[key];
-                    presences.forEach(pres => {
-                        if (!newParticipants.find(part => part.odUserId === pres.odUserId)) {
-                            newParticipants.push(pres);
-                        }
-                    });
-                });
-                participants = newParticipants;
-                updateParticipantsList();
-            })
+    const presenceState = roomChannel.presenceState();
+    const newParticipants = [];
+    Object.keys(presenceState).forEach(key => {
+        const presences = presenceState[key];
+        presences.forEach(pres => {
+            if (!newParticipants.find(part => part.odUserId === pres.odUserId)) {
+                newParticipants.push(pres);
+            }
+        });
+    });
+    participants = newParticipants;
+    console.log('👥 Participantes atualizados:', participants.map(p => ({ id: p.odUserId, name: p.odUserName })));
+    updateParticipantsList();
+    updateLeaderboard(); // 🔥 FORÇA ATUALIZAÇÃO DO PLACAR
+})
             .on('presence', { event: 'join' }, async ({ newPresences }) => {
                 for (const pres of newPresences) {
                     if (!participants.find(p => p.odUserId === pres.odUserId)) {
@@ -1777,12 +2248,7 @@
                         currentVideoId = state.currentVideoId;
                         currentSinger = state.currentSinger;
                         currentSingerId = state.currentSingerId;
-                        currentSongOwnerId = state.currentSongOwnerId || state.currentSingerId;
                         playVideo(state.currentVideoId);
-                    }
-                    if (state.currentSongScores) {
-                        currentSongScores = state.currentSongScores;
-                        currentSongId = state.currentSongId;
                     }
                     if (state.globalLeaderboard) {
                         globalLeaderboard = state.globalLeaderboard;
@@ -1817,20 +2283,11 @@
                         currentVideoId = payload.currentVideoId;
                         currentSinger = payload.currentSinger;
                         currentSingerId = payload.currentSingerId;
-                        currentSongOwnerId = payload.currentSongOwnerId || payload.currentSingerId;
                         playVideo(payload.currentVideoId);
-                    }
-                    if (payload.currentSongScores) {
-                        currentSongScores = payload.currentSongScores;
-                        currentSongId = payload.currentSongId;
                     }
                     if (payload.globalLeaderboard) {
                         globalLeaderboard = payload.globalLeaderboard;
                         updateLeaderboard();
-                    }
-                    if (payload.activities) {
-                        activities = payload.activities;
-                        updateActivityFeed();
                     }
                 }
             })
@@ -1841,81 +2298,73 @@
                 safeUpdateQueueDisplay();
             })
             .on('broadcast', { event: 'new-emoji' }, ({ payload }) => {
-                const { emoji, points, targetUserId, userName: emojiUserName, emojiId } = payload;
-                if (processedEmojis.has(emojiId)) return;
-                processedEmojis.add(emojiId);
-                
-                const targetParticipant = participants.find(p => p.odUserId === targetUserId);
-                const targetName = targetParticipant ? targetParticipant.odUserName : 'cantor';
-                
-                console.log(`📨 ${emojiUserName} enviou ${emoji} (${points} pts) para: ${targetName}`);
-                
-                createFloatingEmoji(emoji);
-                showEmojiNotification(emoji, emojiUserName);
-                flashScoreCard(points);
-                
-                addActivity(emoji, `${emojiUserName} → ${targetName}: ${points > 0 ? '+' + points : points}`);
-                trackEmoji(emoji);
-                
-                scores.total += points;
-                if (points > 0) scores.positive += points;
-                else scores.negative += Math.abs(points);
-                updateScoreDisplay();
-                
-                if (currentSongId && targetUserId) {
-                    if (!currentSongScores[targetUserId]) {
-                        currentSongScores[targetUserId] = 0;
-                    }
-                    currentSongScores[targetUserId] += points;
-                }
-                
-                if (!globalLeaderboard[targetUserId]) {
-                    globalLeaderboard[targetUserId] = { score: 0, topEmoji: emoji, topEmojiCounts: {} };
-                } else if (typeof globalLeaderboard[targetUserId] === 'number') {
-                    globalLeaderboard[targetUserId] = { score: globalLeaderboard[targetUserId], topEmoji: emoji, topEmojiCounts: {} };
-                }
-                globalLeaderboard[targetUserId].score += points;
-                
-                if (!globalLeaderboard[targetUserId].topEmojiCounts) {
-                    globalLeaderboard[targetUserId].topEmojiCounts = {};
-                }
-                globalLeaderboard[targetUserId].topEmojiCounts[emoji] = (globalLeaderboard[targetUserId].topEmojiCounts[emoji] || 0) + 1;
-                
-                let maxCount = 0;
-                let topEmoji = emoji;
-                for (const [e, count] of Object.entries(globalLeaderboard[targetUserId].topEmojiCounts)) {
-                    if (count > maxCount) {
-                        maxCount = count;
-                        topEmoji = e;
-                    }
-                }
-                globalLeaderboard[targetUserId].topEmoji = topEmoji;
-                
-                updateLeaderboard();
-                saveRoomState();
-                saveScoresToSupabase();
-            })
+    const { emoji, points, targetUserId, userName: emojiUserName, emojiId } = payload;
+    if (processedEmojis.has(emojiId)) return;
+    processedEmojis.add(emojiId);
+    
+    const targetParticipant = participants.find(p => p.odUserId === targetUserId);
+    const targetName = targetParticipant ? targetParticipant.odUserName : 'cantor';
+    
+    console.log(`📨 ${emojiUserName} enviou ${emoji} (${points} pts) para o cantor: ${targetName} (ID: ${targetUserId})`);
+    
+    createFloatingEmoji(emoji);
+    showEmojiNotification(emoji, emojiUserName);
+    flashScoreCard(points);
+    
+    addActivity(emoji, `${emojiUserName} → ${targetName}: ${points > 0 ? '+' + points : points}`);
+    
+    if (typeof trackEmoji === 'function') {
+        trackEmoji(emoji);
+    } else {
+        if (!emojiCounts[emoji]) emojiCounts[emoji] = 0;
+        emojiCounts[emoji]++;
+        totalReactions++;
+    }
+    
+    scores.total += points;
+    if (points > 0) scores.positive += points;
+    else scores.negative += Math.abs(points);
+    updateScoreDisplay();
+    
+    // 🔥 CORREÇÃO CRÍTICA: Garantir estrutura correta do placar
+    if (!globalLeaderboard[targetUserId]) {
+        globalLeaderboard[targetUserId] = { score: 0, topEmoji: emoji, topEmojiCounts: {} };
+    } else if (typeof globalLeaderboard[targetUserId] === 'number') {
+        globalLeaderboard[targetUserId] = { score: globalLeaderboard[targetUserId], topEmoji: emoji, topEmojiCounts: {} };
+    }
+    
+    globalLeaderboard[targetUserId].score += points;
+    console.log(`💰 ${targetName} agora tem ${globalLeaderboard[targetUserId].score} pontos`);
+    
+    if (!globalLeaderboard[targetUserId].topEmojiCounts) {
+        globalLeaderboard[targetUserId].topEmojiCounts = {};
+    }
+    globalLeaderboard[targetUserId].topEmojiCounts[emoji] = (globalLeaderboard[targetUserId].topEmojiCounts[emoji] || 0) + 1;
+    
+    let maxCount = 0;
+    let topEmoji = emoji;
+    for (const [e, count] of Object.entries(globalLeaderboard[targetUserId].topEmojiCounts)) {
+        if (count > maxCount) {
+            maxCount = count;
+            topEmoji = e;
+        }
+    }
+    globalLeaderboard[targetUserId].topEmoji = topEmoji;
+    
+    updateLeaderboard();
+    saveRoomState();
+    saveScoresToSupabase();
+})
             .on('broadcast', { event: 'new-video' }, ({ payload }) => {
-                const { videoId, loadedBy, title, songOwnerId } = payload;
+                const { videoId, loadedBy, title } = payload;
                 if (videoId && videoId !== currentVideoId) {
                     currentVideoId = videoId;
                     currentSinger = loadedBy;
-                    currentSongOwnerId = songOwnerId || null;
-                    
                     const singerParticipant = participants.find(p => p.odUserName === loadedBy);
                     currentSingerId = singerParticipant ? singerParticipant.odUserId : null;
-                    
-                    console.log(`📺 NOVA MÚSICA - Cantor: ${loadedBy} (ID: ${currentSingerId})`);
-                    console.log(`👤 DONO DA MÚSICA (quem adicionou): ${currentSongOwnerId}`);
-                    
-                    scores = { total: 0, positive: 0, negative: 0 };
-                    emojiCounts = {};
-                    totalReactions = 0;
-                    updateScoreDisplay();
-                    
                     playVideo(videoId, title);
-                    showToast(`${loadedBy} está cantando! 🎤`);
-                    addActivity('🎬', `${loadedBy} começou a cantar: ${title}`);
+                    showToast(`${loadedBy} carregou um vídeo! 🎬`);
+                    addActivity('🎬', `${loadedBy} carregou vídeo`);
                     saveRoomState();
                 }
             })
@@ -1935,16 +2384,14 @@
                 emojiCounts = {};
                 totalReactions = 0;
                 activities = [];
-                currentSongScores = {};
-                currentSongId = null;
                 globalLeaderboard = {};
                 
                 updateScoreDisplay();
                 updateActivityFeed();
                 updateLeaderboard();
                 
-                showToast('Pontuação resetada! 🔄');
                 addActivity('🔄', 'Pontuação total resetada');
+                showToast('Pontuação total resetada! 🔄');
             });
 
         roomChannel.subscribe(async (status) => {
@@ -1975,8 +2422,31 @@
         await saveScoresToSupabase();
     }
 
+    async function showResultSupabase() {
+        if (!isSupabaseConnected || !roomChannel) return;
+        await roomChannel.send({
+            type: 'broadcast',
+            event: 'show-result',
+            payload: { singer: currentSinger || userName, emojiCounts, totalReactions }
+        });
+    }
+
+    async function resetScoresSupabase() {
+        if (!isSupabaseConnected || !roomChannel) return;
+        await roomChannel.send({
+            type: 'broadcast',
+            event: 'reset',
+            payload: {}
+        });
+    }
+
+    function trackEmoji(emoji) {
+        if (!emojiCounts[emoji]) emojiCounts[emoji] = 0;
+        emojiCounts[emoji]++;
+        totalReactions++;
+    }
+
     function getMostVotedEmoji() {
-        if (!emojiCounts) emojiCounts = {};
         let maxCount = 0;
         let topEmoji = '🎉';
         for (const emoji in emojiCounts) {
@@ -2058,13 +2528,16 @@
         roomId = code;
         isNewRoom = false;
         document.getElementById('headerRoomId').textContent = code;
+        document.getElementById('qrRoomId').textContent = code;
         document.getElementById('modalRoomId').textContent = code;
+        document.getElementById('shareLink').textContent = getShareUrl();
         const modeEl = document.getElementById('modalMode');
         modeEl.textContent = '🚪 Entrando em sala existente';
         modeEl.className = 'modal-mode join';
         if (window.history && window.history.replaceState) {
             window.history.replaceState({}, '', getShareUrl());
         }
+        generateQRCode();
         showToast('Sala definida: ' + code);
         document.getElementById('nameInput').focus();
     }
@@ -2089,93 +2562,112 @@
         }
     }
 
-    // 🔥 FUNÇÃO SEND EMOJI CORRIGIDA - PONTOS VÃO PARA QUEM ADICIONOU A MÚSICA
-    async function sendEmoji(emoji, points) {
-        if (!userName) {
-            showToast('Entre na sala primeiro!', true);
-            return;
+    async function sendEmoji(emoji, points) {	
+    if (!userName) {
+        showToast('Entre na sala primeiro!', true);
+        return;
+    }
+    if (inCooldown) {
+        showToast('Aguarde 1 segundo!', true);
+        return;
+    }
+    
+    if (!currentVideoId) {
+        showToast('Nenhuma música tocando no momento!', true);
+        return;
+    }
+    
+    // 🔥 CORREÇÃO CRÍTICA: O dono da música é currentSongOwnerId, NÃO currentSingerId
+    if (!currentSongOwnerId) {
+        showToast('Erro: Identifique o dono da música.', true);
+        return;
+    }
+    
+    // Impedir que o próprio dono reaja à sua própria música
+    if (currentSongOwnerId === odUserId) {
+        showToast('🎤 Você não pode reagir à sua própria música!', true);
+        return;
+    }
+    
+    const targetUserId = currentSongOwnerId;
+    const targetUserName = currentSinger;
+    
+    console.log(`🎤 ${userName} enviou ${emoji} (${points} pts) para o DONO DA MÚSICA: ${targetUserName} (ID: ${targetUserId})`);
+    
+    trackEmoji(emoji);
+    createFloatingEmoji(emoji);
+    flashScoreCard(points);
+    
+    // Atualiza pontuação da música atual
+    scores.total += points;
+    if (points > 0) scores.positive += points;
+    else scores.negative += Math.abs(points);
+    updateScoreDisplay();
+    
+    // Atualiza estatísticas da música
+    if (currentSongId && targetUserId) {
+        if (!currentSongScores) currentSongScores = {};
+        if (!currentSongScores[targetUserId]) currentSongScores[targetUserId] = 0;
+        currentSongScores[targetUserId] += points;
+    }
+    
+    // 🔥 CORREÇÃO: Atualiza o PLACAR GLOBAL para o DONO DA MÚSICA
+    if (!globalLeaderboard[targetUserId]) {
+        globalLeaderboard[targetUserId] = { score: 0, topEmoji: emoji, topEmojiCounts: {} };
+    } else if (typeof globalLeaderboard[targetUserId] === 'number') {
+        globalLeaderboard[targetUserId] = { score: globalLeaderboard[targetUserId], topEmoji: emoji, topEmojiCounts: {} };
+    }
+    
+    globalLeaderboard[targetUserId].score += points;
+    console.log(`💰 ${targetUserName} agora tem ${globalLeaderboard[targetUserId].score} pontos`);
+    
+    if (!globalLeaderboard[targetUserId].topEmojiCounts) {
+        globalLeaderboard[targetUserId].topEmojiCounts = {};
+    }
+    globalLeaderboard[targetUserId].topEmojiCounts[emoji] = (globalLeaderboard[targetUserId].topEmojiCounts[emoji] || 0) + 1;
+    
+    let maxCount = 0;
+    let topEmoji = emoji;
+    for (const [e, count] of Object.entries(globalLeaderboard[targetUserId].topEmojiCounts)) {
+        if (count > maxCount) {
+            maxCount = count;
+            topEmoji = e;
         }
-        if (inCooldown) {
-            showToast('Aguarde 1 segundo!', true);
-            return;
-        }
+    }
+    globalLeaderboard[targetUserId].topEmoji = topEmoji;
+    
+    updateLeaderboard();
+    
+    const ptText = points > 0 ? '+' + points : String(points);
+    addActivity(emoji, `${userName} → ${targetUserName}: ${ptText}`);
+    
+    await sendEmojiToSupabase(emoji, points, targetUserId);
+    
+    inCooldown = true;
+    const btns = document.querySelectorAll('.emoji-btn');
+    btns.forEach(btn => btn.classList.add('cooldown'));
+    setTimeout(() => {
+        inCooldown = false;
+        btns.forEach(btn => btn.classList.remove('cooldown'));
+    }, 1000);
+}
+
+    async function resetScores() {
+        if (!confirm('Resetar pontuação total da festa?')) return;
         
-        if (!currentVideoId) {
-            showToast('Nenhuma música tocando no momento!', true);
-            return;
-        }
+        scores = { total: 0, positive: 0, negative: 0 };
+        emojiCounts = {};
+        totalReactions = 0;
+        globalLeaderboard = {};
         
-        // Inicializa variáveis se necessário
-        if (!emojiCounts) emojiCounts = {};
-        if (!scores) scores = { total: 0, positive: 0, negative: 0 };
-        if (!globalLeaderboard) globalLeaderboard = {};
-        
-        // 🔥 CORREÇÃO CRÍTICA: O destinatário é o DONO da música (quem adicionou)
-        let targetUserId = currentSongOwnerId || currentSingerId;
-        
-        if (!targetUserId) {
-            console.error('Erro: targetUserId não definido. currentSongOwnerId:', currentSongOwnerId, 'currentSingerId:', currentSingerId);
-            showToast('Aguardando identificação do cantor...', true);
-            return;
-        }
-        
-        const targetParticipant = participants.find(p => p.odUserId === targetUserId);
-        const targetUserName = targetParticipant ? targetParticipant.odUserName : (currentSinger || 'cantor');
-        
-        console.log(`🎤 ${userName} enviou ${emoji} (${points} pts) para o DONO DA MÚSICA: ${targetUserName} (ID: ${targetUserId})`);
-        
-        trackEmoji(emoji);
-        createFloatingEmoji(emoji);
-        flashScoreCard(points);
-        
-        scores.total += points;
-        if (points > 0) scores.positive += points;
-        else scores.negative += Math.abs(points);
         updateScoreDisplay();
-        
-        if (currentSongId && targetUserId) {
-            if (!currentSongScores[targetUserId]) {
-                currentSongScores[targetUserId] = 0;
-            }
-            currentSongScores[targetUserId] += points;
-        }
-        
-        // Atualiza o placar global para o DONO da música
-        if (!globalLeaderboard[targetUserId]) {
-            globalLeaderboard[targetUserId] = { score: 0, topEmoji: emoji, topEmojiCounts: {} };
-        } else if (typeof globalLeaderboard[targetUserId] === 'number') {
-            globalLeaderboard[targetUserId] = { score: globalLeaderboard[targetUserId], topEmoji: emoji, topEmojiCounts: {} };
-        }
-        globalLeaderboard[targetUserId].score += points;
-        
-        if (!globalLeaderboard[targetUserId].topEmojiCounts) {
-            globalLeaderboard[targetUserId].topEmojiCounts = {};
-        }
-        globalLeaderboard[targetUserId].topEmojiCounts[emoji] = (globalLeaderboard[targetUserId].topEmojiCounts[emoji] || 0) + 1;
-        
-        let maxCount = 0;
-        let topEmoji = emoji;
-        for (const [e, count] of Object.entries(globalLeaderboard[targetUserId].topEmojiCounts)) {
-            if (count > maxCount) {
-                maxCount = count;
-                topEmoji = e;
-            }
-        }
-        globalLeaderboard[targetUserId].topEmoji = topEmoji;
-        
+        updateActivityFeed();
         updateLeaderboard();
         
-        addActivity(emoji, `${userName} → ${targetUserName}: ${points > 0 ? '+' + points : points}`);
+        await resetScoresSupabase();
         
-        await sendEmojiToSupabase(emoji, points, targetUserId);
-        
-        inCooldown = true;
-        const btns = document.querySelectorAll('.emoji-btn');
-        btns.forEach(btn => btn.classList.add('cooldown'));
-        setTimeout(() => {
-            inCooldown = false;
-            btns.forEach(btn => btn.classList.remove('cooldown'));
-        }, 1000);
+        showToast('Pontuação total resetada! 🔄');
+        addActivity('🔄', 'Pontuação total resetada');
     }
 
     // ============================================
@@ -2194,7 +2686,9 @@
         }
         
         document.getElementById('headerRoomId').textContent = roomId;
+        document.getElementById('qrRoomId').textContent = roomId;
         document.getElementById('modalRoomId').textContent = roomId;
+        document.getElementById('shareLink').textContent = getShareUrl();
         
         const modeEl = document.getElementById('modalMode');
         if (isNewRoom) {
@@ -2209,6 +2703,8 @@
         if (window.history && window.history.replaceState) {
             window.history.replaceState({}, '', getShareUrl());
         }
+        
+        generateQRCode();
         
         document.getElementById('nameInput').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') joinRoom();
@@ -2229,4 +2725,6 @@
     }
 
     document.addEventListener('DOMContentLoaded', init);
-</script>
+    </script>
+</body>
+</html>
