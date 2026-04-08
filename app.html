@@ -13,7 +13,6 @@
 
     <!-- PRIMEIRO: Verificação de autenticação -->
     <script>
-        // ================= VERIFICAÇÃO DE AUTENTICAÇÃO =================
         (function() {
             const paginasPublicas = ['/login.html', '/checkout.html', '/checkout'];
             const token = localStorage.getItem('token');
@@ -316,7 +315,6 @@
         .score-value.pos { color: var(--accent-green); }
         .score-value.neg { color: #ff4757; }
 
-        /* ===== EMOJIS ===== */
         .emoji-section {
             background: var(--bg-card);
             border-radius: 1rem;
@@ -361,7 +359,6 @@
         .emoji-points.positive { color: var(--accent-green); }
         .emoji-points.negative { color: #ff4757; }
 
-        /* ===== LEADERBOARD ===== */
         .leaderboard-section {
             background: var(--bg-card);
             border-radius: 1rem;
@@ -415,10 +412,6 @@
             text-align: center;
         }
 
-        .leaderboard-rank .medal {
-            font-size: 1.8rem;
-        }
-
         .leaderboard-info {
             flex: 1;
         }
@@ -447,7 +440,6 @@
             border-radius: 0.75rem;
         }
 
-        /* ===== FILA DE ESPERA ===== */
         .queue-section {
             background: var(--bg-card);
             border-radius: 1rem;
@@ -586,12 +578,6 @@
             background: var(--bg-lighter);
             border-radius: 1rem;
             border: 2px dashed rgba(255,255,255,0.1);
-        }
-        
-        .empty-queue i {
-            font-size: 3rem;
-            margin-bottom: 0.5rem;
-            opacity: 0.5;
         }
 
         .card {
@@ -1063,7 +1049,6 @@
             box-shadow: 0 5px 20px rgba(0,212,255,0.4);
         }
         
-        /* Botão Auto Player */
         .auto-player-btn {
             background: linear-gradient(135deg, var(--accent-orange), #ff6b00);
             border: none;
@@ -1110,7 +1095,6 @@
 
     <div class="container">
         <div class="main-grid">
-            <!-- COLUNA ESQUERDA -->
             <div class="left-column">
                 <div class="video-section">
                     <div class="video-header">
@@ -1143,7 +1127,6 @@
                     </div>
                 </div>
 
-                <!-- EMOJIS -->
                 <div class="emoji-section">
                     <h3 class="emoji-header">🎉 Reações ao Vivo</h3>
                     <div class="emoji-grid">
@@ -1175,7 +1158,6 @@
                     </div>
                 </div>
 
-                <!-- LEADERBOARD - PLACAR DE LÍDERES (TOP 3 DA FESTA) -->
                 <div class="leaderboard-section">
                     <div class="leaderboard-header">
                         🏆 Placar de Líderes (Top 3 da Festa)
@@ -1185,7 +1167,6 @@
                     </div>
                 </div>
 
-                <!-- FILA DE ESPERA -->
                 <div class="queue-section">
                     <div class="queue-header">
                         <div class="queue-title">
@@ -1207,7 +1188,6 @@
                 </div>
             </div>
 
-            <!-- COLUNA DIREITA -->
             <div class="right-column">
                 <div class="card">
                     <h3 class="card-title">📱 Compartilhar Sala</h3>
@@ -1245,7 +1225,6 @@
         </div>
     </div>
 
-    <!-- Modal Nome -->
     <div class="modal active" id="nameModal">
         <div class="modal-content">
             <h2 class="modal-title">🎤 Bem-vindo ao Karaokê!</h2>
@@ -1274,7 +1253,6 @@
         </div>
     </div>
 
-    <!-- Modal Vídeo -->
     <div class="modal" id="videoModal">
         <div class="modal-content">
             <h2 class="modal-title">🎬 Adicionar à Fila</h2>
@@ -1294,7 +1272,6 @@
         <span class="notif-text" id="notifText">Alguém reagiu!</span>
     </div>
 
-    <!-- Modal de Resultado Final -->
     <div class="result-overlay" id="resultOverlay">
         <div class="result-container">
             <div class="result-title">🎤 Performance Finalizada!</div>
@@ -1336,73 +1313,9 @@
     </div>
 
     <script>
-    // ============================================
-    // VARIÁVEIS DE ESTADO PARA EMOJIS (GLOBAIS)
-    // ============================================
-    let emojiScoresGlobal = {
-        total: 0,
-        emojis: {}
-    };
-    let currentSongUserIdGlobal = null;
-
-    // ============================================
-    // FUNÇÕES GLOBAIS DE EMOJI
-    // ============================================
-    window.addEmojiReactionGlobal = function(emoji) {
-        emojiScoresGlobal.total++;
-        if (!emojiScoresGlobal.emojis[emoji]) {
-            emojiScoresGlobal.emojis[emoji] = 0;
-        }
-        emojiScoresGlobal.emojis[emoji]++;
-        console.log('🔥 Emoji recebido:', emoji, emojiScoresGlobal);
-    };
-
-    window.finalizeSongScoreGlobal = function() {
-        if (!currentSongUserIdGlobal) return;
-        const totalPoints = emojiScoresGlobal.total || 0;
-        if (totalPoints <= 0) return;
-        
-        let topEmoji = '';
-        let maxCount = 0;
-        Object.entries(emojiScoresGlobal.emojis).forEach(([emoji, count]) => {
-            if (count > maxCount) {
-                maxCount = count;
-                topEmoji = emoji;
-            }
-        });
-        
-        if (!globalLeaderboard[currentSongUserIdGlobal]) {
-            globalLeaderboard[currentSongUserIdGlobal] = {
-                score: 0,
-                topEmoji: topEmoji
-            };
-        }
-        
-        globalLeaderboard[currentSongUserIdGlobal].score += totalPoints;
-        globalLeaderboard[currentSongUserIdGlobal].topEmoji = topEmoji;
-        
-        console.log('🏆 Pontos aplicados:', totalPoints);
-        
-        // reset
-        emojiScoresGlobal.total = 0;
-        emojiScoresGlobal.emojis = {};
-        updateLeaderboard();
-    };
-
-    window.onNewSongStartedGlobal = function(userId) {
-        window.finalizeSongScoreGlobal();
-        currentSongUserIdGlobal = userId;
-    };
-
-    // ============================================
-    // CONFIGURAÇÃO SUPABASE
-    // ============================================
     const SUPABASE_URL = "https://yvrskenfgfpgrcpmmeln.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl2cnNrZW5mZ2ZwZ3JjcG1tZWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNzk1NTAsImV4cCI6MjA4Njc1NTU1MH0.DzO4mZ7jYkTPoleIlF7smZ_Kim7KqFxXA4aumb7Qf8U";
 
-    // ============================================
-    // VARIÁVEIS GLOBAIS
-    // ============================================
     let supabaseClient = null;
     let roomChannel = null;
     let isSupabaseConnected = false;
@@ -1420,59 +1333,77 @@
     let autoPlayerActive = false;
     let ytPlayerInstance = null;
     let isEndingSong = false;
-    let videoEndTimer = null;
     let globalLeaderboard = {}; 
-       
-    // Variáveis da fila
     let songQueue = [];
     let currentQueuePosition = -1;
-    
-    // Estatísticas de resultado
     let emojiCounts = {};
     let totalReactions = 0;
     let currentSinger = '';
     let currentSingerId = null;
-
-    // Flag para controle de sincronização inicial
     let hasReceivedInitialState = false;
-    
-    // DEBOUNCE
     let queueUpdateTimeout = null;
 
-    // ============================================
-    // FUNÇÃO PARA BUSCAR TÍTULO DO YOUTUBE
-    // ============================================
+    let emojiScoresGlobal = { total: 0, emojis: {} };
+    let currentSongUserIdGlobal = null;
+
+    function addEmojiReactionGlobal(emoji) {
+        emojiScoresGlobal.total++;
+        if (!emojiScoresGlobal.emojis[emoji]) emojiScoresGlobal.emojis[emoji] = 0;
+        emojiScoresGlobal.emojis[emoji]++;
+        console.log('🔥 Emoji recebido:', emoji, emojiScoresGlobal);
+    }
+
+    function finalizeSongScoreGlobal() {
+        if (!currentSongUserIdGlobal) return;
+        const totalPoints = emojiScoresGlobal.total || 0;
+        if (totalPoints <= 0) return;
+        
+        let topEmoji = '';
+        let maxCount = 0;
+        Object.entries(emojiScoresGlobal.emojis).forEach(([emoji, count]) => {
+            if (count > maxCount) {
+                maxCount = count;
+                topEmoji = emoji;
+            }
+        });
+        
+        if (!globalLeaderboard[currentSongUserIdGlobal]) {
+            globalLeaderboard[currentSongUserIdGlobal] = { score: 0, topEmoji: topEmoji };
+        }
+        
+        globalLeaderboard[currentSongUserIdGlobal].score += totalPoints;
+        globalLeaderboard[currentSongUserIdGlobal].topEmoji = topEmoji;
+        
+        console.log('🏆 Pontos aplicados:', totalPoints);
+        
+        emojiScoresGlobal.total = 0;
+        emojiScoresGlobal.emojis = {};
+        updateLeaderboard();
+    }
+
+    function onNewSongStartedGlobal(userId) {
+        finalizeSongScoreGlobal();
+        currentSongUserIdGlobal = userId;
+    }
+
     async function fetchVideoInfo(videoId) {
         try {
             const response = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
             const data = await response.json();
             if (data && data.title) {
-                return {
-                    title: data.title,
-                    thumbnail: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`
-                };
+                return { title: data.title, thumbnail: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg` };
             }
         } catch (error) {
-            console.warn('Erro ao buscar título via oEmbed:', error);
+            console.warn('Erro ao buscar título:', error);
         }
-        return {
-            title: `Vídeo do YouTube (${videoId.substring(0, 8)}...)`,
-            thumbnail: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`
-        };
+        return { title: `Vídeo do YouTube (${videoId.substring(0, 8)}...)`, thumbnail: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg` };
     }
 
-    // ============================================
-    // FUNÇÃO PARA ATUALIZAR FILA COM DEBOUNCE
-    // ============================================
     function safeUpdateQueueDisplay() {
         if (queueUpdateTimeout) clearTimeout(queueUpdateTimeout);
-        queueUpdateTimeout = setTimeout(() => {
-            updateQueueDisplay();
-            queueUpdateTimeout = null;
-        }, 100);
+        queueUpdateTimeout = setTimeout(() => { updateQueueDisplay(); queueUpdateTimeout = null; }, 100);
     }
 
-    // ===== FUNÇÃO PARA ESCAPAR HTML =====
     function escapeHtml(text) {
         if (!text) return '';
         return text.replace(/[&<>]/g, function(m) {
@@ -1483,7 +1414,6 @@
         });
     }
 
-    // ===== FUNÇÃO PARA ATUALIZAR O PLACAR =====
     function updateLeaderboard() {
         const container = document.getElementById('leaderboardList');
         if (!container) return;
@@ -1491,12 +1421,7 @@
         let scoresList = Object.entries(globalLeaderboard)
             .map(([userId, data]) => {
                 const user = participants.find(p => p.odUserId === userId);
-                return {
-                    userId,
-                    name: user?.odUserName || 'Anônimo',
-                    score: data.score,
-                    topEmoji: data.topEmoji || '🎵'
-                };
+                return { userId, name: user?.odUserName || 'Anônimo', score: data.score, topEmoji: data.topEmoji || '🎵' };
             })
             .filter(item => item.score > 0)
             .sort((a, b) => b.score - a.score);
@@ -1507,10 +1432,8 @@
         }
 
         let html = '';
-
         scoresList.forEach((item, idx) => {
             const isYou = item.userId === odUserId;
-
             let medal = '';
             if (idx === 0) medal = '🥇';
             else if (idx === 1) medal = '🥈';
@@ -1521,28 +1444,17 @@
                 <div class="leaderboard-item rank-${idx + 1}">
                     <div class="leaderboard-rank">${medal}</div>
                     <div class="leaderboard-info">
-                        <div class="leaderboard-name">
-                            🎤 ${escapeHtml(item.name)} 
-                            ${isYou ? '<span style="font-size:0.7rem;">(você)</span>' : ''}
-                        </div>
-                        <div class="leaderboard-score">
-                            ⭐ ${item.score} pontos
-                        </div>
-                        <div class="leaderboard-emoji">
-                            🔥 Emoji destaque: ${item.topEmoji}
-                        </div>
+                        <div class="leaderboard-name">🎤 ${escapeHtml(item.name)} ${isYou ? '<span style="font-size:0.7rem;">(você)</span>' : ''}</div>
+                        <div class="leaderboard-score">⭐ ${item.score} pontos</div>
+                        <div class="leaderboard-emoji">🔥 Emoji destaque: ${item.topEmoji}</div>
                     </div>
                 </div>
             `;
         });
-
         container.innerHTML = html;
         console.log('📊 Placar atualizado:', scoresList);
     }
 
-    // ============================================
-    // FUNÇÕES DE UI
-    // ============================================
     function showToast(msg, isError) {
         const toast = document.getElementById('toast');
         toast.textContent = msg;
@@ -1558,9 +1470,6 @@
         } else if (status === 'connecting') {
             el.className = 'connection-status connecting';
             el.innerHTML = '🔄 Conectando ao servidor...';
-        } else if (status === 'config-error') {
-            el.className = 'connection-status disconnected';
-            el.innerHTML = '❌ <strong>Configure suas chaves Supabase no código!</strong>';
         } else {
             el.className = 'connection-status disconnected';
             el.innerHTML = '❌ <strong>Desconectado.</strong> Verifique sua conexão.';
@@ -1570,9 +1479,7 @@
     function generateRoomId() {
         const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
         let id = '';
-        for (let i = 0; i < 6; i++) {
-            id += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
+        for (let i = 0; i < 6; i++) id += chars.charAt(Math.floor(Math.random() * chars.length));
         return id;
     }
 
@@ -1589,8 +1496,7 @@
     }
 
     function getShareUrl() {
-        const base = window.location.origin;
-        return base + '/guest.html?room=' + roomId + '#' + roomId;
+        return window.location.origin + '/guest.html?room=' + roomId + '#' + roomId;
     }
 
     function extractVideoId(url) {
@@ -1668,26 +1574,12 @@
             container.className = 'emoji-float-container';
             wrapper.appendChild(container);
         }
-        container.style.position = 'absolute';
-        container.style.top = '0';
-        container.style.left = '0';
-        container.style.width = '100%';
-        container.style.height = '100%';
-        container.style.pointerEvents = 'none';
-        container.style.overflow = 'hidden';
-        container.style.zIndex = '1000';
-        container.style.transform = 'translateZ(0)';
         const el = document.createElement('div');
         el.className = 'floating-emoji';
         el.textContent = emoji;
         const leftPos = 10 + Math.random() * 80;
         el.style.left = leftPos + '%';
         el.style.bottom = '20px';
-        el.style.zIndex = '1001';
-        el.style.position = 'absolute';
-        el.style.pointerEvents = 'none';
-        el.style.userSelect = 'none';
-        el.style.willChange = 'transform, opacity';
         container.appendChild(el);
         setTimeout(() => { if (el.parentNode) el.remove(); }, 3000);
     }
@@ -1731,15 +1623,31 @@
         navigator.clipboard.writeText(url).then(() => showToast('Link copiado!')).catch(() => showToast('Link: ' + url));
     }
 
-    function openVideoModal(addToQueue = true) {
+    function openVideoModal() {
         document.getElementById('videoModal').classList.add('active');
         document.getElementById('videoInput').focus();
-        window.isAddToQueue = addToQueue;
     }
 
     function closeVideoModal() {
         document.getElementById('videoModal').classList.remove('active');
         document.getElementById('videoInput').value = '';
+    }
+
+    function createYouTubePlayer(videoId, playerDiv) {
+        ytPlayerInstance = new YT.Player(playerDiv, {
+            videoId: videoId,
+            playerVars: { autoplay: 1, rel: 0, enablejsapi: 1, origin: window.location.origin },
+            events: {
+                onReady: (event) => event.target.playVideo(),
+                onStateChange: (event) => {
+                    console.log('📺 Estado do player:', event.data);
+                    if (event.data === YT.PlayerState.ENDED) {
+                        console.log('🏁 Vídeo terminou (API)');
+                        if (autoPlayerActive && currentVideoId === videoId) onVideoEnded();
+                    }
+                }
+            }
+        });
     }
 
     function playVideo(videoId, title = 'Vídeo do YouTube') {
@@ -1749,7 +1657,6 @@
         const placeholder = document.getElementById('placeholder');
         const emojiContainer = document.getElementById('emojiContainer');
 
-        // Remove player antigo
         if (ytPlayerInstance) {
             ytPlayerInstance.destroy();
             ytPlayerInstance = null;
@@ -1762,95 +1669,35 @@
         placeholder.classList.add('hidden');
         document.getElementById('endSongBtn').style.display = 'inline-block';
 
-        // ===== CONTROLE =====
         currentSinger = userName;
         currentVideoId = videoId;
 
         const singerParticipant = participants.find(p => p.odUserName === currentSinger);
         currentSingerId = singerParticipant ? singerParticipant.odUserId : odUserId;
 
-        // Chama a função global para nova música
-        if (currentSingerId) {
-            window.onNewSongStartedGlobal(currentSingerId);
-        }
+        if (currentSingerId) onNewSongStartedGlobal(currentSingerId);
 
         emojiCounts = {};
         totalReactions = 0;
 
         saveRoomState();
         addActivity('🎬', `${userName} começou: ${title}`);
-
         console.log(`🎬 NOVA MÚSICA: ${title}`);
 
-        // Aguarda a API do YouTube carregar
         if (typeof YT !== 'undefined' && YT.Player) {
             createYouTubePlayer(videoId, playerDiv);
         } else {
-            console.log('Aguardando API do YouTube carregar...');
             setTimeout(() => playVideo(videoId, title), 500);
         }
     }
 
-    function createYouTubePlayer(videoId, playerDiv) {
-        ytPlayerInstance = new YT.Player(playerDiv, {
-            videoId: videoId,
-            playerVars: {
-                autoplay: 1,
-                rel: 0,
-                enablejsapi: 1,
-                origin: window.location.origin
-            },
-            events: {
-                onReady: (event) => {
-                    event.target.playVideo();
-                },
-                onStateChange: (event) => {
-                    console.log('📺 Estado do player:', event.data);
-
-                    if (event.data === YT.PlayerState.ENDED) {
-                        console.log('🏁 Vídeo terminou (API)');
-                        if (autoPlayerActive && currentVideoId === videoId) {
-                            onVideoEnded();
-                        }
-                    }
-
-                    if (event.data === YT.PlayerState.PLAYING) {
-                        clearInterval(window.__videoCheckInterval);
-                        window.__videoCheckInterval = setInterval(() => {
-                            if (!ytPlayerInstance) return;
-                            const current = ytPlayerInstance.getCurrentTime();
-                            const duration = ytPlayerInstance.getDuration();
-                            if (duration > 0 && current >= duration - 1) {
-                                console.log('⏰ Fim detectado via fallback');
-                                clearInterval(window.__videoCheckInterval);
-                                if (autoPlayerActive && currentVideoId === videoId) {
-                                    onVideoEnded();
-                                }
-                            }
-                        }, 1000);
-                    }
-                }
-            }
-        });
-    }
-
-    // ============================================
-    // FUNÇÕES DA FILA
-    // ============================================
     function updateQueueDisplay() {
         const queueList = document.getElementById('queueList');
         const queueCount = document.getElementById('queueCount');
-        
         queueCount.textContent = songQueue.length;
         
         if (!songQueue.length) {
-            queueList.innerHTML = `
-                <div class="empty-queue">
-                    <div style="font-size: 3rem; margin-bottom: 0.5rem;">🎵</div>
-                    <p>Nenhuma música na fila</p>
-                    <small>Adicione links do YouTube para começar</small>
-                </div>
-            `;
+            queueList.innerHTML = `<div class="empty-queue"><div style="font-size: 3rem;">🎵</div><p>Nenhuma música na fila</p><small>Adicione links do YouTube para começar</small></div>`;
             return;
         }
         
@@ -1858,173 +1705,83 @@
         songQueue.forEach((item, index) => {
             const isPlaying = (index === currentQueuePosition);
             const position = index + 1;
-            
-            const thumbnailHtml = `<img src="${item.thumbnail}" alt="thumbnail" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null; this.style.display='none'; this.parentNode.innerHTML='<div style=\'width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--bg-dark);color:var(--accent-pink);font-size:1.5rem;\'>🎵</div>';">`;
-            
             html += `
-                <div class="queue-item ${isPlaying ? 'playing' : ''}" data-index="${index}">
+                <div class="queue-item ${isPlaying ? 'playing' : ''}">
                     <div class="queue-position">#${position}</div>
-                    <div class="queue-thumbnail">
-                        ${thumbnailHtml}
-                    </div>
+                    <div class="queue-thumbnail"><img src="${item.thumbnail}" style="width:100%;height:100%;object-fit:cover;"></div>
                     <div class="queue-info">
-                        <div class="queue-video-title">${escapeHtml(item.video_title) || 'Vídeo do YouTube'}</div>
-                        <div class="queue-added-by">
-                            <span>👤 ${escapeHtml(item.added_by_name)}</span>
-                            ${isPlaying ? '<span style="color:var(--accent-green);margin-left:0.5rem;">▶️ Tocando agora</span>' : ''}
-                        </div>
+                        <div class="queue-video-title">${escapeHtml(item.video_title)}</div>
+                        <div class="queue-added-by">👤 ${escapeHtml(item.added_by_name)}${isPlaying ? ' <span style="color:var(--accent-green);">▶️ Tocando agora</span>' : ''}</div>
                     </div>
                     <div class="queue-actions">
-                        ${!isPlaying ? `
-                            <button class="queue-btn" onclick="playNow(${index})" title="Tocar agora">▶️</button>
-                            <button class="queue-btn remove" onclick="removeFromQueue(${index})" title="Remover">❌</button>
-                        ` : ''}
+                        ${!isPlaying ? `<button class="queue-btn" onclick="playNow(${index})">▶️</button><button class="queue-btn remove" onclick="removeFromQueue(${index})">❌</button>` : ''}
                     </div>
                 </div>
             `;
         });
-        
         queueList.innerHTML = html;
     }
 
-    // ============================================
-    // FUNÇÃO ADICIONAR À FILA
-    // ============================================
     async function addToQueue() {
-        const input = document.getElementById('videoInput');
-        if (!input) {
-            showToast('Erro: campo de vídeo não encontrado', true);
-            return;
-        }
-        
-        const url = input.value.trim();
-        if (!url) {
-            showToast('Digite ou cole um link do YouTube!', true);
-            return;
-        }
+        const url = document.getElementById('videoInput').value.trim();
+        if (!url) { showToast('Digite um link do YouTube!', true); return; }
         
         const videoId = extractVideoId(url);
-        if (!videoId) {
-            showToast('Link inválido! Use um link do YouTube válido.', true);
-            return;
-        }
-        
-        const addBtn = document.querySelector('#videoModal .modal-btn');
-        const originalText = addBtn.innerText;
-        addBtn.innerText = '⏳ Buscando título...';
-        addBtn.disabled = true;
+        if (!videoId) { showToast('Link inválido!', true); return; }
         
         try {
             const videoInfo = await fetchVideoInfo(videoId);
             closeVideoModal();
             
-            const queueItem = {
-                room_id: roomId,
-                video_id: videoId,
-                video_title: videoInfo.title,
-                thumbnail: videoInfo.thumbnail,
-                added_by: odUserId,
-                user_id: odUserId,
-                added_by_name: userName,
-                status: 'waiting',
-                order: songQueue.length
-            };
-            
-            songQueue.push(queueItem);
+            songQueue.push({
+                video_id: videoId, video_title: videoInfo.title, thumbnail: videoInfo.thumbnail,
+                added_by: odUserId, added_by_name: userName, order: songQueue.length
+            });
             safeUpdateQueueDisplay();
-            
-            if (isSupabaseConnected && roomChannel) {
-                await saveQueueToSupabase();
-            }
-            
+            if (isSupabaseConnected && roomChannel) await saveQueueToSupabase();
             showToast(`"${videoInfo.title.substring(0, 40)}" adicionado! 🎵`);
             addActivity('➕', `${userName} adicionou: ${videoInfo.title.substring(0, 30)}`);
             
-            if (currentQueuePosition === -1 && autoPlayerActive) {
-                playNextInQueue();
-            } else if (currentQueuePosition === -1) {
-                showToast('Música adicionada. Clique em "▶️" na fila para tocar!');
-            }
-            
+            if (currentQueuePosition === -1 && autoPlayerActive) playNextInQueue();
+            else if (currentQueuePosition === -1) showToast('Música adicionada. Clique em "▶️" na fila para tocar!');
         } catch (error) {
-            console.error('❌ Erro ao adicionar música:', error);
-            showToast('Erro ao adicionar música. Tente novamente.', true);
-        } finally {
-            if (addBtn) {
-                addBtn.innerText = originalText;
-                addBtn.disabled = false;
-            }
-            document.getElementById('videoInput').value = '';
+            showToast('Erro ao adicionar música.', true);
         }
+        document.getElementById('videoInput').value = '';
     }
 
     async function removeFromQueue(index) {
-        if (index < 0 || index >= songQueue.length) return;
-        
-        if (index === currentQueuePosition) {
-            showToast('Não é possível remover a música que está tocando!', true);
-            return;
-        }
-        
+        if (index === currentQueuePosition) { showToast('Não é possível remover a música que está tocando!', true); return; }
         songQueue.splice(index, 1);
-        songQueue.forEach((item, i) => { item.order = i; });
-        
         if (currentQueuePosition > index) currentQueuePosition--;
-        
         safeUpdateQueueDisplay();
         await saveQueueToSupabase();
-        
         showToast('Música removida da fila');
-        addActivity('❌', `${userName} removeu música da fila`);
     }
 
     async function playNow(index) {
-        if (index < 0 || index >= songQueue.length) return;
-        
-        const item = songQueue[index];
         if (index === currentQueuePosition) return;
-        
         currentQueuePosition = index;
-        playVideo(item.video_id, item.video_title);
-        
+        playVideo(songQueue[index].video_id, songQueue[index].video_title);
         safeUpdateQueueDisplay();
         await saveQueueToSupabase();
-        
-        showToast(`Tocando agora: ${item.video_title}`);
-        addActivity('▶️', `${userName} iniciou música da fila`);
+        showToast(`Tocando agora: ${songQueue[index].video_title}`);
     }
 
     async function playNextInQueue() {
         if (songQueue.length === 0) {
             currentQueuePosition = -1;
             currentVideoId = null;
-
             document.getElementById('placeholder').classList.remove('hidden');
             document.getElementById('endSongBtn').style.display = 'none';
-
-            if (ytPlayerInstance) {
-                ytPlayerInstance.destroy();
-                ytPlayerInstance = null;
-            }
-
+            if (ytPlayerInstance) { ytPlayerInstance.destroy(); ytPlayerInstance = null; }
             showToast('Fila vazia. Adicione mais músicas!');
             return;
         }
-
-        currentQueuePosition++;
-
-        if (currentQueuePosition >= songQueue.length) {
-            currentQueuePosition = 0;
-        }
-
+        currentQueuePosition = (currentQueuePosition + 1) % songQueue.length;
         const nextItem = songQueue[currentQueuePosition];
-        
-        window.onNewSongStartedGlobal(nextItem.user_id || nextItem.userId);
-
-        console.log(`🎵 Próxima música: ${nextItem.video_title}`);
-
+        onNewSongStartedGlobal(nextItem.user_id || nextItem.added_by);
         playVideo(nextItem.video_id, nextItem.video_title);
-
         safeUpdateQueueDisplay();
         await saveQueueToSupabase();
     }
@@ -2032,56 +1789,40 @@
     async function endSongAndPlayNext() {
         if (isEndingSong) return;
         isEndingSong = true;
-		
-		finalizeSongScore();
+        finalizeSongScoreGlobal();
         
-        if (scores.total > 0) {
-    await showResultSupabase();
-    showResultScreen();
-} else {
-    scores = { total: 0, emojis: {} }; // 🔥 corrigido também
-    updateScoreDisplay();
-    
-    await saveScoresToSupabase();
-
-    if (autoPlayerActive) {
-        await playNextInQueue();
-    }
-}
-
+        if (scores.total !== 0) {
+            await showResultSupabase();
+            showResultScreen();
+        } else {
+            scores = { total: 0, positive: 0, negative: 0 };
+            emojiCounts = {};
+            totalReactions = 0;
+            updateScoreDisplay();
+            await saveScoresToSupabase();
+            if (autoPlayerActive) await playNextInQueue();
+        }
         isEndingSong = false;
     }
 
     function closeResultAndPlayNext() {
         closeResult();
-        
-
-        scores = { total: 0, emojis: {} };
+        scores = { total: 0, positive: 0, negative: 0 };
         emojiCounts = {};
         totalReactions = 0;
         updateScoreDisplay();
-
         saveScoresToSupabase();
-
-        if (autoPlayerActive) {
-            playNextInQueue();
-        }
+        if (autoPlayerActive) playNextInQueue();
     }
 
-    // ===== AUTO PLAYER =====
     function toggleAutoPlayer() {
         autoPlayerActive = !autoPlayerActive;
         const btn = document.getElementById('autoPlayerBtn');
-
         if (autoPlayerActive) {
             btn.classList.add('active');
             btn.innerHTML = '⏸️ Auto Player ON';
-
-            showToast('Modo Auto Player ativado! Próximas músicas tocarão automaticamente.');
-
-            if (!currentVideoId && songQueue.length > 0) {
-                playNextInQueue();
-            }
+            showToast('Modo Auto Player ativado!');
+            if (!currentVideoId && songQueue.length > 0) playNextInQueue();
         } else {
             btn.classList.remove('active');
             btn.innerHTML = '▶️ Auto Player';
@@ -2090,109 +1831,58 @@
     }
 
     async function onVideoEnded() {
-        console.log('🏁 onVideoEnded disparado');
-
         if (isEndingSong) return;
         isEndingSong = true;
-        window.finalizeSongScoreGlobal();
-
+        finalizeSongScoreGlobal();
         try {
-    if (scores.total > 0) {
-        console.log('📊 Mostrando resultado...');
-        await showResultSupabase();
-        showResultScreen();
-    } else {
-        console.log('⏭️ Sem reações, próxima música...');
-        await playNextInQueue();
+            if (scores.total !== 0) {
+                await showResultSupabase();
+                showResultScreen();
+            } else {
+                await playNextInQueue();
+            }
+        } catch (err) { await playNextInQueue(); }
+        isEndingSong = false;
     }
-} catch (err) {
-    console.error('Erro ao finalizar:', err);
-    await playNextInQueue();
-}
 
-isEndingSong = false;
-
-    // ============================================
-    // FUNÇÕES SUPABASE
-    // ============================================
     async function saveQueueToSupabase() {
         if (!isSupabaseConnected || !roomChannel) return;
-        await roomChannel.send({
-            type: 'broadcast',
-            event: 'queue-update',
-            payload: { queue: songQueue, currentPosition: currentQueuePosition }
-        });
+        await roomChannel.send({ type: 'broadcast', event: 'queue-update', payload: { queue: songQueue, currentPosition: currentQueuePosition } });
     }
 
     async function saveScoresToSupabase() {
         if (!isSupabaseConnected || !roomChannel) return;
-        await roomChannel.send({
-            type: 'broadcast',
-            event: 'scores-update',
-            payload: scores
-        });
+        await roomChannel.send({ type: 'broadcast', event: 'scores-update', payload: scores });
     }
 
     async function saveRoomState() {
         if (!isSupabaseConnected || !roomChannel) return;
-        const roomState = {
-            currentVideoId: currentVideoId || null,
-            scores: scores,
-            currentSinger: currentSinger || null,
-            currentSingerId: currentSingerId || null,
-            queue: songQueue,
-            currentQueuePosition: currentQueuePosition,
-            globalLeaderboard: globalLeaderboard,
-            updatedAt: Date.now()
-        };
-        await roomChannel.send({
-            type: 'broadcast',
-            event: 'room-state',
-            payload: roomState
-        });
+        await roomChannel.send({ type: 'broadcast', event: 'room-state', payload: {
+            currentVideoId: currentVideoId || null, scores: scores, currentSinger: currentSinger || null,
+            currentSingerId: currentSingerId || null, queue: songQueue, currentQueuePosition: currentQueuePosition,
+            globalLeaderboard: globalLeaderboard, updatedAt: Date.now()
+        } });
     }
 
     async function requestRoomState() {
         if (!isSupabaseConnected || !roomChannel) return;
-        await roomChannel.send({
-            type: 'broadcast',
-            event: 'request-state',
-            payload: { userId: odUserId, timestamp: Date.now(), isNewUser: true }
-        });
+        await roomChannel.send({ type: 'broadcast', event: 'request-state', payload: { userId: odUserId, isNewUser: true } });
     }
 
     async function sendStateToUser(targetUserId) {
         if (!isSupabaseConnected || !roomChannel) return;
         if (!currentVideoId && songQueue.length === 0 && scores.total === 0) return;
-        
-    const roomState = {
-    currentVideoId: currentVideoId || null,
-    scores: scores,
-    currentSinger: currentSinger || null,
-    currentSingerId: currentSingerId || null,
-    activities: activities.slice(0, 10),
-    queue: songQueue,
-    currentQueuePosition: currentQueuePosition,
-    globalLeaderboard: globalLeaderboard,
-    timestamp: Date.now()
-};
-        
-        await roomChannel.send({
-            type: 'broadcast',
-            event: 'initial-state',
-            payload: { targetUserId: targetUserId, state: roomState }
-        });
+        await roomChannel.send({ type: 'broadcast', event: 'initial-state', payload: { targetUserId, state: {
+            currentVideoId: currentVideoId || null, scores: scores, currentSinger: currentSinger || null,
+            currentSingerId: currentSingerId || null, activities: activities.slice(0, 10),
+            queue: songQueue, currentQueuePosition: currentQueuePosition, globalLeaderboard: globalLeaderboard
+        } } });
     }
 
     async function initSupabase() {
-        if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-            updateConnectionStatus('config-error');
-            return false;
-        }
         try {
             supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            const { error } = await supabaseClient.from('rooms').select('count').limit(1);
-            if (error) throw error;
+            await supabaseClient.from('rooms').select('count').limit(1);
             isSupabaseConnected = true;
             updateConnectionStatus('connected');
             return true;
@@ -2212,11 +1902,8 @@ isEndingSong = false;
                 const presenceState = roomChannel.presenceState();
                 const newParticipants = [];
                 Object.keys(presenceState).forEach(key => {
-                    const presences = presenceState[key];
-                    presences.forEach(pres => {
-                        if (!newParticipants.find(part => part.odUserId === pres.odUserId)) {
-                            newParticipants.push(pres);
-                        }
+                    presenceState[key].forEach(pres => {
+                        if (!newParticipants.find(p => p.odUserId === pres.odUserId)) newParticipants.push(pres);
                     });
                 });
                 participants = newParticipants;
@@ -2228,8 +1915,7 @@ isEndingSong = false;
                         participants.push(pres);
                         showToast(`${pres.odUserName} entrou! 👋`);
                         addActivity('👋', `${pres.odUserName} entrou`);
-                        
-                        if (pres.odUserId !== odUserId && (currentVideoId || songQueue.length > 0 || scores.total !== 0)) {
+                        if (pres.odUserId !== odUserId && (currentVideoId || songQueue.length > 0)) {
                             await sendStateToUser(pres.odUserId);
                         }
                     }
@@ -2240,215 +1926,105 @@ isEndingSong = false;
                 leftPresences.forEach(pres => {
                     participants = participants.filter(p => p.odUserId !== pres.odUserId);
                     showToast(`${pres.odUserName} saiu`);
-                    updateLeaderboard();
                 });
                 updateParticipantsList();
             })
             .on('broadcast', { event: 'request-state' }, async ({ payload }) => {
-                const { userId, isNewUser } = payload;
-                if (userId !== odUserId && isNewUser && (currentVideoId || songQueue.length > 0 || scores.total !== 0)) {
-                    await sendStateToUser(userId);
+                if (payload.userId !== odUserId && payload.isNewUser && (currentVideoId || songQueue.length > 0)) {
+                    await sendStateToUser(payload.userId);
                 }
             })
             .on('broadcast', { event: 'initial-state' }, ({ payload }) => {
-                const { targetUserId, state } = payload;
-                if (targetUserId === odUserId) {
-                    if (state.scores) {
-                        scores = state.scores;
-                        updateScoreDisplay();
+                if (payload.targetUserId === odUserId) {
+                    if (payload.state.scores) scores = payload.state.scores, updateScoreDisplay();
+                    if (payload.state.queue) songQueue = payload.state.queue, currentQueuePosition = payload.state.currentQueuePosition, safeUpdateQueueDisplay();
+                    if (payload.state.currentVideoId && payload.state.currentVideoId !== currentVideoId) {
+                        currentVideoId = payload.state.currentVideoId;
+                        currentSinger = payload.state.currentSinger;
+                        currentSingerId = payload.state.currentSingerId;
+                        playVideo(payload.state.currentVideoId);
                     }
-                    if (state.queue) {
-                        songQueue = state.queue;
-                        currentQueuePosition = state.currentQueuePosition !== undefined ? state.currentQueuePosition : -1;
-                        safeUpdateQueueDisplay();
-                    }
-                    if (state.currentVideoId && state.currentVideoId !== currentVideoId) {
-                        currentVideoId = state.currentVideoId;
-                        currentSinger = state.currentSinger;
-                        currentSingerId = state.currentSingerId;
-                        playVideo(state.currentVideoId);
-                    }
-                    if (state.globalLeaderboard) {
-                        globalLeaderboard = state.globalLeaderboard;
-                        updateLeaderboard();
-                    }
-                    if (state.emojiCounts) {
-                        emojiCounts = state.emojiCounts;
-                        totalReactions = state.totalReactions || 0;
-                    }
-                    if (state.activities) {
-                        activities = state.activities;
-                        updateActivityFeed();
-                    }
+                    if (payload.state.globalLeaderboard) globalLeaderboard = payload.state.globalLeaderboard, updateLeaderboard();
+                    if (payload.state.activities) activities = payload.state.activities, updateActivityFeed();
                     hasReceivedInitialState = true;
                     showToast('Sala sincronizada! 🎤');
                 }
             })
             .on('broadcast', { event: 'room-state' }, ({ payload }) => {
-                if (payload.updatedAt > (lastStateUpdate || 0)) {
+                if (payload.updatedAt > lastStateUpdate) {
                     lastStateUpdate = payload.updatedAt;
-                    
-                    if (payload.scores) {
-                        scores = payload.scores;
-                        updateScoreDisplay();
-                    }
-                    if (payload.queue) {
-                        songQueue = payload.queue;
-                        currentQueuePosition = payload.currentQueuePosition !== undefined ? payload.currentQueuePosition : -1;
-                        safeUpdateQueueDisplay();
-                    }
+                    if (payload.scores) scores = payload.scores, updateScoreDisplay();
+                    if (payload.queue) songQueue = payload.queue, currentQueuePosition = payload.currentQueuePosition, safeUpdateQueueDisplay();
                     if (payload.currentVideoId && payload.currentVideoId !== currentVideoId) {
                         currentVideoId = payload.currentVideoId;
                         currentSinger = payload.currentSinger;
                         currentSingerId = payload.currentSingerId;
                         playVideo(payload.currentVideoId);
                     }
-                    if (payload.globalLeaderboard) {
-                        globalLeaderboard = payload.globalLeaderboard;
-                        updateLeaderboard();
-                    }
+                    if (payload.globalLeaderboard) globalLeaderboard = payload.globalLeaderboard, updateLeaderboard();
                 }
             })
             .on('broadcast', { event: 'queue-update' }, ({ payload, from }) => {
-                if (from === odUserId) return;
-                songQueue = payload.queue;
-                currentQueuePosition = payload.currentPosition;
-                safeUpdateQueueDisplay();
+                if (from !== odUserId) songQueue = payload.queue, currentQueuePosition = payload.currentPosition, safeUpdateQueueDisplay();
             })
             .on('broadcast', { event: 'new-emoji' }, ({ payload }) => {
                 const { emoji, points, targetUserId, userName: emojiUserName, emojiId } = payload;
                 if (processedEmojis.has(emojiId)) return;
                 processedEmojis.add(emojiId);
                 
-                const targetParticipant = participants.find(p => p.odUserId === targetUserId);
-                const targetName = targetParticipant ? targetParticipant.odUserName : 'cantor';
-                
-                console.log(`📨 ${emojiUserName} enviou ${emoji} (${points} pts) para o cantor: ${targetName} (ID: ${targetUserId})`);
-                
+                const targetName = participants.find(p => p.odUserId === targetUserId)?.odUserName || 'cantor';
                 createFloatingEmoji(emoji);
                 showEmojiNotification(emoji, emojiUserName);
                 flashScoreCard(points);
-                
                 addActivity(emoji, `${emojiUserName} → ${targetName}: ${points > 0 ? '+' + points : points}`);
-                trackEmoji(emoji);
                 
                 scores.total += points;
                 if (points > 0) scores.positive += points;
                 else scores.negative += Math.abs(points);
                 updateScoreDisplay();
                 
-                if (!globalLeaderboard[targetUserId]) {
-                    globalLeaderboard[targetUserId] = {
-                        score: 0,
-                        topEmoji: ''
-                    };
-                }
-               
+                if (!globalLeaderboard[targetUserId]) globalLeaderboard[targetUserId] = { score: 0, topEmoji: emoji };
+                globalLeaderboard[targetUserId].score += points;
                 updateLeaderboard();
-                
                 saveRoomState();
-                saveScoresToSupabase();
-            })
-            .on('broadcast', { event: 'new-video' }, ({ payload }) => {
-                const { videoId, loadedBy, title } = payload;
-                if (videoId && videoId !== currentVideoId) {
-                    currentVideoId = videoId;
-                    currentSinger = loadedBy;
-                    const singerParticipant = participants.find(p => p.odUserName === loadedBy);
-                    currentSingerId = singerParticipant ? singerParticipant.odUserId : null;
-                    playVideo(videoId, title);
-                    showToast(`${loadedBy} carregou um vídeo! 🎬`);
-                    addActivity('🎬', `${loadedBy} carregou vídeo`);
-                    saveRoomState();
-                }
             })
             .on('broadcast', { event: 'show-result' }, ({ payload }) => {
-                const { singer, emojiCounts: counts, totalReactions: reactions } = payload;
-                currentSinger = singer;
-                emojiCounts = counts || {};
-                totalReactions = reactions || 0;
+                currentSinger = payload.singer;
+                emojiCounts = payload.emojiCounts || {};
+                totalReactions = payload.totalReactions || 0;
                 showResultScreen();
             })
-            .on('broadcast', { event: 'scores-update' }, ({ payload }) => {
-                scores = payload;
-                updateScoreDisplay();
-            })
-            .on('broadcast', { event: 'reset' }, () => {
-                scores = { total: 0, positive: 0, negative: 0 };
-                emojiCounts = {};
-                totalReactions = 0;
-                activities = [];
-                globalLeaderboard = {};
-                
-                updateScoreDisplay();
-                updateActivityFeed();
-                updateLeaderboard();
-                
-                addActivity('🔄', 'Pontuação total resetada');
-                showToast('Pontuação total resetada! 🔄');
+            .on('broadcast', { event: 'scores-update', 'reset' }, ({ payload }) => {
+                if (payload) scores = payload, updateScoreDisplay();
+                else { scores = { total: 0, positive: 0, negative: 0 }; emojiCounts = {}; totalReactions = 0; globalLeaderboard = {}; updateScoreDisplay(); updateLeaderboard(); addActivity('🔄', 'Pontuação total resetada'); showToast('Pontuação total resetada! 🔄'); }
             });
 
         roomChannel.subscribe(async (status) => {
             if (status === 'SUBSCRIBED') {
-                await roomChannel.track({
-                    odUserId: odUserId,
-                    odUserName: userName,
-                    joinedAt: Date.now()
-                });
-                
-                setTimeout(async () => {
-                    if (!hasReceivedInitialState) {
-                        await requestRoomState();
-                    }
-                }, 1000);
+                await roomChannel.track({ odUserId, odUserName: userName, joinedAt: Date.now() });
+                setTimeout(async () => { if (!hasReceivedInitialState) await requestRoomState(); }, 1000);
             }
         });
     }
 
     async function sendEmojiToSupabase(emoji, points, targetUserId) {
         if (!isSupabaseConnected || !roomChannel) return;
-        const emojiId = `${odUserId}_${Date.now()}_${Math.random()}`;
-        await roomChannel.send({
-            type: 'broadcast',
-            event: 'new-emoji',
-            payload: { emoji, points, targetUserId, userName, emojiId }
-        });
-        await saveScoresToSupabase();
+        await roomChannel.send({ type: 'broadcast', event: 'new-emoji', payload: { emoji, points, targetUserId, userName, emojiId: `${odUserId}_${Date.now()}` } });
     }
 
     async function showResultSupabase() {
         if (!isSupabaseConnected || !roomChannel) return;
-        await roomChannel.send({
-            type: 'broadcast',
-            event: 'show-result',
-            payload: { singer: currentSinger || userName, emojiCounts, totalReactions }
-        });
+        await roomChannel.send({ type: 'broadcast', event: 'show-result', payload: { singer: currentSinger || userName, emojiCounts, totalReactions } });
     }
 
     async function resetScoresSupabase() {
         if (!isSupabaseConnected || !roomChannel) return;
-        await roomChannel.send({
-            type: 'broadcast',
-            event: 'reset',
-            payload: {}
-        });
-    }
-
-    function trackEmoji(emoji) {
-        if (!emojiCounts[emoji]) emojiCounts[emoji] = 0;
-        emojiCounts[emoji]++;
-        totalReactions++;
+        await roomChannel.send({ type: 'broadcast', event: 'reset', payload: {} });
     }
 
     function getMostVotedEmoji() {
-        let maxCount = 0;
-        let topEmoji = '🎉';
-        for (const emoji in emojiCounts) {
-            if (emojiCounts[emoji] > maxCount) {
-                maxCount = emojiCounts[emoji];
-                topEmoji = emoji;
-            }
-        }
+        let maxCount = 0, topEmoji = '🎉';
+        for (const emoji in emojiCounts) if (emojiCounts[emoji] > maxCount) { maxCount = emojiCounts[emoji]; topEmoji = emoji; }
         return { emoji: topEmoji, count: maxCount };
     }
 
@@ -2462,238 +2038,148 @@ isEndingSong = false;
     }
 
     function createConfetti() {
-        const colors = ['#ff2d75', '#9d4edd', '#00d4ff', '#00ff88', '#ff9500', '#ffff00'];
+        const colors = ['#ff2d75', '#9d4edd', '#00d4ff', '#00ff88', '#ff9500'];
         for (let i = 0; i < 100; i++) {
             setTimeout(() => {
                 const confetti = document.createElement('div');
                 confetti.className = 'confetti';
                 confetti.style.left = Math.random() * 100 + 'vw';
                 confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
                 confetti.style.width = (5 + Math.random() * 10) + 'px';
                 confetti.style.height = (5 + Math.random() * 10) + 'px';
-                confetti.style.animationDuration = (2 + Math.random() * 2) + 's';
                 document.body.appendChild(confetti);
-                setTimeout(() => { if (confetti.parentNode) confetti.remove(); }, 4000);
+                setTimeout(() => confetti.remove(), 4000);
             }, i * 30);
         }
     }
 
-    function closeResult() {
-        document.getElementById('resultOverlay').classList.remove('active');
-    }
+    function closeResult() { document.getElementById('resultOverlay').classList.remove('active'); }
 
     function showResultScreen() {
-        const overlay = document.getElementById('resultOverlay');
         const singerName = currentSinger || userName || 'Cantor';
         document.getElementById('resultSingerName').textContent = singerName;
         const topEmoji = getMostVotedEmoji();
         document.getElementById('resultEmoji').textContent = topEmoji.emoji;
         const totalScoreEl = document.getElementById('resultTotalScore');
-        const totalText = scores.total >= 0 ? '+' + scores.total : String(scores.total);
-        totalScoreEl.textContent = totalText;
-        if (scores.total > 0) totalScoreEl.className = 'result-total-score positive';
-        else if (scores.total < 0) totalScoreEl.className = 'result-total-score negative';
-        else totalScoreEl.className = 'result-total-score neutral';
+        totalScoreEl.textContent = scores.total >= 0 ? '+' + scores.total : String(scores.total);
+        totalScoreEl.className = scores.total > 0 ? 'result-total-score positive' : (scores.total < 0 ? 'result-total-score negative' : 'result-total-score neutral');
         document.getElementById('resultPosScore').textContent = '+' + scores.positive;
         document.getElementById('resultNegScore').textContent = '-' + scores.negative;
         document.getElementById('resultTotalReactions').textContent = totalReactions;
+        
         let breakdownHtml = '';
-        const sortedEmojis = Object.keys(emojiCounts).sort((a, b) => emojiCounts[b] - emojiCounts[a]);
-        sortedEmojis.forEach(emoji => {
-            breakdownHtml += '<div class="result-emoji-item"><span class="emoji">' + emoji + '</span><span class="count">×' + emojiCounts[emoji] + '</span></div>';
+        Object.keys(emojiCounts).sort((a,b) => emojiCounts[b] - emojiCounts[a]).forEach(emoji => {
+            breakdownHtml += `<div class="result-emoji-item"><span class="emoji">${emoji}</span><span class="count">×${emojiCounts[emoji]}</span></div>`;
         });
         document.getElementById('resultEmojiBreakdown').innerHTML = breakdownHtml;
+        
         const message = getResultMessage(scores.total);
         const messageEl = document.getElementById('resultMessage');
         messageEl.textContent = message.text;
         messageEl.className = 'result-message ' + message.class;
-        overlay.classList.add('active');
+        document.getElementById('resultOverlay').classList.add('active');
         if (scores.total >= 5) createConfetti();
     }
 
     function setRoomFromInput() {
-        const input = document.getElementById('roomCodeInput');
-        const code = input.value.trim().toUpperCase();
-        if (!code || code.length !== 6) {
-            showToast('Digite um código de 6 caracteres!', true);
-            return;
-        }
+        const code = document.getElementById('roomCodeInput').value.trim().toUpperCase();
+        if (!code || code.length !== 6) { showToast('Digite um código de 6 caracteres!', true); return; }
         roomId = code;
         isNewRoom = false;
         document.getElementById('headerRoomId').textContent = code;
         document.getElementById('qrRoomId').textContent = code;
         document.getElementById('modalRoomId').textContent = code;
         document.getElementById('shareLink').textContent = getShareUrl();
-        const modeEl = document.getElementById('modalMode');
-        modeEl.textContent = '🚪 Entrando em sala existente';
-        modeEl.className = 'modal-mode join';
-        if (window.history && window.history.replaceState) {
-            window.history.replaceState({}, '', getShareUrl());
-        }
+        document.getElementById('modalMode').textContent = '🚪 Entrando em sala existente';
+        document.getElementById('modalMode').className = 'modal-mode join';
+        if (window.history?.replaceState) window.history.replaceState({}, '', getShareUrl());
         generateQRCode();
         showToast('Sala definida: ' + code);
         document.getElementById('nameInput').focus();
     }
 
     async function joinRoom() {
-        const nameInput = document.getElementById('nameInput');
-        const name = nameInput.value.trim();
-        if (!name) {
-            showToast('Digite seu nome!', true);
-            nameInput.focus();
-            return;
-        }
+        const name = document.getElementById('nameInput').value.trim();
+        if (!name) { showToast('Digite seu nome!', true); return; }
         userName = name;
         document.getElementById('nameModal').classList.remove('active');
-        if (isSupabaseConnected) {
-            await setupSupabaseListeners();
-        }
-        if (isNewRoom) {
-            showToast('Sala criada! Código: ' + roomId);
-        } else {
-            showToast('Bem-vindo, ' + name + '! 🎤');
-        }
+        if (isSupabaseConnected) await setupSupabaseListeners();
+        showToast(isNewRoom ? 'Sala criada! Código: ' + roomId : 'Bem-vindo, ' + name + '! 🎤');
     }
 
-    async function sendEmoji(emoji, points) {	
-        if (!userName) {
-            showToast('Entre na sala primeiro!', true);
-            return;
-        }
-        if (inCooldown) {
-            showToast('Aguarde 1 segundo!', true);
-            return;
-        }
-        
-        if (!currentVideoId) {
-            showToast('Nenhuma música tocando no momento!', true);
-            return;
-        }
-        
+    async function sendEmoji(emoji, points) {
+        if (!userName) { showToast('Entre na sala primeiro!', true); return; }
+        if (inCooldown) { showToast('Aguarde 1 segundo!', true); return; }
+        if (!currentVideoId) { showToast('Nenhuma música tocando!', true); return; }
         if (!currentSingerId) {
             const singerParticipant = participants.find(p => p.odUserName === currentSinger);
-            if (singerParticipant) {
-                currentSingerId = singerParticipant.odUserId;
-            } else {
-                showToast('Erro: Identifique o cantor atual.', true);
-                return;
-            }
+            if (singerParticipant) currentSingerId = singerParticipant.odUserId;
+            else { showToast('Erro: Identifique o cantor atual.', true); return; }
         }
         
-        window.addEmojiReactionGlobal(emoji);
-        
-        const targetUserId = currentSingerId;
-        const targetUserName = currentSinger;
-        
-        console.log(`🎤 ${userName} enviou ${emoji} (${points} pts) para o cantor: ${targetUserName} (ID: ${targetUserId})`);
-        
-        trackEmoji(emoji);
+        addEmojiReactionGlobal(emoji);
         createFloatingEmoji(emoji);
         flashScoreCard(points);
         
-        scores.total += 1; // cada emoji conta como 1
-
-if (!scores.emojis[emoji]) {
-    scores.emojis[emoji] = 0;
-}
-scores.emojis[emoji]++;
-
-updateScoreDisplay();
+        scores.total += points;
+        if (points > 0) scores.positive += points;
+        else scores.negative += Math.abs(points);
+        updateScoreDisplay();
         
-        if (!globalLeaderboard[targetUserId]) {
-            globalLeaderboard[targetUserId] = {
-                score: 0,
-                topEmoji: ''
-            };
-        }
-        
+        if (!globalLeaderboard[currentSingerId]) globalLeaderboard[currentSingerId] = { score: 0, topEmoji: emoji };
+        globalLeaderboard[currentSingerId].score += points;
         updateLeaderboard();
         
-        const ptText = points > 0 ? '+' + points : String(points);
-        addActivity(emoji, `${userName} → ${targetUserName}: ${ptText}`);
-        
-        await sendEmojiToSupabase(emoji, points, targetUserId);
+        addActivity(emoji, `${userName} → ${currentSinger}: ${points > 0 ? '+' + points : points}`);
+        await sendEmojiToSupabase(emoji, points, currentSingerId);
         
         inCooldown = true;
-        const btns = document.querySelectorAll('.emoji-btn');
-        btns.forEach(btn => btn.classList.add('cooldown'));
+        document.querySelectorAll('.emoji-btn').forEach(btn => btn.classList.add('cooldown'));
         setTimeout(() => {
             inCooldown = false;
-            btns.forEach(btn => btn.classList.remove('cooldown'));
+            document.querySelectorAll('.emoji-btn').forEach(btn => btn.classList.remove('cooldown'));
         }, 1000);
     }
 
     async function resetScores() {
         if (!confirm('Resetar pontuação total da festa?')) return;
-        
-        scores = {
-    total: 0,
-    emojis: {}
-};
-
+        scores = { total: 0, positive: 0, negative: 0 };
         globalLeaderboard = {};
-        
         updateScoreDisplay();
         updateActivityFeed();
         updateLeaderboard();
-        
         await resetScoresSupabase();
-        
         showToast('Pontuação total resetada! 🔄');
         addActivity('🔄', 'Pontuação total resetada');
     }
 
-    // ============================================
-    // INICIALIZAÇÃO
-    // ============================================
     async function init() {
         await initSupabase();
-        
         const urlRoom = getRoomFromUrl();
-        if (urlRoom) {
-            roomId = urlRoom;
-            isNewRoom = false;
-        } else {
-            roomId = generateRoomId();
-            isNewRoom = true;
-        }
+        if (urlRoom) { roomId = urlRoom; isNewRoom = false; }
+        else { roomId = generateRoomId(); isNewRoom = true; }
         
         document.getElementById('headerRoomId').textContent = roomId;
         document.getElementById('qrRoomId').textContent = roomId;
         document.getElementById('modalRoomId').textContent = roomId;
         document.getElementById('shareLink').textContent = getShareUrl();
         
-        const modeEl = document.getElementById('modalMode');
         if (isNewRoom) {
-            modeEl.textContent = '🆕 Criando nova sala';
-            modeEl.className = 'modal-mode new';
+            document.getElementById('modalMode').textContent = '🆕 Criando nova sala';
+            document.getElementById('modalMode').className = 'modal-mode new';
         } else {
-            modeEl.textContent = '🚪 Entrando em sala existente';
-            modeEl.className = 'modal-mode join';
+            document.getElementById('modalMode').textContent = '🚪 Entrando em sala existente';
+            document.getElementById('modalMode').className = 'modal-mode join';
             document.getElementById('roomCodeInput').value = roomId;
         }
         
-        if (window.history && window.history.replaceState) {
-            window.history.replaceState({}, '', getShareUrl());
-        }
-        
+        if (window.history?.replaceState) window.history.replaceState({}, '', getShareUrl());
         generateQRCode();
         
-        document.getElementById('nameInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') joinRoom();
-        });
-        
-        document.getElementById('videoInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') addToQueue();
-        });
-        
-        document.getElementById('roomCodeInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') setRoomFromInput();
-        });
-        document.getElementById('roomCodeInput').addEventListener('input', (e) => {
-            e.target.value = e.target.value.toUpperCase();
-        });
+        document.getElementById('nameInput').addEventListener('keypress', e => { if (e.key === 'Enter') joinRoom(); });
+        document.getElementById('videoInput').addEventListener('keypress', e => { if (e.key === 'Enter') addToQueue(); });
+        document.getElementById('roomCodeInput').addEventListener('keypress', e => { if (e.key === 'Enter') setRoomFromInput(); });
+        document.getElementById('roomCodeInput').addEventListener('input', e => { e.target.value = e.target.value.toUpperCase(); });
         
         setTimeout(() => document.getElementById('nameInput').focus(), 300);
     }
