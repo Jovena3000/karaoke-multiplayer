@@ -1371,6 +1371,8 @@
     let videoEndTimer = null;
     let globalLeaderboard = {}; 
     let currentSongUserId = null;
+	let currentSongOwnerId = null;  // ID de quem ADICIONOU a música
+	let currentSongScores = {};  // Pontuação temporária da música atual
        
     // Variáveis da fila
     let songQueue = [];
@@ -1702,92 +1704,84 @@
     }
 
     function playVideo(videoId, title = 'Vídeo do YouTube') {
-        if (!videoId) return;
-        
-        const wrapper = document.getElementById('playerWrapper');
-        const placeholder = document.getElementById('placeholder');
-        const emojiContainer = document.getElementById('emojiContainer');
+    if (!videoId) return;
+    
+    const wrapper = document.getElementById('playerWrapper');
+    const placeholder = document.getElementById('placeholder');
+    const emojiContainer = document.getElementById('emojiContainer');
 
-        // Remove player antigo
-        if (ytPlayerInstance) {
-            ytPlayerInstance.destroy();
-            ytPlayerInstance = null;
-        }
-
-        const playerDiv = document.createElement('div');
-        playerDiv.id = 'ytPlayer';
-        wrapper.insertBefore(playerDiv, emojiContainer);
-
-        placeholder.classList.add('hidden');
-        document.getElementById('endSongBtn').style.display = 'inline-block';
-
-        // ===== CONTROLE =====
-        currentSinger = userName;
-        currentVideoId = videoId;
-
-        const singerParticipant = participants.find(p => p.odUserName === currentSinger);
-        currentSingerId = singerParticipant ? singerParticipant.odUserId : odUserId;
-
-        // Chama onNewSongStarted para finalizar música anterior
-        if (typeof onNewSongStarted === 'function') {
-            onNewSongStarted(currentSingerId);
-        }
-
-        emojiCounts = {};
-        totalReactions = 0;
-
-        saveRoomState();
-        addActivity('🎬', `${userName} começou: ${title}`);
-
-        console.log(`🎬 NOVA MÚSICA: ${title}`);
-
-        // ===== PLAYER YOUTUBE API =====
-        if (typeof YT !== 'undefined' && YT.Player) {
-            ytPlayerInstance = new YT.Player(playerDiv, {
-                videoId: videoId,
-                playerVars: {
-                    autoplay: 1,
-                    rel: 0,
-                    enablejsapi: 1,
-                    origin: window.location.origin
-                },
-                events: {
-                    onReady: (event) => {
-                        event.target.playVideo();
-                    },
-                    onStateChange: (event) => {
-                        console.log('📺 Estado do player:', event.data);
-
-                        if (event.data === YT.PlayerState.ENDED) {
-                            console.log('🏁 Vídeo terminou (API)');
-                            if (autoPlayerActive && currentVideoId === videoId) {
-                                onVideoEnded();
-                            }
-                        }
-
-                        if (event.data === YT.PlayerState.PLAYING) {
-                            clearInterval(window.__videoCheckInterval);
-                            window.__videoCheckInterval = setInterval(() => {
-                                if (!ytPlayerInstance) return;
-                                const current = ytPlayerInstance.getCurrentTime();
-                                const duration = ytPlayerInstance.getDuration();
-                                if (duration > 0 && current >= duration - 1) {
-                                    console.log('⏰ Fim detectado via fallback');
-                                    clearInterval(window.__videoCheckInterval);
-                                    if (autoPlayerActive && currentVideoId === videoId) {
-                                        onVideoEnded();
-                                    }
-                                }
-                            }, 1000);
-                        }
-                    }
-                }
-            });
-        } else {
-            setTimeout(() => playVideo(videoId, title), 500);
-        }
+    if (ytPlayerInstance) {
+        ytPlayerInstance.destroy();
+        ytPlayerInstance = null;
     }
 
+    const playerDiv = document.createElement('div');
+    playerDiv.id = 'ytPlayer';
+    wrapper.insertBefore(playerDiv, emojiContainer);
+
+    placeholder.classList.add('hidden');
+    document.getElementById('endSongBtn').style.display = 'inline-block';
+
+    currentVideoId = videoId;
+    
+    // 🔥 CORREÇÃO: Encontrar quem ADICIONOU esta música na fila
+    const queueItem = songQueue.find(item => item.video_id === videoId);
+    if (queueItem && queueItem.added_by) {
+        currentSongOwnerId = queueItem.added_by;  // Quem adicionou (Bru)
+        currentSinger = queueItem.added_by_name;   // Nome de quem adicionou
+    } else {
+        currentSongOwnerId = odUserId;
+        currentSinger = userName;
+    }
+    
+    // Buscar o nome do participante
+    const ownerParticipant = participants.find(p => p.odUserId === currentSongOwnerId);
+    currentSinger = ownerParticipant ? ownerParticipant.odUserName : (queueItem?.added_by_name || userName);
+    currentSingerId = currentSongOwnerId;
+    
+    console.log(`🎬 NOVA MÚSICA: ${title}`);
+    console.log(`👤 Música adicionada por: ${currentSinger} (ID: ${currentSongOwnerId})`);
+    console.log(`⚠️ Pontos irão para quem ADICIONOU, não para quem está na tela!`);
+
+    emojiCounts = {};
+    totalReactions = 0;
+    currentSongId = videoId;
+    
+    if (!currentSongScores) currentSongScores = {};
+    currentSongScores[currentSongOwnerId] = 0;
+
+    saveRoomState();
+    addActivity('🎬', `${currentSinger} começou a música (adicionada por ${currentSinger})`);
+
+    if (typeof YT !== 'undefined' && YT.Player) {
+        ytPlayerInstance = new YT.Player(playerDiv, {
+            videoId: videoId,
+            playerVars: { autoplay: 1, rel: 0, enablejsapi: 1, origin: window.location.origin },
+            events: {
+                onReady: (event) => event.target.playVideo(),
+                onStateChange: (event) => {
+                    if (event.data === YT.PlayerState.ENDED && autoPlayerActive && currentVideoId === videoId) {
+                        onVideoEnded();
+                    }
+                    if (event.data === YT.PlayerState.PLAYING) {
+                        clearInterval(window.__videoCheckInterval);
+                        window.__videoCheckInterval = setInterval(() => {
+                            if (!ytPlayerInstance) return;
+                            const current = ytPlayerInstance.getCurrentTime();
+                            const duration = ytPlayerInstance.getDuration();
+                            if (duration > 0 && current >= duration - 1) {
+                                clearInterval(window.__videoCheckInterval);
+                                if (autoPlayerActive && currentVideoId === videoId) onVideoEnded();
+                            }
+                        }, 1000);
+                    }
+                }
+            }
+        });
+    } else {
+        setTimeout(() => playVideo(videoId, title), 500);
+    }
+}
     // ============================================
     // FUNÇÕES DA FILA
     // ============================================
@@ -1949,41 +1943,37 @@
     }
 
     async function playNextInQueue() {
-        if (songQueue.length === 0) {
-            currentQueuePosition = -1;
-            currentVideoId = null;
-
-            document.getElementById('placeholder').classList.remove('hidden');
-            document.getElementById('endSongBtn').style.display = 'none';
-
-            if (ytPlayerInstance) {
-                ytPlayerInstance.destroy();
-                ytPlayerInstance = null;
-            }
-
-            showToast('Fila vazia. Adicione mais músicas!');
-            return;
+    if (songQueue.length === 0) {
+        currentQueuePosition = -1;
+        currentVideoId = null;
+        currentSongOwnerId = null;
+        document.getElementById('placeholder').classList.remove('hidden');
+        document.getElementById('endSongBtn').style.display = 'none';
+        if (ytPlayerInstance) {
+            ytPlayerInstance.destroy();
+            ytPlayerInstance = null;
         }
-
-        currentQueuePosition++;
-
-        if (currentQueuePosition >= songQueue.length) {
-            currentQueuePosition = 0; // loop
-        }
-
-        const nextItem = songQueue[currentQueuePosition];
-        
-        if (typeof onNewSongStarted === 'function') {
-            onNewSongStarted(nextItem.user_id || nextItem.userId);
-        }
-
-        console.log(`🎵 Próxima música: ${nextItem.video_title}`);
-
-        playVideo(nextItem.video_id, nextItem.video_title);
-
-        safeUpdateQueueDisplay();
-        await saveQueueToSupabase();
+        showToast('Fila vazia. Adicione mais músicas!');
+        return;
     }
+
+    currentQueuePosition++;
+    if (currentQueuePosition >= songQueue.length) currentQueuePosition = 0;
+
+    const nextItem = songQueue[currentQueuePosition];
+    
+    // 🔥 Define quem é o dono ANTES de tocar
+    currentSongOwnerId = nextItem.added_by || nextItem.user_id;
+    currentSinger = nextItem.added_by_name || 'Anônimo';
+    currentSingerId = currentSongOwnerId;
+    
+    console.log(`🎵 Próxima música: ${nextItem.video_title}`);
+    console.log(`👤 Adicionada por: ${currentSinger} (ID: ${currentSongOwnerId})`);
+
+    playVideo(nextItem.video_id, nextItem.video_title);
+    safeUpdateQueueDisplay();
+    await saveQueueToSupabase();
+}
 
     async function endSongAndPlayNext() {
         if (isEndingSong) return;
@@ -2566,56 +2556,49 @@
         return;
     }
     
-    // 🔥 CORREÇÃO: Impedir que o cantor envie emoji para si mesmo
-    if (currentSingerId === odUserId) {
-        showToast('🎤 Você não pode reagir à sua própria apresentação!', true);
+    // 🔥 CORREÇÃO CRÍTICA: O dono da música é currentSongOwnerId, NÃO currentSingerId
+    if (!currentSongOwnerId) {
+        showToast('Erro: Identifique o dono da música.', true);
         return;
     }
     
-    // O cantor que recebe os pontos é o currentSingerId
-    if (!currentSingerId) {
-        const singerParticipant = participants.find(p => p.odUserName === currentSinger);
-        if (singerParticipant) {
-            currentSingerId = singerParticipant.odUserId;
-        } else {
-            showToast('Erro: Identifique o cantor atual.', true);
-            return;
-        }
+    // Impedir que o próprio dono reaja à sua própria música
+    if (currentSongOwnerId === odUserId) {
+        showToast('🎤 Você não pode reagir à sua própria música!', true);
+        return;
     }
     
-    addEmojiReaction(emoji);
-    
-    const targetUserId = currentSingerId;
+    const targetUserId = currentSongOwnerId;
     const targetUserName = currentSinger;
     
-    console.log(`🎤 ${userName} enviou ${emoji} (${points} pts) para o cantor: ${targetUserName} (ID: ${targetUserId})`);
+    console.log(`🎤 ${userName} enviou ${emoji} (${points} pts) para o DONO DA MÚSICA: ${targetUserName} (ID: ${targetUserId})`);
     
-    // Efeitos visuais
     trackEmoji(emoji);
     createFloatingEmoji(emoji);
     flashScoreCard(points);
     
-    // Atualiza o total da música
+    // Atualiza pontuação da música atual
     scores.total += points;
     if (points > 0) scores.positive += points;
     else scores.negative += Math.abs(points);
     updateScoreDisplay();
     
-    // Atualiza pontos da música atual (estatísticas)
+    // Atualiza estatísticas da música
     if (currentSongId && targetUserId) {
-        if (!currentSongScores[targetUserId]) {
-            currentSongScores[targetUserId] = 0;
-        }
+        if (!currentSongScores) currentSongScores = {};
+        if (!currentSongScores[targetUserId]) currentSongScores[targetUserId] = 0;
         currentSongScores[targetUserId] += points;
     }
     
-    // Atualiza o PLACAR GLOBAL para o CANTOR
+    // 🔥 CORREÇÃO: Atualiza o PLACAR GLOBAL para o DONO DA MÚSICA
     if (!globalLeaderboard[targetUserId]) {
         globalLeaderboard[targetUserId] = { score: 0, topEmoji: emoji, topEmojiCounts: {} };
     } else if (typeof globalLeaderboard[targetUserId] === 'number') {
         globalLeaderboard[targetUserId] = { score: globalLeaderboard[targetUserId], topEmoji: emoji, topEmojiCounts: {} };
     }
+    
     globalLeaderboard[targetUserId].score += points;
+    console.log(`💰 ${targetUserName} agora tem ${globalLeaderboard[targetUserId].score} pontos`);
     
     if (!globalLeaderboard[targetUserId].topEmojiCounts) {
         globalLeaderboard[targetUserId].topEmojiCounts = {};
@@ -2634,14 +2617,11 @@
     
     updateLeaderboard();
     
-    // Adiciona à atividade
     const ptText = points > 0 ? '+' + points : String(points);
     addActivity(emoji, `${userName} → ${targetUserName}: ${ptText}`);
     
-    // Envia para o Supabase
     await sendEmojiToSupabase(emoji, points, targetUserId);
     
-    // Cooldown
     inCooldown = true;
     const btns = document.querySelectorAll('.emoji-btn');
     btns.forEach(btn => btn.classList.add('cooldown'));
