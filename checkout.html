@@ -1194,7 +1194,7 @@
                 console.log('✅ Token criado:', tokenId);
                 
                 // Enviar token para o backend
-                const response = await fetch(`${API_URL}/criar-pagamento-cartao`, {
+                const response = await fetch(`${API_URL}/criar-pagamento`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
