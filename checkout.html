@@ -13,10 +13,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Finalizar Compra - Karaokê Multiplayer</title>
-    
-    <!-- 🔥 SDK DO MERCADO PAGO - ADICIONADO 🔥 -->
-    <script src="https://sdk.mercadopago.com/js/v2"></script>
-    
     <style>
         /* ===== ESTILOS COMPLETOS ===== */
         * {
@@ -350,28 +346,6 @@
             border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 16px;
-        }
-        
-        /* 🔥 ESTILOS PARA O FORMULÁRIO DE CARTÃO 🔥 */
-        .card-form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-        
-        .card-full-width {
-            grid-column: span 2;
-        }
-        
-        @media (max-width: 480px) {
-            .card-form-row {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
-            .card-full-width {
-                grid-column: span 1;
-            }
         }
         
         .btn-pay {
@@ -829,46 +803,13 @@
                     </div>
                 </div>
 
-                <!-- 🔥 FORMULÁRIO CARTÃO DE CRÉDITO - CHECKOUT TRANSPARENTE 🔥 -->
+                <!-- Formulário Cartão de Crédito (apenas informações) -->
                 <div id="cardForm" class="payment-form active">
                     <div class="mp-info-box">
-                        <h3><i class="fas fa-shield-alt"></i> Pagamento com Cartão de Crédito</h3>
-                        <p>Preencha os dados do seu cartão com segurança. A transação é processada diretamente pelo Mercado Pago.</p>
-                    </div>
-                    
-                    <!-- Número do Cartão -->
-                    <div class="form-group">
-                        <label>Número do Cartão</label>
-                        <input type="text" id="cardNumber" placeholder="0000 0000 0000 0000" maxlength="19">
-                    </div>
-                    
-                    <div class="card-form-row">
-                        <!-- Validade -->
-                        <div class="form-group">
-                            <label>Validade</label>
-                            <input type="text" id="expirationDate" placeholder="MM/AA" maxlength="5">
-                        </div>
-                        <!-- CVV -->
-                        <div class="form-group">
-                            <label>CVV</label>
-                            <input type="text" id="securityCode" placeholder="123" maxlength="4">
-                        </div>
-                    </div>
-                    
-                    <!-- Nome no Cartão -->
-                    <div class="form-group">
-                        <label>Nome no Cartão</label>
-                        <input type="text" id="cardholderName" placeholder="Como está no cartão">
-                    </div>
-                    
-                    <!-- CPF do Titular -->
-                    <div class="form-group">
-                        <label>CPF do Titular</label>
-                        <input type="text" id="docNumber" placeholder="000.000.000-00" maxlength="14">
-                    </div>
-                    
-                    <div class="mp-info-box" style="margin-top: 15px; background: #f0f3ff;">
-                        <p style="margin: 0; font-size: 0.8rem;">🔒 Seus dados estão protegidos e criptografados.</p>
+                        <h3><i class="fas fa-shield-alt"></i> Pagamento via Mercado Pago</h3>
+                        <p>Você será redirecionado para o ambiente seguro do Mercado Pago para finalizar o pagamento com cartão de crédito.</p>
+                        <p><strong>🔒 Seus dados estão protegidos:</strong> Não armazenamos informações do seu cartão em nossos servidores. Toda a transação é processada diretamente pelo Mercado Pago com criptografia de ponta a ponta.</p>
+                        <p style="margin-bottom: 0;"><i class="fas fa-check-circle" style="color: #4CAF50;"></i> Aceitamos as principais bandeiras: Visa, Mastercard, American Express, Hipercard e Elo.</p>
                     </div>
                 </div>
 
@@ -914,8 +855,8 @@
                 <!-- Mensagem de erro/sucesso -->
                 <div id="alertMessage" class="alert"></div>
 
-                <!-- 🔥 BOTÃO PAGAR - CHAMA A FUNÇÃO pagarCartao() para cartão 🔥 -->
-                <button class="btn-pay" onclick="processarPagamentoOuCartao()" id="btnPagar">
+                <!-- Botão Pagar -->
+                <button class="btn-pay" onclick="processarPagamento()" id="btnPagar">
                     💳 Pagar R$ <span id="totalBotao">49,90</span>
                 </button>
 
@@ -975,13 +916,8 @@
         // ================= CONFIGURAÇÕES =================
         const API_URL = 'https://karaoke-api-backend3.vercel.app/api';
         
-        // 🔥 PUBLIC KEY DO MERCADO PAGO (SUBSTITUA PELA SUA) 🔥
-        // Você encontra em: https://www.mercadopago.com.br/developers/panel
-        const MP_PUBLIC_KEY = 'APP_USR-f156b92f-d32a-46b1-9420-44a2a856beb8';
-        
         let planoSelecionado = 'trimestral';
         let metodoAtual = 'card';
-        let mp = null;
 
         // Preços dos planos
         const plans = {
@@ -1014,19 +950,6 @@
                 save: 'Economize R$ 138,90'
             }
         };
-
-        // 🔥 INICIALIZAR MERCADO PAGO 🔥
-        function inicializarMercadoPago() {
-            if (typeof MercadoPago !== 'undefined') {
-                mp = new MercadoPago(MP_PUBLIC_KEY, {
-                    locale: 'pt-BR'
-                });
-                console.log('✅ Mercado Pago SDK inicializado');
-            } else {
-                console.error('❌ Mercado Pago SDK não carregado');
-                setTimeout(inicializarMercadoPago, 500);
-            }
-        }
 
         // Criar seletor de planos
         function criarSeletorPlanos() {
@@ -1120,119 +1043,8 @@
             });
         };
 
-        // 🔥 FUNÇÃO PARA PAGAR COM CARTÃO (CHECKOUT TRANSPARENTE) 🔥
-        async function pagarComCartao() {
-            const email = document.getElementById('emailCliente').value;
-            const cardNumber = document.getElementById('cardNumber').value;
-            const expirationDate = document.getElementById('expirationDate').value;
-            const securityCode = document.getElementById('securityCode').value;
-            const cardholderName = document.getElementById('cardholderName').value;
-            const docNumber = document.getElementById('docNumber').value;
-            
-            // Validações
-            if (!email || !email.includes('@')) {
-                mostrarAlerta('Digite um e-mail válido', 'error');
-                return;
-            }
-            
-            if (!cardNumber || cardNumber.length < 16) {
-                mostrarAlerta('Digite um número de cartão válido', 'error');
-                return;
-            }
-            
-            if (!expirationDate || !expirationDate.includes('/')) {
-                mostrarAlerta('Digite a validade (MM/AA)', 'error');
-                return;
-            }
-            
-            if (!securityCode || securityCode.length < 3) {
-                mostrarAlerta('Digite o CVV válido', 'error');
-                return;
-            }
-            
-            if (!cardholderName) {
-                mostrarAlerta('Digite o nome no cartão', 'error');
-                return;
-            }
-            
-            if (!docNumber) {
-                mostrarAlerta('Digite o CPF do titular', 'error');
-                return;
-            }
-            
-            // Formatar dados
-            const [expMonth, expYear] = expirationDate.split('/');
-            const cardData = {
-                cardNumber: cardNumber.replace(/\s/g, ''),
-                cardholderName: cardholderName,
-                cardExpirationMonth: expMonth,
-                cardExpirationYear: '20' + expYear,
-                securityCode: securityCode,
-                identificationType: 'CPF',
-                identificationNumber: docNumber.replace(/\D/g, '')
-            };
-            
-            console.log('💳 Criando token do cartão...');
-            
-            // Mostrar loading
-            document.getElementById('loading').classList.add('active');
-            document.getElementById('btnPagar').disabled = true;
-            
-            try {
-                // Criar token do cartão via Mercado Pago
-                const tokenResponse = await mp.createCardToken(cardData);
-                
-                if (tokenResponse.error) {
-                    console.error('Erro ao criar token:', tokenResponse);
-                    mostrarAlerta('Erro ao processar cartão. Verifique os dados.', 'error');
-                    document.getElementById('loading').classList.remove('active');
-                    document.getElementById('btnPagar').disabled = false;
-                    return;
-                }
-                
-                const tokenId = tokenResponse.id;
-                console.log('✅ Token criado:', tokenId);
-                
-                // Enviar token para o backend
-                const response = await fetch(`${API_URL}/criar-pagamento`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        metodo: 'card',
-                        token: tokenId,
-                        email: email,
-                        plan: planoSelecionado,
-                        valor: plans[planoSelecionado].price
-                    })
-                });
-                
-                const data = await response.json();
-                
-                if (data.sucesso) {
-                    mostrarAlerta('✅ Pagamento aprovado! Redirecionando...', 'success');
-                    localStorage.setItem('pagamento_aprovado', JSON.stringify({
-                        email: email,
-                        plan: planoSelecionado
-                    }));
-                    setTimeout(() => {
-                        window.location.href = '/sucesso.html';
-                    }, 2000);
-                } else {
-                    mostrarAlerta(data.erro || 'Pagamento recusado. Tente outro cartão.', 'error');
-                    document.getElementById('loading').classList.remove('active');
-                    document.getElementById('btnPagar').disabled = false;
-                }
-                
-            } catch (error) {
-                console.error('Erro:', error);
-                mostrarAlerta('Erro ao processar pagamento. Tente novamente.', 'error');
-                document.getElementById('loading').classList.remove('active');
-                document.getElementById('btnPagar').disabled = false;
-            }
-        }
-
-        // 🔥 FUNÇÃO PARA PAGAR COM PIX 🔥
-        async function pagarComPix() {
+        // Função principal de pagamento
+        async function processarPagamento() {
             const email = document.getElementById('emailCliente').value;
             
             if (!email || !email.includes('@')) {
@@ -1252,7 +1064,7 @@
                     body: JSON.stringify({
                         plan: planoSelecionado,
                         email: email,
-                        metodo: 'pix'
+                        metodo: metodoAtual
                     })
                 });
 
@@ -1264,34 +1076,41 @@
                         plan: planoSelecionado,
                         id: data.id
                     }));
-                    
-                    mostrarAlerta('PIX gerado! Escaneie o QR Code para pagar', 'success');
-                    
-                    // Gerar QR Code
-                    if (data.qr_code_base64) {
-                        document.getElementById('qrcode').innerHTML = `
-                            <img src="data:image/jpeg;base64,${data.qr_code_base64}" 
-                                 style="width: 100%; height: 100%; border-radius: 8px; object-fit: contain;">
+
+                    if (metodoAtual === 'pix') {
+                        mostrarAlerta('PIX gerado! Escaneie o QR Code para pagar', 'success');
+                        
+                        // Gerar QR Code
+                        if (data.qr_code_base64) {
+                            document.getElementById('qrcode').innerHTML = `
+                                <img src="data:image/jpeg;base64,${data.qr_code_base64}" 
+                                     style="width: 100%; height: 100%; border-radius: 8px; object-fit: contain;">
+                            `;
+                        } else {
+                            const pixLink = `https://pix.mercadopago.com.br/${data.id}`;
+                            document.getElementById('qrcode').innerHTML = `
+                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${pixLink}" 
+                                     style="width: 100%; height: 100%; border-radius: 8px; object-fit: contain;">
+                            `;
+                        }
+                        
+                        // Mostrar a chave PIX e o botão de copiar
+                        document.getElementById('pixKeyDisplay').style.display = 'block';
+                        document.getElementById('pixKeyDisplay').innerHTML = `
+                            <strong style="font-size: clamp(12px, 3vw, 14px); word-break: break-all;">
+                                ${data.qr_code || 'Código PIX não disponível'}
+                            </strong>
+                            <br>
+                            <small style="font-size: clamp(10px, 2.5vw, 12px);"></small>
                         `;
+                        
+                        document.getElementById('copyPixBtn').style.display = 'inline-block';
+                        
+                        document.getElementById('loading').classList.remove('active');
+                        document.getElementById('btnPagar').disabled = false;
                     } else {
-                        const pixLink = `https://pix.mercadopago.com.br/${data.id}`;
-                        document.getElementById('qrcode').innerHTML = `
-                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${pixLink}" 
-                                 style="width: 100%; height: 100%; border-radius: 8px; object-fit: contain;">
-                        `;
+                        window.location.href = data.init_point;
                     }
-                    
-                    document.getElementById('pixKeyDisplay').style.display = 'block';
-                    document.getElementById('pixKeyDisplay').innerHTML = `
-                        <strong style="font-size: clamp(12px, 3vw, 14px); word-break: break-all;">
-                            ${data.qr_code || 'Código PIX não disponível'}
-                        </strong>
-                    `;
-                    
-                    document.getElementById('copyPixBtn').style.display = 'inline-block';
-                    
-                    document.getElementById('loading').classList.remove('active');
-                    document.getElementById('btnPagar').disabled = false;
                 } else {
                     mostrarAlerta('Erro ao criar pagamento: ' + (data.erro || 'Tente novamente'), 'error');
                     document.getElementById('loading').classList.remove('active');
@@ -1302,15 +1121,6 @@
                 mostrarAlerta('Erro ao conectar com o servidor. Verifique sua conexão.', 'error');
                 document.getElementById('loading').classList.remove('active');
                 document.getElementById('btnPagar').disabled = false;
-            }
-        }
-
-        // 🔥 FUNÇÃO PRINCIPAL QUE DECIDE O MÉTODO DE PAGAMENTO 🔥
-        async function processarPagamentoOuCartao() {
-            if (metodoAtual === 'card') {
-                await pagarComCartao();
-            } else {
-                await pagarComPix();
             }
         }
 
@@ -1334,52 +1144,11 @@
             }
         }
 
-        // 🔥 FORMATAR CAMPOS DO CARTÃO 🔥
-        function formatarNumeroCartao(input) {
-            let value = input.value.replace(/\D/g, '');
-            value = value.replace(/(\d{4})/g, '$1 ').trim();
-            input.value = value;
-        }
-        
-        function formatarValidade(input) {
-            let value = input.value.replace(/\D/g, '');
-            if (value.length >= 2) {
-                value = value.substring(0, 2) + '/' + value.substring(2, 4);
-            }
-            input.value = value;
-        }
-        
-        function formatarCPF(input) {
-            let value = input.value.replace(/\D/g, '');
-            if (value.length <= 11) {
-                value = value.replace(/(\d{3})(\d)/, '$1.$2');
-                value = value.replace(/(\d{3})(\d)/, '$1.$2');
-                value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-            }
-            input.value = value;
-        }
-
         // Inicializar página
         window.onload = function() {
             criarSeletorPlanos();
             atualizarResumo();
             verificarPagamentoPendente();
-            inicializarMercadoPago();
-            
-            // 🔥 ADICIONAR FORMATADORES AOS CAMPOS 🔥
-            const cardNumberInput = document.getElementById('cardNumber');
-            const expirationInput = document.getElementById('expirationDate');
-            const cpfInput = document.getElementById('docNumber');
-            
-            if (cardNumberInput) {
-                cardNumberInput.addEventListener('input', () => formatarNumeroCartao(cardNumberInput));
-            }
-            if (expirationInput) {
-                expirationInput.addEventListener('input', () => formatarValidade(expirationInput));
-            }
-            if (cpfInput) {
-                cpfInput.addEventListener('input', () => formatarCPF(cpfInput));
-            }
             
             const urlParams = new URLSearchParams(window.location.search);
             const planFromUrl = urlParams.get('plan');
