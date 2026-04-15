@@ -498,6 +498,26 @@ async function processCardPayment() {
             showAlert('Código PIX copiado!', 'success');
         }
     };
+
+         // ✅ ADICIONAR ESTAS LINHAS AQUI ✅
+    localStorage.setItem('pagamento_aprovado', JSON.stringify({ 
+        email: email, 
+        plan: planoSelecionado 
+    }));
+    
+    localStorage.setItem('pagamento_pendente', JSON.stringify({ 
+        email: email, 
+        plan: planoSelecionado, 
+        id: data.id
+    }));
+    
+    document.getElementById('copyPixBtn').style.display = 'inline-block';
+    document.getElementById('loading').classList.remove('active');
+    document.getElementById('btnPagar').disabled = false;
+    
+    // Iniciar verificação do status do PIX
+    verificarStatusPix(data.id, email);
+}
     
     window.processPayment = async function() {
         const btn = document.getElementById('payButton');
