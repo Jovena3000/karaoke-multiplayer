@@ -457,19 +457,7 @@ async function processCardPayment() {
             
             if (data.sucesso) {
                 pixDataAtual = data;
-
-                // ✅ ✅ ✅ ADICIONE AQUI (dentro do if data.sucesso) ✅ ✅ ✅
-            localStorage.setItem('pagamento_aprovado', JSON.stringify({ 
-                email: email, 
-                plan: selectedPlan 
-            }));
-            
-            localStorage.setItem('pagamento_pendente', JSON.stringify({ 
-                email: email, 
-                plan: selectedPlan, 
-                id: data.id 
-            }));
-                
+                              
                 const qrHtml = `
                     <div class="text-center mt-4">
                         <div class="bg-white p-4 rounded-2xl inline-block"><img src="data:image/jpeg;base64,${data.qr_code_base64 || ''}" class="w-48 h-48 mx-auto"></div>
