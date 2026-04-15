@@ -22,7 +22,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        /* Custom styles */
         .card-flip {
             transition: transform 0.6s;
             transform-style: preserve-3d;
@@ -43,20 +42,16 @@
             from { opacity: 0; transform: scale(0.95); }
             to { opacity: 1; transform: scale(1); }
         }
-        
-        /* Efeito pulsante no plano selecionado */
         .plan-card.selected {
             border-color: #6366f1 !important;
             background-color: #eef2ff !important;
             animation: pulse 0.6s ease-in-out 2;
         }
-        
         @keyframes pulse {
             0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); }
             50% { transform: scale(1.02); box-shadow: 0 0 0 8px rgba(99, 102, 241, 0.1); }
             100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
         }
-        
         input:focus {
             outline: none;
             ring: 2px solid #6366f1;
@@ -81,39 +76,23 @@
     // Planos
     const PLANS = {
         mensal: { 
-            name: 'Plano Mensal', 
-            price: 5.00, 
-            originalPrice: 5.00, 
-            description: 'Válido por 1 mês', 
-            save: 'Pagamento mensal', 
-            period: '1 mês', 
+            name: 'Plano Mensal', price: 5.00, originalPrice: 5.00, 
+            description: 'Válido por 1 mês', save: 'Pagamento mensal', period: '1 mês', 
             features: ['Salas ilimitadas', 'Músicas liberadas', 'Suporte básico'] 
         },
         trimestral: { 
-            name: 'Plano Trimestral', 
-            price: 49.90, 
-            originalPrice: 74.70, 
-            description: 'Válido por 3 meses', 
-            save: 'Economize R$ 24,80', 
-            period: '3 meses', 
+            name: 'Plano Trimestral', price: 49.90, originalPrice: 74.70, 
+            description: 'Válido por 3 meses', save: 'Economize R$ 24,80', period: '3 meses', 
             features: ['Salas ilimitadas', 'Histórico de músicas', 'Sistema de pontuação', 'Reações especiais', 'Emojis premium', 'Suporte prioritário'] 
         },
         semestral: { 
-            name: 'Plano Semestral', 
-            price: 89.90, 
-            originalPrice: 149.40, 
-            description: 'Válido por 6 meses', 
-            save: 'Economize R$ 59,50', 
-            period: '6 meses', 
+            name: 'Plano Semestral', price: 89.90, originalPrice: 149.40, 
+            description: 'Válido por 6 meses', save: 'Economize R$ 59,50', period: '6 meses', 
             features: ['Salas ilimitadas', 'Histórico de músicas', 'Sistema de pontuação', 'Reações especiais', 'Emojis premium', 'Suporte prioritário'] 
         },
         anual: { 
-            name: 'Plano Anual', 
-            price: 159.90, 
-            originalPrice: 298.80, 
-            description: 'Válido por 12 meses', 
-            save: 'Economize R$ 138,90', 
-            period: '12 meses', 
+            name: 'Plano Anual', price: 159.90, originalPrice: 298.80, 
+            description: 'Válido por 12 meses', save: 'Economize R$ 138,90', period: '12 meses', 
             features: ['Salas ilimitadas', 'Histórico de músicas', 'Sistema de pontuação', 'Reações especiais', 'Emojis premium', 'Suporte prioritário'] 
         }
     };
@@ -154,7 +133,6 @@
         return null;
     }
     
-    // Inicializar Mercado Pago
     function initMercadoPago() {
         if (typeof MercadoPago !== 'undefined') {
             mp = new MercadoPago(MP_PUBLIC_KEY, { locale: 'pt-BR' });
@@ -164,7 +142,6 @@
         }
     }
     
-    // Mostrar alerta
     function showAlert(message, type) {
         const alertDiv = document.getElementById('customAlert');
         if (alertDiv) {
@@ -179,7 +156,6 @@
         }
     }
     
-    // Modal functions
     function showModal(title, message, type = 'loading', extraHtml = '') {
         const modal = document.getElementById('paymentModal');
         const modalIcon = document.getElementById('modalIcon');
@@ -231,36 +207,27 @@
         if (pagamentoAprovado) window.location.href = '/sucesso.html';
     }
     
-    // Função para selecionar plano
     window.selectPlan = function(plan) {
         selectedPlan = plan;
-        
-        // Atualizar visual dos cards
         document.querySelectorAll('.plan-card').forEach(card => {
             card.classList.remove('selected', 'border-indigo-500', 'bg-indigo-50', 'scale-[1.02]');
         });
-        
         const selectedCard = document.getElementById(`plan-${plan}`);
         if (selectedCard) {
             selectedCard.classList.add('selected', 'border-indigo-500', 'bg-indigo-50', 'scale-[1.02]');
         }
-        
-        // Atualizar o resumo do pedido
         updateOrderSummary();
         updatePayButton();
     };
     
-    // Atualizar resumo do pedido
     function updateOrderSummary() {
         const plan = PLANS[selectedPlan];
         const hasDiscount = plan.originalPrice > plan.price;
         const discount = plan.originalPrice - plan.price;
         
-        // Nome e período
         document.getElementById('planName').textContent = plan.name;
         document.getElementById('planPeriod').textContent = plan.period;
         
-        // Preço
         const planPriceEl = document.getElementById('planPrice');
         if (hasDiscount) {
             planPriceEl.innerHTML = `R$ ${formatCurrency(plan.price)} <span class="text-base text-gray-400 line-through ml-2">R$ ${formatCurrency(plan.originalPrice)}</span>`;
@@ -268,7 +235,6 @@
             planPriceEl.innerHTML = `R$ ${formatCurrency(plan.price)}`;
         }
         
-        // Features
         const featuresList = document.getElementById('planFeatures');
         featuresList.innerHTML = plan.features.map(f => `
             <li class="flex items-center gap-2 text-gray-600 text-sm">
@@ -281,7 +247,6 @@
             </li>
         `).join('');
         
-        // Subtotal
         const subtotalEl = document.getElementById('subtotal');
         if (hasDiscount) {
             subtotalEl.innerHTML = `<span class="line-through text-gray-400">R$ ${formatCurrency(plan.originalPrice)}</span>`;
@@ -289,7 +254,6 @@
             subtotalEl.innerHTML = `R$ ${formatCurrency(plan.originalPrice)}`;
         }
         
-        // Desconto
         const discountRow = document.getElementById('discountRow');
         const discountValue = document.getElementById('discountValue');
         if (hasDiscount) {
@@ -299,11 +263,9 @@
             discountRow.classList.add('hidden');
         }
         
-        // Total
         const totalAmount = document.getElementById('totalAmount');
         totalAmount.innerHTML = `<span class="text-green-600 font-bold text-lg">R$ ${formatCurrency(plan.price)}</span>`;
         
-        // Botão
         const payButton = document.getElementById('payButton');
         if (payButton) {
             payButton.innerHTML = currentPaymentMethod === 'card' 
@@ -344,104 +306,73 @@
         updatePayButton();
     };
     
-       // Pagamento com Cartão
-async function processCardPayment() {
-    const email = document.getElementById('email').value;
-    const cardNumber = document.getElementById('cardNumber').value;
-    const expiry = document.getElementById('expiry').value;
-    const cvv = document.getElementById('cvv').value;
-    const cardholderName = document.getElementById('cardholderName').value;
-    const cpf = document.getElementById('cpf').value;
+    async function processCardPayment() {
+        const email = document.getElementById('email').value;
+        const cardNumber = document.getElementById('cardNumber').value;
+        const expiry = document.getElementById('expiry').value;
+        const cvv = document.getElementById('cvv').value;
+        const cardholderName = document.getElementById('cardholderName').value;
+        const cpf = document.getElementById('cpf').value;
 
-    if (!email || !email.includes('@')) { showAlert('Digite um e-mail válido', 'error'); return false; }
-    if (!cardNumber || cardNumber.replace(/\s/g, '').length < 16) { showAlert('Digite um número de cartão válido', 'error'); return false; }
-    if (!expiry || !expiry.includes('/')) { showAlert('Digite a validade do cartão', 'error'); return false; }
-    if (!cvv || cvv.length < 3) { showAlert('Digite o CVV válido', 'error'); return false; }
-    if (!cardholderName) { showAlert('Digite o nome no cartão', 'error'); return false; }
+        if (!email || !email.includes('@')) { showAlert('Digite um e-mail válido', 'error'); return false; }
+        if (!cardNumber || cardNumber.replace(/\s/g, '').length < 16) { showAlert('Digite um número de cartão válido', 'error'); return false; }
+        if (!expiry || !expiry.includes('/')) { showAlert('Digite a validade do cartão', 'error'); return false; }
+        if (!cvv || cvv.length < 3) { showAlert('Digite o CVV válido', 'error'); return false; }
+        if (!cardholderName) { showAlert('Digite o nome no cartão', 'error'); return false; }
 
-    const [expMonth, expYear] = expiry.split('/');
+        const [expMonth, expYear] = expiry.split('/');
+        const cardData = {
+            cardNumber: cardNumber.replace(/\s/g, ''),
+            cardholderName: cardholderName,
+            cardExpirationMonth: expMonth,
+            cardExpirationYear: '20' + expYear,
+            securityCode: cvv,
+            identificationType: 'CPF',
+            identificationNumber: cpf.replace(/\D/g, '') || '19119119100'
+        };
 
-    const cardData = {
-        cardNumber: cardNumber.replace(/\s/g, ''),
-        cardholderName: cardholderName,
-        cardExpirationMonth: expMonth,
-        cardExpirationYear: '20' + expYear,
-        securityCode: cvv,
-        identificationType: 'CPF',
-        identificationNumber: cpf.replace(/\D/g, '') || '19119119100'
-    };
+        showModal('Processando pagamento...', 'Validando dados do cartão', 'loading');
 
-    showModal('Processando pagamento...', 'Validando dados do cartão', 'loading');
+        try {
+            const tokenResponse = await mp.createCardToken(cardData);
+            if (tokenResponse.error) throw new Error('Cartão inválido');
+            console.log("✅ Token:", tokenResponse.id);
+            showModal('Processando pagamento...', 'Autorizando transação', 'loading');
+            
+            const response = await fetch(`${API_URL}/criar-pagamento`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    metodo: 'card',
+                    token: tokenResponse.id,
+                    payment_method_id: tokenResponse.payment_method_id,
+                    issuer_id: tokenResponse.issuer_id,
+                    installments: 1,
+                    email: email,
+                    plan: selectedPlan
+                })
+            });
+            const data = await response.json();
+            console.log("📦 Resposta backend:", data);
 
-    try {
-        // 🔥 CRIA TOKEN
-        const tokenResponse = await mp.createCardToken(cardData);
-
-        if (tokenResponse.error) {
-            throw new Error('Cartão inválido');
+            if (data.sucesso && data.status === 'approved') {
+                pagamentoAprovado = true;
+                localStorage.setItem('pagamento_aprovado', JSON.stringify({ email, plan: selectedPlan }));
+                showModal('✅ Pagamento Confirmado!', 'Seu pagamento foi aprovado. Redirecionando...', 'success');
+                setTimeout(() => { window.location.href = '/sucesso.html'; }, 2000);
+                return true;
+            } else {
+                throw new Error(data.detalhe || data.erro || 'Pagamento recusado');
+            }
+        } catch (error) {
+            console.error("❌ Erro:", error);
+            showModal('❌ Falha no Pagamento', error.message, 'error');
+            return false;
         }
-
-        console.log("✅ Token:", tokenResponse.id);
-
-        showModal('Processando pagamento...', 'Autorizando transação', 'loading');
-
-        // 🔥 PEGA DADOS IMPORTANTES DO TOKEN
-        const paymentMethodId = tokenResponse.payment_method_id;
-        const issuerId = tokenResponse.issuer_id;
-
-        // 🔥 ENVIA PRO BACKEND (CORRIGIDO)
-        const response = await fetch(`${API_URL}/criar-pagamento`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                metodo: 'card',
-                token: tokenResponse.id,
-                payment_method_id: paymentMethodId,
-                issuer_id: issuerId,
-                installments: 1,
-                email: email,
-                plan: selectedPlan
-            })
-        });
-
-        const data = await response.json();
-
-        console.log("📦 Resposta backend:", data);
-
-        // 🔥 TRATAMENTO CORRETO
-        if (data.sucesso && data.status === 'approved') {
-            pagamentoAprovado = true;
-
-            localStorage.setItem('pagamento_aprovado', JSON.stringify({
-                email,
-                plan: selectedPlan
-            }));
-
-            showModal('✅ Pagamento Confirmado!', 'Seu pagamento foi aprovado. Redirecionando...', 'success');
-
-            setTimeout(() => {
-                window.location.href = '/sucesso.html';
-            }, 2000);
-
-            return true;
-
-        } else {
-            throw new Error(data.detalhe || data.erro || 'Pagamento recusado');
-        }
-
-    } catch (error) {
-        console.error("❌ Erro:", error);
-        showModal('❌ Falha no Pagamento', error.message, 'error');
-        return false;
     }
-}
     
-    // Pagamento com PIX
     async function processPixPayment() {
         const email = document.getElementById('email').value;
-        
         if (!email || !email.includes('@')) { showAlert('Digite um e-mail válido', 'error'); return false; }
         
         showModal('Gerando PIX...', 'Criando QR Code para pagamento', 'loading');
@@ -452,12 +383,15 @@ async function processCardPayment() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ metodo: 'pix', email, plan: selectedPlan, valor: PLANS[selectedPlan].price })
             });
-            
             const data = await response.json();
             
             if (data.sucesso) {
                 pixDataAtual = data;
-                              
+                
+                // ✅ SALVAR DADOS NO LOCALSTORAGE
+                localStorage.setItem('pagamento_aprovado', JSON.stringify({ email: email, plan: selectedPlan }));
+                localStorage.setItem('pagamento_pendente', JSON.stringify({ email: email, plan: selectedPlan, id: data.id }));
+                
                 const qrHtml = `
                     <div class="text-center mt-4">
                         <div class="bg-white p-4 rounded-2xl inline-block"><img src="data:image/jpeg;base64,${data.qr_code_base64 || ''}" class="w-48 h-48 mx-auto"></div>
@@ -467,7 +401,6 @@ async function processCardPayment() {
                     </div>
                 `;
                 showModal('Pagamento via PIX', 'Escaneie o QR Code com o app do seu banco', 'pix', qrHtml);
-                localStorage.setItem('pagamento_pendente', JSON.stringify({ email, plan: selectedPlan, id: data.id }));
                 
                 if (statusCheckInterval) clearInterval(statusCheckInterval);
                 statusCheckInterval = setInterval(async () => {
@@ -499,14 +432,6 @@ async function processCardPayment() {
             showAlert('Código PIX copiado!', 'success');
         }
     };
-       
-    document.getElementById('copyPixBtn').style.display = 'inline-block';
-    document.getElementById('loading').classList.remove('active');
-    document.getElementById('btnPagar').disabled = false;
-    
-    // Iniciar verificação do status do PIX
-    verificarStatusPix(data.id, email);
-}
     
     window.processPayment = async function() {
         const btn = document.getElementById('payButton');
