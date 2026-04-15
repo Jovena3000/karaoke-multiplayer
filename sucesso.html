@@ -15,7 +15,6 @@
     <title>Pagamento Confirmado - Karaokê Multiplayer</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Mesmos estilos da página anterior, com algumas adaptações */
         :root {
             --primary: #FF4D94;
             --secondary: #6C63FF;
@@ -206,7 +205,6 @@
         </div>
         
         <div>
-            <!-- CORRIGIDO: Link para o app -->
             <a href="/login.html" class="btn">
                 <i class="fas fa-microphone"></i> COMEÇAR A CANTAR AGORA
             </a>
@@ -222,33 +220,48 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Função para obter parâmetros da URL
-            function getUrlParams() {
-                const params = new URLSearchParams(window.location.search);
-                return {
-                    collection_id: params.get('collection_id'),
-                    payment_id: params.get('payment_id'),
-                    status: params.get('status'),
-                    external_reference: params.get('external_reference'),
-                    payment_type: params.get('payment_type')
-                };
-            }
-
-            // Função para decodificar o external_reference
-            function parseExternalReference(extRef) {
-                if (!extRef) return { email: null, plan: null };
+            // 🔥 CORRIGIDO: Buscar dados do localStorage (enviado pelo checkout)
+            let paymentData = null;
+            
+            // Tentar buscar do localStorage
+            const pagamentoAprovado = localStorage.getItem('pagamento_aprovado');
+            if (pagamentoAprovado) {
                 try {
-                    // O parâmetro external_reference vem como string JSON codificada
-                    // Ex: {%22email%22:%22dominio3002@gmail.com%22,%22plan%22:%22mensal%22}
-                    const decodedJson = decodeURIComponent(extRef);
-                    return JSON.parse(decodedJson);
+                    paymentData = JSON.parse(pagamentoAprovado);
+                    console.log("✅ Dados encontrados no localStorage:", paymentData);
                 } catch (e) {
-                    console.error("Erro ao processar external_reference:", e);
-                    return { email: null, plan: null };
+                    console.error("Erro ao parsear localStorage:", e);
                 }
             }
-
-            // Função para formatar o nome do plano
+            
+            // Se não tiver no localStorage, tentar da URL
+            if (!paymentData) {
+                const urlParams = new URLSearchParams(window.location.search);
+                const extRef = urlParams.get('external_reference');
+                if (extRef) {
+                    try {
+                        const decoded = decodeURIComponent(extRef);
+                        paymentData = JSON.parse(decoded);
+                        console.log("✅ Dados encontrados na URL:", paymentData);
+                    } catch (e) {
+                        console.error("Erro ao parsear URL:", e);
+                    }
+                }
+            }
+            
+            // Se ainda não tiver, usar dados de exemplo
+            if (!paymentData) {
+                paymentData = {
+                    email: localStorage.getItem('user_email') || 'cliente@email.com',
+                    plan: 'trimestral'
+                };
+                console.log("⚠️ Usando dados padrão");
+            }
+            
+            const plan = paymentData.plan || 'mensal';
+            const email = paymentData.email || 'não informado';
+            
+            // Formatar nome do plano
             function formatPlanName(plan) {
                 const plans = {
                     mensal: "Plano Mensal",
@@ -258,19 +271,19 @@
                 };
                 return plans[plan] || "Plano não identificado";
             }
-
-            // CORRIGIDO: Preços corretos (mensal R$5,00)
+            
+            // Preços corretos
             function getPlanPrice(plan) {
                 const prices = {
-                    mensal: "R$ 5,00",      // ✅ CORRIGIDO
+                    mensal: "R$ 5,00",
                     trimestral: "R$ 49,90",
                     semestral: "R$ 89,90",
                     anual: "R$ 159,90"
                 };
                 return prices[plan] || "R$ 5,00";
             }
-
-            // Função para calcular data de validade
+            
+            // Calcular data de validade
             function calculateExpirationDate(plan) {
                 const days = {
                     mensal: 30,
@@ -283,8 +296,8 @@
                 date.setDate(date.getDate() + addDays);
                 return date.toLocaleDateString('pt-BR');
             }
-
-            // Função para gerar código de acesso
+            
+            // Gerar código de acesso
             function generateAccessCode() {
                 const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
                 let code = 'KARAOKE-';
@@ -293,40 +306,25 @@
                 }
                 return code;
             }
-
-            // NOVO: Função para salvar dados de acesso
-            function saveAccessData(email, plan, accessCode, expirationDate) {
-                const accessData = {
-                    email: email,
-                    plan: plan,
-                    accessCode: accessCode,
-                    expirationDate: expirationDate,
-                    loginDate: new Date().toISOString()
-                };
-                localStorage.setItem('karaoke_access', JSON.stringify(accessData));
-                
-                // Salvar histórico
-                const history = JSON.parse(localStorage.getItem('karaoke_history') || '[]');
-                history.push(accessData);
-                localStorage.setItem('karaoke_history', JSON.stringify(history.slice(-5)));
-            }
-
-            // Obter dados da URL
-            const params = getUrlParams();
-            const externalData = parseExternalReference(params.external_reference);
             
-            // Determinar valores
-            const plan = externalData.plan || 'mensal';
-            const email = externalData.email || 'não informado';
+            // Obter ID da transação (se disponível)
+            let transactionId = 'não informado';
+            const pendingPayment = localStorage.getItem('pagamento_pendente');
+            if (pendingPayment) {
+                try {
+                    const pending = JSON.parse(pendingPayment);
+                    transactionId = pending.id || 'não informado';
+                } catch (e) {}
+            }
+            
+            // Preencher os dados
             const planName = formatPlanName(plan);
             const planPrice = getPlanPrice(plan);
-            const transactionId = params.payment_id || 'não informado';
             const currentDate = new Date().toLocaleDateString('pt-BR') + ' ' + 
                                new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
             const expirationDate = calculateExpirationDate(plan);
             const accessCode = generateAccessCode();
-
-            // Preencher os campos na página
+            
             document.getElementById('success-plan').textContent = planName;
             document.getElementById('success-price').textContent = planPrice;
             document.getElementById('transaction-id').textContent = transactionId;
@@ -334,9 +332,23 @@
             document.getElementById('success-email').textContent = email;
             document.getElementById('access-code').textContent = accessCode;
             document.getElementById('validity-date').textContent = expirationDate;
-
-            // NOVO: Salvar dados de acesso
-            saveAccessData(email, plan, accessCode, expirationDate);
+            
+            // Salvar dados de acesso para uso futuro
+            const accessData = {
+                email: email,
+                plan: plan,
+                accessCode: accessCode,
+                expirationDate: expirationDate,
+                transactionId: transactionId,
+                loginDate: new Date().toISOString()
+            };
+            localStorage.setItem('karaoke_access', JSON.stringify(accessData));
+            
+            // Limpar dados temporários após 5 segundos
+            setTimeout(() => {
+                localStorage.removeItem('pagamento_aprovado');
+                localStorage.removeItem('pagamento_pendente');
+            }, 5000);
         });
     </script>
 </body>
