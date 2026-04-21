@@ -314,41 +314,7 @@
     const cardholderName = document.getElementById('cardholderName').value;
     const cpf = document.getElementById('cpf').value;
 
-    if (!email || !email.includes('@')) { 
-        showAlert('Digite um e-mail válido', 'error'); 
-        return false; 
-    }
-    
-    if (!cardNumber || cardNumber.replace(/\s/g, '').length < 16) { 
-        showAlert('Digite um número de cartão válido', 'error'); 
-        return false; 
-    }
-    
-    if (!expiry || !expiry.includes('/')) { 
-        showAlert('Digite a validade do cartão', 'error'); 
-        return false; 
-    }
-    
-    if (!cvv || cvv.length < 3) { 
-        showAlert('Digite o CVV válido', 'error'); 
-        return false; 
-    }
-    
-    if (!cardholderName) { 
-        showAlert('Digite o nome no cartão', 'error'); 
-        return false; 
-    }
-
-    const [expMonth, expYear] = expiry.split('/');
-    const cardData = {
-        cardNumber: cardNumber.replace(/\s/g, ''),
-        cardholderName: cardholderName,
-        cardExpirationMonth: expMonth,
-        cardExpirationYear: '20' + expYear,
-        securityCode: cvv,
-        identificationType: 'CPF',
-        identificationNumber: cpf.replace(/\D/g, '') || '19119119100'
-    };
+    // ... validações ...
 
     showModal('Processando pagamento...', 'Validando dados do cartão', 'loading');
 
@@ -360,25 +326,22 @@
         }
         
         console.log("✅ Token:", tokenResponse.id);
-        showModal('Processando pagamento...', 'Autorizando transação', 'loading');
         
-        // 🔥 CORREÇÃO AQUI - Enviar SOMENTE os campos necessários 🔥
-        const response = await fetch(`${API_URL}/criar-pagamento`, {
+        // 🔥 CORREÇÃO AQUI! Remova o "-cartao" da URL!
+        const response = await fetch(`${API_URL}/criar-pagamento`, {  // ← CORRETO!
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                metodo: 'card',           // ← Obrigatório
-                token: tokenResponse.id,  // ← Obrigatório
-                email: email,             // ← Obrigatório
-                plan: selectedPlan        // ← Obrigatório
-                
+                metodo: 'card',
+                token: tokenResponse.id,
+                email: email,
+                plan: selectedPlan
             })
         });
         
         const data = await response.json();
         console.log("📦 Resposta backend:", data);
 
-       // 🔥 CORREÇÃO AQUI - Verificar o campo correto de sucesso
         if (data.sucesso === true) {
             pagamentoAprovado = true;
             localStorage.setItem('pagamento_aprovado', JSON.stringify({ 
@@ -391,7 +354,6 @@
             }, 2000);
             return true;
         } else {
-            // Mostrar mensagem de erro específica
             const mensagemErro = data.erro || data.mensagem || 'Pagamento recusado';
             throw new Error(mensagemErro);
         }
