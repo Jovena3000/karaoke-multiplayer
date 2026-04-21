@@ -314,7 +314,43 @@
     const cardholderName = document.getElementById('cardholderName').value;
     const cpf = document.getElementById('cpf').value;
 
-    // ... validações ...
+    // Validações
+    if (!email || !email.includes('@')) { 
+        showAlert('Digite um e-mail válido', 'error'); 
+        return false; 
+    }
+    
+    if (!cardNumber || cardNumber.replace(/\s/g, '').length < 16) { 
+        showAlert('Digite um número de cartão válido', 'error'); 
+        return false; 
+    }
+    
+    if (!expiry || !expiry.includes('/')) { 
+        showAlert('Digite a validade do cartão', 'error'); 
+        return false; 
+    }
+    
+    if (!cvv || cvv.length < 3) { 
+        showAlert('Digite o CVV válido', 'error'); 
+        return false; 
+    }
+    
+    if (!cardholderName) { 
+        showAlert('Digite o nome no cartão', 'error'); 
+        return false; 
+    }
+
+    // 🔥 CRIA O cardData AQUI - ANTES DE USAR!
+    const [expMonth, expYear] = expiry.split('/');
+    const cardData = {
+        cardNumber: cardNumber.replace(/\s/g, ''),
+        cardholderName: cardholderName,
+        cardExpirationMonth: expMonth,
+        cardExpirationYear: '20' + expYear,
+        securityCode: cvv,
+        identificationType: 'CPF',
+        identificationNumber: cpf.replace(/\D/g, '') || '19119119100'
+    };
 
     showModal('Processando pagamento...', 'Validando dados do cartão', 'loading');
 
@@ -326,9 +362,9 @@
         }
         
         console.log("✅ Token:", tokenResponse.id);
+        showModal('Processando pagamento...', 'Autorizando transação', 'loading');
         
-        // 🔥 CORREÇÃO AQUI! Remova o "-cartao" da URL!
-        const response = await fetch(`${API_URL}/criar-pagamento`, {  // ← CORRETO!
+        const response = await fetch(`${API_URL}/criar-pagamento`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
