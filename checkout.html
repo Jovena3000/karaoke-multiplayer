@@ -53,8 +53,8 @@
             100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
         }
         input:focus {
-            outline: none;
-            ring: 2px solid #6366f1;
+    outline: none;
+    box-shadow: 0 0 0 2px #6366f1;
         }
     </style>
 </head>
@@ -607,12 +607,25 @@
         bindFormatters();
     }
     
+    <script>
+document.addEventListener('DOMContentLoaded', () => {
     initMercadoPago();
     renderApp();
-    
+
+    // Selecionar plano via URL
     const urlParams = new URLSearchParams(window.location.search);
     const planFromUrl = urlParams.get('plan');
-    if (planFromUrl && PLANS[planFromUrl]) setTimeout(() => selectPlan(planFromUrl), 100);
+    
+    if (planFromUrl && PLANS[planFromUrl]) {
+        setTimeout(() => selectPlan(planFromUrl), 200);
+    }
+
+    // Garantir botão inicial correto
+    setTimeout(() => {
+        updateOrderSummary();
+        updatePayButton();
+    }, 300);
+});
     </script>
 </body>
 </html>
