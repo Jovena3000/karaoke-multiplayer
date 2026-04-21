@@ -371,25 +371,18 @@
                 token: tokenResponse.id,  // ← Obrigatório
                 email: email,             // ← Obrigatório
                 plan: selectedPlan        // ← Obrigatório
-                // ❌ REMOVA: payment_method_id, issuer_id, installments
+                
             })
         });
         
         const data = await response.json();
         console.log("📦 Resposta backend:", data);
 
-        // 🔥 CORREÇÃO AQUI - Verificar o campo correto de sucesso
-        if (data.sucesso === true) {
-            pagamentoAprovado = true;
-            localStorage.setItem('pagamento_aprovado', JSON.stringify({ 
-                email: email, 
-                plan: selectedPlan 
-            }));
-            showModal('✅ Pagamento Confirmado!', 'Seu pagamento foi aprovado. Redirecionando...', 'success');
-            setTimeout(() => { 
-                window.location.href = '/sucesso.html'; 
-            }, 2000);
-            return true;
+        // ✅ Se veio link do Mercado Pago → redireciona
+if (data.init_point) {
+    window.location.href = data.init_point;
+    return true;
+}
         } else {
             // Mostrar mensagem de erro específica
             const mensagemErro = data.erro || data.mensagem || 'Pagamento recusado';
