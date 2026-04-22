@@ -343,9 +343,8 @@
         }
         updatePayButton();
     };
-    
-       // Pagamento com Cartão
-async function processCardPayment() {
+    // Pagamento com Cartão
+      async function processCardPayment() {
     const email = document.getElementById('email').value;
     const cardNumber = document.getElementById('cardNumber').value;
     const expiry = document.getElementById('expiry').value;
@@ -353,6 +352,7 @@ async function processCardPayment() {
     const cardholderName = document.getElementById('cardholderName').value;
     const cpf = document.getElementById('cpf').value;
 
+    // Validações
     if (!email || !email.includes('@')) { 
         showAlert('Digite um e-mail válido', 'error'); 
         return false; 
@@ -392,6 +392,7 @@ async function processCardPayment() {
     showModal('Processando pagamento...', 'Validando dados do cartão', 'loading');
 
     try {
+        // 🔥 1. Criar token do cartão
         const tokenResponse = await mp.createCardToken(cardData);
         
         if (tokenResponse.error) {
@@ -401,6 +402,7 @@ async function processCardPayment() {
         console.log("✅ Token:", tokenResponse.id);
         showModal('Processando pagamento...', 'Autorizando transação', 'loading');
         
+        // 🔥 2. Enviar token para o backend processar o pagamento
         const response = await fetch(`${API_URL}/criar-pagamento`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -415,22 +417,7 @@ async function processCardPayment() {
         const data = await response.json();
         console.log("📦 Resposta backend:", data);
 
-        // 🔥 CORREÇÃO: Verificar se é Checkout Pro (com init_point)
-        if (data.init_point) {
-            // Salvar dados do pagamento pendente
-            localStorage.setItem('pagamento_pendente', JSON.stringify({ 
-                email: email, 
-                plan: selectedPlan,
-                id: data.id
-            }));
-            showModal('Redirecionando...', 'Você será redirecionado para o Mercado Pago para concluir o pagamento', 'success');
-            setTimeout(() => {
-                window.location.href = data.init_point;
-            }, 2000);
-            return true;
-        }
-        
-        // Checkout Transparente
+        // 🔥 3. Verificar o status do pagamento (SEM redirecionamento)
         if (data.sucesso === true) {
             pagamentoAprovado = true;
             localStorage.setItem('pagamento_aprovado', JSON.stringify({ 
@@ -443,7 +430,25 @@ async function processCardPayment() {
             }, 2000);
             return true;
         } else {
-            const mensagemErro = data.erro || data.mensagem || 'Pagamento recusado';
+            // Mostrar mensagem específica baseada no status
+            let mensagemErro = data.mensagem || data.erro || 'Pagamento recusado';
+            
+            if (data.status === 'rejected') {
+                if (data.status_detail === 'cc_rejected_bad_filled_card_number') {
+                    mensagemErro = 'Número do cartão inválido. Verifique e tente novamente.';
+                } else if (data.status_detail === 'cc_rejected_bad_filled_date') {
+                    mensagemErro = 'Data de validade inválida. Verifique e tente novamente.';
+                } else if (data.status_detail === 'cc_rejected_bad_filled_security_code') {
+                    mensagemErro = 'Código de segurança (CVV) inválido.';
+                } else if (data.status_detail === 'cc_rejected_insufficient_amount') {
+                    mensagemErro = 'Saldo insuficiente no cartão.';
+                } else if (data.status_detail === 'cc_rejected_other_reason') {
+                    mensagemErro = 'Cartão recusado. Tente outro cartão.';
+                } else {
+                    mensagemErro = `Cartão recusado: ${data.status_detail || 'tente novamente'}`;
+                }
+            }
+            
             throw new Error(mensagemErro);
         }
         
