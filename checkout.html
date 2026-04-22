@@ -417,19 +417,29 @@
         const data = await response.json();
         console.log("📦 Resposta backend:", data);
 
-        // 🔥 3. Verificar o status do pagamento (SEM redirecionamento)
-        if (data.sucesso === true) {
-            pagamentoAprovado = true;
-            localStorage.setItem('pagamento_aprovado', JSON.stringify({ 
-                email: email, 
-                plan: selectedPlan 
-            }));
-            showModal('✅ Pagamento Confirmado!', 'Seu pagamento foi aprovado. Redirecionando...', 'success');
-            setTimeout(() => { 
-                window.location.href = '/sucesso.html'; 
-            }, 2000);
-            return true;
-        } else {
+        // 🔥 VALIDAÇÃO CORRETA
+if (data.status === 'approved') {
+    pagamentoAprovado = true;
+
+    localStorage.setItem('pagamento_aprovado', JSON.stringify({ 
+        email: email, 
+        plan: selectedPlan 
+    }));
+
+    showModal('✅ Pagamento Confirmado!', 'Seu pagamento foi aprovado. Redirecionando...', 'success');
+
+    setTimeout(() => { 
+        window.location.href = '/sucesso.html'; 
+    }, 2000);
+
+} else if (data.status === 'pending') {
+    
+    showModal('⏳ Pagamento pendente', 'Seu pagamento está em análise. Aguarde confirmação.', 'warning');
+
+} else {
+
+    showModal('❌ Pagamento recusado', 'Tente outro cartão ou verifique os dados.', 'error');
+}
             // Mostrar mensagem específica baseada no status
             let mensagemErro = data.mensagem || data.erro || 'Pagamento recusado';
             
