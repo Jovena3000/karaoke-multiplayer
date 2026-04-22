@@ -63,6 +63,8 @@
 
     <script>
     // ================= CONFIGURAÇÕES =================
+    <script>
+    // ================= CONFIGURAÇÕES =================
     const API_URL = 'https://karaoke-api-backend3.vercel.app/api';
     const MP_PUBLIC_KEY = 'APP_USR-f156b92f-d32a-46b1-9420-44a2a856beb8';
     
@@ -165,6 +167,8 @@
         const modalExtra = document.getElementById('modalExtra');
         const modalCloseBtn = document.getElementById('modalCloseBtn');
         
+        if (!modal) return;
+        
         modal.classList.remove('hidden');
         modal.classList.add('flex');
         document.body.style.overflow = 'hidden';
@@ -201,8 +205,10 @@
     
     function hideModal() {
         const modal = document.getElementById('paymentModal');
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
         document.body.style.overflow = 'auto';
         if (pagamentoAprovado) window.location.href = '/sucesso.html';
     }
@@ -225,48 +231,61 @@
         const hasDiscount = plan.originalPrice > plan.price;
         const discount = plan.originalPrice - plan.price;
         
-        document.getElementById('planName').textContent = plan.name;
-        document.getElementById('planPeriod').textContent = plan.period;
-        
+        const planNameEl = document.getElementById('planName');
+        const planPeriodEl = document.getElementById('planPeriod');
         const planPriceEl = document.getElementById('planPrice');
-        if (hasDiscount) {
-            planPriceEl.innerHTML = `R$ ${formatCurrency(plan.price)} <span class="text-base text-gray-400 line-through ml-2">R$ ${formatCurrency(plan.originalPrice)}</span>`;
-        } else {
-            planPriceEl.innerHTML = `R$ ${formatCurrency(plan.price)}`;
-        }
-        
         const featuresList = document.getElementById('planFeatures');
-        featuresList.innerHTML = plan.features.map(f => `
-            <li class="flex items-center gap-2 text-gray-600 text-sm">
-                <span class="flex-shrink-0 w-4 h-4 bg-green-100 rounded-full flex items-center justify-center">
-                    <svg class="w-2.5 h-2.5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                </span>
-                ${f}
-            </li>
-        `).join('');
-        
         const subtotalEl = document.getElementById('subtotal');
-        if (hasDiscount) {
-            subtotalEl.innerHTML = `<span class="line-through text-gray-400">R$ ${formatCurrency(plan.originalPrice)}</span>`;
-        } else {
-            subtotalEl.innerHTML = `R$ ${formatCurrency(plan.originalPrice)}`;
-        }
-        
         const discountRow = document.getElementById('discountRow');
         const discountValue = document.getElementById('discountValue');
-        if (hasDiscount) {
-            discountRow.classList.remove('hidden');
-            discountValue.innerHTML = `<span class="text-green-600 font-bold">-R$ ${formatCurrency(discount)}</span>`;
-        } else {
-            discountRow.classList.add('hidden');
+        const totalAmount = document.getElementById('totalAmount');
+        const payButton = document.getElementById('payButton');
+        
+        if (planNameEl) planNameEl.textContent = plan.name;
+        if (planPeriodEl) planPeriodEl.textContent = plan.period;
+        
+        if (planPriceEl) {
+            if (hasDiscount) {
+                planPriceEl.innerHTML = `R$ ${formatCurrency(plan.price)} <span class="text-base text-gray-400 line-through ml-2">R$ ${formatCurrency(plan.originalPrice)}</span>`;
+            } else {
+                planPriceEl.innerHTML = `R$ ${formatCurrency(plan.price)}`;
+            }
         }
         
-        const totalAmount = document.getElementById('totalAmount');
-        totalAmount.innerHTML = `<span class="text-green-600 font-bold text-lg">R$ ${formatCurrency(plan.price)}</span>`;
+        if (featuresList) {
+            featuresList.innerHTML = plan.features.map(f => `
+                <li class="flex items-center gap-2 text-gray-600 text-sm">
+                    <span class="flex-shrink-0 w-4 h-4 bg-green-100 rounded-full flex items-center justify-center">
+                        <svg class="w-2.5 h-2.5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                    </span>
+                    ${f}
+                </li>
+            `).join('');
+        }
         
-        const payButton = document.getElementById('payButton');
+        if (subtotalEl) {
+            if (hasDiscount) {
+                subtotalEl.innerHTML = `<span class="line-through text-gray-400">R$ ${formatCurrency(plan.originalPrice)}</span>`;
+            } else {
+                subtotalEl.innerHTML = `R$ ${formatCurrency(plan.originalPrice)}`;
+            }
+        }
+        
+        if (discountRow && discountValue) {
+            if (hasDiscount) {
+                discountRow.classList.remove('hidden');
+                discountValue.innerHTML = `<span class="text-green-600 font-bold">-R$ ${formatCurrency(discount)}</span>`;
+            } else {
+                discountRow.classList.add('hidden');
+            }
+        }
+        
+        if (totalAmount) {
+            totalAmount.innerHTML = `<span class="text-green-600 font-bold text-lg">R$ ${formatCurrency(plan.price)}</span>`;
+        }
+        
         if (payButton) {
             payButton.innerHTML = currentPaymentMethod === 'card' 
                 ? `💳 Pagar R$ ${formatCurrency(plan.price)}` 
@@ -290,116 +309,122 @@
         });
         const cardForm = document.getElementById('cardForm');
         const pixForm = document.getElementById('pixForm');
+        const cardPreview = document.getElementById('cardPreview');
+        
         if (method === 'card') {
-            document.getElementById('method-card').classList.remove('border-gray-200', 'text-gray-500');
-            document.getElementById('method-card').classList.add('border-indigo-500', 'bg-indigo-50', 'text-indigo-700');
-            cardForm.classList.remove('hidden');
-            pixForm.classList.add('hidden');
-            document.getElementById('cardPreview').classList.remove('hidden');
+            const methodCard = document.getElementById('method-card');
+            if (methodCard) {
+                methodCard.classList.remove('border-gray-200', 'text-gray-500');
+                methodCard.classList.add('border-indigo-500', 'bg-indigo-50', 'text-indigo-700');
+            }
+            if (cardForm) cardForm.classList.remove('hidden');
+            if (pixForm) pixForm.classList.add('hidden');
+            if (cardPreview) cardPreview.classList.remove('hidden');
         } else {
-            document.getElementById('method-pix').classList.remove('border-gray-200', 'text-gray-500');
-            document.getElementById('method-pix').classList.add('border-teal-500', 'bg-teal-50', 'text-teal-700');
-            cardForm.classList.add('hidden');
-            pixForm.classList.remove('hidden');
-            document.getElementById('cardPreview').classList.add('hidden');
+            const methodPix = document.getElementById('method-pix');
+            if (methodPix) {
+                methodPix.classList.remove('border-gray-200', 'text-gray-500');
+                methodPix.classList.add('border-teal-500', 'bg-teal-50', 'text-teal-700');
+            }
+            if (cardForm) cardForm.classList.add('hidden');
+            if (pixForm) pixForm.classList.remove('hidden');
+            if (cardPreview) cardPreview.classList.add('hidden');
         }
         updatePayButton();
     };
     
     async function processCardPayment() {
-    const email = document.getElementById('email').value;
-    const cardNumber = document.getElementById('cardNumber').value;
-    const expiry = document.getElementById('expiry').value;
-    const cvv = document.getElementById('cvv').value;
-    const cardholderName = document.getElementById('cardholderName').value;
-    const cpf = document.getElementById('cpf').value;
+        const email = document.getElementById('email').value;
+        const cardNumber = document.getElementById('cardNumber').value;
+        const expiry = document.getElementById('expiry').value;
+        const cvv = document.getElementById('cvv').value;
+        const cardholderName = document.getElementById('cardholderName').value;
+        const cpf = document.getElementById('cpf').value;
 
-    // Validações
-    if (!email || !email.includes('@')) { 
-        showAlert('Digite um e-mail válido', 'error'); 
-        return false; 
-    }
-    
-    if (!cardNumber || cardNumber.replace(/\s/g, '').length < 16) { 
-        showAlert('Digite um número de cartão válido', 'error'); 
-        return false; 
-    }
-    
-    if (!expiry || !expiry.includes('/')) { 
-        showAlert('Digite a validade do cartão', 'error'); 
-        return false; 
-    }
-    
-    if (!cvv || cvv.length < 3) { 
-        showAlert('Digite o CVV válido', 'error'); 
-        return false; 
-    }
-    
-    if (!cardholderName) { 
-        showAlert('Digite o nome no cartão', 'error'); 
-        return false; 
-    }
-
-    // 🔥 CRIA O cardData AQUI - ANTES DE USAR!
-    const [expMonth, expYear] = expiry.split('/');
-    const cardData = {
-        cardNumber: cardNumber.replace(/\s/g, ''),
-        cardholderName: cardholderName,
-        cardExpirationMonth: expMonth,
-        cardExpirationYear: '20' + expYear,
-        securityCode: cvv,
-        identificationType: 'CPF',
-        identificationNumber: cpf.replace(/\D/g, '') || '19119119100'
-    };
-
-    showModal('Processando pagamento...', 'Validando dados do cartão', 'loading');
-
-    try {
-        const tokenResponse = await mp.createCardToken(cardData);
-        
-        if (tokenResponse.error) {
-            throw new Error(tokenResponse.error.message || 'Cartão inválido');
+        if (!email || !email.includes('@')) { 
+            showAlert('Digite um e-mail válido', 'error'); 
+            return false; 
         }
         
-        console.log("✅ Token:", tokenResponse.id);
-        showModal('Processando pagamento...', 'Autorizando transação', 'loading');
-        
-        const response = await fetch(`${API_URL}/criar-pagamento`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                metodo: 'card',
-                token: tokenResponse.id,
-                email: email,
-                plan: selectedPlan
-            })
-        });
-        
-        const data = await response.json();
-        console.log("📦 Resposta backend:", data);
-
-        if (data.sucesso === true) {
-            pagamentoAprovado = true;
-            localStorage.setItem('pagamento_aprovado', JSON.stringify({ 
-                email: email, 
-                plan: selectedPlan 
-            }));
-            showModal('✅ Pagamento Confirmado!', 'Seu pagamento foi aprovado. Redirecionando...', 'success');
-            setTimeout(() => { 
-                window.location.href = '/sucesso.html'; 
-            }, 2000);
-            return true;
-        } else {
-            const mensagemErro = data.erro || data.mensagem || 'Pagamento recusado';
-            throw new Error(mensagemErro);
+        if (!cardNumber || cardNumber.replace(/\s/g, '').length < 16) { 
+            showAlert('Digite um número de cartão válido', 'error'); 
+            return false; 
         }
         
-    } catch (error) {
-        console.error("❌ Erro:", error);
-        showModal('❌ Falha no Pagamento', error.message, 'error');
-        return false;
+        if (!expiry || !expiry.includes('/')) { 
+            showAlert('Digite a validade do cartão', 'error'); 
+            return false; 
+        }
+        
+        if (!cvv || cvv.length < 3) { 
+            showAlert('Digite o CVV válido', 'error'); 
+            return false; 
+        }
+        
+        if (!cardholderName) { 
+            showAlert('Digite o nome no cartão', 'error'); 
+            return false; 
+        }
+
+        const [expMonth, expYear] = expiry.split('/');
+        const cardData = {
+            cardNumber: cardNumber.replace(/\s/g, ''),
+            cardholderName: cardholderName,
+            cardExpirationMonth: expMonth,
+            cardExpirationYear: '20' + expYear,
+            securityCode: cvv,
+            identificationType: 'CPF',
+            identificationNumber: cpf.replace(/\D/g, '') || '19119119100'
+        };
+
+        showModal('Processando pagamento...', 'Validando dados do cartão', 'loading');
+
+        try {
+            const tokenResponse = await mp.createCardToken(cardData);
+            
+            if (tokenResponse.error) {
+                throw new Error(tokenResponse.error.message || 'Cartão inválido');
+            }
+            
+            console.log("✅ Token:", tokenResponse.id);
+            showModal('Processando pagamento...', 'Autorizando transação', 'loading');
+            
+            const response = await fetch(`${API_URL}/criar-pagamento`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    metodo: 'card',
+                    token: tokenResponse.id,
+                    email: email,
+                    plan: selectedPlan
+                })
+            });
+            
+            const data = await response.json();
+            console.log("📦 Resposta backend:", data);
+
+            if (data.sucesso === true) {
+                pagamentoAprovado = true;
+                localStorage.setItem('pagamento_aprovado', JSON.stringify({ 
+                    email: email, 
+                    plan: selectedPlan 
+                }));
+                showModal('✅ Pagamento Confirmado!', 'Seu pagamento foi aprovado. Redirecionando...', 'success');
+                setTimeout(() => { 
+                    window.location.href = '/sucesso.html'; 
+                }, 2000);
+                return true;
+            } else {
+                const mensagemErro = data.erro || data.mensagem || 'Pagamento recusado';
+                throw new Error(mensagemErro);
+            }
+            
+        } catch (error) {
+            console.error("❌ Erro:", error);
+            showModal('❌ Falha no Pagamento', error.message, 'error');
+            return false;
+        }
     }
-}
     
     async function processPixPayment() {
         const email = document.getElementById('email').value;
@@ -418,7 +443,6 @@
             if (data.sucesso) {
                 pixDataAtual = data;
                 
-                // ✅ SALVAR DADOS NO LOCALSTORAGE
                 localStorage.setItem('pagamento_aprovado', JSON.stringify({ email: email, plan: selectedPlan }));
                 localStorage.setItem('pagamento_pendente', JSON.stringify({ email: email, plan: selectedPlan, id: data.id }));
                 
@@ -465,10 +489,12 @@
     
     window.processPayment = async function() {
         const btn = document.getElementById('payButton');
-        btn.disabled = true;
-        btn.innerHTML = '<div class="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent inline-block mr-2"></div> Processando...';
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<div class="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent inline-block mr-2"></div> Processando...';
+        }
         let result = currentPaymentMethod === 'card' ? await processCardPayment() : await processPixPayment();
-        if (!result) {
+        if (!result && btn) {
             btn.disabled = false;
             btn.innerHTML = currentPaymentMethod === 'card' ? `💳 Pagar R$ ${formatCurrency(PLANS[selectedPlan].price)}` : `⚡ Gerar QR Code PIX · R$ ${formatCurrency(PLANS[selectedPlan].price)}`;
         }
@@ -481,24 +507,41 @@
         const cvv = document.getElementById('cvv')?.value || '';
         const formattedNumber = cardNumber.padEnd(19, ' ').substring(0, 19);
         const chunks = formattedNumber.match(/.{1,4}/g) || ['****', '****', '****', '****'];
-        document.getElementById('previewNumber').textContent = chunks.join(' ');
-        document.getElementById('previewName').textContent = cardholderName.toUpperCase() || 'SEU NOME';
-        document.getElementById('previewExpiry').textContent = expiry || 'MM/AA';
-        document.getElementById('previewCvv').textContent = cvv || '***';
+        const previewNumber = document.getElementById('previewNumber');
+        const previewName = document.getElementById('previewName');
+        const previewExpiry = document.getElementById('previewExpiry');
+        const previewCvv = document.getElementById('previewCvv');
+        const previewBrand = document.getElementById('previewBrand');
+        
+        if (previewNumber) previewNumber.textContent = chunks.join(' ');
+        if (previewName) previewName.textContent = cardholderName.toUpperCase() || 'SEU NOME';
+        if (previewExpiry) previewExpiry.textContent = expiry || 'MM/AA';
+        if (previewCvv) previewCvv.textContent = cvv || '***';
+        
         const brand = detectCardBrand(cardNumber);
-        const brandElement = document.getElementById('previewBrand');
-        if (brand) {
-            brandElement.textContent = brand.name;
-            brandElement.style.color = brand.color;
-        } else {
-            brandElement.textContent = '****';
-            brandElement.style.color = '#94a3b8';
+        if (previewBrand) {
+            if (brand) {
+                previewBrand.textContent = brand.name;
+                previewBrand.style.color = brand.color;
+            } else {
+                previewBrand.textContent = '****';
+                previewBrand.style.color = '#94a3b8';
+            }
         }
     }
     
-    window.flipCard = function() { document.getElementById('cardInner').classList.toggle('flipped'); };
-    window.flipCardFront = function() { document.getElementById('cardInner').classList.add('flipped'); };
-    window.flipCardBack = function() { document.getElementById('cardInner').classList.remove('flipped'); };
+    window.flipCard = function() { 
+        const cardInner = document.getElementById('cardInner');
+        if (cardInner) cardInner.classList.toggle('flipped');
+    };
+    window.flipCardFront = function() { 
+        const cardInner = document.getElementById('cardInner');
+        if (cardInner) cardInner.classList.add('flipped');
+    };
+    window.flipCardBack = function() { 
+        const cardInner = document.getElementById('cardInner');
+        if (cardInner) cardInner.classList.remove('flipped');
+    };
     
     function bindFormatters() {
         const cardNumberInput = document.getElementById('cardNumber');
@@ -506,13 +549,23 @@
         const cpfInput = document.getElementById('cpf');
         const nameInput = document.getElementById('cardholderName');
         const cvvInput = document.getElementById('cvv');
-        if (cardNumberInput) cardNumberInput.addEventListener('input', (e) => { e.target.value = formatCardNumber(e.target.value); updateCardPreview(); const brand = detectCardBrand(e.target.value); const flagIcon = document.getElementById('cardFlagIcon'); if (brand && flagIcon) flagIcon.innerHTML = `<span class="text-xs font-bold" style="color: ${brand.color}">${brand.name}</span>`; else if (flagIcon) flagIcon.innerHTML = ''; });
+        
+        if (cardNumberInput) {
+            cardNumberInput.addEventListener('input', (e) => { 
+                e.target.value = formatCardNumber(e.target.value); 
+                updateCardPreview(); 
+                const brand = detectCardBrand(e.target.value); 
+                const flagIcon = document.getElementById('cardFlagIcon'); 
+                if (brand && flagIcon) flagIcon.innerHTML = `<span class="text-xs font-bold" style="color: ${brand.color}">${brand.name}</span>`; 
+                else if (flagIcon) flagIcon.innerHTML = ''; 
+            });
+        }
         if (expiryInput) expiryInput.addEventListener('input', (e) => { e.target.value = formatExpiry(e.target.value); updateCardPreview(); });
         if (cpfInput) cpfInput.addEventListener('input', (e) => { e.target.value = formatCPF(e.target.value); });
         if (nameInput) nameInput.addEventListener('input', () => updateCardPreview());
         if (cvvInput) cvvInput.addEventListener('input', () => updateCardPreview());
-    }
-    
+    }   
+        
     function renderApp() {
         const plan = PLANS[selectedPlan];
         const hasDiscount = plan.originalPrice > plan.price;
