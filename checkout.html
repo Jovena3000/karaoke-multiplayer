@@ -11,7 +11,7 @@
     <link rel="icon" href="/favicon.ico">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <link rel="manifest" href="/site.webmanifest">
-       
+    
     <!-- Mercado Pago SDK -->
     <script src="https://sdk.mercadopago.com/js/v2"></script>
     
@@ -22,6 +22,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
+        /* Custom styles */
         .card-flip {
             transition: transform 0.6s;
             transform-style: preserve-3d;
@@ -35,13 +36,30 @@
         .card-back {
             transform: rotateY(180deg);
         }
+        .modal-enter {
+            animation: modalFadeIn 0.3s ease;
+        }
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        /* Efeito pulsante no plano selecionado */
         .plan-card.selected {
             border-color: #6366f1 !important;
             background-color: #eef2ff !important;
+            animation: pulse 0.6s ease-in-out 2;
         }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); }
+            50% { transform: scale(1.02); box-shadow: 0 0 0 8px rgba(99, 102, 241, 0.1); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+        }
+        
         input:focus {
             outline: none;
-            box-shadow: 0 0 0 2px #6366f1;
+            ring: 2px solid #6366f1;
         }
     </style>
 </head>
@@ -62,40 +80,106 @@
     
     // Planos
     const PLANS = {
-        mensal: { name: 'Plano Mensal', price: 5.00, originalPrice: 5.00, description: 'Válido por 1 mês', save: 'Pagamento mensal', period: '1 mês', features: ['Salas ilimitadas', 'Músicas liberadas', 'Suporte básico'] },
-        trimestral: { name: 'Plano Trimestral', price: 49.90, originalPrice: 74.70, description: 'Válido por 3 meses', save: 'Economize R$ 24,80', period: '3 meses', features: ['Salas ilimitadas', 'Histórico de músicas', 'Sistema de pontuação', 'Reações especiais', 'Emojis premium', 'Suporte prioritário'] },
-        semestral: { name: 'Plano Semestral', price: 89.90, originalPrice: 149.40, description: 'Válido por 6 meses', save: 'Economize R$ 59,50', period: '6 meses', features: ['Salas ilimitadas', 'Histórico de músicas', 'Sistema de pontuação', 'Reações especiais', 'Emojis premium', 'Suporte prioritário'] },
-        anual: { name: 'Plano Anual', price: 159.90, originalPrice: 298.80, description: 'Válido por 12 meses', save: 'Economize R$ 138,90', period: '12 meses', features: ['Salas ilimitadas', 'Histórico de músicas', 'Sistema de pontuação', 'Reações especiais', 'Emojis premium', 'Suporte prioritário'] }
+        mensal: { 
+            name: 'Plano Mensal', 
+            price: 5.00, 
+            originalPrice: 5.00, 
+            description: 'Válido por 1 mês', 
+            save: 'Pagamento mensal', 
+            period: '1 mês', 
+            features: ['Salas ilimitadas', 'Músicas liberadas', 'Suporte básico'] 
+        },
+        trimestral: { 
+            name: 'Plano Trimestral', 
+            price: 49.90, 
+            originalPrice: 74.70, 
+            description: 'Válido por 3 meses', 
+            save: 'Economize R$ 24,80', 
+            period: '3 meses', 
+            features: ['Salas ilimitadas', 'Histórico de músicas', 'Sistema de pontuação', 'Reações especiais', 'Emojis premium', 'Suporte prioritário'] 
+        },
+        semestral: { 
+            name: 'Plano Semestral', 
+            price: 89.90, 
+            originalPrice: 149.40, 
+            description: 'Válido por 6 meses', 
+            save: 'Economize R$ 59,50', 
+            period: '6 meses', 
+            features: ['Salas ilimitadas', 'Histórico de músicas', 'Sistema de pontuação', 'Reações especiais', 'Emojis premium', 'Suporte prioritário'] 
+        },
+        anual: { 
+            name: 'Plano Anual', 
+            price: 159.90, 
+            originalPrice: 298.80, 
+            description: 'Válido por 12 meses', 
+            save: 'Economize R$ 138,90', 
+            period: '12 meses', 
+            features: ['Salas ilimitadas', 'Histórico de músicas', 'Sistema de pontuação', 'Reações especiais', 'Emojis premium', 'Suporte prioritário'] 
+        }
     };
     
     // Funções auxiliares
-    function formatCurrency(value) { return value.toFixed(2).replace('.', ','); }
-    function formatCardNumber(value) { const clean = value.replace(/\D/g, ''); const match = clean.match(/(\d{1,4})/g); return match ? match.join(' ').substring(0, 19) : clean; }
-    function formatExpiry(value) { const clean = value.replace(/\D/g, ''); if (clean.length >= 2) return clean.substring(0, 2) + '/' + clean.substring(2, 4); return clean; }
-    function formatCPF(value) { const clean = value.replace(/\D/g, '').substring(0, 11); return clean.replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d{1,2})$/, '$1-$2'); }
+    function formatCurrency(value) {
+        return value.toFixed(2).replace('.', ',');
+    }
+    
+    function formatCardNumber(value) {
+        const clean = value.replace(/\D/g, '');
+        const match = clean.match(/(\d{1,4})/g);
+        return match ? match.join(' ').substring(0, 19) : clean;
+    }
+    
+    function formatExpiry(value) {
+        const clean = value.replace(/\D/g, '');
+        if (clean.length >= 2) return clean.substring(0, 2) + '/' + clean.substring(2, 4);
+        return clean;
+    }
+    
+    function formatCPF(value) {
+        const clean = value.replace(/\D/g, '').substring(0, 11);
+        return clean.replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+    }
     
     function detectCardBrand(cardNumber) {
         const clean = cardNumber.replace(/\s/g, '');
-        if (/^4/.test(clean)) return { name: 'Visa', color: '#1A1F71' };
-        if (/^(5[1-5]|2[2-7])/.test(clean)) return { name: 'Mastercard', color: '#EB001B' };
-        if (/^3[47]/.test(clean)) return { name: 'Amex', color: '#007BC1' };
-        if (/^(4011|4312|4389|4514|4576|504175|5067|5090|6277|6362|6363|6504)/.test(clean)) return { name: 'Elo', color: '#FFD700' };
+        const patterns = {
+            visa: { pattern: /^4/, name: 'Visa', color: '#1A1F71' },
+            mastercard: { pattern: /^(5[1-5]|2[2-7])/, name: 'Mastercard', color: '#EB001B' },
+            amex: { pattern: /^3[47]/, name: 'Amex', color: '#007BC1' },
+            elo: { pattern: /^(4011|4312|4389|4514|4576|504175|5067|5090|6277|6362|6363|6504)/, name: 'Elo', color: '#FFD700' }
+        };
+        for (const [key, brand] of Object.entries(patterns)) {
+            if (brand.pattern.test(clean)) return { id: key, name: brand.name, color: brand.color };
+        }
         return null;
     }
     
+    // Inicializar Mercado Pago
     function initMercadoPago() {
-        if (typeof MercadoPago !== 'undefined') { mp = new MercadoPago(MP_PUBLIC_KEY, { locale: 'pt-BR' }); console.log('✅ Mercado Pago SDK inicializado'); }
-        else { setTimeout(initMercadoPago, 500); }
+        if (typeof MercadoPago !== 'undefined') {
+            mp = new MercadoPago(MP_PUBLIC_KEY, { locale: 'pt-BR' });
+            console.log('✅ Mercado Pago SDK inicializado');
+        } else {
+            setTimeout(initMercadoPago, 500);
+        }
     }
     
+    // Mostrar alerta
     function showAlert(message, type) {
         const alertDiv = document.getElementById('customAlert');
         if (alertDiv) {
-            alertDiv.innerHTML = `<div class="fixed bottom-4 right-4 z-50 animate-pulse"><div class="px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 ${type === 'error' ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-green-50 text-green-700 border border-green-200'}">${type === 'error' ? '❌' : '✅'} ${message}</div></div>`;
+            alertDiv.innerHTML = `
+                <div class="fixed bottom-4 right-4 z-50 animate-pulse">
+                    <div class="px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 ${type === 'error' ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-green-50 text-green-700 border border-green-200'}">
+                        ${type === 'error' ? '❌' : '✅'} ${message}
+                    </div>
+                </div>
+            `;
             setTimeout(() => { alertDiv.innerHTML = ''; }, 5000);
         }
     }
     
+    // Modal functions
     function showModal(title, message, type = 'loading', extraHtml = '') {
         const modal = document.getElementById('paymentModal');
         const modalIcon = document.getElementById('modalIcon');
@@ -104,14 +188,22 @@
         const modalProgress = document.getElementById('modalProgress');
         const modalExtra = document.getElementById('modalExtra');
         const modalCloseBtn = document.getElementById('modalCloseBtn');
-        if (!modal) return;
+        
         modal.classList.remove('hidden');
         modal.classList.add('flex');
         document.body.style.overflow = 'hidden';
         modalCloseBtn.style.display = 'none';
+        
         if (type === 'loading') {
             modalIcon.innerHTML = '<i class="fas fa-spinner fa-pulse text-4xl text-indigo-500"></i>';
             modalProgress.classList.remove('hidden');
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 10;
+                const progressBar = document.getElementById('progressBar');
+                if (progressBar) progressBar.style.width = progress + '%';
+                if (progress >= 90) clearInterval(interval);
+            }, 200);
         } else if (type === 'success') {
             modalIcon.innerHTML = '<i class="fas fa-check-circle text-5xl text-green-500"></i>';
             modalProgress.classList.add('hidden');
@@ -125,6 +217,7 @@
             modalProgress.classList.add('hidden');
             modalCloseBtn.style.display = 'block';
         }
+        
         modalTitle.textContent = title;
         modalMessage.textContent = message;
         if (extraHtml) modalExtra.innerHTML = extraHtml;
@@ -132,127 +225,291 @@
     
     function hideModal() {
         const modal = document.getElementById('paymentModal');
-        if (modal) modal.classList.add('hidden');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
         document.body.style.overflow = 'auto';
         if (pagamentoAprovado) window.location.href = '/sucesso.html';
     }
     
+    // Função para selecionar plano
     window.selectPlan = function(plan) {
         selectedPlan = plan;
-        document.querySelectorAll('.plan-card').forEach(card => card.classList.remove('selected', 'border-indigo-500', 'bg-indigo-50', 'scale-[1.02]'));
+        
+        // Atualizar visual dos cards
+        document.querySelectorAll('.plan-card').forEach(card => {
+            card.classList.remove('selected', 'border-indigo-500', 'bg-indigo-50', 'scale-[1.02]');
+        });
+        
         const selectedCard = document.getElementById(`plan-${plan}`);
-        if (selectedCard) selectedCard.classList.add('selected', 'border-indigo-500', 'bg-indigo-50', 'scale-[1.02]');
+        if (selectedCard) {
+            selectedCard.classList.add('selected', 'border-indigo-500', 'bg-indigo-50', 'scale-[1.02]');
+        }
+        
+        // Atualizar o resumo do pedido
         updateOrderSummary();
         updatePayButton();
     };
     
+    // Atualizar resumo do pedido
     function updateOrderSummary() {
         const plan = PLANS[selectedPlan];
         const hasDiscount = plan.originalPrice > plan.price;
         const discount = plan.originalPrice - plan.price;
-        const planNameEl = document.getElementById('planName');
-        const planPeriodEl = document.getElementById('planPeriod');
+        
+        // Nome e período
+        document.getElementById('planName').textContent = plan.name;
+        document.getElementById('planPeriod').textContent = plan.period;
+        
+        // Preço
         const planPriceEl = document.getElementById('planPrice');
+        if (hasDiscount) {
+            planPriceEl.innerHTML = `R$ ${formatCurrency(plan.price)} <span class="text-base text-gray-400 line-through ml-2">R$ ${formatCurrency(plan.originalPrice)}</span>`;
+        } else {
+            planPriceEl.innerHTML = `R$ ${formatCurrency(plan.price)}`;
+        }
+        
+        // Features
         const featuresList = document.getElementById('planFeatures');
+        featuresList.innerHTML = plan.features.map(f => `
+            <li class="flex items-center gap-2 text-gray-600 text-sm">
+                <span class="flex-shrink-0 w-4 h-4 bg-green-100 rounded-full flex items-center justify-center">
+                    <svg class="w-2.5 h-2.5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                </span>
+                ${f}
+            </li>
+        `).join('');
+        
+        // Subtotal
         const subtotalEl = document.getElementById('subtotal');
+        if (hasDiscount) {
+            subtotalEl.innerHTML = `<span class="line-through text-gray-400">R$ ${formatCurrency(plan.originalPrice)}</span>`;
+        } else {
+            subtotalEl.innerHTML = `R$ ${formatCurrency(plan.originalPrice)}`;
+        }
+        
+        // Desconto
         const discountRow = document.getElementById('discountRow');
         const discountValue = document.getElementById('discountValue');
+        if (hasDiscount) {
+            discountRow.classList.remove('hidden');
+            discountValue.innerHTML = `<span class="text-green-600 font-bold">-R$ ${formatCurrency(discount)}</span>`;
+        } else {
+            discountRow.classList.add('hidden');
+        }
+        
+        // Total
         const totalAmount = document.getElementById('totalAmount');
+        totalAmount.innerHTML = `<span class="text-green-600 font-bold text-lg">R$ ${formatCurrency(plan.price)}</span>`;
+        
+        // Botão
         const payButton = document.getElementById('payButton');
-        if (planNameEl) planNameEl.textContent = plan.name;
-        if (planPeriodEl) planPeriodEl.textContent = plan.period;
-        if (planPriceEl) planPriceEl.innerHTML = hasDiscount ? `R$ ${formatCurrency(plan.price)} <span class="text-base text-gray-400 line-through ml-2">R$ ${formatCurrency(plan.originalPrice)}</span>` : `R$ ${formatCurrency(plan.price)}`;
-        if (featuresList) featuresList.innerHTML = plan.features.map(f => `<li class="flex items-center gap-2 text-gray-600 text-sm"><span class="flex-shrink-0 w-4 h-4 bg-green-100 rounded-full flex items-center justify-center"><svg class="w-2.5 h-2.5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg></span>${f}</li>`).join('');
-        if (subtotalEl) subtotalEl.innerHTML = hasDiscount ? `<span class="line-through text-gray-400">R$ ${formatCurrency(plan.originalPrice)}</span>` : `R$ ${formatCurrency(plan.originalPrice)}`;
-        if (discountRow && discountValue) { if (hasDiscount) { discountRow.classList.remove('hidden'); discountValue.innerHTML = `<span class="text-green-600 font-bold">-R$ ${formatCurrency(discount)}</span>`; } else { discountRow.classList.add('hidden'); } }
-        if (totalAmount) totalAmount.innerHTML = `<span class="text-green-600 font-bold text-lg">R$ ${formatCurrency(plan.price)}</span>`;
-        if (payButton) payButton.innerHTML = currentPaymentMethod === 'card' ? `💳 Pagar R$ ${formatCurrency(plan.price)}` : `⚡ Gerar QR Code PIX · R$ ${formatCurrency(plan.price)}`;
+        if (payButton) {
+            payButton.innerHTML = currentPaymentMethod === 'card' 
+                ? `💳 Pagar R$ ${formatCurrency(plan.price)}` 
+                : `⚡ Gerar QR Code PIX · R$ ${formatCurrency(plan.price)}`;
+        }
     }
     
-    function updatePayButton() { const btn = document.getElementById('payButton'); if (btn) btn.innerHTML = currentPaymentMethod === 'card' ? `💳 Pagar R$ ${formatCurrency(PLANS[selectedPlan].price)}` : `⚡ Gerar QR Code PIX · R$ ${formatCurrency(PLANS[selectedPlan].price)}`; }
+    function updatePayButton() {
+        const btn = document.getElementById('payButton');
+        if (btn) {
+            const price = PLANS[selectedPlan].price;
+            btn.innerHTML = currentPaymentMethod === 'card' ? `💳 Pagar R$ ${formatCurrency(price)}` : `⚡ Gerar QR Code PIX · R$ ${formatCurrency(price)}`;
+        }
+    }
     
     window.selectPaymentMethod = function(method) {
         currentPaymentMethod = method;
-        document.querySelectorAll('.payment-method-btn').forEach(btn => { btn.classList.remove('border-indigo-500', 'bg-indigo-50', 'text-indigo-700'); btn.classList.add('border-gray-200', 'text-gray-500'); });
+        document.querySelectorAll('.payment-method-btn').forEach(btn => {
+            btn.classList.remove('border-indigo-500', 'bg-indigo-50', 'text-indigo-700');
+            btn.classList.add('border-gray-200', 'text-gray-500');
+        });
         const cardForm = document.getElementById('cardForm');
         const pixForm = document.getElementById('pixForm');
-        const cardPreview = document.getElementById('cardPreview');
         if (method === 'card') {
-            const methodCard = document.getElementById('method-card');
-            if (methodCard) { methodCard.classList.remove('border-gray-200', 'text-gray-500'); methodCard.classList.add('border-indigo-500', 'bg-indigo-50', 'text-indigo-700'); }
-            if (cardForm) cardForm.classList.remove('hidden');
-            if (pixForm) pixForm.classList.add('hidden');
-            if (cardPreview) cardPreview.classList.remove('hidden');
+            document.getElementById('method-card').classList.remove('border-gray-200', 'text-gray-500');
+            document.getElementById('method-card').classList.add('border-indigo-500', 'bg-indigo-50', 'text-indigo-700');
+            cardForm.classList.remove('hidden');
+            pixForm.classList.add('hidden');
+            document.getElementById('cardPreview').classList.remove('hidden');
         } else {
-            const methodPix = document.getElementById('method-pix');
-            if (methodPix) { methodPix.classList.remove('border-gray-200', 'text-gray-500'); methodPix.classList.add('border-teal-500', 'bg-teal-50', 'text-teal-700'); }
-            if (cardForm) cardForm.classList.add('hidden');
-            if (pixForm) pixForm.classList.remove('hidden');
-            if (cardPreview) cardPreview.classList.add('hidden');
+            document.getElementById('method-pix').classList.remove('border-gray-200', 'text-gray-500');
+            document.getElementById('method-pix').classList.add('border-teal-500', 'bg-teal-50', 'text-teal-700');
+            cardForm.classList.add('hidden');
+            pixForm.classList.remove('hidden');
+            document.getElementById('cardPreview').classList.add('hidden');
         }
         updatePayButton();
     };
     
-    async function processCardPayment() {
-        const email = document.getElementById('email').value;
-        const cardNumber = document.getElementById('cardNumber').value;
-        const expiry = document.getElementById('expiry').value;
-        const cvv = document.getElementById('cvv').value;
-        const cardholderName = document.getElementById('cardholderName').value;
-        const cpf = document.getElementById('cpf').value;
-        if (!email || !email.includes('@')) { showAlert('Digite um e-mail válido', 'error'); return false; }
-        if (!cardNumber || cardNumber.replace(/\s/g, '').length < 16) { showAlert('Digite um número de cartão válido', 'error'); return false; }
-        if (!expiry || !expiry.includes('/')) { showAlert('Digite a validade do cartão', 'error'); return false; }
-        if (!cvv || cvv.length < 3) { showAlert('Digite o CVV válido', 'error'); return false; }
-        if (!cardholderName) { showAlert('Digite o nome no cartão', 'error'); return false; }
-        const [expMonth, expYear] = expiry.split('/');
-        const cardData = { cardNumber: cardNumber.replace(/\s/g, ''), cardholderName: cardholderName, cardExpirationMonth: expMonth, cardExpirationYear: '20' + expYear, securityCode: cvv, identificationType: 'CPF', identificationNumber: cpf.replace(/\D/g, '') || '19119119100' };
-        showModal('Processando pagamento...', 'Validando dados do cartão', 'loading');
-        try {
-            const tokenResponse = await mp.createCardToken(cardData);
-            if (tokenResponse.error) throw new Error(tokenResponse.error.message || 'Cartão inválido');
-            console.log("✅ Token:", tokenResponse.id);
-            showModal('Processando pagamento...', 'Autorizando transação', 'loading');
-            const response = await fetch(`${API_URL}/criar-pagamento`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ metodo: 'card', token: tokenResponse.id, email: email, plan: selectedPlan }) });
-            const data = await response.json();
-            console.log("📦 Resposta backend:", data);
-            if (data.sucesso === true) {
-                pagamentoAprovado = true;
-                localStorage.setItem('pagamento_aprovado', JSON.stringify({ email: email, plan: selectedPlan }));
-                showModal('✅ Pagamento Confirmado!', 'Seu pagamento foi aprovado. Redirecionando...', 'success');
-                setTimeout(() => { window.location.href = '/sucesso.html'; }, 2000);
-                return true;
-            } else { throw new Error(data.erro || data.mensagem || 'Pagamento recusado'); }
-        } catch (error) { console.error("❌ Erro:", error); showModal('❌ Falha no Pagamento', error.message, 'error'); return false; }
+       // Pagamento com Cartão
+async function processCardPayment() {
+    const email = document.getElementById('email').value;
+    const cardNumber = document.getElementById('cardNumber').value;
+    const expiry = document.getElementById('expiry').value;
+    const cvv = document.getElementById('cvv').value;
+    const cardholderName = document.getElementById('cardholderName').value;
+    const cpf = document.getElementById('cpf').value;
+
+    if (!email || !email.includes('@')) { showAlert('Digite um e-mail válido', 'error'); return false; }
+    if (!cardNumber || cardNumber.replace(/\s/g, '').length < 16) { showAlert('Digite um número de cartão válido', 'error'); return false; }
+    if (!expiry || !expiry.includes('/')) { showAlert('Digite a validade do cartão', 'error'); return false; }
+    if (!cvv || cvv.length < 3) { showAlert('Digite o CVV válido', 'error'); return false; }
+    if (!cardholderName) { showAlert('Digite o nome no cartão', 'error'); return false; }
+
+    const [expMonth, expYear] = expiry.split('/');
+
+    const cardData = {
+        cardNumber: cardNumber.replace(/\s/g, ''),
+        cardholderName: cardholderName,
+        cardExpirationMonth: expMonth,
+        cardExpirationYear: '20' + expYear,
+        securityCode: cvv,
+        identificationType: 'CPF',
+        identificationNumber: cpf.replace(/\D/g, '') || '19119119100'
+    };
+
+    showModal('Processando pagamento...', 'Validando dados do cartão', 'loading');
+
+    try {
+        // 🔥 CRIA TOKEN
+        const tokenResponse = await mp.createCardToken(cardData);
+
+        if (tokenResponse.error) {
+            throw new Error('Cartão inválido');
+        }
+
+        console.log("✅ Token:", tokenResponse.id);
+
+        showModal('Processando pagamento...', 'Autorizando transação', 'loading');
+
+        // 🔥 PEGA DADOS IMPORTANTES DO TOKEN
+        const paymentMethodId = tokenResponse.payment_method_id;
+        const issuerId = tokenResponse.issuer_id;
+
+        // 🔥 ENVIA PRO BACKEND (CORRIGIDO)
+        const response = await fetch(`${API_URL}/criar-pagamento`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                metodo: 'card',
+                token: tokenResponse.id,
+                payment_method_id: paymentMethodId,
+                issuer_id: issuerId,
+                installments: 1,
+                email: email,
+                plan: selectedPlan
+            })
+        });
+
+        const data = await response.json();
+
+        console.log("📦 Resposta backend:", data);
+
+        // 🔥 TRATAMENTO CORRETO
+        if (data.sucesso && data.status === 'approved') {
+            pagamentoAprovado = true;
+
+            localStorage.setItem('pagamento_aprovado', JSON.stringify({
+                email,
+                plan: selectedPlan
+            }));
+
+            showModal('✅ Pagamento Confirmado!', 'Seu pagamento foi aprovado. Redirecionando...', 'success');
+
+            setTimeout(() => {
+                window.location.href = '/sucesso.html';
+            }, 2000);
+
+            return true;
+
+        } else {
+            throw new Error(data.detalhe || data.erro || 'Pagamento recusado');
+        }
+
+    } catch (error) {
+        console.error("❌ Erro:", error);
+        showModal('❌ Falha no Pagamento', error.message, 'error');
+        return false;
     }
+}
     
+    // Pagamento com PIX
     async function processPixPayment() {
         const email = document.getElementById('email').value;
+        
         if (!email || !email.includes('@')) { showAlert('Digite um e-mail válido', 'error'); return false; }
+        
         showModal('Gerando PIX...', 'Criando QR Code para pagamento', 'loading');
+        
         try {
-            const response = await fetch(`${API_URL}/criar-pagamento`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ metodo: 'pix', email, plan: selectedPlan, valor: PLANS[selectedPlan].price }) });
+            const response = await fetch(`${API_URL}/criar-pagamento`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ metodo: 'pix', email, plan: selectedPlan, valor: PLANS[selectedPlan].price })
+            });
+            
             const data = await response.json();
+            
             if (data.sucesso) {
                 pixDataAtual = data;
-                localStorage.setItem('pagamento_aprovado', JSON.stringify({ email: email, plan: selectedPlan }));
-                localStorage.setItem('pagamento_pendente', JSON.stringify({ email: email, plan: selectedPlan, id: data.id }));
-                const qrHtml = `<div class="text-center mt-4"><div class="bg-white p-4 rounded-2xl inline-block"><img src="data:image/jpeg;base64,${data.qr_code_base64 || ''}" class="w-48 h-48 mx-auto"></div><p class="text-xs text-gray-500 mt-3 break-all bg-gray-50 p-3 rounded-lg">${data.qr_code || ''}</p><button onclick="copyPixCode()" class="mt-3 bg-teal-500 text-white px-6 py-2 rounded-lg hover:bg-teal-600">📋 Copiar código PIX</button><p class="text-xs text-gray-400 mt-3">⏱️ QR Code válido por 30 minutos</p></div>`;
+                              
+                const qrHtml = `
+                    <div class="text-center mt-4">
+                        <div class="bg-white p-4 rounded-2xl inline-block"><img src="data:image/jpeg;base64,${data.qr_code_base64 || ''}" class="w-48 h-48 mx-auto"></div>
+                        <p class="text-xs text-gray-500 mt-3 break-all bg-gray-50 p-3 rounded-lg">${data.qr_code || ''}</p>
+                        <button onclick="copyPixCode()" class="mt-3 bg-teal-500 text-white px-6 py-2 rounded-lg hover:bg-teal-600">📋 Copiar código PIX</button>
+                        <p class="text-xs text-gray-400 mt-3">⏱️ QR Code válido por 30 minutos</p>
+                    </div>
+                `;
                 showModal('Pagamento via PIX', 'Escaneie o QR Code com o app do seu banco', 'pix', qrHtml);
+                localStorage.setItem('pagamento_pendente', JSON.stringify({ email, plan: selectedPlan, id: data.id }));
+                
                 if (statusCheckInterval) clearInterval(statusCheckInterval);
-                statusCheckInterval = setInterval(async () => { try { const statusResponse = await fetch(`${API_URL}/verificar-pagamento?id=${data.id}`); const statusData = await statusResponse.json(); if (statusData.status === 'approved') { clearInterval(statusCheckInterval); pagamentoAprovado = true; localStorage.setItem('pagamento_aprovado', JSON.stringify({ email, plan: selectedPlan })); showModal('✅ Pagamento Confirmado!', 'PIX confirmado! Redirecionando...', 'success'); setTimeout(() => { window.location.href = '/sucesso.html'; }, 2000); } } catch (err) { console.error('Erro ao verificar status:', err); } }, 5000);
+                statusCheckInterval = setInterval(async () => {
+                    try {
+                        const statusResponse = await fetch(`${API_URL}/verificar-pagamento?id=${data.id}`);
+                        const statusData = await statusResponse.json();
+                        if (statusData.status === 'approved') {
+                            clearInterval(statusCheckInterval);
+                            pagamentoAprovado = true;
+                            localStorage.setItem('pagamento_aprovado', JSON.stringify({ email, plan: selectedPlan }));
+                            showModal('✅ Pagamento Confirmado!', 'PIX confirmado! Redirecionando...', 'success');
+                            setTimeout(() => { window.location.href = '/sucesso.html'; }, 2000);
+                        }
+                    } catch (err) { console.error('Erro ao verificar status:', err); }
+                }, 5000);
                 return true;
-            } else { throw new Error(data.erro || 'Erro ao gerar PIX'); }
-        } catch (error) { showModal('❌ Erro', error.message, 'error'); return false; }
+            } else {
+                throw new Error(data.erro || 'Erro ao gerar PIX');
+            }
+        } catch (error) {
+            showModal('❌ Erro', error.message, 'error');
+            return false;
+        }
     }
     
-    window.copyPixCode = function() { if (pixDataAtual && pixDataAtual.qr_code) { navigator.clipboard.writeText(pixDataAtual.qr_code); showAlert('Código PIX copiado!', 'success'); } };
-    
+    window.copyPixCode = function() {
+        if (pixDataAtual && pixDataAtual.qr_code) {
+            navigator.clipboard.writeText(pixDataAtual.qr_code);
+            showAlert('Código PIX copiado!', 'success');
+        }
+    };
+       
+       
     window.processPayment = async function() {
         const btn = document.getElementById('payButton');
-        if (btn) { btn.disabled = true; btn.innerHTML = '<div class="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent inline-block mr-2"></div> Processando...'; }
+        btn.disabled = true;
+        btn.innerHTML = '<div class="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent inline-block mr-2"></div> Processando...';
         let result = currentPaymentMethod === 'card' ? await processCardPayment() : await processPixPayment();
-        if (!result && btn) { btn.disabled = false; btn.innerHTML = currentPaymentMethod === 'card' ? `💳 Pagar R$ ${formatCurrency(PLANS[selectedPlan].price)}` : `⚡ Gerar QR Code PIX · R$ ${formatCurrency(PLANS[selectedPlan].price)}`; }
+        if (!result) {
+            btn.disabled = false;
+            btn.innerHTML = currentPaymentMethod === 'card' ? `💳 Pagar R$ ${formatCurrency(PLANS[selectedPlan].price)}` : `⚡ Gerar QR Code PIX · R$ ${formatCurrency(PLANS[selectedPlan].price)}`;
+        }
     };
     
     function updateCardPreview() {
@@ -260,23 +517,26 @@
         const cardholderName = document.getElementById('cardholderName')?.value || '';
         const expiry = document.getElementById('expiry')?.value || '';
         const cvv = document.getElementById('cvv')?.value || '';
-        const chunks = cardNumber.padEnd(19, ' ').substring(0, 19).match(/.{1,4}/g) || ['****', '****', '****', '****'];
-        const previewNumber = document.getElementById('previewNumber');
-        const previewName = document.getElementById('previewName');
-        const previewExpiry = document.getElementById('previewExpiry');
-        const previewCvv = document.getElementById('previewCvv');
-        const previewBrand = document.getElementById('previewBrand');
-        if (previewNumber) previewNumber.textContent = chunks.join(' ');
-        if (previewName) previewName.textContent = cardholderName.toUpperCase() || 'SEU NOME';
-        if (previewExpiry) previewExpiry.textContent = expiry || 'MM/AA';
-        if (previewCvv) previewCvv.textContent = cvv || '***';
+        const formattedNumber = cardNumber.padEnd(19, ' ').substring(0, 19);
+        const chunks = formattedNumber.match(/.{1,4}/g) || ['****', '****', '****', '****'];
+        document.getElementById('previewNumber').textContent = chunks.join(' ');
+        document.getElementById('previewName').textContent = cardholderName.toUpperCase() || 'SEU NOME';
+        document.getElementById('previewExpiry').textContent = expiry || 'MM/AA';
+        document.getElementById('previewCvv').textContent = cvv || '***';
         const brand = detectCardBrand(cardNumber);
-        if (previewBrand) { if (brand) { previewBrand.textContent = brand.name; previewBrand.style.color = brand.color; } else { previewBrand.textContent = '****'; previewBrand.style.color = '#94a3b8'; } }
+        const brandElement = document.getElementById('previewBrand');
+        if (brand) {
+            brandElement.textContent = brand.name;
+            brandElement.style.color = brand.color;
+        } else {
+            brandElement.textContent = '****';
+            brandElement.style.color = '#94a3b8';
+        }
     }
     
-    window.flipCard = function() { const cardInner = document.getElementById('cardInner'); if (cardInner) cardInner.classList.toggle('flipped'); };
-    window.flipCardFront = function() { const cardInner = document.getElementById('cardInner'); if (cardInner) cardInner.classList.add('flipped'); };
-    window.flipCardBack = function() { const cardInner = document.getElementById('cardInner'); if (cardInner) cardInner.classList.remove('flipped'); };
+    window.flipCard = function() { document.getElementById('cardInner').classList.toggle('flipped'); };
+    window.flipCardFront = function() { document.getElementById('cardInner').classList.add('flipped'); };
+    window.flipCardBack = function() { document.getElementById('cardInner').classList.remove('flipped'); };
     
     function bindFormatters() {
         const cardNumberInput = document.getElementById('cardNumber');
@@ -385,12 +645,12 @@
         bindFormatters();
     }
     
-    // Inicialização
-    document.addEventListener('DOMContentLoaded', () => {
-        initMercadoPago();
-        renderApp();
-        setTimeout(() => { updateOrderSummary(); updatePayButton(); }, 300);
-    });
+    initMercadoPago();
+    renderApp();
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const planFromUrl = urlParams.get('plan');
+    if (planFromUrl && PLANS[planFromUrl]) setTimeout(() => selectPlan(planFromUrl), 100);
     </script>
 </body>
 </html>
