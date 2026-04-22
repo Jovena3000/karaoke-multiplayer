@@ -415,16 +415,22 @@ async function processCardPayment() {
         const data = await response.json();
         console.log("📦 Resposta backend:", data);
 
-        // 🔥 CORREÇÃO: Verificar se veio init_point (Checkout Pro)
+        // 🔥 CORREÇÃO: Verificar se é Checkout Pro (com init_point)
         if (data.init_point) {
-            // Redireciona para o Mercado Pago
-            showModal('Redirecionando...', 'Você será redirecionado para o Mercado Pago', 'success');
+            // Salvar dados do pagamento pendente
+            localStorage.setItem('pagamento_pendente', JSON.stringify({ 
+                email: email, 
+                plan: selectedPlan,
+                id: data.id
+            }));
+            showModal('Redirecionando...', 'Você será redirecionado para o Mercado Pago para concluir o pagamento', 'success');
             setTimeout(() => {
                 window.location.href = data.init_point;
             }, 2000);
             return true;
         }
         
+        // Checkout Transparente
         if (data.sucesso === true) {
             pagamentoAprovado = true;
             localStorage.setItem('pagamento_aprovado', JSON.stringify({ 
