@@ -22,7 +22,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        /* Custom styles */
         .card-flip {
             transition: transform 0.6s;
             transform-style: preserve-3d;
@@ -43,20 +42,16 @@
             from { opacity: 0; transform: scale(0.95); }
             to { opacity: 1; transform: scale(1); }
         }
-        
-        /* Efeito pulsante no plano selecionado */
         .plan-card.selected {
             border-color: #6366f1 !important;
             background-color: #eef2ff !important;
             animation: pulse 0.6s ease-in-out 2;
         }
-        
         @keyframes pulse {
             0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); }
             50% { transform: scale(1.02); box-shadow: 0 0 0 8px rgba(99, 102, 241, 0.1); }
             100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
         }
-        
         input:focus {
             outline: none;
             ring: 2px solid #6366f1;
@@ -78,47 +73,29 @@
     let pixDataAtual = null;
     let statusCheckInterval = null;
     
-    // Planos
     const PLANS = {
         mensal: { 
-            name: 'Plano Mensal', 
-            price: 5.00, 
-            originalPrice: 5.00, 
-            description: 'Válido por 1 mês', 
-            save: 'Pagamento mensal', 
-            period: '1 mês', 
+            name: 'Plano Mensal', price: 5.00, originalPrice: 5.00, 
+            description: 'Válido por 1 mês', save: 'Pagamento mensal', period: '1 mês', 
             features: ['Salas ilimitadas', 'Músicas liberadas', 'Suporte básico'] 
         },
         trimestral: { 
-            name: 'Plano Trimestral', 
-            price: 49.90, 
-            originalPrice: 74.70, 
-            description: 'Válido por 3 meses', 
-            save: 'Economize R$ 24,80', 
-            period: '3 meses', 
+            name: 'Plano Trimestral', price: 49.90, originalPrice: 74.70, 
+            description: 'Válido por 3 meses', save: 'Economize R$ 24,80', period: '3 meses', 
             features: ['Salas ilimitadas', 'Histórico de músicas', 'Sistema de pontuação', 'Reações especiais', 'Emojis premium', 'Suporte prioritário'] 
         },
         semestral: { 
-            name: 'Plano Semestral', 
-            price: 89.90, 
-            originalPrice: 149.40, 
-            description: 'Válido por 6 meses', 
-            save: 'Economize R$ 59,50', 
-            period: '6 meses', 
+            name: 'Plano Semestral', price: 89.90, originalPrice: 149.40, 
+            description: 'Válido por 6 meses', save: 'Economize R$ 59,50', period: '6 meses', 
             features: ['Salas ilimitadas', 'Histórico de músicas', 'Sistema de pontuação', 'Reações especiais', 'Emojis premium', 'Suporte prioritário'] 
         },
         anual: { 
-            name: 'Plano Anual', 
-            price: 159.90, 
-            originalPrice: 298.80, 
-            description: 'Válido por 12 meses', 
-            save: 'Economize R$ 138,90', 
-            period: '12 meses', 
+            name: 'Plano Anual', price: 159.90, originalPrice: 298.80, 
+            description: 'Válido por 12 meses', save: 'Economize R$ 138,90', period: '12 meses', 
             features: ['Salas ilimitadas', 'Histórico de músicas', 'Sistema de pontuação', 'Reações especiais', 'Emojis premium', 'Suporte prioritário'] 
         }
     };
     
-    // Funções auxiliares
     function formatCurrency(value) {
         return value.toFixed(2).replace('.', ',');
     }
@@ -154,7 +131,6 @@
         return null;
     }
     
-    // Inicializar Mercado Pago
     function initMercadoPago() {
         if (typeof MercadoPago !== 'undefined') {
             mp = new MercadoPago(MP_PUBLIC_KEY, { locale: 'pt-BR' });
@@ -164,7 +140,6 @@
         }
     }
     
-    // Mostrar alerta
     function showAlert(message, type) {
         const alertDiv = document.getElementById('customAlert');
         if (alertDiv) {
@@ -179,7 +154,6 @@
         }
     }
     
-    // Modal functions
     function showModal(title, message, type = 'loading', extraHtml = '') {
         const modal = document.getElementById('paymentModal');
         const modalIcon = document.getElementById('modalIcon');
@@ -231,44 +205,31 @@
         if (pagamentoAprovado) window.location.href = '/sucesso.html';
     }
     
-    // Função para selecionar plano
     window.selectPlan = function(plan) {
         selectedPlan = plan;
-        
-        // Atualizar visual dos cards
         document.querySelectorAll('.plan-card').forEach(card => {
             card.classList.remove('selected', 'border-indigo-500', 'bg-indigo-50', 'scale-[1.02]');
         });
-        
         const selectedCard = document.getElementById(`plan-${plan}`);
         if (selectedCard) {
             selectedCard.classList.add('selected', 'border-indigo-500', 'bg-indigo-50', 'scale-[1.02]');
         }
-        
-        // Atualizar o resumo do pedido
         updateOrderSummary();
         updatePayButton();
     };
     
-    // Atualizar resumo do pedido
     function updateOrderSummary() {
         const plan = PLANS[selectedPlan];
         const hasDiscount = plan.originalPrice > plan.price;
         const discount = plan.originalPrice - plan.price;
-        
-        // Nome e período
         document.getElementById('planName').textContent = plan.name;
         document.getElementById('planPeriod').textContent = plan.period;
-        
-        // Preço
         const planPriceEl = document.getElementById('planPrice');
         if (hasDiscount) {
             planPriceEl.innerHTML = `R$ ${formatCurrency(plan.price)} <span class="text-base text-gray-400 line-through ml-2">R$ ${formatCurrency(plan.originalPrice)}</span>`;
         } else {
             planPriceEl.innerHTML = `R$ ${formatCurrency(plan.price)}`;
         }
-        
-        // Features
         const featuresList = document.getElementById('planFeatures');
         featuresList.innerHTML = plan.features.map(f => `
             <li class="flex items-center gap-2 text-gray-600 text-sm">
@@ -280,16 +241,12 @@
                 ${f}
             </li>
         `).join('');
-        
-        // Subtotal
         const subtotalEl = document.getElementById('subtotal');
         if (hasDiscount) {
             subtotalEl.innerHTML = `<span class="line-through text-gray-400">R$ ${formatCurrency(plan.originalPrice)}</span>`;
         } else {
             subtotalEl.innerHTML = `R$ ${formatCurrency(plan.originalPrice)}`;
         }
-        
-        // Desconto
         const discountRow = document.getElementById('discountRow');
         const discountValue = document.getElementById('discountValue');
         if (hasDiscount) {
@@ -298,12 +255,7 @@
         } else {
             discountRow.classList.add('hidden');
         }
-        
-        // Total
-        const totalAmount = document.getElementById('totalAmount');
-        totalAmount.innerHTML = `<span class="text-green-600 font-bold text-lg">R$ ${formatCurrency(plan.price)}</span>`;
-        
-        // Botão
+        document.getElementById('totalAmount').innerHTML = `<span class="text-green-600 font-bold text-lg">R$ ${formatCurrency(plan.price)}</span>`;
         const payButton = document.getElementById('payButton');
         if (payButton) {
             payButton.innerHTML = currentPaymentMethod === 'card' 
@@ -316,7 +268,9 @@
         const btn = document.getElementById('payButton');
         if (btn) {
             const price = PLANS[selectedPlan].price;
-            btn.innerHTML = currentPaymentMethod === 'card' ? `💳 Pagar R$ ${formatCurrency(price)}` : `⚡ Gerar QR Code PIX · R$ ${formatCurrency(price)}`;
+            btn.innerHTML = currentPaymentMethod === 'card' 
+                ? `💳 Pagar R$ ${formatCurrency(price)}` 
+                : `⚡ Gerar QR Code PIX · R$ ${formatCurrency(price)}`;
         }
     }
     
@@ -343,120 +297,96 @@
         }
         updatePayButton();
     };
-    
-       // Pagamento com Cartão
-async function processCardPayment() {
-    const email = document.getElementById('email').value;
-    const cardNumber = document.getElementById('cardNumber').value;
-    const expiry = document.getElementById('expiry').value;
-    const cvv = document.getElementById('cvv').value;
-    const cardholderName = document.getElementById('cardholderName').value;
-    const cpf = document.getElementById('cpf').value;
 
-    if (!email || !email.includes('@')) { 
-        showAlert('Digite um e-mail válido', 'error'); 
-        return false; 
-    }
-    
-    if (!cardNumber || cardNumber.replace(/\s/g, '').length < 16) { 
-        showAlert('Digite um número de cartão válido', 'error'); 
-        return false; 
-    }
-    
-    if (!expiry || !expiry.includes('/')) { 
-        showAlert('Digite a validade do cartão', 'error'); 
-        return false; 
-    }
-    
-    if (!cvv || cvv.length < 3) { 
-        showAlert('Digite o CVV válido', 'error'); 
-        return false; 
-    }
-    
-    if (!cardholderName) { 
-        showAlert('Digite o nome no cartão', 'error'); 
-        return false; 
-    }
+    // ================= PAGAMENTO COM CARTÃO =================
+    async function processCardPayment() {
+        const email = document.getElementById('email').value.trim();
+        const cardNumber = document.getElementById('cardNumber').value;
+        const expiry = document.getElementById('expiry').value;
+        const cvv = document.getElementById('cvv').value;
+        const cardholderName = document.getElementById('cardholderName').value;
+        const cpf = document.getElementById('cpf').value;
 
-    const [expMonth, expYear] = expiry.split('/');
-    const cardData = {
-        cardNumber: cardNumber.replace(/\s/g, ''),
-        cardholderName: cardholderName,
-        cardExpirationMonth: expMonth,
-        cardExpirationYear: '20' + expYear,
-        securityCode: cvv,
-        identificationType: 'CPF',
-        identificationNumber: cpf.replace(/\D/g, '') || '19119119100'
-    };
+        // Validações
+        if (!email || !email.includes('@')) { showAlert('Digite um e-mail válido', 'error'); return false; }
+        if (!cardNumber || cardNumber.replace(/\s/g, '').length < 16) { showAlert('Digite um número de cartão válido', 'error'); return false; }
+        if (!expiry || !expiry.includes('/')) { showAlert('Digite a validade do cartão', 'error'); return false; }
+        if (!cvv || cvv.length < 3) { showAlert('Digite o CVV válido', 'error'); return false; }
+        if (!cardholderName) { showAlert('Digite o nome no cartão', 'error'); return false; }
 
-    showModal('Processando pagamento...', 'Validando dados do cartão', 'loading');
+        const [expMonth, expYear] = expiry.split('/');
+        const cpfNumeros = cpf.replace(/\D/g, '');
 
-    try {
-        const tokenResponse = await mp.createCardToken(cardData);
-        
-        if (tokenResponse.error) {
-            throw new Error(tokenResponse.error.message || 'Cartão inválido');
+        const cardData = {
+            cardNumber: cardNumber.replace(/\s/g, ''),
+            cardholderName: cardholderName,
+            cardExpirationMonth: expMonth,
+            cardExpirationYear: '20' + expYear,
+            securityCode: cvv,
+            identificationType: 'CPF',
+            identificationNumber: cpfNumeros || '19119119100'
+        };
+
+        showModal('Processando pagamento...', 'Validando dados do cartão', 'loading');
+
+        try {
+            const tokenResponse = await mp.createCardToken(cardData);
+            
+            if (tokenResponse.error) {
+                throw new Error(tokenResponse.error.message || 'Cartão inválido');
+            }
+
+            // ✅ CORRIGIDO: loga o payment_method_id retornado pelo SDK
+            console.log("✅ Token gerado:", tokenResponse.id);
+            console.log("💳 Bandeira detectada pelo MP:", tokenResponse.payment_method_id);
+
+            showModal('Processando pagamento...', 'Autorizando transação', 'loading');
+            
+            const response = await fetch(`${API_URL}/criar-pagamento`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    metodo: 'card',
+                    token: tokenResponse.id,
+                    // ✅ CORRIGIDO: envia a bandeira real do cartão
+                    payment_method_id: tokenResponse.payment_method_id,
+                    // ✅ CORRIGIDO: envia o CPF real do cliente
+                    cpf: cpfNumeros,
+                    email: email,
+                    plan: selectedPlan
+                })
+            });
+            
+            const data = await response.json();
+            console.log("📦 Resposta backend:", data);
+
+            if (data.init_point) {
+                localStorage.setItem('pagamento_pendente', JSON.stringify({ email, plan: selectedPlan, id: data.id }));
+                showModal('Redirecionando...', 'Você será redirecionado para o Mercado Pago para concluir o pagamento', 'success');
+                setTimeout(() => { window.location.href = data.init_point; }, 2000);
+                return true;
+            }
+            
+            if (data.sucesso === true) {
+                pagamentoAprovado = true;
+                localStorage.setItem('pagamento_aprovado', JSON.stringify({ email, plan: selectedPlan }));
+                showModal('✅ Pagamento Confirmado!', 'Seu pagamento foi aprovado. Redirecionando...', 'success');
+                setTimeout(() => { window.location.href = '/sucesso.html'; }, 2000);
+                return true;
+            } else {
+                throw new Error(data.erro || data.mensagem || 'Pagamento recusado');
+            }
+            
+        } catch (error) {
+            console.error("❌ Erro no pagamento:", error);
+            showModal('❌ Falha no Pagamento', error.message, 'error');
+            return false;
         }
-        
-        console.log("✅ Token:", tokenResponse.id);
-        showModal('Processando pagamento...', 'Autorizando transação', 'loading');
-        
-        const response = await fetch(`${API_URL}/criar-pagamento`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                metodo: 'card',
-                token: tokenResponse.id,
-                email: email,
-                plan: selectedPlan
-            })
-        });
-        
-        const data = await response.json();
-        console.log("📦 Resposta backend:", data);
-
-        // 🔥 CORREÇÃO: Verificar se é Checkout Pro (com init_point)
-        if (data.init_point) {
-            // Salvar dados do pagamento pendente
-            localStorage.setItem('pagamento_pendente', JSON.stringify({ 
-                email: email, 
-                plan: selectedPlan,
-                id: data.id
-            }));
-            showModal('Redirecionando...', 'Você será redirecionado para o Mercado Pago para concluir o pagamento', 'success');
-            setTimeout(() => {
-                window.location.href = data.init_point;
-            }, 2000);
-            return true;
-        }
-        
-        // Checkout Transparente
-        if (data.sucesso === true) {
-            pagamentoAprovado = true;
-            localStorage.setItem('pagamento_aprovado', JSON.stringify({ 
-                email: email, 
-                plan: selectedPlan 
-            }));
-            showModal('✅ Pagamento Confirmado!', 'Seu pagamento foi aprovado. Redirecionando...', 'success');
-            setTimeout(() => { 
-                window.location.href = '/sucesso.html'; 
-            }, 2000);
-            return true;
-        } else {
-            const mensagemErro = data.erro || data.mensagem || 'Pagamento recusado';
-            throw new Error(mensagemErro);
-        }
-        
-    } catch (error) {
-        console.error("❌ Erro:", error);
-        showModal('❌ Falha no Pagamento', error.message, 'error');
-        return false;
     }
-}
     
-    // Pagamento com PIX
+    // ================= PAGAMENTO COM PIX =================
     async function processPixPayment() {
-        const email = document.getElementById('email').value;
+        const email = document.getElementById('email').value.trim();
         
         if (!email || !email.includes('@')) { showAlert('Digite um e-mail válido', 'error'); return false; }
         
@@ -466,17 +396,18 @@ async function processCardPayment() {
             const response = await fetch(`${API_URL}/criar-pagamento`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ metodo: 'pix', email, plan: selectedPlan, valor: PLANS[selectedPlan].price })
+                body: JSON.stringify({ metodo: 'pix', email, plan: selectedPlan })
             });
             
             const data = await response.json();
             
             if (data.sucesso) {
                 pixDataAtual = data;
-                              
                 const qrHtml = `
                     <div class="text-center mt-4">
-                        <div class="bg-white p-4 rounded-2xl inline-block"><img src="data:image/jpeg;base64,${data.qr_code_base64 || ''}" class="w-48 h-48 mx-auto"></div>
+                        <div class="bg-white p-4 rounded-2xl inline-block">
+                            <img src="data:image/jpeg;base64,${data.qr_code_base64 || ''}" class="w-48 h-48 mx-auto">
+                        </div>
                         <p class="text-xs text-gray-500 mt-3 break-all bg-gray-50 p-3 rounded-lg">${data.qr_code || ''}</p>
                         <button onclick="copyPixCode()" class="mt-3 bg-teal-500 text-white px-6 py-2 rounded-lg hover:bg-teal-600">📋 Copiar código PIX</button>
                         <p class="text-xs text-gray-400 mt-3">⏱️ QR Code válido por 30 minutos</p>
@@ -515,16 +446,17 @@ async function processCardPayment() {
             showAlert('Código PIX copiado!', 'success');
         }
     };
-       
-       
+    
     window.processPayment = async function() {
         const btn = document.getElementById('payButton');
         btn.disabled = true;
         btn.innerHTML = '<div class="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent inline-block mr-2"></div> Processando...';
-        let result = currentPaymentMethod === 'card' ? await processCardPayment() : await processPixPayment();
+        const result = currentPaymentMethod === 'card' ? await processCardPayment() : await processPixPayment();
         if (!result) {
             btn.disabled = false;
-            btn.innerHTML = currentPaymentMethod === 'card' ? `💳 Pagar R$ ${formatCurrency(PLANS[selectedPlan].price)}` : `⚡ Gerar QR Code PIX · R$ ${formatCurrency(PLANS[selectedPlan].price)}`;
+            btn.innerHTML = currentPaymentMethod === 'card' 
+                ? `💳 Pagar R$ ${formatCurrency(PLANS[selectedPlan].price)}` 
+                : `⚡ Gerar QR Code PIX · R$ ${formatCurrency(PLANS[selectedPlan].price)}`;
         }
     };
     
@@ -560,7 +492,14 @@ async function processCardPayment() {
         const cpfInput = document.getElementById('cpf');
         const nameInput = document.getElementById('cardholderName');
         const cvvInput = document.getElementById('cvv');
-        if (cardNumberInput) cardNumberInput.addEventListener('input', (e) => { e.target.value = formatCardNumber(e.target.value); updateCardPreview(); const brand = detectCardBrand(e.target.value); const flagIcon = document.getElementById('cardFlagIcon'); if (brand && flagIcon) flagIcon.innerHTML = `<span class="text-xs font-bold" style="color: ${brand.color}">${brand.name}</span>`; else if (flagIcon) flagIcon.innerHTML = ''; });
+        if (cardNumberInput) cardNumberInput.addEventListener('input', (e) => {
+            e.target.value = formatCardNumber(e.target.value);
+            updateCardPreview();
+            const brand = detectCardBrand(e.target.value);
+            const flagIcon = document.getElementById('cardFlagIcon');
+            if (brand && flagIcon) flagIcon.innerHTML = `<span class="text-xs font-bold" style="color: ${brand.color}">${brand.name}</span>`;
+            else if (flagIcon) flagIcon.innerHTML = '';
+        });
         if (expiryInput) expiryInput.addEventListener('input', (e) => { e.target.value = formatExpiry(e.target.value); updateCardPreview(); });
         if (cpfInput) cpfInput.addEventListener('input', (e) => { e.target.value = formatCPF(e.target.value); });
         if (nameInput) nameInput.addEventListener('input', () => updateCardPreview());
@@ -595,56 +534,170 @@ async function processCardPayment() {
                         <div class="flex-1 max-w-[60px] h-0.5 bg-white/20 rounded"></div>
                         <div class="flex flex-col items-center"><div class="w-9 h-9 rounded-full bg-white/20 text-white/60 flex items-center justify-center font-bold text-sm">3</div><span class="mt-1.5 text-xs font-medium text-white/50">Confirmação</span></div>
                     </div>
-                    <div class="mb-8"><h2 class="text-white text-center text-2xl font-bold mb-5 drop-shadow">Escolha seu plano:</h2>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        ${Object.entries(PLANS).map(([key, p]) => `<div id="plan-${key}" onclick="selectPlan('${key}')" class="plan-card bg-white rounded-xl border-2 ${key === 'trimestral' ? 'border-yellow-400' : 'border-gray-200'} p-4 cursor-pointer transition-all duration-300 text-left relative ${key === selectedPlan ? 'selected border-indigo-500 bg-indigo-50 scale-[1.02]' : ''}">${key === 'trimestral' ? '<span class="absolute -top-3 right-3 bg-yellow-400 text-gray-800 text-xs font-bold py-1 px-3 rounded-full shadow">⭐ RECOMENDADO</span>' : ''}${key === selectedPlan ? '<span class="absolute top-2 right-2 w-5 h-5 bg-indigo-500 rounded-full flex items-center justify-center"><svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg></span>' : ''}<div class="font-bold text-gray-800 text-base mb-1">${p.name}</div><div class="text-indigo-600 font-extrabold text-2xl">R$ ${formatCurrency(p.price)}</div><div class="text-gray-500 text-xs mt-1">${p.description}</div><div class="mt-2 inline-block bg-green-100 text-green-700 text-xs font-semibold px-2 py-0.5 rounded-full">${p.save}</div></div>`).join('')}
-                    </div></div>
+                    <div class="mb-8">
+                        <h2 class="text-white text-center text-2xl font-bold mb-5 drop-shadow">Escolha seu plano:</h2>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            ${Object.entries(PLANS).map(([key, p]) => `
+                                <div id="plan-${key}" onclick="selectPlan('${key}')" class="plan-card bg-white rounded-xl border-2 ${key === 'trimestral' ? 'border-yellow-400' : 'border-gray-200'} p-4 cursor-pointer transition-all duration-300 text-left relative ${key === selectedPlan ? 'selected border-indigo-500 bg-indigo-50 scale-[1.02]' : ''}">
+                                    ${key === 'trimestral' ? '<span class="absolute -top-3 right-3 bg-yellow-400 text-gray-800 text-xs font-bold py-1 px-3 rounded-full shadow">⭐ RECOMENDADO</span>' : ''}
+                                    ${key === selectedPlan ? '<span class="absolute top-2 right-2 w-5 h-5 bg-indigo-500 rounded-full flex items-center justify-center"><svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg></span>' : ''}
+                                    <div class="font-bold text-gray-800 text-base mb-1">${p.name}</div>
+                                    <div class="text-indigo-600 font-extrabold text-2xl">R$ ${formatCurrency(p.price)}</div>
+                                    <div class="text-gray-500 text-xs mt-1">${p.description}</div>
+                                    <div class="mt-2 inline-block bg-green-100 text-green-700 text-xs font-semibold px-2 py-0.5 rounded-full">${p.save}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
                     <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
                         <div class="grid grid-cols-1 lg:grid-cols-2">
+                            <!-- Resumo do Pedido -->
                             <div class="border-b lg:border-b-0 lg:border-r border-gray-100 p-5 sm:p-7 bg-gray-50/50">
                                 <div class="bg-gray-50 rounded-xl p-5 h-full">
                                     <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2"><span class="text-2xl">🛒</span> Seu Pedido</h2>
                                     <div class="bg-white rounded-xl p-4 mb-4 shadow-sm border border-gray-100">
-                                        <div class="flex items-center justify-between mb-1"><span class="font-bold text-gray-800 text-base" id="planName">${plan.name}</span><span class="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full" id="planPeriod">${plan.period}</span></div>
-                                        <div class="text-3xl font-extrabold text-indigo-600 my-2" id="planPrice">R$ ${formatCurrency(plan.price)}${hasDiscount ? `<span class="text-base text-gray-400 line-through ml-2">R$ ${formatCurrency(plan.originalPrice)}</span>` : ''}</div>
-                                        <ul class="space-y-1.5" id="planFeatures">${plan.features.map(f => `<li class="flex items-center gap-2 text-gray-600 text-sm"><span class="flex-shrink-0 w-4 h-4 bg-green-100 rounded-full flex items-center justify-center"><svg class="w-2.5 h-2.5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg></span>${f}</li>`).join('')}</ul>
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="font-bold text-gray-800 text-base" id="planName">${plan.name}</span>
+                                            <span class="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full" id="planPeriod">${plan.period}</span>
+                                        </div>
+                                        <div class="text-3xl font-extrabold text-indigo-600 my-2" id="planPrice">
+                                            R$ ${formatCurrency(plan.price)}${hasDiscount ? `<span class="text-base text-gray-400 line-through ml-2">R$ ${formatCurrency(plan.originalPrice)}</span>` : ''}
+                                        </div>
+                                        <ul class="space-y-1.5" id="planFeatures">
+                                            ${plan.features.map(f => `
+                                                <li class="flex items-center gap-2 text-gray-600 text-sm">
+                                                    <span class="flex-shrink-0 w-4 h-4 bg-green-100 rounded-full flex items-center justify-center">
+                                                        <svg class="w-2.5 h-2.5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                                                    </span>${f}
+                                                </li>
+                                            `).join('')}
+                                        </ul>
                                     </div>
                                     <div class="border-t border-gray-200 pt-4 space-y-2">
                                         <div class="flex justify-between text-gray-500 text-sm"><span>Subtotal</span><span id="subtotal">${hasDiscount ? `<span class="line-through text-gray-400">R$ ${formatCurrency(plan.originalPrice)}</span>` : `R$ ${formatCurrency(plan.originalPrice)}`}</span></div>
                                         <div id="discountRow" class="flex justify-between ${hasDiscount ? '' : 'hidden'}"><span>Desconto</span><span id="discountValue">${hasDiscount ? `<span class="text-green-600 font-bold">-R$ ${formatCurrency(plan.originalPrice - plan.price)}</span>` : ''}</span></div>
                                         <div class="flex justify-between text-gray-800 font-bold text-lg border-t border-gray-200 pt-2 mt-1"><span>Total</span><span id="totalAmount"><span class="text-green-600 font-bold">R$ ${formatCurrency(plan.price)}</span></span></div>
                                     </div>
-                                    <div class="mt-4 bg-gradient-to-r from-yellow-400 to-amber-400 rounded-xl p-4 text-center shadow-sm"><p class="font-bold text-gray-800 text-sm">🎁 Bônus de Boas-vindas!</p><p class="text-gray-700 text-xs mt-1">Você ganhou <strong>7 dias grátis</strong> adicionais ao seu plano.</p><p class="text-gray-700 text-xs mt-1 font-semibold">Acesso liberado imediatamente após confirmação!</p></div>
-                                    <div class="mt-4 grid grid-cols-3 gap-2 text-center"><div class="bg-white rounded-lg p-2 border border-gray-100 shadow-sm"><div class="text-lg">🔒</div><div class="text-xs text-gray-500 mt-0.5 leading-tight">SSL 256-bit</div></div><div class="bg-white rounded-lg p-2 border border-gray-100 shadow-sm"><div class="text-lg">↩️</div><div class="text-xs text-gray-500 mt-0.5 leading-tight">7 dias garantia</div></div><div class="bg-white rounded-lg p-2 border border-gray-100 shadow-sm"><div class="text-lg">⚡</div><div class="text-xs text-gray-500 mt-0.5 leading-tight">Acesso imediato</div></div></div>
+                                    <div class="mt-4 bg-gradient-to-r from-yellow-400 to-amber-400 rounded-xl p-4 text-center shadow-sm">
+                                        <p class="font-bold text-gray-800 text-sm">🎁 Bônus de Boas-vindas!</p>
+                                        <p class="text-gray-700 text-xs mt-1">Você ganhou <strong>7 dias grátis</strong> adicionais ao seu plano.</p>
+                                        <p class="text-gray-700 text-xs mt-1 font-semibold">Acesso liberado imediatamente após confirmação!</p>
+                                    </div>
+                                    <div class="mt-4 grid grid-cols-3 gap-2 text-center">
+                                        <div class="bg-white rounded-lg p-2 border border-gray-100 shadow-sm"><div class="text-lg">🔒</div><div class="text-xs text-gray-500 mt-0.5 leading-tight">SSL 256-bit</div></div>
+                                        <div class="bg-white rounded-lg p-2 border border-gray-100 shadow-sm"><div class="text-lg">↩️</div><div class="text-xs text-gray-500 mt-0.5 leading-tight">7 dias garantia</div></div>
+                                        <div class="bg-white rounded-lg p-2 border border-gray-100 shadow-sm"><div class="text-lg">⚡</div><div class="text-xs text-gray-500 mt-0.5 leading-tight">Acesso imediato</div></div>
+                                    </div>
                                 </div>
                             </div>
+                            <!-- Formulário de Pagamento -->
                             <div class="p-5 sm:p-7">
                                 <div class="flex flex-col h-full">
                                     <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2"><span class="text-2xl">💳</span> Forma de Pagamento</h2>
-                                    <div class="mb-5"><label class="block text-sm font-semibold text-gray-700 mb-1.5">📧 Seu melhor e-mail</label><input type="email" id="email" placeholder="exemplo@email.com" class="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-800 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"><p class="text-xs text-gray-400 mt-1">Enviaremos sua senha de acesso para este e-mail após a confirmação.</p></div>
-                                    <div class="flex gap-3 mb-5">
-                                        <button id="method-card" onclick="selectPaymentMethod('card')" class="payment-method-btn flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border-2 font-semibold text-sm transition-all duration-200 border-indigo-500 bg-indigo-50 text-indigo-700 shadow-sm"><div class="flex -space-x-1"><span class="w-6 h-5 bg-blue-900 rounded text-white text-[8px] flex items-center justify-center">VISA</span><span class="w-6 h-5 bg-red-500 rounded text-white text-[8px] flex items-center justify-center">MC</span></div><span>Cartão de Crédito</span></button>
-                                        <button id="method-pix" onclick="selectPaymentMethod('pix')" class="payment-method-btn flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border-2 font-semibold text-sm transition-all duration-200 border-gray-200 text-gray-500"><svg viewBox="0 0 24 24" class="w-5 h-5 fill-current text-teal-500" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 2.5l3 3-3 3-3-3 3-3zm5 5l3 3-3 3-3-3 3-3zm-10 0l3 3-3 3-3-3 3-3zm5 5l3 3-3 3-3-3 3-3z"/></svg><span>PIX</span><span class="text-xs bg-teal-100 text-teal-700 px-1.5 py-0.5 rounded-full font-medium">Instantâneo</span></button>
+                                    <div class="mb-5">
+                                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">📧 Seu melhor e-mail</label>
+                                        <input type="email" id="email" placeholder="exemplo@email.com" class="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-800 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+                                        <p class="text-xs text-gray-400 mt-1">Enviaremos sua senha de acesso para este e-mail após a confirmação.</p>
                                     </div>
+                                    <div class="flex gap-3 mb-5">
+                                        <button id="method-card" onclick="selectPaymentMethod('card')" class="payment-method-btn flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border-2 font-semibold text-sm transition-all duration-200 border-indigo-500 bg-indigo-50 text-indigo-700 shadow-sm">
+                                            <div class="flex -space-x-1"><span class="w-6 h-5 bg-blue-900 rounded text-white text-[8px] flex items-center justify-center">VISA</span><span class="w-6 h-5 bg-red-500 rounded text-white text-[8px] flex items-center justify-center">MC</span></div>
+                                            <span>Cartão de Crédito</span>
+                                        </button>
+                                        <button id="method-pix" onclick="selectPaymentMethod('pix')" class="payment-method-btn flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border-2 font-semibold text-sm transition-all duration-200 border-gray-200 text-gray-500">
+                                            <svg viewBox="0 0 24 24" class="w-5 h-5 fill-current text-teal-500" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 2.5l3 3-3 3-3-3 3-3zm5 5l3 3-3 3-3-3 3-3zm-10 0l3 3-3 3-3-3 3-3zm5 5l3 3-3 3-3-3 3-3z"/></svg>
+                                            <span>PIX</span>
+                                            <span class="text-xs bg-teal-100 text-teal-700 px-1.5 py-0.5 rounded-full font-medium">Instantâneo</span>
+                                        </button>
+                                    </div>
+                                    <!-- Formulário Cartão -->
                                     <div id="cardForm">
-                                        <div class="mb-6 perspective-1000 cursor-pointer" id="cardPreview" onclick="flipCard()"><div id="cardInner" class="relative w-full max-w-[340px] mx-auto h-52 transition-all duration-700 card-flip"><div class="card-front absolute inset-0 rounded-2xl bg-gradient-to-br from-indigo-800 via-purple-800 to-indigo-700 shadow-2xl p-5 flex flex-col justify-between overflow-hidden"><div class="flex justify-between items-start"><div><p class="text-white/50 text-xs uppercase tracking-widest">Cartão de Crédito</p></div><div id="previewBrand" class="text-white/70 text-sm font-bold">****</div></div><div><div id="previewNumber" class="font-mono text-white text-lg tracking-widest">**** **** **** ****</div></div><div class="flex justify-between items-end"><div><p class="text-white/50 text-xs uppercase tracking-wider mb-0.5">Titular</p><p id="previewName" class="text-white font-semibold text-sm uppercase tracking-wider truncate max-w-[180px]">SEU NOME</p></div><div class="text-right"><p class="text-white/50 text-xs uppercase tracking-wider mb-0.5">Validade</p><p id="previewExpiry" class="text-white font-semibold text-sm font-mono">MM/AA</p></div></div></div><div class="card-back absolute inset-0 rounded-2xl bg-gradient-to-br from-indigo-800 via-purple-800 to-indigo-700 shadow-2xl overflow-hidden"><div class="w-full h-12 bg-gray-900 mt-8"></div><div class="mx-5 mt-4 flex items-center gap-3"><div class="flex-1 bg-white/90 rounded h-10 flex items-center px-3"><div class="flex-1 h-0.5 bg-gray-300" style="background-image: repeating-linear-gradient(90deg, #999 0px, #999 2px, transparent 2px, transparent 6px);"></div></div><div class="bg-white/90 rounded px-3 py-2 min-w-[50px] text-center"><p class="text-gray-400 text-xs">CVV</p><p id="previewCvv" class="font-bold font-mono text-gray-800 text-sm tracking-widest">***</p></div></div></div></div></div>
-                                        <div class="mb-4"><label class="block text-sm font-semibold text-gray-700 mb-1.5">Número do Cartão</label><div class="relative"><input type="text" id="cardNumber" placeholder="0000 0000 0000 0000" maxlength="19" class="w-full border border-gray-300 rounded-lg px-4 py-3 pr-14 text-gray-800 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"><div id="cardFlagIcon" class="absolute right-3 top-1/2 -translate-y-1/2"></div></div></div>
-                                        <div class="grid grid-cols-2 gap-3 mb-4"><div><label class="block text-sm font-semibold text-gray-700 mb-1.5">Validade</label><input type="text" id="expiry" placeholder="MM/AA" maxlength="5" class="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-800 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"></div><div><label class="block text-sm font-semibold text-gray-700 mb-1.5">CVV</label><input type="text" id="cvv" placeholder="123" maxlength="4" onfocus="flipCardFront()" onblur="flipCardBack()" class="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-800 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"></div></div>
+                                        <div class="mb-6 perspective-1000 cursor-pointer" id="cardPreview" onclick="flipCard()">
+                                            <div id="cardInner" class="relative w-full max-w-[340px] mx-auto h-52 transition-all duration-700 card-flip">
+                                                <div class="card-front absolute inset-0 rounded-2xl bg-gradient-to-br from-indigo-800 via-purple-800 to-indigo-700 shadow-2xl p-5 flex flex-col justify-between overflow-hidden">
+                                                    <div class="flex justify-between items-start"><div><p class="text-white/50 text-xs uppercase tracking-widest">Cartão de Crédito</p></div><div id="previewBrand" class="text-white/70 text-sm font-bold">****</div></div>
+                                                    <div><div id="previewNumber" class="font-mono text-white text-lg tracking-widest">**** **** **** ****</div></div>
+                                                    <div class="flex justify-between items-end">
+                                                        <div><p class="text-white/50 text-xs uppercase tracking-wider mb-0.5">Titular</p><p id="previewName" class="text-white font-semibold text-sm uppercase tracking-wider truncate max-w-[180px]">SEU NOME</p></div>
+                                                        <div class="text-right"><p class="text-white/50 text-xs uppercase tracking-wider mb-0.5">Validade</p><p id="previewExpiry" class="text-white font-semibold text-sm font-mono">MM/AA</p></div>
+                                                    </div>
+                                                </div>
+                                                <div class="card-back absolute inset-0 rounded-2xl bg-gradient-to-br from-indigo-800 via-purple-800 to-indigo-700 shadow-2xl overflow-hidden">
+                                                    <div class="w-full h-12 bg-gray-900 mt-8"></div>
+                                                    <div class="mx-5 mt-4 flex items-center gap-3">
+                                                        <div class="flex-1 bg-white/90 rounded h-10 flex items-center px-3"><div class="flex-1 h-0.5 bg-gray-300" style="background-image: repeating-linear-gradient(90deg, #999 0px, #999 2px, transparent 2px, transparent 6px);"></div></div>
+                                                        <div class="bg-white/90 rounded px-3 py-2 min-w-[50px] text-center"><p class="text-gray-400 text-xs">CVV</p><p id="previewCvv" class="font-bold font-mono text-gray-800 text-sm tracking-widest">***</p></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mb-4">
+                                            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Número do Cartão</label>
+                                            <div class="relative"><input type="text" id="cardNumber" placeholder="0000 0000 0000 0000" maxlength="19" class="w-full border border-gray-300 rounded-lg px-4 py-3 pr-14 text-gray-800 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"><div id="cardFlagIcon" class="absolute right-3 top-1/2 -translate-y-1/2"></div></div>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-3 mb-4">
+                                            <div><label class="block text-sm font-semibold text-gray-700 mb-1.5">Validade</label><input type="text" id="expiry" placeholder="MM/AA" maxlength="5" class="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-800 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"></div>
+                                            <div><label class="block text-sm font-semibold text-gray-700 mb-1.5">CVV</label><input type="text" id="cvv" placeholder="123" maxlength="4" onfocus="flipCardFront()" onblur="flipCardBack()" class="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-800 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"></div>
+                                        </div>
                                         <div class="mb-4"><label class="block text-sm font-semibold text-gray-700 mb-1.5">Nome no Cartão</label><input type="text" id="cardholderName" placeholder="Como está impresso no cartão" class="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-800 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all uppercase"></div>
                                         <div class="mb-4"><label class="block text-sm font-semibold text-gray-700 mb-1.5">CPF do Titular</label><input type="text" id="cpf" placeholder="000.000.000-00" maxlength="14" class="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-800 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"></div>
-                                        <div class="flex items-center gap-2 bg-indigo-50 rounded-lg p-3 border border-indigo-100"><svg class="w-4 h-4 text-indigo-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg><p class="text-xs text-indigo-700">🔒 Seus dados são criptografados com SSL 256-bit. Não armazenamos dados do cartão.</p></div>
+                                        <div class="flex items-center gap-2 bg-indigo-50 rounded-lg p-3 border border-indigo-100">
+                                            <svg class="w-4 h-4 text-indigo-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                                            <p class="text-xs text-indigo-700">🔒 Seus dados são criptografados com SSL 256-bit. Não armazenamos dados do cartão.</p>
+                                        </div>
                                     </div>
-                                    <div id="pixForm" class="hidden"><div class="text-center"><div class="flex items-center justify-center gap-3 mb-5"><div class="w-12 h-12 bg-teal-500 rounded-xl flex items-center justify-center shadow"><svg viewBox="0 0 48 48" class="w-8 h-8" fill="none"><path d="M19.5 12l4.5 4.5L28.5 12l3 3-4.5 4.5L31.5 24l-3 3-4.5-4.5L19.5 27l-3-3 4.5-4.5L16.5 15z" fill="white"/><path d="M19.5 27l4.5 4.5L28.5 27l3 3-4.5 4.5-4.5-4.5-4.5 4.5-3-3z" fill="white"/></svg></div><div class="text-left"><h3 class="font-bold text-gray-800 text-lg">Pagamento via PIX</h3><p class="text-gray-500 text-sm">Rápido, seguro e sem taxas</p></div></div><div class="bg-teal-50 rounded-2xl p-6 border border-teal-100"><div class="w-32 h-32 mx-auto bg-gray-100 rounded-xl flex items-center justify-center border-2 border-dashed border-gray-300 mb-4"><svg class="w-16 h-16 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg></div><p class="text-gray-600 text-sm mb-4">Clique em <strong>"Gerar PIX"</strong> para criar seu QR Code de pagamento</p><div class="space-y-2 text-left"><div class="flex items-center gap-2 text-sm text-gray-600"><span>⚡</span><span>Confirmação automática em até 1 minuto</span></div><div class="flex items-center gap-2 text-sm text-gray-600"><span>🔒</span><span>Transação 100% segura via Banco Central</span></div><div class="flex items-center gap-2 text-sm text-gray-600"><span>📱</span><span>Use qualquer banco ou carteira digital</span></div><div class="flex items-center gap-2 text-sm text-gray-600"><span>⏱️</span><span>QR Code válido por 30 minutos</span></div></div></div></div></div>
-                                    <button id="payButton" onclick="processPayment()" class="mt-4 w-full py-4 rounded-xl font-bold text-lg text-white transition-all duration-300 flex items-center justify-center gap-2 shadow-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-indigo-200 hover:scale-[1.01] active:scale-[0.99]">💳 Pagar R$ ${formatCurrency(plan.price)}</button>
-                                    <div class="mt-4 text-center"><div class="inline-flex items-center gap-3 bg-green-50 border border-green-200 rounded-2xl px-4 py-3"><div class="text-3xl">🛡️</div><div class="text-left"><p class="font-bold text-green-800 text-sm">Garantia de 7 dias</p><p class="text-green-600 text-xs">Reembolso total sem perguntas</p></div></div></div>
-                                    <div class="mt-5 bg-gradient-to-br from-gray-50 to-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden"><div class="flex items-center gap-3 px-4 py-3 border-b border-gray-100 bg-white"><div class="flex items-center justify-center w-9 h-9 bg-indigo-100 rounded-lg flex-shrink-0"><svg class="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg></div><div><p class="font-bold text-gray-800 text-sm">🔒 Seus dados estão protegidos</p><p class="text-xs text-gray-500">Criptografia SSL 256-bit · Processado pelo Mercado Pago</p></div></div><div class="flex items-center justify-center gap-4 px-4 py-3 border-b border-gray-100 flex-wrap"><div class="flex items-center gap-1.5 bg-sky-50 rounded-lg px-2 py-1"><div class="w-4 h-4 bg-sky-500 rounded-full flex items-center justify-center"><span class="text-white text-xs font-bold">$</span></div><span class="text-sky-700 text-xs font-semibold">Mercado Pago</span></div><div class="bg-blue-900 text-white text-xs font-bold px-2 py-1 rounded">VISA</div><div class="flex"><div class="w-5 h-5 bg-red-500 rounded-full -mr-1.5 opacity-90"></div><div class="w-5 h-5 bg-yellow-400 rounded-full opacity-90"></div></div><div class="bg-yellow-400 text-gray-800 text-xs font-bold px-2 py-1 rounded">elo</div><div class="bg-teal-500 text-white text-xs font-bold px-2 py-1 rounded">PIX</div></div><div class="grid grid-cols-2 sm:grid-cols-4 gap-0 divide-x divide-y divide-gray-100"><div class="flex flex-col items-center text-center p-3 hover:bg-indigo-50 transition-colors duration-200 group"><div class="w-12 h-12 bg-indigo-50 group-hover:bg-white rounded-full flex items-center justify-center mb-2 transition-colors duration-200 shadow-sm"><svg class="w-7 h-7 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg></div><h4 class="font-bold text-gray-700 text-xs leading-tight">Proteção de Dados</h4><p class="text-gray-400 text-xs mt-0.5">LGPD compliant</p></div><div class="flex flex-col items-center text-center p-3 hover:bg-indigo-50 transition-colors duration-200 group"><div class="w-12 h-12 bg-indigo-50 group-hover:bg-white rounded-full flex items-center justify-center mb-2 transition-colors duration-200 shadow-sm"><svg class="w-7 h-7 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg></div><h4 class="font-bold text-gray-700 text-xs leading-tight">Reembolso em 7 dias</h4><p class="text-gray-400 text-xs mt-0.5">Garantia incondicional</p></div><div class="flex flex-col items-center text-center p-3 hover:bg-indigo-50 transition-colors duration-200 group"><div class="w-12 h-12 bg-indigo-50 group-hover:bg-white rounded-full flex items-center justify-center mb-2 transition-colors duration-200 shadow-sm"><svg class="w-7 h-7 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"></path></svg></div><h4 class="font-bold text-gray-700 text-xs leading-tight">Suporte 24/7</h4><p class="text-gray-400 text-xs mt-0.5">Atendimento humanizado</p></div><div class="flex flex-col items-center text-center p-3 hover:bg-indigo-50 transition-colors duration-200 group"><div class="w-12 h-12 bg-indigo-50 group-hover:bg-white rounded-full flex items-center justify-center mb-2 transition-colors duration-200 shadow-sm"><svg class="w-7 h-7 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg></div><h4 class="font-bold text-gray-700 text-xs leading-tight">SSL 256-bit</h4><p class="text-gray-400 text-xs mt-0.5">Dados criptografados</p></div></div></div>
-                                    <div class="mt-4 pt-4 border-t border-gray-100"><div class="flex items-center justify-center gap-3 flex-wrap"><span class="text-xs text-gray-400">Processado por:</span><div class="flex items-center gap-2"><span class="text-xs font-bold text-blue-800 bg-blue-100 px-2 py-1 rounded">VISA</span><span class="text-xs font-bold text-red-800 bg-red-100 px-2 py-1 rounded">Mastercard</span><span class="text-xs font-bold text-yellow-800 bg-yellow-100 px-2 py-1 rounded">Elo</span><span class="text-xs font-bold text-teal-800 bg-teal-100 px-2 py-1 rounded">PIX</span></div></div></div>
+                                    <!-- Formulário PIX -->
+                                    <div id="pixForm" class="hidden">
+                                        <div class="text-center">
+                                            <div class="flex items-center justify-center gap-3 mb-5">
+                                                <div class="w-12 h-12 bg-teal-500 rounded-xl flex items-center justify-center shadow"><svg viewBox="0 0 48 48" class="w-8 h-8" fill="none"><path d="M19.5 12l4.5 4.5L28.5 12l3 3-4.5 4.5L31.5 24l-3 3-4.5-4.5L19.5 27l-3-3 4.5-4.5L16.5 15z" fill="white"/><path d="M19.5 27l4.5 4.5L28.5 27l3 3-4.5 4.5-4.5-4.5-4.5 4.5-3-3z" fill="white"/></svg></div>
+                                                <div class="text-left"><h3 class="font-bold text-gray-800 text-lg">Pagamento via PIX</h3><p class="text-gray-500 text-sm">Rápido, seguro e sem taxas</p></div>
+                                            </div>
+                                            <div class="bg-teal-50 rounded-2xl p-6 border border-teal-100">
+                                                <div class="w-32 h-32 mx-auto bg-gray-100 rounded-xl flex items-center justify-center border-2 border-dashed border-gray-300 mb-4"><svg class="w-16 h-16 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg></div>
+                                                <p class="text-gray-600 text-sm mb-4">Clique em <strong>"Gerar PIX"</strong> para criar seu QR Code de pagamento</p>
+                                                <div class="space-y-2 text-left">
+                                                    <div class="flex items-center gap-2 text-sm text-gray-600"><span>⚡</span><span>Confirmação automática em até 1 minuto</span></div>
+                                                    <div class="flex items-center gap-2 text-sm text-gray-600"><span>🔒</span><span>Transação 100% segura via Banco Central</span></div>
+                                                    <div class="flex items-center gap-2 text-sm text-gray-600"><span>📱</span><span>Use qualquer banco ou carteira digital</span></div>
+                                                    <div class="flex items-center gap-2 text-sm text-gray-600"><span>⏱️</span><span>QR Code válido por 30 minutos</span></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button id="payButton" onclick="processPayment()" class="mt-4 w-full py-4 rounded-xl font-bold text-lg text-white transition-all duration-300 flex items-center justify-center gap-2 shadow-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-indigo-200 hover:scale-[1.01] active:scale-[0.99]">
+                                        💳 Pagar R$ ${formatCurrency(plan.price)}
+                                    </button>
+                                    <div class="mt-4 text-center">
+                                        <div class="inline-flex items-center gap-3 bg-green-50 border border-green-200 rounded-2xl px-4 py-3">
+                                            <div class="text-3xl">🛡️</div>
+                                            <div class="text-left"><p class="font-bold text-green-800 text-sm">Garantia de 7 dias</p><p class="text-green-600 text-xs">Reembolso total sem perguntas</p></div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-4 pt-4 border-t border-gray-100">
+                                        <div class="flex items-center justify-center gap-3 flex-wrap">
+                                            <span class="text-xs text-gray-400">Processado por:</span>
+                                            <div class="flex items-center gap-2">
+                                                <span class="text-xs font-bold text-blue-800 bg-blue-100 px-2 py-1 rounded">VISA</span>
+                                                <span class="text-xs font-bold text-red-800 bg-red-100 px-2 py-1 rounded">Mastercard</span>
+                                                <span class="text-xs font-bold text-yellow-800 bg-yellow-100 px-2 py-1 rounded">Elo</span>
+                                                <span class="text-xs font-bold text-teal-800 bg-teal-100 px-2 py-1 rounded">PIX</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         <div class="border-t border-gray-100 px-6 py-4 bg-gray-50 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-400">
-                            <div class="flex items-center gap-2"><svg class="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg><span>Pagamento processado com segurança pelo <strong class="text-gray-500">Mercado Pago</strong></span></div>
-                            <div class="flex items-center gap-4"><a href="#" class="hover:text-gray-600 transition-colors">Termos de uso</a><a href="#" class="hover:text-gray-600 transition-colors">Política de privacidade</a><a href="#" class="hover:text-gray-600 transition-colors">Suporte</a></div>
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                                <span>Pagamento processado com segurança pelo <strong class="text-gray-500">Mercado Pago</strong></span>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <a href="#" class="hover:text-gray-600 transition-colors">Termos de uso</a>
+                                <a href="#" class="hover:text-gray-600 transition-colors">Política de privacidade</a>
+                                <a href="#" class="hover:text-gray-600 transition-colors">Suporte</a>
+                            </div>
                         </div>
                     </div>
                     <div class="mt-5 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 text-white/60 text-xs">
@@ -654,7 +707,19 @@ async function processCardPayment() {
                     </div>
                 </div>
             </div>
-            <div id="paymentModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden items-center justify-center"><div class="bg-white rounded-2xl max-w-md w-full mx-4 p-6 text-center modal-enter"><div id="modalIcon" class="mb-4"><i class="fas fa-spinner fa-pulse text-4xl text-indigo-500"></i></div><h3 id="modalTitle" class="text-xl font-bold text-gray-800 mb-2">Processando pagamento...</h3><p id="modalMessage" class="text-gray-500 mb-4">Aguarde enquanto processamos sua transação</p><div id="modalProgress" class="w-full h-1 bg-gray-200 rounded-full overflow-hidden mb-4"><div id="progressBar" class="h-full bg-green-500 rounded-full progress-bar-animate" style="width: 0%"></div></div><div id="modalExtra"></div><button id="modalCloseBtn" onclick="hideModal()" class="mt-4 bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-all hidden">Fechar</button></div></div>
+            <!-- Modal de Pagamento -->
+            <div id="paymentModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden items-center justify-center">
+                <div class="bg-white rounded-2xl max-w-md w-full mx-4 p-6 text-center modal-enter">
+                    <div id="modalIcon" class="mb-4"><i class="fas fa-spinner fa-pulse text-4xl text-indigo-500"></i></div>
+                    <h3 id="modalTitle" class="text-xl font-bold text-gray-800 mb-2">Processando pagamento...</h3>
+                    <p id="modalMessage" class="text-gray-500 mb-4">Aguarde enquanto processamos sua transação</p>
+                    <div id="modalProgress" class="w-full h-1 bg-gray-200 rounded-full overflow-hidden mb-4">
+                        <div id="progressBar" class="h-full bg-green-500 rounded-full" style="width: 0%; transition: width 0.2s ease;"></div>
+                    </div>
+                    <div id="modalExtra"></div>
+                    <button id="modalCloseBtn" onclick="hideModal()" class="mt-4 bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-all hidden">Fechar</button>
+                </div>
+            </div>
             <div id="customAlert"></div>
         `;
         document.getElementById('root').innerHTML = appHtml;
