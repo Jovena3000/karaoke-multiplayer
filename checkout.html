@@ -55,6 +55,7 @@
     let pagamentoAprovado = false;
     let pixDataAtual = null;
     let statusCheckInterval = null;
+    let brickLoading = false;          // ✅ controle para evitar chamadas simultâneas
 
     // ================= PLANOS =================
     const PLANS = {
@@ -233,16 +234,23 @@
         if (container) container.innerHTML = '';
     }
 
+    // ✅ Versão atualizada com controle brickLoading
     async function recreateCardBrick() {
+        if (brickLoading) return;   // ✅ evita chamadas simultâneas
+        brickLoading = true;
+
         await destroyCardBrick();
+
+        // ✅ Aguarda o SDK estar pronto
+        if (!mp || !bricksBuilder) {
+            brickLoading = false;
+            console.warn('⏳ SDK ainda carregando, aguardando...');
+            setTimeout(recreateCardBrick, 500);
+            return;
+        }
 
         const email = document.getElementById('email')?.value?.trim() || '';
         const plan  = PLANS[selectedPlan];
-
-        if (!bricksBuilder) {
-            showAlert('SDK do Mercado Pago ainda carregando, tente novamente.', 'error');
-            return;
-        }
 
         try {
             cardBrickController = await bricksBuilder.create(
@@ -251,15 +259,14 @@
                 {
                     initialization: {
                         amount: plan.price,
-                        // payer preenchido pelo e-mail que o usuário digitou (opcional)
                         payer: email ? { email } : undefined
                     },
                     customization: {
                         visual: {
                             style: {
-                                theme: 'default',         // 'default' | 'dark' | 'bootstrap' | 'flat'
+                                theme: 'default',
                                 customVariables: {
-                                    baseColor:       '#6366f1',   // roxo indigo do seu site
+                                    baseColor:       '#6366f1',
                                     baseColorFirstVariant:  '#4f46e5',
                                     baseColorSecondVariant: '#4338ca',
                                     errorColor:      '#ef4444',
@@ -269,24 +276,23 @@
                                     borderRadiusMedium: '8px',
                                 }
                             },
-                            // Campos que o Brick já mostra — não precisa de mais nenhum input seu
-                            hideFormTitle:      true,   // remove "Cartão de crédito ou débito"
-                            hidePaymentButton:  false,  // mantém o botão "Pagar" do Brick
+                            hideFormTitle:      true,
+                            hidePaymentButton:  false,
                         },
                         paymentMethods: {
-                            // só cartão de crédito; para aceitar débito também remova essa linha
                             types: { excluded: ['debit_card'] }
                         }
                     },
                     callbacks: {
                         onReady: () => {
+                            brickLoading = false;
                             console.log('✅ Card Brick pronto');
                         },
                         onSubmit: async (cardFormData) => {
-                            // cardFormData já vem com token, payment_method_id, installments, etc.
                             await processCardBrickPayment(cardFormData);
                         },
                         onError: (error) => {
+                            brickLoading = false;
                             console.error('❌ Brick error:', error);
                             showAlert('Erro no formulário do cartão: ' + (error.message || error.type), 'error');
                         }
@@ -294,6 +300,7 @@
                 }
             );
         } catch(err) {
+            brickLoading = false;
             console.error('❌ Erro ao criar Card Brick:', err);
             showAlert('Não foi possível carregar o formulário de cartão.', 'error');
         }
@@ -319,7 +326,7 @@
                 body: JSON.stringify({
                     metodo:             'card',
                     token:              cardFormData.token,
-                    payment_method_id:  cardFormData.payment_method_id,  // ✅ bandeira real
+                    payment_method_id:  cardFormData.payment_method_id,
                     installments:       cardFormData.installments,
                     issuer_id:          cardFormData.issuer_id,
                     cpf:                cardFormData.payer?.identification?.number || '',
@@ -615,7 +622,6 @@
     }
 
     // Atualiza o payer.email do Brick quando o usuário troca o e-mail
-    // (Bricks não tem update de payer — precisamos recriar)
     let emailDebounce = null;
     window.onEmailChange = function() {
         clearTimeout(emailDebounce);
