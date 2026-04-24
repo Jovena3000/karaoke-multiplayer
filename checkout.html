@@ -320,7 +320,7 @@
         try {
             console.log('📦 cardFormData do Brick:', cardFormData);
 
-            const response = await fetch(`${API_URL}/criar-pagamento.js`, {
+            const response = await fetch(`${API_URL}/criar-pagamento`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -361,7 +361,7 @@
         showModal('Gerando PIX...', 'Criando QR Code para pagamento', 'loading');
 
         try {
-            const response = await fetch(`${API_URL}/criar-pagamento.js`, {
+            const response = await fetch(`${API_URL}/criar-pagamento`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ metodo: 'pix', email, plan: selectedPlan })
