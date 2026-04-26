@@ -298,8 +298,33 @@
         updatePayButton();
     };
 
-    // ================= PAGAMENTO COM CARTÃO =================
-    async function processCardPayment() {
+    // ================= DETECTAR BANDEIRA DO CARTÃO =================
+function detectCardBrand(cardNumber) {
+    const clean = cardNumber.replace(/\s/g, '');
+    
+    const patterns = {
+        'visa': /^4/,
+        'master': /^(5[1-5]|2[2-7])/,
+        'amex': /^3[47]/,
+        'elo': /^(4011|4312|4389|4514|4576|504175|5067|5090|6277|6362|6363|6504|636368)/,
+        'hipercard': /^(606282|3841)/,
+        'diners': /^3(0[0-5]|[6-8])/,
+        'discover': /^6(011|5|4[4-9]|22)/
+    };
+    
+    for (const [brand, pattern] of Object.entries(patterns)) {
+        if (pattern.test(clean)) {
+            console.log("✅ Bandeira detectada:", brand);
+            return brand;
+        }
+    }
+    
+    console.log("⚠️ Bandeira não detectada, usando 'master' como fallback");
+    return 'master';
+}
+
+// ================= PAGAMENTO COM CARTÃO =================
+async function processCardPayment() {
     const email = document.getElementById('email').value;
     const cardNumber = document.getElementById('cardNumber').value;
     const expiry = document.getElementById('expiry').value;
@@ -354,21 +379,27 @@
         }
         
         console.log("✅ Token:", tokenResponse.id);
-        console.log("✅ payment_method_id:", tokenResponse.payment_method_id);
-        console.log("✅ issuer_id:", tokenResponse.issuer_id);
+        
+        // 🔥 DETECTAR BANDEIRA MANUALMENTE (já que o SDK não está retornando)
+        const bandeira = detectCardBrand(cardNumber);
+        console.log("✅ Bandeira detectada:", bandeira);
+        
+        // 🔥 VALIDAÇÃO: Se a bandeira foi detectada
+        if (!bandeira) {
+            throw new Error('Não foi possível identificar a bandeira do cartão');
+        }
         
         showModal('Processando pagamento...', 'Autorizando transação', 'loading');
         
-        // 🔥 CORREÇÃO: Enviar TODOS os campos necessários
+        // 🔥 ENVIAR COM A BANDEIRA DETECTADA MANUALMENTE
         const response = await fetch(`${API_URL}/criar-pagamento`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 metodo: 'card',
                 token: tokenResponse.id,
-                payment_method_id: tokenResponse.payment_method_id, // ← ESSENCIAL!
-                issuer_id: tokenResponse.issuer_id,                 // ← Importante
-                installments: 1,                                    // ← 1 parcela
+                payment_method_id: bandeira,  // ← USAR A BANDEIRA DETECTADA!
+                installments: 1,
                 email: email,
                 plan: selectedPlan
             })
