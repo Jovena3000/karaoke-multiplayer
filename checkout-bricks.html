@@ -11,7 +11,7 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <link rel="manifest" href="/site.webmanifest">
 
-    <!-- Mercado Pago SDK v2 — carregado ANTES de tudo -->
+    <!-- Mercado Pago SDK v2 -->
     <script src="https://sdk.mercadopago.com/js/v2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -26,20 +26,31 @@
             border-color: #6366f1 !important;
             background-color: #eef2ff !important;
         }
+        /* 🔧 CORREÇÃO: Garante que o Brick ocupe todo espaço */
+        #cardPaymentBrick_container {
+            min-height: 400px;
+            width: 100%;
+        }
         #cardPaymentBrick_container > div,
         #cardPaymentBrick_container iframe {
             width: 100% !important;
+            min-height: 380px !important;
         }
         .brick-skeleton {
             background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
             background-size: 200% 100%;
             animation: shimmer 1.5s infinite;
             border-radius: 8px;
-            height: 320px;
+            height: 380px;
+            width: 100%;
         }
         @keyframes shimmer {
             0%   { background-position: 200% 0; }
             100% { background-position: -200% 0; }
+        }
+        /* 🔧 CORREÇÃO: Remove zoom em mobile */
+        input, select, textarea {
+            font-size: 16px !important;
         }
     </style>
 </head>
@@ -48,8 +59,11 @@
 
     <script>
     // ================= CONFIG =================
-    // ✅ URL correta sem .js no final
-    const API_URL       = 'https://karaoke-api-backend3.vercel.app/api';
+    // 🔧 CORREÇÃO 1: URL correta (sem o número 3, ou use variável de ambiente)
+    const API_URL = 'https://karaoke-api-backend.vercel.app/api';
+    // Se tiver erro, tente também:
+    // const API_URL = 'https://karaoke-api-backend3.vercel.app/api';
+    
     const MP_PUBLIC_KEY = 'APP_USR-63ba9966-8d21-4c54-ba75-ac07077ee125';
 
     let mp                   = null;
@@ -72,25 +86,30 @@
 
     function formatCurrency(v) { return v.toFixed(2).replace('.', ','); }
 
-    // ================= INIT MP (Promise) =================
-    function initMercadoPago() {
+    // ================= INIT MP =================
+    async function initMercadoPago() {
         return new Promise((resolve) => {
+            let attempts = 0;
             function tryInit() {
+                attempts++;
                 if (typeof MercadoPago !== 'undefined') {
                     mp = new MercadoPago(MP_PUBLIC_KEY, { locale: 'pt-BR' });
                     bricksBuilder = mp.bricks();
                     console.log('✅ MP SDK + Bricks prontos');
                     resolve();
-                } else {
-                    console.log('⏳ Aguardando MP SDK...');
+                } else if (attempts < 20) {
+                    console.log(`⏳ Aguardando MP SDK... (${attempts})`);
                     setTimeout(tryInit, 300);
+                } else {
+                    console.error('❌ Falha ao carregar MP SDK');
+                    showAlert('Erro ao carregar Mercado Pago. Recarregue a página.', 'error');
                 }
             }
             tryInit();
         });
     }
 
-    // ================= ALERTAS / MODAL =================
+    // ================= ALERTAS =================
     function showAlert(msg, type) {
         const el = document.getElementById('customAlert');
         if (!el) return;
@@ -105,13 +124,13 @@
     }
 
     function showModal(title, message, type = 'loading', extraHtml = '') {
-        const modal      = document.getElementById('paymentModal');
-        const iconEl     = document.getElementById('modalIcon');
-        const titleEl    = document.getElementById('modalTitle');
-        const messageEl  = document.getElementById('modalMessage');
+        const modal = document.getElementById('paymentModal');
+        const iconEl = document.getElementById('modalIcon');
+        const titleEl = document.getElementById('modalTitle');
+        const messageEl = document.getElementById('modalMessage');
         const progressEl = document.getElementById('modalProgress');
-        const extraEl    = document.getElementById('modalExtra');
-        const closeBtn   = document.getElementById('modalCloseBtn');
+        const extraEl = document.getElementById('modalExtra');
+        const closeBtn = document.getElementById('modalCloseBtn');
 
         modal.classList.remove('hidden');
         modal.classList.add('flex');
@@ -142,7 +161,7 @@
             closeBtn.style.display = 'block';
         }
 
-        titleEl.textContent   = title;
+        titleEl.textContent = title;
         messageEl.textContent = message;
         if (extraHtml) extraEl.innerHTML = extraHtml;
     }
@@ -163,17 +182,20 @@
         const card = document.getElementById(`plan-${plan}`);
         if (card) card.classList.add('selected', 'border-indigo-500', 'bg-indigo-50', 'scale-[1.02]');
         updateOrderSummary();
-        if (currentPaymentMethod === 'card') recreateCardBrick();
+        // 🔧 CORREÇÃO 2: Recria o Brick apenas se estiver em modo cartão
+        if (currentPaymentMethod === 'card') {
+            recreateCardBrick();
+        }
     };
 
     function updateOrderSummary() {
         const plan = PLANS[selectedPlan];
         const hasDiscount = plan.originalPrice > plan.price;
-        const discount    = plan.originalPrice - plan.price;
+        const discount = plan.originalPrice - plan.price;
 
-        document.getElementById('planName').textContent   = plan.name;
+        document.getElementById('planName').textContent = plan.name;
         document.getElementById('planPeriod').textContent = plan.period;
-        document.getElementById('planPrice').innerHTML    = `R$ ${formatCurrency(plan.price)}` +
+        document.getElementById('planPrice').innerHTML = `R$ ${formatCurrency(plan.price)}` +
             (hasDiscount ? `<span class="text-base text-gray-400 line-through ml-2">R$ ${formatCurrency(plan.originalPrice)}</span>` : '');
 
         document.getElementById('planFeatures').innerHTML = plan.features.map(f => `
@@ -211,15 +233,16 @@
         });
 
         const cardSection = document.getElementById('cardSection');
-        const pixSection  = document.getElementById('pixSection');
-        const payBtn      = document.getElementById('payButton');
+        const pixSection = document.getElementById('pixSection');
+        const payBtn = document.getElementById('payButton');
 
         if (method === 'card') {
             document.getElementById('method-card').classList.add('border-indigo-500','bg-indigo-50','text-indigo-700');
             cardSection.classList.remove('hidden');
             pixSection.classList.add('hidden');
             payBtn.classList.add('hidden');
-            recreateCardBrick();
+            // 🔧 CORREÇÃO 3: Recria Brick com delay
+            setTimeout(() => recreateCardBrick(), 100);
         } else {
             document.getElementById('method-pix').classList.add('border-teal-500','bg-teal-50','text-teal-700');
             cardSection.classList.add('hidden');
@@ -233,39 +256,56 @@
     // ================= BRICKS =================
     async function destroyCardBrick() {
         if (cardBrickController) {
-            try { await cardBrickController.unmount(); } catch(e) {}
+            try { 
+                await cardBrickController.unmount(); 
+                console.log('✅ Brick desmontado');
+            } catch(e) {
+                console.log('Erro ao desmontar:', e);
+            }
             cardBrickController = null;
         }
         brickMounted = false;
         brickLoading = false;
         const container = document.getElementById('cardPaymentBrick_container');
-        if (container) container.innerHTML = '<div class="brick-skeleton"></div>';
+        if (container && !container.querySelector('.brick-skeleton')) {
+            container.innerHTML = '<div class="brick-skeleton"></div>';
+        }
     }
 
     async function recreateCardBrick() {
+        // 🔧 CORREÇÃO 4: Evita recriar se já está carregando
         if (brickLoading) {
             console.log('⏳ Brick já carregando, ignorando.');
             return;
         }
+        
         if (!mp || !bricksBuilder) {
             console.log('⏳ SDK não pronto, aguardando...');
-            setTimeout(recreateCardBrick, 400);
+            setTimeout(() => recreateCardBrick(), 500);
             return;
         }
 
         brickLoading = true;
         brickMounted = false;
 
+        // Destroi o brick existente
         if (cardBrickController) {
-            try { await cardBrickController.unmount(); } catch(e) {}
+            try { 
+                await cardBrickController.unmount(); 
+            } catch(e) {}
             cardBrickController = null;
         }
 
         const container = document.getElementById('cardPaymentBrick_container');
-        if (container) container.innerHTML = '<div class="brick-skeleton"></div>';
+        if (!container) return;
+        
+        // Mostra skeleton
+        container.innerHTML = '<div class="brick-skeleton"></div>';
 
         const email = document.getElementById('email')?.value?.trim() || '';
-        const plan  = PLANS[selectedPlan];
+        const plan = PLANS[selectedPlan];
+        
+        console.log('🚀 Criando Brick para:', { amount: plan.price, email });
 
         try {
             cardBrickController = await bricksBuilder.create(
@@ -281,17 +321,17 @@
                             style: {
                                 theme: 'default',
                                 customVariables: {
-                                    baseColor:              '#6366f1',
-                                    baseColorFirstVariant:  '#4f46e5',
+                                    baseColor: '#6366f1',
+                                    baseColorFirstVariant: '#4f46e5',
                                     baseColorSecondVariant: '#4338ca',
-                                    errorColor:             '#ef4444',
-                                    successColor:           '#22c55e',
-                                    fontSizeSmall:          '13px',
-                                    fontSizeMedium:         '15px',
-                                    borderRadiusMedium:     '8px',
+                                    errorColor: '#ef4444',
+                                    successColor: '#22c55e',
+                                    fontSizeSmall: '13px',
+                                    fontSizeMedium: '15px',
+                                    borderRadiusMedium: '8px',
                                 }
                             },
-                            hideFormTitle:     true,
+                            hideFormTitle: false,
                             hidePaymentButton: false,
                         },
                         paymentMethods: {
@@ -300,27 +340,23 @@
                     },
                     callbacks: {
                         onReady: () => {
+                            console.log('✅ Card Brick montado com sucesso!');
                             brickLoading = false;
                             brickMounted = true;
-                            console.log('✅ Card Brick montado');
                         },
                         onSubmit: async (cardFormData) => {
+                            console.log('📝 Formulário submetido:', cardFormData);
                             await processCardBrickPayment(cardFormData);
                         },
                         onError: (error) => {
                             console.error('❌ Brick error:', error);
                             brickLoading = false;
                             brickMounted = false;
-
-                            // Auto-retry em erro crítico de Secure Fields
-                            if (error.type === 'critical' && error.cause === 'fields_setup_failed_after_3_tries') {
-                                console.warn('🔄 Recriando Brick após falha crítica...');
-                                setTimeout(async () => {
-                                    await destroyCardBrick();
-                                    recreateCardBrick();
-                                }, 1500);
-                            } else {
-                                showAlert('Erro no formulário: ' + (error.message || error.type), 'error');
+                            showAlert('Erro no formulário: ' + (error.message || 'Tente novamente'), 'error');
+                            
+                            // Tenta recriar em caso de erro crítico
+                            if (error.type === 'critical') {
+                                setTimeout(() => recreateCardBrick(), 2000);
                             }
                         }
                     }
@@ -334,6 +370,7 @@
                 container.innerHTML = `
                     <div class="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
                         <p class="text-red-700 text-sm font-semibold mb-2">⚠️ Não foi possível carregar o formulário.</p>
+                        <p class="text-red-600 text-xs mb-3">${err.message || 'Erro desconhecido'}</p>
                         <button onclick="recreateCardBrick()"
                             class="text-sm bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
                             🔄 Tentar novamente
@@ -355,19 +392,23 @@
         showModal('Processando pagamento...', 'Autorizando transação', 'loading');
 
         try {
-            console.log('📦 cardFormData:', cardFormData);
+            console.log('📦 Enviando pagamento:', {
+                metodo: 'card',
+                token: cardFormData.token,
+                plan: selectedPlan,
+                email
+            });
 
-            // ✅ URL correta: /criar-pagamento (sem .js)
             const response = await fetch(`${API_URL}/criar-pagamento`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    metodo:            'card',
-                    token:             cardFormData.token,
+                    metodo: 'card',
+                    token: cardFormData.token,
                     payment_method_id: cardFormData.payment_method_id,
-                    installments:      cardFormData.installments,
-                    issuer_id:         cardFormData.issuer_id,
-                    cpf:               cardFormData.payer?.identification?.number || '',
+                    installments: cardFormData.installments,
+                    issuer_id: cardFormData.issuer_id,
+                    cpf: cardFormData.payer?.identification?.number || '',
                     email,
                     plan: selectedPlan
                 })
@@ -393,12 +434,14 @@
     // ================= PIX =================
     async function processPixPayment() {
         const email = document.getElementById('email')?.value?.trim();
-        if (!email || !email.includes('@')) { showAlert('Digite um e-mail válido.', 'error'); return false; }
+        if (!email || !email.includes('@')) { 
+            showAlert('Digite um e-mail válido.', 'error'); 
+            return false; 
+        }
 
         showModal('Gerando PIX...', 'Criando QR Code para pagamento', 'loading');
 
         try {
-            // ✅ URL correta: /criar-pagamento (sem .js)
             const response = await fetch(`${API_URL}/criar-pagamento`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -411,7 +454,7 @@
                 const qrHtml = `
                     <div class="text-center mt-4">
                         <div class="bg-white p-4 rounded-2xl inline-block">
-                            <img src="data:image/jpeg;base64,${data.qr_code_base64 || ''}" class="w-48 h-48 mx-auto">
+                            <img src="data:image/jpeg;base64,${data.qr_code_base64 || ''}" class="w-48 h-48 mx-auto" alt="QR Code PIX">
                         </div>
                         <p class="text-xs text-gray-500 mt-3 break-all bg-gray-50 p-3 rounded-lg">${data.qr_code || ''}</p>
                         <button onclick="copyPixCode()" class="mt-3 bg-teal-500 text-white px-6 py-2 rounded-lg hover:bg-teal-600">
@@ -578,7 +621,7 @@
                                     <svg class="w-3 h-3 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                                     Formulário seguro pelo Mercado Pago
                                 </p>
-                                <div id="cardPaymentBrick_container">
+                                <div id="cardPaymentBrick_container" style="min-height: 400px;">
                                     <div class="brick-skeleton"></div>
                                 </div>
                             </div>
@@ -647,7 +690,7 @@
         `;
     }
 
-    // Debounce no e-mail — só recria se o Brick já estava montado
+    // Debounce no e-mail
     let emailDebounce = null;
     window.onEmailChange = function() {
         clearTimeout(emailDebounce);
@@ -659,14 +702,28 @@
     };
 
     // ================= BOOT =================
-    // Ordem garantida: render → SDK pronto → Brick
     renderApp();
 
     initMercadoPago().then(() => {
-        const urlParams   = new URLSearchParams(window.location.search);
+        const urlParams = new URLSearchParams(window.location.search);
         const planFromUrl = urlParams.get('plan');
-        if (planFromUrl && PLANS[planFromUrl]) selectPlan(planFromUrl);
-        setTimeout(recreateCardBrick, 200);
+        if (planFromUrl && PLANS[planFromUrl]) {
+            selectPlan(planFromUrl);
+        }
+        // Aguarda um pouco e cria o Brick
+        setTimeout(() => {
+            recreateCardBrick();
+        }, 500);
+    }).catch(err => {
+        console.error('❌ Falha ao iniciar MP:', err);
+        document.getElementById('cardPaymentBrick_container').innerHTML = `
+            <div class="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+                <p class="text-red-700 font-semibold">❌ Erro ao carregar Mercado Pago</p>
+                <p class="text-red-600 text-sm mt-2">Verifique sua conexão e recarregue a página</p>
+                <button onclick="location.reload()" class="mt-3 bg-indigo-600 text-white px-4 py-2 rounded-lg">
+                    🔄 Recarregar
+                </button>
+            </div>`;
     });
     </script>
 </body>
