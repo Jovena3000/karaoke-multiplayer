@@ -300,89 +300,105 @@
 
     // ================= PAGAMENTO COM CARTÃO =================
     async function processCardPayment() {
-        const email = document.getElementById('email').value.trim();
-        const cardNumber = document.getElementById('cardNumber').value;
-        const expiry = document.getElementById('expiry').value;
-        const cvv = document.getElementById('cvv').value;
-        const cardholderName = document.getElementById('cardholderName').value;
-        const cpf = document.getElementById('cpf').value;
+    const email = document.getElementById('email').value;
+    const cardNumber = document.getElementById('cardNumber').value;
+    const expiry = document.getElementById('expiry').value;
+    const cvv = document.getElementById('cvv').value;
+    const cardholderName = document.getElementById('cardholderName').value;
+    const cpf = document.getElementById('cpf').value;
 
-        // Validações
-        if (!email || !email.includes('@')) { showAlert('Digite um e-mail válido', 'error'); return false; }
-        if (!cardNumber || cardNumber.replace(/\s/g, '').length < 16) { showAlert('Digite um número de cartão válido', 'error'); return false; }
-        if (!expiry || !expiry.includes('/')) { showAlert('Digite a validade do cartão', 'error'); return false; }
-        if (!cvv || cvv.length < 3) { showAlert('Digite o CVV válido', 'error'); return false; }
-        if (!cardholderName) { showAlert('Digite o nome no cartão', 'error'); return false; }
-
-        const [expMonth, expYear] = expiry.split('/');
-        const cpfNumeros = cpf.replace(/\D/g, '');
-
-        const cardData = {
-            cardNumber: cardNumber.replace(/\s/g, ''),
-            cardholderName: cardholderName,
-            cardExpirationMonth: expMonth,
-            cardExpirationYear: '20' + expYear,
-            securityCode: cvv,
-            identificationType: 'CPF',
-            identificationNumber: cpfNumeros || '19119119100'
-        };
-
-        showModal('Processando pagamento...', 'Validando dados do cartão', 'loading');
-
-        try {
-            const tokenResponse = await mp.createCardToken(cardData);
-            
-            if (tokenResponse.error) {
-                throw new Error(tokenResponse.error.message || 'Cartão inválido');
-            }
-
-            // ✅ CORRIGIDO: loga o payment_method_id retornado pelo SDK
-            console.log("✅ Token gerado:", tokenResponse.id);
-            console.log("💳 Bandeira detectada pelo MP:", tokenResponse.payment_method_id);
-
-            showModal('Processando pagamento...', 'Autorizando transação', 'loading');
-            
-            const response = await fetch(`${API_URL}/criar-pagamento`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    metodo: 'card',
-                    token: tokenResponse.id,
-                    // ✅ CORRIGIDO: envia a bandeira real do cartão
-                    payment_method_id: tokenResponse.payment_method_id,
-                    // ✅ CORRIGIDO: envia o CPF real do cliente
-                    cpf: cpfNumeros,
-                    email: email,
-                    plan: selectedPlan
-                })
-            });
-            
-            const data = await response.json();
-            console.log("📦 Resposta backend:", data);
-
-            if (data.init_point) {
-                localStorage.setItem('pagamento_pendente', JSON.stringify({ email, plan: selectedPlan, id: data.id }));
-                showModal('Redirecionando...', 'Você será redirecionado para o Mercado Pago para concluir o pagamento', 'success');
-                setTimeout(() => { window.location.href = data.init_point; }, 2000);
-                return true;
-            }
-            
-            if (data.sucesso === true) {
-                pagamentoAprovado = true;
-                localStorage.setItem('pagamento_aprovado', JSON.stringify({ email, plan: selectedPlan }));
-                showModal('✅ Pagamento Confirmado!', 'Seu pagamento foi aprovado. Redirecionando...', 'success');
-                setTimeout(() => { window.location.href = '/sucesso.html'; }, 2000);
-                return true;
-            } else {
-                throw new Error(data.erro || data.mensagem || 'Pagamento recusado');
-            }
-            
-        } catch (error) {
-            console.error("❌ Erro no pagamento:", error);
-            showModal('❌ Falha no Pagamento', error.message, 'error');
-            return false;
-        }
+    // Validações
+    if (!email || !email.includes('@')) { 
+        showAlert('Digite um e-mail válido', 'error'); 
+        return false; 
     }
+    
+    if (!cardNumber || cardNumber.replace(/\s/g, '').length < 16) { 
+        showAlert('Digite um número de cartão válido', 'error'); 
+        return false; 
+    }
+    
+    if (!expiry || !expiry.includes('/')) { 
+        showAlert('Digite a validade do cartão', 'error'); 
+        return false; 
+    }
+    
+    if (!cvv || cvv.length < 3) { 
+        showAlert('Digite o CVV válido', 'error'); 
+        return false; 
+    }
+    
+    if (!cardholderName) { 
+        showAlert('Digite o nome no cartão', 'error'); 
+        return false; 
+    }
+
+    const [expMonth, expYear] = expiry.split('/');
+    const cardData = {
+        cardNumber: cardNumber.replace(/\s/g, ''),
+        cardholderName: cardholderName,
+        cardExpirationMonth: expMonth,
+        cardExpirationYear: '20' + expYear,
+        securityCode: cvv,
+        identificationType: 'CPF',
+        identificationNumber: cpf.replace(/\D/g, '') || '19119119100'
+    };
+
+    showModal('Processando pagamento...', 'Validando dados do cartão', 'loading');
+
+    try {
+        const tokenResponse = await mp.createCardToken(cardData);
+        
+        if (tokenResponse.error) {
+            throw new Error(tokenResponse.error.message || 'Cartão inválido');
+        }
+        
+        console.log("✅ Token:", tokenResponse.id);
+        console.log("✅ payment_method_id:", tokenResponse.payment_method_id);
+        console.log("✅ issuer_id:", tokenResponse.issuer_id);
+        
+        showModal('Processando pagamento...', 'Autorizando transação', 'loading');
+        
+        // 🔥 CORREÇÃO: Enviar TODOS os campos necessários
+        const response = await fetch(`${API_URL}/criar-pagamento`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                metodo: 'card',
+                token: tokenResponse.id,
+                payment_method_id: tokenResponse.payment_method_id, // ← ESSENCIAL!
+                issuer_id: tokenResponse.issuer_id,                 // ← Importante
+                installments: 1,                                    // ← 1 parcela
+                email: email,
+                plan: selectedPlan
+            })
+        });
+        
+        const data = await response.json();
+        console.log("📦 Resposta backend:", data);
+
+        if (data.sucesso === true) {
+            pagamentoAprovado = true;
+            localStorage.setItem('pagamento_aprovado', JSON.stringify({ 
+                email: email, 
+                plan: selectedPlan 
+            }));
+            showModal('✅ Pagamento Confirmado!', 'Seu pagamento foi aprovado. Redirecionando...', 'success');
+            setTimeout(() => { 
+                window.location.href = '/sucesso.html'; 
+            }, 2000);
+            return true;
+        } else {
+            const mensagemErro = data.erro || data.mensagem || 'Pagamento recusado';
+            throw new Error(mensagemErro);
+        }
+        
+    } catch (error) {
+        console.error("❌ Erro:", error);
+        showModal('❌ Falha no Pagamento', error.message, 'error');
+        return false;
+    }
+}
     
     // ================= PAGAMENTO COM PIX =================
     async function processPixPayment() {
