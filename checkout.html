@@ -384,7 +384,7 @@ async function processCardPayment() {
             body: JSON.stringify({
                 metodo: 'card',
                 token: tokenResponse.id,
-                payment_method_id: bandeira.toLowerCase(), 
+                payment_method_id: bandeira.id.toLowerCase(), 
                 installments: 1, 
                 email: email,
                 plan: selectedPlan
