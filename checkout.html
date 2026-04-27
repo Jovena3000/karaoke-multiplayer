@@ -383,6 +383,9 @@ async function processCardPayment() {
         // 🔥 DETECTAR BANDEIRA MANUALMENTE (já que o SDK não está retornando)
         const bandeira = detectCardBrand(cardNumber);
         console.log("✅ Bandeira detectada:", bandeira);
+
+		// 🔥 ADICIONE ESTA LINHA AQUI! 🔥
+        document.getElementById('cardBrand').innerText = bandeira || '';
         
         // 🔥 VALIDAÇÃO MAIS SEGURA
 		if (!bandeira || bandeira === 'unknown') {
