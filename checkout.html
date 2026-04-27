@@ -415,29 +415,35 @@ async function processCardPayment() {
         });
         
         const data = await response.json();
-        console.log("📦 Resposta backend:", data);
+console.log("📦 Resposta backend:", data);
 
-        if (data.sucesso === true) {
-            pagamentoAprovado = true;
-            localStorage.setItem('pagamento_aprovado', JSON.stringify({ 
-                email: email, 
-                plan: selectedPlan 
-            }));
-            showModal('✅ Pagamento Confirmado!', 'Seu pagamento foi aprovado. Redirecionando...', 'success');
-            setTimeout(() => { 
-                window.location.href = '/sucesso.html'; 
-            }, 2000);
-            return true;
-        } else {
-            const mensagemErro = data.erro || data.mensagem || 'Pagamento recusado';
-            throw new Error(mensagemErro);
-        }
-        
-    } catch (error) {
-        console.error("❌ Erro:", error);
-        showModal('❌ Falha no Pagamento', error.message, 'error');
-        return false;
-    }
+if (data.status === 'approved') {
+    pagamentoAprovado = true;
+
+    localStorage.setItem('pagamento_aprovado', JSON.stringify({ 
+        email: email, 
+        plan: selectedPlan 
+    }));
+
+    showModal('✅ Pagamento Confirmado!', 'Seu pagamento foi aprovado. Redirecionando...', 'success');
+
+    setTimeout(() => { 
+        window.location.href = '/sucesso.html'; 
+    }, 2000);
+
+    return true;
+} 
+else if (data.status === 'in_process') {
+    showModal('⏳ Pagamento em análise', 'Seu pagamento está em análise. Você será notificado após a aprovação.', 'info');
+    return false;
+} 
+else if (data.status === 'rejected') {
+    showModal('❌ Pagamento recusado', 'Tente outro cartão ou verifique seus dados.', 'error');
+    return false;
+} 
+else {
+    showModal('⚠️ Erro', data.erro || 'Erro inesperado', 'error');
+    return false;
 }
     
     // ================= PAGAMENTO COM PIX =================
