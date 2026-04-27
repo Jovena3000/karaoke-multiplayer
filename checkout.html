@@ -314,13 +314,11 @@ function detectCardBrand(cardNumber) {
     
     for (const [brand, pattern] of Object.entries(patterns)) {
         if (pattern.test(clean)) {
-            console.log("✅ Bandeira detectada:", brand);
             return brand;
         }
     }
     
-    console.log("⚠️ Bandeira não detectada, usando 'master' como fallback");
-    return null;
+    return 'unknown';
 }
 
 // ================= PAGAMENTO COM CARTÃO =================
@@ -380,16 +378,24 @@ async function processCardPayment() {
         
         console.log("✅ Token:", tokenResponse.id);
         
-        // 🔥 DETECTAR BANDEIRA MANUALMENTE (já que o SDK não está retornando)
+        // 🔥 DETECTAR BANDEIRA MANUALMENTE
         const bandeira = detectCardBrand(cardNumber);
         console.log("✅ Bandeira detectada:", bandeira);
 
-		// 🔥 ADICIONE ESTA LINHA AQUI! 🔥
-        document.getElementById('cardBrand').innerText = bandeira || '';
+        // 🔥 MOSTRAR BANDEIRA NO HTML
+        const brandElement = document.getElementById('cardBrand');
+        if (brandElement) {
+            brandElement.innerText = bandeira || '';
+            // Adicionar ícone/estilo baseado na bandeira
+            if (bandeira === 'master') brandElement.style.color = '#EB001B';
+            else if (bandeira === 'visa') brandElement.style.color = '#1A1F71';
+            else if (bandeira === 'elo') brandElement.style.color = '#FFD700';
+            else brandElement.style.color = '#6366f1';
+        }
         
         // 🔥 VALIDAÇÃO MAIS SEGURA
-		if (!bandeira || bandeira === 'unknown') {
-		throw new Error('Cartão não suportado');
+        if (!bandeira || bandeira === 'unknown') {
+            throw new Error('Bandeira do cartão não suportada ou não identificada');
         }
         
         showModal('Processando pagamento...', 'Autorizando transação', 'loading');
@@ -402,10 +408,10 @@ async function processCardPayment() {
                 metodo: 'card',
                 token: tokenResponse.id,
                 payment_method_id: bandeira.toLowerCase(), 
-				installments: 1, 
-				email: email,
-				plan: selectedPlan
-})
+                installments: 1, 
+                email: email,
+                plan: selectedPlan
+            })
         });
         
         const data = await response.json();
