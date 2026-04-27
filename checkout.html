@@ -668,6 +668,11 @@ async function processCardPayment() {
                                     </div>
                                     <!-- Formulário Cartão -->
                                     <div id="cardForm">
+                                    <!-- 🔥 ADICIONE ESTE ELEMENTO -->
+    <div class="mb-2 text-sm">
+        <span>💳 Bandeira: </span>
+        <span id="cardBrand" class="font-bold text-indigo-600"></span>
+    </div>
                                         <div class="mb-6 perspective-1000 cursor-pointer" id="cardPreview" onclick="flipCard()">
                                             <div id="cardInner" class="relative w-full max-w-[340px] mx-auto h-52 transition-all duration-700 card-flip">
                                                 <div class="card-front absolute inset-0 rounded-2xl bg-gradient-to-br from-indigo-800 via-purple-800 to-indigo-700 shadow-2xl p-5 flex flex-col justify-between overflow-hidden">
