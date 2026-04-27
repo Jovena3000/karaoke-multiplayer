@@ -320,7 +320,7 @@ function detectCardBrand(cardNumber) {
     }
     
     console.log("⚠️ Bandeira não detectada, usando 'master' como fallback");
-    return 'master';
+    return null;
 }
 
 // ================= PAGAMENTO COM CARTÃO =================
@@ -384,9 +384,9 @@ async function processCardPayment() {
         const bandeira = detectCardBrand(cardNumber);
         console.log("✅ Bandeira detectada:", bandeira);
         
-        // 🔥 VALIDAÇÃO: Se a bandeira foi detectada
-        if (!bandeira) {
-            throw new Error('Não foi possível identificar a bandeira do cartão');
+        // 🔥 VALIDAÇÃO MAIS SEGURA
+		if (!bandeira || bandeira === 'unknown') {
+		throw new Error('Cartão não suportado');
         }
         
         showModal('Processando pagamento...', 'Autorizando transação', 'loading');
@@ -398,11 +398,11 @@ async function processCardPayment() {
             body: JSON.stringify({
                 metodo: 'card',
                 token: tokenResponse.id,
-                payment_method_id: bandeira,  // ← USAR A BANDEIRA DETECTADA!
-                installments: 1,
-                email: email,
-                plan: selectedPlan
-            })
+                payment_method_id: bandeira.toLowerCase(), 
+				installments: 1, 
+				email: email,
+				plan: selectedPlan
+})
         });
         
         const data = await response.json();
