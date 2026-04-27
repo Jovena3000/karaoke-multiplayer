@@ -118,18 +118,24 @@
     }
     
     function detectCardBrand(cardNumber) {
-        const clean = cardNumber.replace(/\s/g, '');
-        const patterns = {
-            visa: { pattern: /^4/, name: 'Visa', color: '#1A1F71' },
-            mastercard: { pattern: /^(5[1-5]|2[2-7])/, name: 'Mastercard', color: '#EB001B' },
-            amex: { pattern: /^3[47]/, name: 'Amex', color: '#007BC1' },
-            elo: { pattern: /^(4011|4312|4389|4514|4576|504175|5067|5090|6277|6362|6363|6504)/, name: 'Elo', color: '#FFD700' }
-        };
-        for (const [key, brand] of Object.entries(patterns)) {
-            if (brand.pattern.test(clean)) return { id: key, name: brand.name, color: brand.color };
+    const clean = cardNumber.replace(/\s/g, '');
+    const patterns = {
+        master: { pattern: /^(5[1-5]|2[2-7])/, name: 'Mastercard', color: '#EB001B' },
+        visa: { pattern: /^4/, name: 'Visa', color: '#1A1F71' },
+        amex: { pattern: /^3[47]/, name: 'Amex', color: '#007BC1' },
+        elo: { pattern: /^(4011|4312|4389|4514|4576|504175|5067|5090|6277|6362|6363|6504)/, name: 'Elo', color: '#FFD700' }
+    };
+    
+    for (const [id, brand] of Object.entries(patterns)) {
+        if (brand.pattern.test(clean)) {
+            console.log(`✅ Bandeira detectada: ${id} (${brand.name})`);
+            return { id: id, name: brand.name, color: brand.color };
         }
-        return null;
     }
+    
+    console.warn("⚠️ Nenhuma bandeira detectada para:", clean.substring(0, 6));
+    return null;
+}
     
     function initMercadoPago() {
         if (typeof MercadoPago !== 'undefined') {
