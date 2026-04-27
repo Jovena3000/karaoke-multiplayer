@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>Karaokê Multiplayer - Oferta Especial 3 Meses por R$49,90</title>
 <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any">
 <link rel="icon" href="/favicon.ico">
@@ -9,2181 +11,929 @@
 <link rel="manifest" href="/site.webmanifest">
 <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)">
-
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Karaokê Multiplayer - Oferta Especial 3 Meses por R$49,90</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #333;
-            overflow-x: hidden;
-        }
-
-        /* Animações */
-        @keyframes float {
-            0% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(5deg); }
-            100% { transform: translateY(0px) rotate(0deg); }
-        }
-
-        @keyframes float-side {
-            0% { transform: translateX(0px) rotate(0deg); }
-            50% { transform: translateX(20px) rotate(-5deg); }
-            100% { transform: translateX(0px) rotate(0deg); }
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes confetti {
-            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
-        }
-
-        @keyframes urgent-pulse {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255,71,87,0.7); }
-            50% { transform: scale(1.02); box-shadow: 0 0 0 15px rgba(255,71,87,0); }
-            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255,71,87,0); }
-        }
-
-        @keyframes countdown-blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
-        }
-
-        /* Floating Emojis - Responsivo */
-        .floating-emojis-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 999;
-            overflow: hidden;
-        }
-
-        .floating-emoji {
-            position: absolute;
-            font-size: clamp(1rem, 4vw, 2.5rem);
-            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
-            animation: float 8s ease-in-out infinite;
-            white-space: nowrap;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            background: rgba(255,255,255,0.2);
-            backdrop-filter: blur(5px);
-            padding: clamp(4px, 2vw, 8px) clamp(8px, 3vw, 15px);
-            border-radius: 50px;
-            border: 2px solid rgba(255,255,255,0.3);
-        }
-
-        .floating-emoji span {
-            font-size: clamp(0.6rem, 2.5vw, 1rem);
-            font-weight: bold;
-            color: white;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-        }
-
-        .floating-emoji .positive {
-            color: #4CAF50;
-        }
-
-        .floating-emoji .negative {
-            color: #ff4757;
-        }
-
-        /* Posicionamento dos 4 emojis */
-        .emoji-1 { top: 10%; left: 2%; animation-delay: 0s; }
-        .emoji-2 { top: 20%; right: 2%; animation-delay: 1s; animation-name: float-side; }
-        .emoji-3 { top: 70%; left: 3%; animation-delay: 2s; }
-        .emoji-4 { top: 80%; right: 3%; animation-delay: 3s; animation-name: float-side; }
-
-        /* Ajustes para tablets */
-        @media (max-width: 1024px) and (min-width: 769px) {
-            .floating-emoji {
-                font-size: clamp(1rem, 3vw, 2rem);
-                padding: 4px 12px;
-            }
-        }
-
-        /* Ajustes para celulares */
-        @media (max-width: 768px) {
-            .floating-emoji {
-                font-size: 0.9rem;
-                padding: 3px 8px;
-                gap: 3px;
-                opacity: 0.7;
-            }
-            .floating-emoji span {
-                font-size: 0.7rem;
-            }
-            .emoji-1 { top: 8%; left: 1%; }
-            .emoji-2 { top: 15%; right: 1%; }
-            .emoji-3 { top: 70%; left: 2%; }
-            .emoji-4 { top: 80%; right: 2%; }
-        }
-
-        @media (max-width: 480px) {
-            .floating-emoji {
-                font-size: 0.8rem;
-                padding: 2px 6px;
-            }
-            .floating-emoji span {
-                font-size: 0.6rem;
-            }
-        }
-        
-        /* Header */
-        .header {
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            padding: 15px 0;
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 1000;
-            border-bottom: 1px solid rgba(255,255,255,0.2);
-        }
-
-        .header-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .logo-icon {
-            font-size: 2rem;
-            color: #ffd700;
-            filter: drop-shadow(0 0 10px rgba(255,215,0,0.5));
-        }
-
-        .logo h1 {
-            font-size: 1.5rem;
-            color: white;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .nav-buttons {
-            display: flex;
-            gap: 15px;
-        }
-
-        .btn-nav {
-            padding: 8px 20px;
-            border: none;
-            border-radius: 25px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 0.9rem;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .btn-login {
-            background: transparent;
-            border: 2px solid white;
-            color: white;
-        }
-
-        .btn-login:hover {
-            background: white;
-            color: #667eea;
-        }
-
-        .btn-signup {
-            background: #ffd700;
-            color: #333;
-        }
-
-        .btn-signup:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 20px rgba(255,215,0,0.5);
-        }
-
-        /* Hero Section */
-        .hero {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 100px 20px 50px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .hero-background {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at 30% 50%, rgba(255,255,255,0.1) 0%, transparent 50%);
-        }
-
-        .hero-content {
-            max-width: 1200px;
-            text-align: center;
-            color: white;
-            position: relative;
-            z-index: 2;
-        }
-
-        .hero-title {
-            font-size: 3.5rem;
-            margin-bottom: 20px;
-            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
-            animation: float 3s ease-in-out infinite;
-        }
-
-        .hero-subtitle {
-            font-size: 1.2rem;
-            margin-bottom: 40px;
-            opacity: 0.9;
-            max-width: 800px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        /* ===== OFERTA ESPECIAL - BANNER DE URGÊNCIA ===== */
-        .offer-banner {
-            background: linear-gradient(135deg, #ff4757, #ff6b6b);
-            border-radius: 20px;
-            padding: 20px;
-            margin-bottom: 40px;
-            text-align: center;
-            animation: urgent-pulse 2s infinite;
-            border: 2px solid #ffd700;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-
-        .offer-badge {
-            background: #ffd700;
-            color: #333;
-            display: inline-block;
-            padding: 8px 20px;
-            border-radius: 30px;
-            font-weight: 800;
-            font-size: 0.9rem;
-            margin-bottom: 15px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        .offer-title {
-            font-size: 1.8rem;
-            font-weight: 800;
-            margin-bottom: 10px;
-            color: white;
-        }
-
-        .offer-price {
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: #ffd700;
-            margin: 10px 0;
-        }
-
-        .offer-price small {
-            font-size: 1rem;
-            color: white;
-        }
-
-        .offer-original {
-            text-decoration: line-through;
-            font-size: 1.1rem;
-            opacity: 0.8;
-            margin-bottom: 10px;
-        }
-
-        .offer-save {
-            background: rgba(0,0,0,0.3);
-            display: inline-block;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            margin-bottom: 15px;
-        }
-
-        /* Timer */
-        .timer-container {
-            background: rgba(0,0,0,0.5);
-            border-radius: 15px;
-            padding: 15px;
-            margin: 20px 0;
-            backdrop-filter: blur(5px);
-        }
-
-        .timer-label {
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 10px;
-        }
-
-        .timer {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-
-        .timer-block {
-            text-align: center;
-            min-width: 70px;
-        }
-
-        .timer-number {
-            font-size: 2.5rem;
-            font-weight: 800;
-            background: rgba(0,0,0,0.7);
-            padding: 10px 15px;
-            border-radius: 12px;
-            font-family: monospace;
-            letter-spacing: 3px;
-            animation: countdown-blink 1s ease-in-out;
-        }
-
-        .timer-label-small {
-            font-size: 0.7rem;
-            margin-top: 5px;
-            opacity: 0.8;
-        }
-
-        /* Counter de vagas */
-        .spots-counter {
-            margin-top: 15px;
-            font-size: 0.9rem;
-        }
-
-        .spots-number {
-            font-size: 1.3rem;
-            font-weight: 800;
-            color: #ffd700;
-            background: rgba(0,0,0,0.5);
-            display: inline-block;
-            padding: 5px 15px;
-            border-radius: 30px;
-        }
-
-        .progress-bar-container {
-            width: 100%;
-            max-width: 300px;
-            margin: 15px auto 0;
-            background: rgba(255,255,255,0.2);
-            border-radius: 10px;
-            height: 8px;
-            overflow: hidden;
-        }
-
-        .progress-bar-fill {
-            width: 0%;
-            height: 100%;
-            background: #ffd700;
-            border-radius: 10px;
-            transition: width 0.5s ease;
-        }
-
-        .hero-buttons {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            margin: 30px 0 40px;
-            flex-wrap: wrap;
-        }
-
-        .btn-hero {
-            padding: 15px 40px;
-            border: none;
-            border-radius: 50px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .btn-primary {
-            background: #ffd700;
-            color: #333;
-            box-shadow: 0 10px 20px rgba(255,215,0,0.3);
-            animation: pulse 2s infinite;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(255,215,0,0.4);
-        }
-
-        .btn-secondary {
-            background: transparent;
-            border: 2px solid white;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: white;
-            color: #667eea;
-        }
-
-        /* Preview Cards */
-        .preview-showcase {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 25px;
-            animation: slideIn 1s ease-out;
-        }
-
-        @media (max-width: 1024px) {
-            .preview-showcase {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 20px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .preview-showcase {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-            
-            .hero-title {
-                font-size: 2.5rem;
-            }
-            
-            .hero-buttons {
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            .btn-hero {
-                width: 100%;
-                max-width: 280px;
-                text-align: center;
-            }
-            
-            .header-content {
-                flex-direction: column;
-                gap: 10px;
-            }
-            
-            .offer-title {
-                font-size: 1.2rem;
-            }
-            
-            .offer-price {
-                font-size: 1.8rem;
-            }
-            
-            .timer-number {
-                font-size: 1.5rem;
-                min-width: 50px;
-                padding: 8px 10px;
-            }
-            
-            .timer-block {
-                min-width: 55px;
-            }
-        }
-
-        .preview-card {
-            background: white;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-            transition: all 0.3s;
-            border: 1px solid rgba(255,255,255,0.3);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .preview-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 30px 60px rgba(0,0,0,0.3);
-        }
-
-        .card-header {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            color: white;
-            padding: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .room-tag {
-            background: rgba(255,255,255,0.1);
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-family: monospace;
-            font-size: 1.1rem;
-            letter-spacing: 2px;
-        }
-
-        .live-badge {
-            background: #ff4757;
-            color: white;
-            padding: 3px 10px;
-            border-radius: 15px;
-            font-size: 0.7rem;
-            font-weight: bold;
-            animation: pulse 1.5s ease-in-out infinite;
-        }
-
-        .participants-badge {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 0.9rem;
-        }
-
-        .main-screen, .queue-screen, .score-screen {
-            flex: 1;
-        }
-
-        .main-screen {
-            background: #1a1a2e;
-            color: white;
-            padding: 20px;
-        }
-
-        .queue-screen {
-            background: white;
-            padding: 20px;
-        }
-
-        .score-screen {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 25px;
-            color: white;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .song-player {
-            text-align: center;
-            margin: 15px 0;
-        }
-
-        .song-title-main {
-            font-size: 1.4rem;
-            font-weight: bold;
-            color: #ffd700;
-            margin-bottom: 5px;
-        }
-
-        .song-artist {
-            color: #a0a0a0;
-            font-size: 0.9rem;
-            margin-bottom: 15px;
-        }
-
-        .progress-container {
-            background: rgba(255,255,255,0.1);
-            height: 6px;
-            border-radius: 3px;
-            margin: 15px 0;
-            position: relative;
-        }
-
-        .progress-fill {
-            width: 45%;
-            height: 100%;
-            background: linear-gradient(90deg, #ffd700, #ff6b6b);
-            border-radius: 3px;
-        }
-
-        .time-stamps {
-            display: flex;
-            justify-content: space-between;
-            color: #a0a0a0;
-            font-size: 0.8rem;
-        }
-
-        .reactions-panel {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            margin: 20px 0;
-        }
-
-        .reaction-item {
-            background: rgba(255,255,255,0.1);
-            border-radius: 10px;
-            padding: 10px 5px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .reaction-item:hover {
-            background: rgba(255,215,0,0.2);
-            transform: scale(1.1);
-        }
-
-        .reaction-emoji {
-            font-size: 1.5rem;
-            margin-bottom: 5px;
-        }
-
-        .reaction-count {
-            font-size: 0.8rem;
-            color: #ffd700;
-        }
-
-        .participants-online {
-            margin-top: 20px;
-        }
-
-        .participant-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 10px;
-            margin-bottom: 8px;
-        }
-
-        .participant-avatar {
-            width: 35px;
-            height: 35px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: white;
-        }
-
-        .queue-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            color: #333;
-        }
-
-        .queue-title {
-            font-weight: bold;
-            font-size: 1.1rem;
-        }
-
-        .queue-count {
-            background: #667eea;
-            color: white;
-            padding: 3px 10px;
-            border-radius: 15px;
-            font-size: 0.8rem;
-        }
-
-        .queue-item {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 12px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            transition: all 0.3s;
-        }
-
-        .queue-item:hover {
-            background: #e9ecef;
-            transform: translateX(5px);
-        }
-
-        .queue-position {
-            width: 30px;
-            height: 30px;
-            background: #ffd700;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: #333;
-        }
-
-        .performer {
-            font-size: 2rem;
-            font-weight: bold;
-            margin-bottom: 10px;
-            position: relative;
-        }
-
-        .total-score-display {
-            font-size: 4rem;
-            font-weight: bold;
-            color: #ffd700;
-            margin: 15px 0;
-            text-shadow: 0 0 20px rgba(255,215,0,0.5);
-        }
-
-        .score-breakdown {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            margin: 20px 0;
-        }
-
-        .score-stat {
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 1.8rem;
-            font-weight: bold;
-        }
-
-        .stat-label {
-            font-size: 0.8rem;
-            opacity: 0.8;
-        }
-
-        .stat-positive {
-            color: #4CAF50;
-        }
-
-        .stat-negative {
-            color: #ff4757;
-        }
-
-        .legendary-badge {
-            background: #ffd700;
-            color: #333;
-            padding: 10px 20px;
-            border-radius: 30px;
-            display: inline-block;
-            font-weight: bold;
-            margin: 15px 0;
-            animation: pulse 2s ease-in-out infinite;
-        }
-
-        .score-actions {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-top: 20px;
-        }
-
-        .btn-score-action {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 25px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 0.9rem;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .btn-selfie {
-            background: #ffd700;
-            color: #333;
-        }
-
-        .btn-selfie:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(255,215,0,0.4);
-        }
-
-        .btn-next {
-            background: transparent;
-            border: 2px solid white;
-            color: white;
-        }
-
-        .btn-next:hover {
-            background: white;
-            color: #667eea;
-        }
-
-        /* Plans Section */
-        .plans {
-            padding: 80px 20px;
-            background: white;
-        }
-
-        .section-title {
-            text-align: center;
-            margin-bottom: 50px;
-        }
-
-        .section-title h3 {
-            font-size: 2.5rem;
-            color: #333;
-            margin-bottom: 15px;
-        }
-
-        .section-title p {
-            color: #666;
-            font-size: 1.1rem;
-            max-width: 700px;
-            margin: 0 auto;
-        }
-
-        .plans-grid {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 25px;
-        }
-
-        @media (max-width: 1024px) and (min-width: 769px) {
-            .plans-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 20px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .plans-grid {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-        }
-
-        .plan-card {
-            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
-            border-radius: 15px;
-            padding: 25px 20px;
-            text-align: center;
-            transition: all 0.3s;
-            position: relative;
-            border: 1px solid #e0e0e0;
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-        }
-
-        .plan-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            border-color: #667eea;
-        }
-
-        .plan-card.recommended {
-            border: 3px solid #ffd700;
-            transform: scale(1.02);
-            background: linear-gradient(135deg, #fff9e6 0%, #fff2cc 100%);
-        }
-
-        @media (max-width: 768px) {
-            .plan-card.recommended {
-                transform: scale(1);
-            }
-        }
-
-        .plan-card.recommended::before {
-            content: "⭐ RECOMENDADO";
-            position: absolute;
-            top: -12px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #ffd700;
-            color: #333;
-            padding: 5px 20px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            white-space: nowrap;
-        }
-
-        /* Oferta especial no plano trimestral */
-        .special-offer-badge {
-            background: #ff4757;
-            color: white;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.7rem;
-            font-weight: bold;
-            display: inline-block;
-            margin-bottom: 10px;
-            animation: pulse 1s infinite;
-        }
-
-        .plan-name {
-            font-size: 1.3rem;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        .plan-price {
-            font-size: 2rem;
-            color: #667eea;
-            margin-bottom: 5px;
-        }
-
-        .plan-price small {
-            font-size: 0.8rem;
-            color: #999;
-        }
-
-        .plan-period {
-            color: #666;
-            margin-bottom: 15px;
-            font-size: 0.85rem;
-        }
-
-        .plan-save {
-            background: #4CAF50;
-            color: white;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.7rem;
-            display: inline-block;
-            margin-bottom: 15px;
-        }
-
-        .plan-features {
-            list-style: none;
-            margin: 15px 0 20px;
-            text-align: left;
-            flex: 1;
-        }
-
-        .plan-features li {
-            padding: 8px 0;
-            color: #555;
-            border-bottom: 1px solid #e0e0e0;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.85rem;
-        }
-
-        .plan-features li:before {
-            content: "✓";
-            color: #4CAF50;
-            font-weight: bold;
-        }
-
-        .btn-plan {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 25px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-            width: 100%;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 0.95rem;
-            margin-top: auto;
-        }
-
-        .btn-plan:hover {
-            background: #5a67d8;
-            transform: scale(1.02);
-        }
-
-        /* CTA Showcase */
-        .cta-showcase {
-            margin: 60px 0 40px;
-            padding: 0 20px;
-        }
-
-        .cta-grid {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 25px;
-        }
-
-        .cta-card {
-            background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.98) 100%);
-            border-radius: 20px;
-            padding: 28px 24px;
-            text-align: center;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(102, 126, 234, 0.15);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            backdrop-filter: blur(2px);
-        }
-
-        .cta-card:hover {
-            transform: translateY(-8px);
-            border-color: #667eea;
-            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.15);
-        }
-
-        .cta-card.cta-highlight {
-            background: linear-gradient(135deg, #fff9e6 0%, #fff2cc 100%);
-            border-left: 4px solid #ffd700;
-            position: relative;
-        }
-
-        .cta-card.cta-highlight::before {
-            content: "✨ MAIS POPULAR ✨";
-            position: absolute;
-            top: -12px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #ffd700;
-            color: #333;
-            font-size: 0.7rem;
-            font-weight: bold;
-            padding: 3px 12px;
-            border-radius: 20px;
-            white-space: nowrap;
-        }
-
-        .cta-icon {
-            font-size: 3rem;
-            margin-bottom: 15px;
-            display: inline-block;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        .cta-card h3 {
-            font-size: 1.3rem;
-            margin-bottom: 12px;
-            color: #1e293b;
-            font-weight: 700;
-        }
-
-        .cta-card p {
-            color: #475569;
-            font-size: 0.9rem;
-            line-height: 1.5;
-            margin-bottom: 20px;
-        }
-
-        .cta-btn {
-            display: inline-block;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 12px 28px;
-            border-radius: 40px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.9rem;
-            transition: all 0.3s;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-        }
-
-        .cta-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
-        }
-
-        /* Footer */
-        .footer {
-            background: #1a1a2e;
-            color: white;
-            padding: 50px 20px 20px;
-        }
-
-        .footer-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 30px;
-        }
-
-        @media (max-width: 1024px) {
-            .footer-content {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 30px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .footer-content {
-                grid-template-columns: 1fr;
-                gap: 30px;
-                text-align: center;
-            }
-            
-            .social-links {
-                justify-content: center;
-            }
-            
-            .cta-grid {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-            
-            .cta-card {
-                padding: 22px 20px;
-            }
-            
-            .cta-card h3 {
-                font-size: 1.2rem;
-            }
-            
-            .cta-icon {
-                font-size: 2.5rem;
-            }
-            
-            .cta-card.cta-highlight::before {
-                font-size: 0.6rem;
-                padding: 2px 10px;
-                white-space: nowrap;
-            }
-        }
-
-        .footer-column h4 {
-            color: #ffd700;
-            margin-bottom: 20px;
-        }
-
-        .footer-column ul {
-            list-style: none;
-        }
-
-        .footer-column ul li {
-            margin-bottom: 10px;
-        }
-
-        .footer-column ul li a {
-            color: #a0a0a0;
-            text-decoration: none;
-            transition: all 0.3s;
-        }
-
-        .footer-column ul li a:hover {
-            color: #ffd700;
-            padding-left: 5px;
-        }
-
-        .social-links {
-            display: flex;
-            gap: 15px;
-        }
-
-        .social-links a {
-            color: white;
-            font-size: 1.5rem;
-            transition: all 0.3s;
-        }
-
-        .social-links a:hover {
-            color: #ffd700;
-            transform: translateY(-3px);
-        }
-
-        .footer-bottom {
-            max-width: 1200px;
-            margin: 40px auto 0;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            text-align: center;
-            color: #a0a0a0;
-        }
-
-        /* Ajustes para Touch Screen */
-        @media (hover: none) {
-            .plan-card:hover,
-            .preview-card:hover,
-            .btn-plan:hover,
-            .btn-hero:hover,
-            .cta-card:hover {
-                transform: none;
-            }
-        }
-
-        /* Modal de Selfie Estilizado */
-        .selfie-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.95);
-            z-index: 2000;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(10px);
-        }
-
-        .selfie-modal.active {
-            display: flex;
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .selfie-content {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 30px;
-            padding: 40px;
-            text-align: center;
-            max-width: 500px;
-            width: 90%;
-            position: relative;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-            border: 2px solid #ffd700;
-            animation: slideUp 0.4s ease;
-        }
-
-        @keyframes slideUp {
-            from { transform: translateY(50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        .selfie-content h3 {
-            color: #ffd700;
-            font-size: 1.8rem;
-            margin-bottom: 20px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .selfie-preview {
-            background: rgba(255,255,255,0.1);
-            border-radius: 20px;
-            padding: 30px;
-            margin: 20px 0;
-            position: relative;
-            border: 2px dashed rgba(255,255,255,0.3);
-        }
-
-        .selfie-avatar {
-            font-size: 3rem;
-            display: block;
-            margin-bottom: 15px;
-            color: white;
-            font-weight: bold;
-        }
-
-        .selfie-score-overlay {
-            background: rgba(0,0,0,0.7);
-            display: inline-block;
-            padding: 10px 20px;
-            border-radius: 40px;
-            font-size: 1.3rem;
-            font-weight: bold;
-            color: #ffd700;
-        }
-
-        .selfie-actions {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            margin-top: 25px;
-            flex-wrap: wrap;
-        }
-
-        .btn-selfie-action {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 30px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 0.9rem;
-        }
-
-        .btn-download {
-            background: #ffd700;
-            color: #333;
-        }
-
-        .btn-share {
-            background: #4CAF50;
-            color: white;
-        }
-
-        .btn-close {
-            background: #ff4757;
-            color: white;
-        }
-
-        .btn-selfie-action:hover {
-            transform: scale(1.05);
-        }
-
-        /* Modal de Imagem */
-        .imagem-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.95);
-            z-index: 2000;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(10px);
-        }
-
-        .imagem-modal.active {
-            display: flex;
-        }
-
-        .imagem-modal-content {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 30px;
-            padding: 20px;
-            text-align: center;
-            max-width: 600px;
-            width: 90%;
-            position: relative;
-            border: 2px solid #ffd700;
-        }
-
-        .imagem-modal-close {
-            position: absolute;
-            top: 10px;
-            right: 20px;
-            font-size: 2rem;
-            cursor: pointer;
-            color: white;
-            transition: all 0.3s;
-        }
-
-        .imagem-modal-close:hover {
-            transform: scale(1.2);
-            color: #ffd700;
-        }
-
-        .imagem-modal-content img {
-            max-width: 100%;
-            border-radius: 15px;
-            margin: 10px 0;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-
-        .imagem-modal-caption {
-            margin-top: 20px;
-            color: white;
-        }
-
-        .imagem-modal-caption h3 {
-            color: #ffd700;
-            font-size: 1.5rem;
-            margin-bottom: 10px;
-        }
-
-        .btn-share-modal {
-            background: #ffd700;
-            color: #333;
-            padding: 10px 25px;
-            border: none;
-            border-radius: 30px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 15px;
-            transition: all 0.3s;
-        }
-
-        .btn-share-modal:hover {
-            transform: scale(1.05);
-        }
-    </style>
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<!-- Font Awesome não-bloqueante -->
+<link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
+<style>
+/* ===== RESET ===== */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
+/* ===== BASE ===== */
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+  color:#333;
+  overflow-x:hidden;
+}
+
+/* ===== ANIMAÇÕES — apenas transform + opacity (GPU) ===== */
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-18px)}}
+@keyframes float-x{0%,100%{transform:translateX(0)}50%{transform:translateX(18px)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+@keyframes slideIn{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:translateY(0)}}
+@keyframes confetti{to{transform:translateY(100vh) rotate(720deg);opacity:0}}
+@keyframes urgentPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,71,87,.6)}50%{box-shadow:0 0 0 14px rgba(255,71,87,0)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.45}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+
+/* Acessibilidade: sem animação */
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+/* ===== FLOATING EMOJIS ===== */
+.fe-wrap{position:fixed;inset:0;pointer-events:none;z-index:999;overflow:hidden}
+.fe{
+  position:absolute;
+  font-size:clamp(.85rem,3.5vw,2rem);
+  display:flex;align-items:center;gap:4px;
+  background:rgba(255,255,255,.18);
+  padding:clamp(3px,1.5vw,7px) clamp(7px,2.5vw,13px);
+  border-radius:50px;
+  border:1.5px solid rgba(255,255,255,.28);
+  will-change:transform;
+  animation:float 8s ease-in-out infinite;
+}
+.fe span{font-size:clamp(.58rem,2vw,.88rem);font-weight:700;color:#fff;text-shadow:1px 1px 2px rgba(0,0,0,.5)}
+.fe .p{color:#4caf50}.fe .n{color:#ff4757}
+.fe-1{top:10%;left:2%;animation-delay:0s}
+.fe-2{top:20%;right:2%;animation-delay:1s;animation-name:float-x}
+.fe-3{top:70%;left:3%;animation-delay:2s}
+.fe-4{top:80%;right:3%;animation-delay:3s;animation-name:float-x}
+@media(max-width:768px){.fe{opacity:.6;font-size:.82rem;padding:2px 7px}.fe-1{top:8%;left:1%}.fe-2{top:15%;right:1%}}
+
+/* ===== HEADER ===== */
+.header{
+  background:rgba(255,255,255,.1);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  padding:14px 0;position:fixed;width:100%;top:0;z-index:1000;
+  border-bottom:1px solid rgba(255,255,255,.2);
+}
+.header-in{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;padding:0 20px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{font-size:2rem;color:#ffd700}
+.logo h1{font-size:1.4rem;color:#fff;text-shadow:2px 2px 4px rgba(0,0,0,.3)}
+.nav{display:flex;gap:14px}
+.btn-nav{
+  padding:8px 20px;border-radius:25px;font-weight:700;cursor:pointer;
+  font-size:.9rem;text-decoration:none;display:inline-block;border:none;
+  transition:background .25s,color .25s,transform .25s;
+}
+.btn-login{background:transparent;border:2px solid #fff;color:#fff}
+.btn-login:hover{background:#fff;color:#667eea}
+.btn-signup{background:#ffd700;color:#333}
+.btn-signup:hover{transform:scale(1.05);box-shadow:0 0 18px rgba(255,215,0,.5)}
+@media(max-width:768px){.header-in{flex-direction:column;gap:8px}}
+
+/* ===== HERO ===== */
+.hero{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  padding:100px 20px 50px;position:relative;overflow:hidden;
+}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 30% 50%,rgba(255,255,255,.08) 0%,transparent 55%);pointer-events:none}
+.hero-in{max-width:1200px;text-align:center;color:#fff;position:relative;z-index:2}
+.hero-title{
+  font-size:clamp(2rem,5vw,3.5rem);margin-bottom:18px;
+  text-shadow:3px 3px 6px rgba(0,0,0,.3);
+  will-change:transform;animation:float 3s ease-in-out infinite;
+}
+.hero-sub{font-size:1.1rem;margin:0 auto 36px;opacity:.9;max-width:800px;line-height:1.65}
+
+/* ===== OFFER BANNER ===== */
+.offer-banner{
+  background:linear-gradient(135deg,#ff4757,#ff6b6b);
+  border-radius:18px;padding:20px;margin-bottom:36px;
+  animation:urgentPulse 2.2s infinite;
+  border:2px solid #ffd700;
+  box-shadow:0 10px 28px rgba(0,0,0,.3);
+}
+.offer-badge{
+  background:#ffd700;color:#333;display:inline-block;
+  padding:7px 18px;border-radius:30px;font-weight:800;
+  font-size:.82rem;margin-bottom:12px;text-transform:uppercase;letter-spacing:2px;
+}
+.offer-title{font-size:clamp(1.15rem,3vw,1.8rem);font-weight:800;color:#fff;margin-bottom:8px}
+.offer-price{font-size:clamp(1.6rem,4vw,2.4rem);font-weight:800;color:#ffd700;margin:8px 0}
+.offer-price small{font-size:.9rem;color:#fff}
+.offer-old{text-decoration:line-through;font-size:1rem;opacity:.8;margin-bottom:8px}
+.offer-save{background:rgba(0,0,0,.3);display:inline-block;padding:4px 14px;border-radius:20px;font-size:.85rem;margin-bottom:14px}
+
+/* Timer */
+.timer-wrap{background:rgba(0,0,0,.45);border-radius:14px;padding:14px;margin:16px 0}
+.timer-label{font-size:.75rem;text-transform:uppercase;letter-spacing:2px;margin-bottom:10px}
+.timer{display:flex;justify-content:center;gap:18px;flex-wrap:wrap}
+.timer-block{text-align:center;min-width:62px}
+.timer-num{
+  font-size:clamp(1.4rem,4vw,2.4rem);font-weight:800;
+  background:rgba(0,0,0,.65);padding:9px 13px;border-radius:11px;
+  font-family:monospace;letter-spacing:3px;
+}
+.timer-num.blink{animation:blink .5s ease-in-out infinite}
+.timer-sub{font-size:.66rem;margin-top:5px;opacity:.8}
+
+/* Spots */
+.spots{margin-top:14px;font-size:.9rem}
+.spots-num{font-size:1.22rem;font-weight:800;color:#ffd700;background:rgba(0,0,0,.45);display:inline-block;padding:4px 14px;border-radius:30px}
+.prog-wrap{width:100%;max-width:300px;margin:12px auto 0;background:rgba(255,255,255,.2);border-radius:10px;height:8px;overflow:hidden}
+.prog-fill{width:0%;height:100%;background:#ffd700;border-radius:10px;transition:width .5s ease,background .5s ease}
+.spots-note{font-size:.66rem;margin-top:7px}
+
+/* ===== HERO BUTTONS ===== */
+.hero-btns{display:flex;gap:18px;justify-content:center;margin:26px 0 36px;flex-wrap:wrap}
+.btn-hero{
+  padding:14px 38px;border:none;border-radius:50px;
+  font-size:1.05rem;font-weight:700;cursor:pointer;
+  transition:transform .25s,box-shadow .25s,background .25s,color .25s;
+  text-decoration:none;display:inline-block;
+}
+.btn-primary{background:#ffd700;color:#333;box-shadow:0 8px 18px rgba(255,215,0,.3);animation:pulse 2.2s infinite}
+.btn-primary:hover{transform:translateY(-4px);box-shadow:0 14px 28px rgba(255,215,0,.4)}
+.btn-secondary{background:transparent;border:2px solid #fff;color:#fff}
+.btn-secondary:hover{background:#fff;color:#667eea}
+@media(max-width:768px){.hero-btns{flex-direction:column;align-items:center}.btn-hero{width:100%;max-width:280px;text-align:center}}
+
+/* ===== PREVIEW CARDS ===== */
+.preview-grid{
+  max-width:1200px;margin:0 auto;
+  display:grid;grid-template-columns:repeat(3,1fr);gap:22px;
+  animation:slideIn .9s ease-out both;
+}
+@media(max-width:1024px){.preview-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:768px){.preview-grid{grid-template-columns:1fr}}
+
+.pcard{background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 18px 38px rgba(0,0,0,.18);transition:transform .3s,box-shadow .3s;display:flex;flex-direction:column}
+.pcard:hover{transform:translateY(-8px);box-shadow:0 28px 56px rgba(0,0,0,.28)}
+
+.pcard-head{color:#fff;padding:14px;display:flex;justify-content:space-between;align-items:center}
+.head-dark{background:linear-gradient(135deg,#1a1a2e,#16213e)}
+.head-blue{background:linear-gradient(135deg,#2c3e50,#3498db)}
+.head-purple{background:linear-gradient(135deg,#667eea,#764ba2)}
+
+.room-tag{background:rgba(255,255,255,.12);padding:4px 11px;border-radius:20px;font-family:monospace;font-size:1.05rem;letter-spacing:2px}
+.live-badge{background:#ff4757;color:#fff;padding:3px 9px;border-radius:14px;font-size:.68rem;font-weight:700;animation:pulse 1.5s ease-in-out infinite}
+.parts-badge{display:flex;align-items:center;gap:5px;font-size:.88rem}
+
+/* Main screen */
+.main-scr{background:#1a1a2e;color:#fff;padding:18px;flex:1}
+.song-player{text-align:center;margin:12px 0}
+.song-title{font-size:1.3rem;font-weight:700;color:#ffd700;margin-bottom:4px}
+.song-artist{color:#a0a0a0;font-size:.85rem;margin-bottom:12px}
+.prog-bar{background:rgba(255,255,255,.12);height:6px;border-radius:3px;margin:12px 0}
+.prog-bar-fill{width:45%;height:100%;background:linear-gradient(90deg,#ffd700,#ff6b6b);border-radius:3px}
+.timestamps{display:flex;justify-content:space-between;color:#a0a0a0;font-size:.75rem}
+
+.react-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:16px 0}
+.react-item{background:rgba(255,255,255,.1);border-radius:9px;padding:9px 4px;text-align:center;cursor:pointer;transition:background .2s,transform .2s}
+.react-item:hover{background:rgba(255,215,0,.22);transform:scale(1.1)}
+.react-emoji{font-size:1.35rem;margin-bottom:4px}
+.react-count{font-size:.75rem;color:#ffd700}
+
+.part-row{display:flex;align-items:center;gap:9px;padding:9px;background:rgba(255,255,255,.05);border-radius:9px;margin-bottom:7px}
+.part-avatar{width:33px;height:33px;background:linear-gradient(135deg,#667eea,#764ba2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;flex-shrink:0}
+.part-status{margin-left:auto;font-size:.78rem}
+
+.btn-copy{background:#ffd700;color:#333;border:none;padding:8px;border-radius:20px;margin-top:12px;width:100%;font-weight:700;cursor:pointer;font-size:.88rem;transition:opacity .2s}
+.btn-copy:hover{opacity:.88}
+
+/* Queue screen */
+.queue-scr{background:#fff;padding:18px;flex:1}
+.queue-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;color:#333}
+.queue-title{font-weight:700;font-size:1rem}
+.queue-badge{background:#667eea;color:#fff;padding:3px 9px;border-radius:14px;font-size:.75rem}
+.queue-item{display:flex;align-items:center;gap:12px;padding:11px;background:#f8f9fa;border-radius:9px;margin-bottom:8px;transition:background .2s,transform .2s}
+.queue-item:hover{background:#e9ecef;transform:translateX(4px)}
+.queue-pos{width:29px;height:29px;background:#ffd700;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#333;flex-shrink:0}
+.queue-song{font-weight:600;font-size:.9rem}
+.queue-user{font-size:.75rem;color:#888}
+.queue-cta{margin-top:16px;padding:12px;background:#e3f2fd;border-radius:9px;text-align:center}
+.queue-cta p{color:#1976d2;margin-bottom:4px;font-size:.9rem}
+.queue-cta small{font-size:.78rem;color:#555}
+
+/* Score screen */
+.score-scr{background:linear-gradient(135deg,#667eea,#764ba2);padding:22px;color:#fff;text-align:center;flex:1}
+.performer{font-size:1.9rem;font-weight:700;margin-bottom:8px}
+.total-score{font-size:3.8rem;font-weight:800;color:#ffd700;margin:12px 0;text-shadow:0 0 18px rgba(255,215,0,.5)}
+.score-breakdown{display:flex;justify-content:center;gap:24px;margin:16px 0}
+.score-stat{text-align:center}
+.stat-val{font-size:1.65rem;font-weight:700}
+.stat-lbl{font-size:.75rem;opacity:.8}
+.stat-pos{color:#4caf50}
+.stat-neg{color:#ff4757}
+.legend-badge{background:#ffd700;color:#333;padding:9px 18px;border-radius:30px;display:inline-block;font-weight:700;margin:12px 0;animation:pulse 2s ease-in-out infinite}
+.score-acts{display:flex;gap:9px;justify-content:center;margin-top:16px;flex-wrap:wrap}
+.btn-sa{padding:9px 18px;border:none;border-radius:24px;font-weight:700;cursor:pointer;transition:transform .2s;font-size:.85rem}
+.btn-sa-selfie{background:#ffd700;color:#333}
+.btn-sa-next{background:transparent;border:2px solid #fff;color:#fff}
+.btn-sa:hover{transform:scale(1.06)}
+
+/* ===== CTA SHOWCASE ===== */
+.cta-section{margin:56px 0 36px;padding:0 20px}
+.cta-grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:22px}
+@media(max-width:768px){.cta-grid{grid-template-columns:1fr;gap:18px}}
+
+.cta-card{
+  background:rgba(255,255,255,.96);border-radius:18px;
+  padding:26px 22px;text-align:center;
+  transition:transform .3s,border-color .3s,box-shadow .3s;
+  border:1px solid rgba(102,126,234,.14);
+  box-shadow:0 8px 26px rgba(0,0,0,.05);
+}
+.cta-card:hover{transform:translateY(-7px);border-color:#667eea;box-shadow:0 18px 38px rgba(102,126,234,.14)}
+.cta-highlight{background:linear-gradient(135deg,#fff9e6,#fff2cc);border-left:4px solid #ffd700;position:relative}
+.cta-highlight::before{
+  content:"✨ MAIS POPULAR ✨";
+  position:absolute;top:-11px;left:50%;transform:translateX(-50%);
+  background:#ffd700;color:#333;font-size:.66rem;font-weight:700;
+  padding:3px 11px;border-radius:18px;white-space:nowrap;
+}
+.cta-icon{font-size:2.8rem;margin-bottom:12px;display:inline-block}
+.cta-card h3{font-size:1.18rem;margin-bottom:10px;color:#1e293b;font-weight:700}
+.cta-card p{color:#475569;font-size:.86rem;line-height:1.55;margin-bottom:18px}
+.cta-btn{
+  display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);
+  color:#fff;padding:11px 26px;border-radius:40px;
+  text-decoration:none;font-weight:600;font-size:.86rem;
+  transition:transform .25s,box-shadow .25s;
+  box-shadow:0 4px 11px rgba(102,126,234,.3);
+}
+.cta-btn:hover{transform:scale(1.05);box-shadow:0 8px 18px rgba(102,126,234,.4)}
+
+/* ===== PLANS ===== */
+.plans{padding:76px 20px;background:#fff}
+.section-title{text-align:center;margin-bottom:44px}
+.section-title h3{font-size:clamp(1.6rem,3.5vw,2.5rem);color:#333;margin-bottom:12px}
+.section-title p{color:#666;font-size:1rem;max-width:700px;margin:0 auto}
+.plans-grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:22px}
+@media(max-width:1024px){.plans-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:768px){.plans-grid{grid-template-columns:1fr}}
+
+.plan-card{
+  background:linear-gradient(135deg,#f5f7fa,#e9ecef);
+  border-radius:14px;padding:24px 18px;text-align:center;
+  transition:transform .3s,box-shadow .3s,border-color .3s;
+  position:relative;border:1px solid #e0e0e0;
+  display:flex;flex-direction:column;
+}
+.plan-card:hover{transform:translateY(-8px);box-shadow:0 18px 38px rgba(0,0,0,.1);border-color:#667eea}
+.plan-recommended{border:3px solid #ffd700;background:linear-gradient(135deg,#fff9e6,#fff2cc)}
+.plan-recommended::before{
+  content:"⭐ RECOMENDADO";
+  position:absolute;top:-12px;left:50%;transform:translateX(-50%);
+  background:#ffd700;color:#333;padding:4px 18px;border-radius:20px;font-size:.7rem;font-weight:700;white-space:nowrap;
+}
+@media(max-width:768px){.plan-recommended{transform:none}}
+
+.plan-offer-badge{background:#ff4757;color:#fff;padding:4px 11px;border-radius:18px;font-size:.66rem;font-weight:700;display:inline-block;margin-bottom:9px;animation:pulse 1s infinite}
+.plan-name{font-size:1.22rem;font-weight:700;color:#333;margin-bottom:9px}
+.plan-price{font-size:1.9rem;color:#667eea;margin-bottom:4px}
+.plan-price small{font-size:.76rem;color:#999}
+.plan-period{color:#666;margin-bottom:12px;font-size:.82rem}
+.plan-save{background:#4caf50;color:#fff;padding:4px 11px;border-radius:18px;font-size:.68rem;display:inline-block;margin-bottom:12px}
+.plan-features{list-style:none;margin:12px 0 18px;text-align:left;flex:1}
+.plan-features li{padding:7px 0;color:#555;border-bottom:1px solid #e0e0e0;display:flex;align-items:center;gap:7px;font-size:.82rem}
+.plan-features li::before{content:"✓";color:#4caf50;font-weight:700;flex-shrink:0}
+.plan-warn{color:#ff4757;font-weight:700}
+.btn-plan{
+  background:#667eea;color:#fff;border:none;padding:11px 18px;border-radius:24px;
+  font-weight:700;cursor:pointer;transition:background .25s,transform .2s;
+  width:100%;text-decoration:none;display:inline-block;font-size:.9rem;margin-top:auto;
+}
+.btn-plan:hover{background:#5a67d8;transform:scale(1.02)}
+
+/* ===== FOOTER ===== */
+.footer{background:#1a1a2e;color:#fff;padding:48px 20px 18px}
+.footer-grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:28px}
+@media(max-width:1024px){.footer-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:768px){.footer-grid{grid-template-columns:1fr;text-align:center}.social-links{justify-content:center}}
+.footer-col h4{color:#ffd700;margin-bottom:16px}
+.footer-col ul{list-style:none}
+.footer-col ul li{margin-bottom:9px}
+.footer-col ul li a{color:#a0a0a0;text-decoration:none;transition:color .2s,padding-left .2s}
+.footer-col ul li a:hover{color:#ffd700;padding-left:4px}
+.social-links{display:flex;gap:13px}
+.social-links a{color:#fff;font-size:1.4rem;transition:color .2s,transform .2s}
+.social-links a:hover{color:#ffd700;transform:translateY(-3px)}
+.footer-bottom{max-width:1200px;margin:36px auto 0;padding-top:18px;border-top:1px solid rgba(255,255,255,.1);text-align:center;color:#a0a0a0}
+.footer-bottom p+p{margin-top:8px;font-size:.76rem}
+
+/* ===== MODAIS ===== */
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:2000;align-items:center;justify-content:center}
+.modal.active{display:flex;animation:fadeIn .28s ease}
+.modal-box{
+  background:linear-gradient(135deg,#667eea,#764ba2);
+  border-radius:28px;padding:36px;text-align:center;
+  max-width:500px;width:90%;position:relative;
+  box-shadow:0 18px 56px rgba(0,0,0,.5);border:2px solid #ffd700;
+  animation:slideUp .35s ease both;
+}
+.modal-box h3{color:#ffd700;font-size:1.7rem;margin-bottom:18px}
+.modal-box p{color:#e0e0e0;margin:12px 0}
+.modal-close{position:absolute;top:10px;right:18px;font-size:1.9rem;cursor:pointer;color:#fff;transition:transform .2s,color .2s;line-height:1;background:none;border:none}
+.modal-close:hover{transform:scale(1.2);color:#ffd700}
+
+/* Selfie */
+.selfie-prev{background:rgba(255,255,255,.1);border-radius:18px;padding:26px;margin:16px 0;border:2px dashed rgba(255,255,255,.28)}
+.selfie-avatar{font-size:2.8rem;display:block;margin-bottom:12px}
+.selfie-score{background:rgba(0,0,0,.65);display:inline-block;padding:9px 18px;border-radius:38px;font-size:1.2rem;font-weight:700;color:#ffd700}
+.selfie-acts{display:flex;gap:12px;justify-content:center;margin-top:20px;flex-wrap:wrap}
+.btn-sm{padding:11px 22px;border:none;border-radius:28px;font-weight:700;cursor:pointer;transition:transform .2s;font-size:.86rem}
+.btn-dl{background:#ffd700;color:#333}
+.btn-sh{background:#4caf50;color:#fff}
+.btn-cl{background:#ff4757;color:#fff}
+.btn-sm:hover{transform:scale(1.06)}
+
+/* Image modal */
+.img-modal-box{max-width:560px}
+.img-modal-box img{max-width:100%;border-radius:12px;margin:8px 0;box-shadow:0 9px 28px rgba(0,0,0,.3)}
+.img-caption h3{color:#ffd700;font-size:1.35rem;margin-bottom:8px}
+.img-caption p{color:#e0e0e0;font-size:.88rem}
+.btn-share-modal{background:#ffd700;color:#333;padding:9px 22px;border:none;border-radius:28px;font-weight:700;cursor:pointer;margin-top:12px;transition:transform .2s}
+.btn-share-modal:hover{transform:scale(1.05)}
+
+/* Touch: desativa hovers de elevação */
+@media(hover:none){.plan-card:hover,.pcard:hover,.cta-card:hover{transform:none;box-shadow:none}}
+</style>
 </head>
 <body>
-    <!-- Floating Emojis Section -->
-    <div class="floating-emojis-container">
-        <div class="floating-emoji emoji-1">
-            😀 <span class="positive">+1</span>
-        </div>
-        <div class="floating-emoji emoji-2">
-            🎤 <span class="positive">+5</span>
-        </div>
-        <div class="floating-emoji emoji-3">
-            😂 <span class="positive">+1</span>
-        </div>
-        <div class="floating-emoji emoji-4">
-            😍 <span class="positive">+3</span>
-        </div>
+
+<!-- ===== FLOATING EMOJIS ===== -->
+<div class="fe-wrap" aria-hidden="true">
+  <div class="fe fe-1">😀 <span class="p">+1</span></div>
+  <div class="fe fe-2">🎤 <span class="p">+5</span></div>
+  <div class="fe fe-3">😂 <span class="p">+1</span></div>
+  <div class="fe fe-4">😍 <span class="p">+3</span></div>
+</div>
+
+<!-- ===== HEADER ===== -->
+<header class="header">
+  <div class="header-in">
+    <div class="logo">
+      <span class="logo-icon" aria-hidden="true">🎤</span>
+      <h1>Karaokê Multiplayer</h1>
     </div>
-        
-    <!-- Header -->
-    <header class="header">
-        <div class="header-content">
-            <div class="logo">
-                <span class="logo-icon">🎤</span>
-                <h1>Karaokê Multiplayer</h1>
-            </div>
-            <div class="nav-buttons">
-                <a href="javascript:void(0)" onclick="irParaLogin()" class="btn-nav btn-login">Entrar</a>
-                <a href="javascript:void(0)" onclick="irParaCheckout()" class="btn-nav btn-signup">Criar Conta</a>
-            </div>
+    <nav class="nav">
+      <a href="javascript:void(0)" onclick="irParaLogin()" class="btn-nav btn-login">Entrar</a>
+      <a href="javascript:void(0)" onclick="irParaCheckout()" class="btn-nav btn-signup">Criar Conta</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ===== HERO ===== -->
+<section class="hero">
+  <div class="hero-in">
+    <h2 class="hero-title">Cante, Pontue, Vire Estrela! ⭐</h2>
+
+    <!-- OFFER BANNER -->
+    <div class="offer-banner" id="offerBanner">
+      <div class="offer-badge">🔥 OFERTA POR TEMPO LIMITADO 🔥</div>
+      <div class="offer-title">3 MESES DE KARAOKÊ PREMIUM</div>
+      <div class="offer-price">R$ 49,90 <small>em até 3x sem juros</small></div>
+      <div class="offer-old">De R$ 74,70 por apenas</div>
+      <div class="offer-save">💰 Economia de R$ 24,80 💰</div>
+
+      <div class="timer-wrap">
+        <div class="timer-label">⏰ OFERTA EXPIRA EM ⏰</div>
+        <div class="timer">
+          <div class="timer-block">
+            <div class="timer-num" id="tMin">15</div>
+            <div class="timer-sub">MINUTOS</div>
+          </div>
+          <div class="timer-block">
+            <div class="timer-num" id="tSec">00</div>
+            <div class="timer-sub">SEGUNDOS</div>
+          </div>
         </div>
-    </header>
+      </div>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="hero-background"></div>
-        <div class="hero-content">
-            <h2 class="hero-title">Cante, Pontue, Vire Estrela! ⭐</h2>
-            
-            <!-- BANNER DE OFERTA COM TIMER E ESCASSEZ -->
-            <div class="offer-banner">
-                <div class="offer-badge">
-                    🔥 OFERTA POR TEMPO LIMITADO 🔥
-                </div>
-                <div class="offer-title">
-                    3 MESES DE KARAOKÊ PREMIUM
-                </div>
-                <div class="offer-price">
-                    R$ 49,90 <small>em até 3x sem juros</small>
-                </div>
-                <div class="offer-original">
-                    De R$ 74,70 por apenas
-                </div>
-                <div class="offer-save">
-                    💰 Economia de R$ 24,80 💰
-                </div>
-                
-                <!-- Timer de 15 minutos -->
-                <div class="timer-container">
-                    <div class="timer-label">
-                        ⏰ OFERTA EXPIRA EM ⏰
-                    </div>
-                    <div class="timer" id="countdownTimer">
-                        <div class="timer-block">
-                            <div class="timer-number" id="timerMinutes">15</div>
-                            <div class="timer-label-small">MINUTOS</div>
-                        </div>
-                        <div class="timer-block">
-                            <div class="timer-number" id="timerSeconds">00</div>
-                            <div class="timer-label-small">SEGUNDOS</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Contador de vagas -->
-                <div class="spots-counter">
-                    <div class="spots-number">
-                        🎟️ APENAS <span id="spotsLeft">500</span> VAGAS RESTANTES
-                    </div>
-                    <div class="progress-bar-container">
-                        <div class="progress-bar-fill" id="spotsProgress" style="width: 0%;"></div>
-                    </div>
-                    <div style="font-size: 0.7rem; margin-top: 8px;">
-                        * Para os 500 primeiros clientes
-                    </div>
-                </div>
-            </div>
-            
-            <p class="hero-subtitle">
-                A primeira plataforma de karaokê interativo onde você canta ao vivo com amigos<br>
-                e recebe pontuação em tempo real através de emojis!
-            </p>
-            
-            <div class="hero-buttons">
-                <a href="javascript:void(0)" onclick="irParaCheckoutComPlano('trimestral')" class="btn-hero btn-primary">
-                    🎵 GARANTIR OFERTA AGORA
-                </a>
-                <a href="https://uploads.onecompiler.io/43xkytw48/44gvhqscq/img-03.png" class="btn-hero btn-secondary" target="_blank">
-                    ▶️ Ver Demonstração
-                </a>
-            </div>
-
-            <!-- Preview Cards -->
-            <div class="preview-showcase">
-                <!-- Card 1: Tela Principal -->
-                <div class="preview-card">
-                    <div class="card-header">
-                        <span class="room-tag">7K4GPP</span>
-                        <span class="live-badge">AO VIVO</span>
-                        <span class="participants-badge">
-                            <i class="fas fa-users"></i> 2
-                        </span>
-                    </div>
-                    <div class="main-screen">
-                        <div class="song-player">
-                            <div class="song-title-main">DESCER PRA BC</div>
-                            <div class="song-artist">Breno & Matheus, DJ Ari SL</div>
-                            
-                            <div class="progress-container">
-                                <div class="progress-fill"></div>
-                            </div>
-                            
-                            <div class="time-stamps">
-                                <span>0:01</span>
-                                <span>2:52</span>
-                            </div>
-                        </div>
-
-                        <div class="reactions-panel">
-                            <div class="reaction-item">
-                                <div class="reaction-emoji">🔥</div>
-                                <div class="reaction-count">27</div>
-                            </div>
-                            <div class="reaction-item">
-                                <div class="reaction-emoji">⭐</div>
-                                <div class="reaction-count">27</div>
-                            </div>
-                            <div class="reaction-item">
-                                <div class="reaction-emoji">👏</div>
-                                <div class="reaction-count">15</div>
-                            </div>
-                            <div class="reaction-item">
-                                <div class="reaction-emoji">😂</div>
-                                <div class="reaction-count">8</div>
-                            </div>
-                        </div>
-
-                        <div class="participants-online">
-                            <div class="participant-row">
-                                <div class="participant-avatar">J</div>
-                                <span class="participant-name">ju</span>
-                                <span class="participant-status">
-                                    <i class="fas fa-circle" style="color: #4CAF50; font-size: 8px;"></i> Cantando
-                                </span>
-                            </div>
-                            <div class="participant-row">
-                                <div class="participant-avatar">B</div>
-                                <span class="participant-name">Bru</span>
-                                <span class="participant-status">
-                                    <i class="fas fa-circle" style="color: #4CAF50; font-size: 8px;"></i> Online
-                                </span>
-                            </div>
-                        </div>
-
-                        <button style="background: #ffd700; color: #333; border: none; padding: 8px; border-radius: 20px; margin-top: 15px; width: 100%; font-weight: bold; cursor: pointer;" onclick="copiarLink()">
-                            <i class="fas fa-link"></i> Copiar Link da Sala
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Card 2: Fila de Espera -->
-                <div class="preview-card">
-                    <div class="card-header" style="background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);">
-                        <span class="room-tag">FILA</span>
-                        <span class="participants-badge">
-                            <i class="fas fa-music"></i> 1 na fila
-                        </span>
-                    </div>
-                    <div class="queue-screen">
-                        <div class="queue-header">
-                            <span class="queue-title">Próximas Músicas</span>
-                            <span class="queue-count">1</span>
-                        </div>
-
-                        <div class="queue-item">
-                            <div class="queue-position">1</div>
-                            <div class="queue-info">
-                                <div class="queue-song">Video Karaoke</div>
-                                <div class="queue-user">Adicionado por ju</div>
-                            </div>
-                            <div class="queue-thumb">
-                                <i class="fas fa-play"></i>
-                            </div>
-                        </div>
-
-                        <div style="margin-top: 20px; padding: 15px; background: #e3f2fd; border-radius: 10px; text-align: center;">
-                            <p style="color: #1976d2; margin-bottom: 5px;">🎤 Sua vez de cantar!</p>
-                            <small>Adicione uma música à fila</small>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Card 3: Pontuação Final (CORRIGIDO) -->
-                <div class="preview-card">
-                    <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                        <span class="room-tag">FINAL</span>
-                        <span class="live-badge">ENCERRADO</span>
-                    </div>
-                    <div class="score-screen">
-                        <div class="performer">ju</div>
-                        <div class="total-score-display">+55</div>
-                        
-                        <div class="score-breakdown">
-                            <div class="score-stat">
-                                <div class="stat-value stat-positive">+59</div>
-                                <div class="stat-label">Positivos</div>
-                            </div>
-                            <div class="score-stat">
-                                <div class="stat-value stat-negative">-4</div>
-                                <div class="stat-label">Negativos</div>
-                            </div>
-                            <div class="score-stat">
-                                <div class="stat-value">47</div>
-                                <div class="stat-label">Reações</div>
-                            </div>
-                        </div>
-
-                        <!-- TEXTO CORRIGIDO: "Sua Performance Lendária!" -->
-                        <div class="legendary-badge">
-                            ⭐ Sua Performance Lendária! ⭐
-                        </div>
-
-                        <div class="score-actions">
-                            <button class="btn-score-action btn-selfie" onclick="abrirSelfie()">
-                                <i class="fas fa-camera"></i> Selfie
-                            </button>
-                            <button class="btn-score-action btn-next" onclick="abrirModalImagem()">
-                                <i class="fas fa-step-forward"></i> Próxima
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- NOVA SEÇÃO: CHAMADAS PARA AÇÃO -->
-    <section class="cta-showcase">
-        <div class="cta-grid">
-            <div class="cta-card cta-highlight">
-                <div class="cta-icon">🎤➖</div>
-                <h3>Sem microfone? Sem problema!</h3>
-                <p>No Karaokê Multiplayer, quem te dá a nota é a galera — com emojis em tempo real. Cante do sofá, da TV ou do celular.</p>
-                <a href="https://karaokemultiplayer.com.br/checkout.html?plan=trimestral&offer=flash15min" class="cta-btn">Garantir Oferta →</a>
-            </div>
-
-            <div class="cta-card">
-                <div class="cta-icon">📱💻📺</div>
-                <h3>De qualquer lugar, em qualquer tela</h3>
-                <p>Computador, tablet, celular ou Smart TV — seu palco está onde você estiver.</p>
-                <a href="https://karaokemultiplayer.com.br/checkout.html?plan=trimestral&offer=flash15min" class="cta-btn">Quero Essa Oferta →</a>
-            </div>
-
-            <div class="cta-card">
-                <div class="cta-icon">👥➡️⭐</div>
-                <h3>Agora quem decide é a galera</h3>
-                <p>Cada emoji vale nota. Quanto mais a plateia se emocionar, mais alta sua pontuação.</p>
-                <a href="https://karaokemultiplayer.com.br/checkout.html?plan=trimestral&offer=flash15min" class="cta-btn">Ativar Plateia →</a>
-            </div>
-
-            <div class="cta-card cta-highlight">
-                <div class="cta-icon">📸✨</div>
-                <h3>Cante, pontue, vire estrela</h3>
-                <p>Sua performance vira um momento único. O público decide, você brilha.</p>
-                <a href="https://karaokemultiplayer.com.br/checkout.html?plan=trimestral&offer=flash15min" class="cta-btn">Quero Minha Selfie →</a>
-            </div>
-
-            <div class="cta-card">
-                <div class="cta-icon">🎉🏠</div>
-                <h3>O karaokê que se adapta à sua vida</h3>
-                <p>De casa, da festa ou na fila do banco? Sim, dá pra cantar e pontuar de onde quiser.</p>
-                <a href="https://karaokemultiplayer.com.br/checkout.html?plan=trimestral&offer=flash15min" class="cta-btn">Liberar Acesso →</a>
-            </div>
-
-            <div class="cta-card">
-                <div class="cta-icon">🎭🎤</div>
-                <h3>Transforme qualquer festa em um SHOW</h3>
-                <p>Com karaokê sincronizado, pontuação colaborativa e selfie final.</p>
-                <a href="https://karaokemultiplayer.com.br/checkout.html?plan=trimestral&offer=flash15min" class="cta-btn">Criar Evento →</a>
-            </div>
-			<!-- CTA 7: Sem equipamentos -->
-            <div class="cta-card">
-                <div class="cta-icon">🎧🚫</div>
-                <h3>Nada de equipamentos caros</h3>
-                <p>Só você, seus amigos e a vontade de cantar. Acesse pelo navegador, compartilhe o link da sala e comece a receber emojis — e pontos — de quem está assistindo.</p>
-                <a href="https://karaokemultiplayer.com.br/checkout.html?plan=trimestral&offer=flash15min" class="cta-btn">Quero Cantar Agora →</a>
-            </div>
-
-            <!-- CTA 8: Emoção do público -->
-            <div class="cta-card cta-highlight">
-                <div class="cta-icon">😍🔥👏</div>
-                <h3>Cada emoji vale nota</h3>
-                <p>Quanto mais a plateia se emocionar, mais alta sua pontuação. No final, o resultado vira uma selfie para guardar ou postar.</p>
-                <a href="https://karaokemultiplayer.com.br/checkout.html?plan=trimestral&offer=flash15min" class="cta-btn">Ativar Minha Plateia →</a>
-            </div>
-
-            <!-- CTA 9: Carreira brilhante -->
-            <div class="cta-card">
-                <div class="cta-icon">⭐🌟⭐</div>
-                <h3>Cante como se ninguém estivesse vendo — mas eles estão</h3>
-                <p>Sua pontuação final vira um troféu digital que você pode postar e dizer: "Essa foi minha performance lendária!"</p>
-                <a href="https://karaokemultiplayer.com.br/checkout.html?plan=trimestral&offer=flash15min" class="cta-btn">Viver Minha Estrela →</a>
-            </div>
-
-            <!-- CTA 10: Liberdade total -->
-            <div class="cta-card">
-                <div class="cta-icon">🌍🎶</div>
-                <h3>Karaokê sem fronteiras</h3>
-                <p>Conecte amigos de qualquer lugar, em qualquer dispositivo. Cantem juntos, pontuem juntos e criem memórias inesquecíveis.</p>
-                <a href="https://karaokemultiplayer.com.br/checkout.html?plan=trimestral&offer=flash15min" class="cta-btn">Começar Agora →</a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Plans Section -->
-    <section class="plans">
-        <div class="section-title">
-            <h3>Escolha seu Plano</h3>
-            <p>Comece a cantar hoje e vire a estrela da noite! ⭐</p>
-        </div>
-
-        <div class="plans-grid">
-            <!-- Plano Mensal -->
-            <div class="plan-card">
-                <div class="plan-name">Plano Mensal</div>
-                <div class="plan-price">R$ 5,00 <small>/mês</small></div>
-                <div class="plan-period">Válido por 1 mês</div>
-                <ul class="plan-features">
-                    <li>Salas ilimitadas</li>
-                    <li>Histórico de músicas</li>
-                    <li>Pontuação por emojis</li>
-                    <li>Reações em tempo real</li>
-                </ul>
-                <a href="https://karaokemultiplayer.com.br/checkout.html?plan=mensal" class="btn-plan">Assinar Agora</a>
-            </div>
-
-            <!-- Plano Trimestral (COM OFERTA ESPECIAL) -->
-            <div class="plan-card recommended">
-                <div class="special-offer-badge">🎁 OFERTA ESPECIAL - 500 PRIMEIROS 🎁</div>
-                <div class="plan-name">Plano Trimestral</div>
-                <div class="plan-price">R$ 49,90 <small>/trimestre</small></div>
-                <div class="plan-period">Válido por 3 meses</div>
-                <div class="plan-save">Economize R$ 24,80</div>
-                <ul class="plan-features">
-                    <li>Tudo do Mensal +</li>
-                    <li>Selfie da pontuação</li>
-                    <li>Compartilhamento direto</li>
-                    <li>Temas exclusivos</li>
-                    <li>Suporte prioritário</li>
-                    <li><strong style="color:#ff4757;">🔥 Preço promocional exclusivo</strong></li>
-                </ul>
-                <a href="https://karaokemultiplayer.com.br/checkout.html?plan=trimestral&offer=flash15min" class="btn-plan">Garantir Oferta Agora →</a>
-            </div>
-
-            <!-- Plano Semestral -->
-            <div class="plan-card">
-                <div class="plan-name">Plano Semestral</div>
-                <div class="plan-price">R$ 89,90 <small>/semestre</small></div>
-                <div class="plan-period">Válido por 6 meses</div>
-                <div class="plan-save">Economize R$ 59,50</div>
-                <ul class="plan-features">
-                    <li>Tudo do Trimestral +</li>
-                    <li>Playlists personalizadas</li>
-                    <li>Downloads das performances</li>
-                    <li>Efeitos especiais</li>
-                </ul>
-                <a href="https://karaokemultiplayer.com.br/checkout.html?plan=semestral" class="btn-plan">Assinar Agora</a>
-            </div>
-
-            <!-- Plano Anual -->
-            <div class="plan-card">
-                <div class="plan-name">Plano Anual</div>
-                <div class="plan-price">R$ 159,90 <small>/ano</small></div>
-                <div class="plan-period">Válido por 12 meses</div>
-                <div class="plan-save">Economize R$ 138,90</div>
-                <ul class="plan-features">
-                    <li>Tudo do Semestral +</li>
-                    <li>Suporte VIP 24/7</li>
-                    <li>Eventos exclusivos</li>
-                    <li>Badges especiais</li>
-                    <li>Destaque na comunidade</li>
-                </ul>
-                <a href="https://karaokemultiplayer.com.br/checkout.html?plan=anual" class="btn-plan">Assinar Agora</a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Selfie Modal (CORRIGIDO) -->
-    <div class="selfie-modal" id="selfieModal">
-        <div class="selfie-content">
-            <h3>⭐ Sua Performance Lendária! ⭐</h3>
-            
-            <div class="selfie-preview">
-                <span class="selfie-avatar">😎 ju</span>
-                <div class="selfie-score-overlay">
-                    <i class="fas fa-star" style="color: #ffd700;"></i> +55 pontos
-                </div>
-            </div>
-
-            <p style="margin: 15px 0; color: #e0e0e0;">
-                Compartilhe esse momento épico com seus amigos!
-            </p>
-
-            <div class="selfie-actions">
-                <button class="btn-selfie-action btn-download" onclick="baixarSelfie()">
-                    <i class="fas fa-download"></i> Baixar
-                </button>
-                <button class="btn-selfie-action btn-share" onclick="compartilharSelfie()">
-                    <i class="fas fa-share-alt"></i> Compartilhar
-                </button>
-                <button class="btn-selfie-action btn-close" onclick="fecharSelfie()">
-                    <i class="fas fa-times"></i> Fechar
-                </button>
-            </div>
-        </div>
+      <div class="spots">
+        <div class="spots-num">🎟️ APENAS <span id="spotsLeft">500</span> VAGAS RESTANTES</div>
+        <div class="prog-wrap"><div class="prog-fill" id="progFill"></div></div>
+        <div class="spots-note">* Para os 500 primeiros clientes</div>
+      </div>
     </div>
 
-    <!-- Modal para exibir imagem (CORRIGIDO) -->
-    <div id="imagemModal" class="imagem-modal">
-        <div class="imagem-modal-content">
-            <span class="imagem-modal-close" onclick="fecharModalImagem()">&times;</span>
-            <img id="modalImagem" src="" alt="Performance Finalizada">
-            <div class="imagem-modal-caption">
-                <h3>🎤 Sua Performance Lendária! 🎤</h3>
-                <p>Compartilhe esse momento épico com seus amigos!</p>
-                <button class="btn-share-modal" onclick="compartilharImagem()">
-                    <i class="fas fa-share-alt"></i> Compartilhar
-                </button>
-            </div>
-        </div>
+    <p class="hero-sub">
+      A primeira plataforma de karaokê interativo onde você canta ao vivo com amigos
+      e recebe pontuação em tempo real através de emojis!
+    </p>
+
+    <div class="hero-btns">
+      <a href="javascript:void(0)" onclick="irParaCheckoutComPlano('trimestral')" class="btn-hero btn-primary">🎵 GARANTIR OFERTA AGORA</a>
+      <a href="https://uploads.onecompiler.io/43xkytw48/44gvhqscq/img-03.png" class="btn-hero btn-secondary" target="_blank" rel="noopener">▶️ Ver Demonstração</a>
     </div>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="footer-content">
-            <div class="footer-column">
-                <h4>Karaokê Multiplayer</h4>
-                <ul>
-                    <li><a href="#">Sobre nós</a></li>
-                    <li><a href="#">Como funciona</a></li>
-                    <li><a href="#">Planos</a></li>
-                    <li><a href="#">FAQ</a></li>
-                </ul>
-            </div>
-            <div class="footer-column">
-                <h4>Legal</h4>
-                <ul>
-                    <li><a href="#">Termos de uso</a></li>
-                    <li><a href="#">Política de privacidade</a></li>
-                    <li><a href="#">Cookies</a></li>
-                </ul>
-            </div>
-            <div class="footer-column">
-                <h4>Suporte</h4>
-                <ul>
-                    <li><a href="#">Central de ajuda</a></li>
-                    <li><a href="#">Contato</a></li>
-                    <li><a href="#">Reportar problema</a></li>
-                </ul>
-            </div>
-            <div class="footer-column">
-                <h4>Redes Sociais</h4>
-                <div class="social-links">
-                    <a href="#"><i class="fab fa-instagram"></i></a>
-                    <a href="#"><i class="fab fa-facebook"></i></a>
-                    <a href="#"><i class="fab fa-twitter"></i></a>
-                    <a href="#"><i class="fab fa-tiktok"></i></a>
-                </div>
-            </div>
+    <!-- PREVIEW CARDS -->
+    <div class="preview-grid">
+
+      <!-- Card 1: Tela principal -->
+      <div class="pcard">
+        <div class="pcard-head head-dark">
+          <span class="room-tag">7K4GPP</span>
+          <span class="live-badge">AO VIVO</span>
+          <span class="parts-badge"><i class="fas fa-users" aria-hidden="true"></i> 2</span>
         </div>
-        <div class="footer-bottom">
-            <p>© 2026 Karaokê Multiplayer. Todos os direitos reservados.</p>
-            <p style="margin-top: 10px; font-size: 0.8rem;">Cante, pontue, vire estrela! ⭐</p>
+        <div class="main-scr">
+          <div class="song-player">
+            <div class="song-title">DESCER PRA BC</div>
+            <div class="song-artist">Breno &amp; Matheus, DJ Ari SL</div>
+            <div class="prog-bar"><div class="prog-bar-fill"></div></div>
+            <div class="timestamps"><span>0:01</span><span>2:52</span></div>
+          </div>
+          <div class="react-grid">
+            <div class="react-item"><div class="react-emoji">🔥</div><div class="react-count">27</div></div>
+            <div class="react-item"><div class="react-emoji">⭐</div><div class="react-count">27</div></div>
+            <div class="react-item"><div class="react-emoji">👏</div><div class="react-count">15</div></div>
+            <div class="react-item"><div class="react-emoji">😂</div><div class="react-count">8</div></div>
+          </div>
+          <div class="part-row">
+            <div class="part-avatar">J</div>
+            <span>ju</span>
+            <span class="part-status"><i class="fas fa-circle" style="color:#4caf50;font-size:7px" aria-hidden="true"></i> Cantando</span>
+          </div>
+          <div class="part-row">
+            <div class="part-avatar">B</div>
+            <span>Bru</span>
+            <span class="part-status"><i class="fas fa-circle" style="color:#4caf50;font-size:7px" aria-hidden="true"></i> Online</span>
+          </div>
+          <button class="btn-copy" onclick="copiarLink()"><i class="fas fa-link" aria-hidden="true"></i> Copiar Link da Sala</button>
         </div>
-    </footer>
+      </div>
 
-    <script>
-        // ========== TIMER DE 15 MINUTOS ==========
-        let timerInterval;
-        let timeLeft = 59 * 60; // 15 minutos em segundos
-        let spotsLeft = 500;
-        let soldOut = false;
-        
-        function updateTimerDisplay() {
-            const minutes = Math.floor(timeLeft / 60);
-            const seconds = timeLeft % 60;
-            
-            const minutesEl = document.getElementById('timerMinutes');
-            const secondsEl = document.getElementById('timerSeconds');
-            
-            if (minutesEl) minutesEl.textContent = minutes.toString().padStart(2, '0');
-            if (secondsEl) secondsEl.textContent = seconds.toString().padStart(2, '0');
-            
-            // Efeito visual quando faltam menos de 1 minuto
-            if (timeLeft <= 60) {
-                const timerNumbers = document.querySelectorAll('.timer-number');
-                timerNumbers.forEach(el => {
-                    el.style.animation = 'countdown-blink 0.5s ease-in-out infinite';
-                });
-            }
-        }
-        
-        function startTimer() {
-            if (timerInterval) clearInterval(timerInterval);
-            
-            timerInterval = setInterval(() => {
-                if (timeLeft > 0) {
-                    timeLeft--;
-                    updateTimerDisplay();
-                    
-                    // Atualiza vagas aleatoriamente para simular escassez
-                    if (Math.random() < 0.05 && spotsLeft > 0 && !soldOut) { // 5% de chance a cada segundo
-                        const decrease = Math.floor(Math.random() * 3) + 1; // 1 a 3 vagas
-                        spotsLeft = Math.max(0, spotsLeft - decrease);
-                        updateSpotsDisplay();
-                        
-                        if (spotsLeft === 0) {
-                            soldOut = true;
-                            showSoldOutMessage();
-                        }
-                    }
-                } else {
-                    clearInterval(timerInterval);
-                    showExpiredMessage();
-                }
-            }, 1000);
-        }
-        
-        function updateSpotsDisplay() {
-            const spotsEl = document.getElementById('spotsLeft');
-            const progressEl = document.getElementById('spotsProgress');
-            
-            if (spotsEl) spotsEl.textContent = spotsLeft;
-            if (progressEl) {
-                const percent = ((500 - spotsLeft) / 500) * 100;
-                progressEl.style.width = percent + '%';
-                
-                // Muda a cor da barra quando estiver quase cheia
-                if (percent >= 80) {
-                    progressEl.style.background = '#ff4757';
-                } else if (percent >= 50) {
-                    progressEl.style.background = '#ff9500';
-                }
-            }
-        }
-        
-        function showSoldOutMessage() {
-            const banner = document.querySelector('.offer-banner');
-            if (banner) {
-                const originalContent = banner.innerHTML;
-                banner.innerHTML = `
-                    <div class="offer-badge">🔴 ESGOTADO 🔴</div>
-                    <div class="offer-title">OFERTA ENCERRADA</div>
-                    <div class="offer-price">As 500 vagas foram preenchidas!</div>
-                    <div style="margin-top: 20px;">
-                        <a href="javascript:void(0)" onclick="irParaCheckoutComPlano('trimestral')" class="btn-hero btn-primary" style="padding: 12px 30px; font-size: 1rem;">
-                            Ver Planos Disponíveis →
-                        </a>
-                    </div>
-                `;
-            }
-        }
-        
-        function showExpiredMessage() {
-            const banner = document.querySelector('.offer-banner');
-            if (banner) {
-                const originalContent = banner.innerHTML;
-                banner.innerHTML = `
-                    <div class="offer-badge">⏰ TEMPO ESGOTADO ⏰</div>
-                    <div class="offer-title">OFERTA EXPIRADA</div>
-                    <div class="offer-price">O tempo para esta oferta acabou!</div>
-                    <div style="margin-top: 20px;">
-                        <a href="javascript:void(0)" onclick="irParaCheckoutComPlano('trimestral')" class="btn-hero btn-primary" style="padding: 12px 30px; font-size: 1rem;">
-                            Ver Outros Planos →
-                        </a>
-                    </div>
-                `;
-            }
-        }
-        
-        // ========== FUNÇÕES DE REDIRECIONAMENTO ==========
-        
-        function irParaLogin() {
-            const token = localStorage.getItem('token');
-            const usuarioLogado = localStorage.getItem('usuario');
-            
-            if (token && usuarioLogado) {
-                window.location.href = '/app.html';
-            } else {
-                window.location.href = '/login.html';
-            }
-        }
+      <!-- Card 2: Fila -->
+      <div class="pcard">
+        <div class="pcard-head head-blue">
+          <span class="room-tag">FILA</span>
+          <span class="parts-badge"><i class="fas fa-music" aria-hidden="true"></i> 1 na fila</span>
+        </div>
+        <div class="queue-scr">
+          <div class="queue-head">
+            <span class="queue-title">Próximas Músicas</span>
+            <span class="queue-badge">1</span>
+          </div>
+          <div class="queue-item">
+            <div class="queue-pos">1</div>
+            <div>
+              <div class="queue-song">Video Karaoke</div>
+              <div class="queue-user">Adicionado por ju</div>
+            </div>
+            <div style="margin-left:auto"><i class="fas fa-play" aria-hidden="true"></i></div>
+          </div>
+          <div class="queue-cta">
+            <p>🎤 Sua vez de cantar!</p>
+            <small>Adicione uma música à fila</small>
+          </div>
+        </div>
+      </div>
 
-        function irParaCheckout() {
-            const token = localStorage.getItem('token');
-            const usuarioLogado = localStorage.getItem('usuario');
-            
-            if (token && usuarioLogado) {
-                window.location.href = '/checkout.html';
-            } else {
-                localStorage.setItem('redirectAfterLogin', '/checkout.html');
-                window.location.href = '/login.html';
-            }
+      <!-- Card 3: Pontuação -->
+      <div class="pcard">
+        <div class="pcard-head head-purple">
+          <span class="room-tag">FINAL</span>
+          <span class="live-badge">ENCERRADO</span>
+        </div>
+        <div class="score-scr">
+          <div class="performer">ju</div>
+          <div class="total-score">+55</div>
+          <div class="score-breakdown">
+            <div class="score-stat"><div class="stat-val stat-pos">+59</div><div class="stat-lbl">Positivos</div></div>
+            <div class="score-stat"><div class="stat-val stat-neg">-4</div><div class="stat-lbl">Negativos</div></div>
+            <div class="score-stat"><div class="stat-val">47</div><div class="stat-lbl">Reações</div></div>
+          </div>
+          <div class="legend-badge">⭐ Sua Performance Lendária! ⭐</div>
+          <div class="score-acts">
+            <button class="btn-sa btn-sa-selfie" onclick="abrirSelfie()"><i class="fas fa-camera" aria-hidden="true"></i> Selfie</button>
+            <button class="btn-sa btn-sa-next"   onclick="abrirModalImagem()"><i class="fas fa-step-forward" aria-hidden="true"></i> Próxima</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /preview-grid -->
+  </div>
+</section>
+
+<!-- ===== CTA SHOWCASE ===== -->
+<section class="cta-section">
+  <div class="cta-grid">
+
+    <div class="cta-card cta-highlight">
+      <div class="cta-icon">🎤➖</div>
+      <h3>Sem microfone? Sem problema!</h3>
+      <p>No Karaokê Multiplayer, quem te dá a nota é a galera — com emojis em tempo real. Cante do sofá, da TV ou do celular.</p>
+      <a href="https://karaokemultiplayer.com.br/checkout.html?plan=trimestral&offer=flash15min" class="cta-btn">Garantir Oferta →</a>
+    </div>
+
+    <div class="cta-card">
+      <div class="cta-icon">📱💻📺</div>
+      <h3>De qualquer lugar, em qualquer tela</h3>
+      <p>Computador, tablet, celular ou Smart TV — seu palco está onde você estiver.</p>
+      <a href="https://karaokemultiplayer.com.br/checkout.html?plan=trimestral&offer=flash15min" class="cta-btn">Quero Essa Oferta →</a>
+    </div>
+
+    <div class="cta-card">
+      <div class="cta-icon">👥➡️⭐</div>
+      <h3>Agora quem decide é a galera</h3>
+      <p>Cada emoji vale nota. Quanto mais a plateia se emocionar, mais alta sua pontuação.</p>
+      <a href="https://karaokemultiplayer.com.br/checkout.html?plan=trimestral&offer=flash15min" class="cta-btn">Ativar Plateia →</a>
+    </div>
+
+    <div class="cta-card cta-highlight">
+      <div class="cta-icon">📸✨</div>
+      <h3>Cante, pontue, vire estrela</h3>
+      <p>Sua performance vira um momento único. O público decide, você brilha.</p>
+      <a href="https://karaokemultiplayer.com.br/checkout.html?plan=trimestral&offer=flash15min" class="cta-btn">Quero Minha Selfie →</a>
+    </div>
+
+    <div class="cta-card">
+      <div class="cta-icon">🎉🏠</div>
+      <h3>O karaokê que se adapta à sua vida</h3>
+      <p>De casa, da festa ou na fila do banco? Sim, dá pra cantar e pontuar de onde quiser.</p>
+      <a href="https://karaokemultiplayer.com.br/checkout.html?plan=trimestral&offer=flash15min" class="cta-btn">Liberar Acesso →</a>
+    </div>
+
+    <div class="cta-card">
+      <div class="cta-icon">🎭🎤</div>
+      <h3>Transforme qualquer festa em um SHOW</h3>
+      <p>Com karaokê sincronizado, pontuação colaborativa e selfie final.</p>
+      <a href="https://karaokemultiplayer.com.br/checkout.html?plan=trimestral&offer=flash15min" class="cta-btn">Criar Evento →</a>
+    </div>
+
+    <div class="cta-card">
+      <div class="cta-icon">🎧🚫</div>
+      <h3>Nada de equipamentos caros</h3>
+      <p>Só você, seus amigos e a vontade de cantar. Acesse pelo navegador, compartilhe o link e comece a receber emojis — e pontos.</p>
+      <a href="https://karaokemultiplayer.com.br/checkout.html?plan=trimestral&offer=flash15min" class="cta-btn">Quero Cantar Agora →</a>
+    </div>
+
+    <div class="cta-card cta-highlight">
+      <div class="cta-icon">😍🔥👏</div>
+      <h3>Cada emoji vale nota</h3>
+      <p>Quanto mais a plateia se emocionar, mais alta sua pontuação. No final, o resultado vira uma selfie para guardar ou postar.</p>
+      <a href="https://karaokemultiplayer.com.br/checkout.html?plan=trimestral&offer=flash15min" class="cta-btn">Ativar Minha Plateia →</a>
+    </div>
+
+    <div class="cta-card">
+      <div class="cta-icon">⭐🌟⭐</div>
+      <h3>Cante como se ninguém estivesse vendo — mas eles estão</h3>
+      <p>Sua pontuação final vira um troféu digital que você pode postar: "Essa foi minha performance lendária!"</p>
+      <a href="https://karaokemultiplayer.com.br/checkout.html?plan=trimestral&offer=flash15min" class="cta-btn">Viver Minha Estrela →</a>
+    </div>
+
+    <div class="cta-card">
+      <div class="cta-icon">🌍🎶</div>
+      <h3>Karaokê sem fronteiras</h3>
+      <p>Conecte amigos de qualquer lugar, em qualquer dispositivo. Cantem juntos, pontuem juntos e criem memórias inesquecíveis.</p>
+      <a href="https://karaokemultiplayer.com.br/checkout.html?plan=trimestral&offer=flash15min" class="cta-btn">Começar Agora →</a>
+    </div>
+
+  </div>
+</section>
+
+<!-- ===== PLANS ===== -->
+<section class="plans">
+  <div class="section-title">
+    <h3>Escolha seu Plano</h3>
+    <p>Comece a cantar hoje e vire a estrela da noite! ⭐</p>
+  </div>
+  <div class="plans-grid">
+
+    <div class="plan-card">
+      <div class="plan-name">Plano Mensal</div>
+      <div class="plan-price">R$ 5,00 <small>/mês</small></div>
+      <div class="plan-period">Válido por 1 mês</div>
+      <ul class="plan-features">
+        <li>Salas ilimitadas</li>
+        <li>Histórico de músicas</li>
+        <li>Pontuação por emojis</li>
+        <li>Reações em tempo real</li>
+      </ul>
+      <a href="https://karaokemultiplayer.com.br/checkout.html?plan=mensal" class="btn-plan">Assinar Agora</a>
+    </div>
+
+    <div class="plan-card plan-recommended">
+      <div class="plan-offer-badge">🎁 OFERTA ESPECIAL - 500 PRIMEIROS 🎁</div>
+      <div class="plan-name">Plano Trimestral</div>
+      <div class="plan-price">R$ 49,90 <small>/trimestre</small></div>
+      <div class="plan-period">Válido por 3 meses</div>
+      <div class="plan-save">Economize R$ 24,80</div>
+      <ul class="plan-features">
+        <li>Tudo do Mensal +</li>
+        <li>Selfie da pontuação</li>
+        <li>Compartilhamento direto</li>
+        <li>Temas exclusivos</li>
+        <li>Suporte prioritário</li>
+        <li><span class="plan-warn">🔥 Preço promocional exclusivo</span></li>
+      </ul>
+      <a href="https://karaokemultiplayer.com.br/checkout.html?plan=trimestral&offer=flash15min" class="btn-plan">Garantir Oferta Agora →</a>
+    </div>
+
+    <div class="plan-card">
+      <div class="plan-name">Plano Semestral</div>
+      <div class="plan-price">R$ 89,90 <small>/semestre</small></div>
+      <div class="plan-period">Válido por 6 meses</div>
+      <div class="plan-save">Economize R$ 59,50</div>
+      <ul class="plan-features">
+        <li>Tudo do Trimestral +</li>
+        <li>Playlists personalizadas</li>
+        <li>Downloads das performances</li>
+        <li>Efeitos especiais</li>
+      </ul>
+      <a href="https://karaokemultiplayer.com.br/checkout.html?plan=semestral" class="btn-plan">Assinar Agora</a>
+    </div>
+
+    <div class="plan-card">
+      <div class="plan-name">Plano Anual</div>
+      <div class="plan-price">R$ 159,90 <small>/ano</small></div>
+      <div class="plan-period">Válido por 12 meses</div>
+      <div class="plan-save">Economize R$ 138,90</div>
+      <ul class="plan-features">
+        <li>Tudo do Semestral +</li>
+        <li>Suporte VIP 24/7</li>
+        <li>Eventos exclusivos</li>
+        <li>Badges especiais</li>
+        <li>Destaque na comunidade</li>
+      </ul>
+      <a href="https://karaokemultiplayer.com.br/checkout.html?plan=anual" class="btn-plan">Assinar Agora</a>
+    </div>
+
+  </div>
+</section>
+
+<!-- ===== MODAL SELFIE ===== -->
+<div class="modal" id="selfieModal" role="dialog" aria-modal="true" aria-label="Selfie da performance">
+  <div class="modal-box">
+    <h3>⭐ Sua Performance Lendária! ⭐</h3>
+    <div class="selfie-prev">
+      <span class="selfie-avatar">😎 ju</span>
+      <div class="selfie-score"><i class="fas fa-star" style="color:#ffd700" aria-hidden="true"></i> +55 pontos</div>
+    </div>
+    <p>Compartilhe esse momento épico com seus amigos!</p>
+    <div class="selfie-acts">
+      <button class="btn-sm btn-dl" onclick="baixarSelfie()"><i class="fas fa-download" aria-hidden="true"></i> Baixar</button>
+      <button class="btn-sm btn-sh" onclick="compartilharSelfie()"><i class="fas fa-share-alt" aria-hidden="true"></i> Compartilhar</button>
+      <button class="btn-sm btn-cl" onclick="fecharSelfie()"><i class="fas fa-times" aria-hidden="true"></i> Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL IMAGEM ===== -->
+<div class="modal" id="imagemModal" role="dialog" aria-modal="true" aria-label="Imagem da performance">
+  <div class="modal-box img-modal-box">
+    <button class="modal-close" onclick="fecharModalImagem()" aria-label="Fechar">&times;</button>
+    <img id="modalImg" src="" alt="Performance Finalizada" loading="lazy">
+    <div class="img-caption">
+      <h3>🎤 Sua Performance Lendária! 🎤</h3>
+      <p>Compartilhe esse momento épico com seus amigos!</p>
+      <button class="btn-share-modal" onclick="compartilharImagem()"><i class="fas fa-share-alt" aria-hidden="true"></i> Compartilhar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer">
+  <div class="footer-grid">
+    <div class="footer-col">
+      <h4>Karaokê Multiplayer</h4>
+      <ul>
+        <li><a href="#">Sobre nós</a></li>
+        <li><a href="#">Como funciona</a></li>
+        <li><a href="#">Planos</a></li>
+        <li><a href="#">FAQ</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Legal</h4>
+      <ul>
+        <li><a href="#">Termos de uso</a></li>
+        <li><a href="#">Política de privacidade</a></li>
+        <li><a href="#">Cookies</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Suporte</h4>
+      <ul>
+        <li><a href="#">Central de ajuda</a></li>
+        <li><a href="#">Contato</a></li>
+        <li><a href="#">Reportar problema</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Redes Sociais</h4>
+      <div class="social-links">
+        <a href="#" aria-label="Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>
+        <a href="#" aria-label="Facebook"><i class="fab fa-facebook" aria-hidden="true"></i></a>
+        <a href="#" aria-label="Twitter"><i class="fab fa-twitter" aria-hidden="true"></i></a>
+        <a href="#" aria-label="TikTok"><i class="fab fa-tiktok" aria-hidden="true"></i></a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 Karaokê Multiplayer. Todos os direitos reservados.</p>
+    <p>Cante, pontue, vire estrela! ⭐</p>
+  </div>
+</footer>
+
+<!-- ===== SCRIPT ===== -->
+<script>
+(function(){
+  'use strict';
+
+  /* --- CONSTANTES --- */
+  var TOTAL_SPOTS = 500;
+  var CHECKOUT_BASE = 'https://karaokemultiplayer.com.br/checkout.html';
+
+  /* --- ESTADO --- */
+  var timeLeft  = 59 * 60;
+  var spotsLeft = TOTAL_SPOTS;
+  var soldOut   = false;
+  var interval  = null;
+
+  /* --- CACHE DOM (feito uma vez) --- */
+  var elMin    = document.getElementById('tMin');
+  var elSec    = document.getElementById('tSec');
+  var elSpots  = document.getElementById('spotsLeft');
+  var elProg   = document.getElementById('progFill');
+  var elBanner = document.getElementById('offerBanner');
+
+  /* --- UTILIDADES --- */
+  function pad(n){ return n < 10 ? '0'+n : ''+n; }
+
+  function renderTimer(){
+    if(elMin) elMin.textContent = pad(Math.floor(timeLeft/60));
+    if(elSec) elSec.textContent = pad(timeLeft%60);
+    if(timeLeft <= 60){
+      if(elMin) elMin.classList.add('blink');
+      if(elSec) elSec.classList.add('blink');
+    }
+  }
+
+  function renderSpots(){
+    if(elSpots) elSpots.textContent = spotsLeft;
+    if(elProg){
+      var pct = ((TOTAL_SPOTS - spotsLeft) / TOTAL_SPOTS) * 100;
+      elProg.style.width = pct + '%';
+      elProg.style.background = pct >= 80 ? '#ff4757' : pct >= 50 ? '#ff9500' : '#ffd700';
+    }
+  }
+
+  function showBanner(badge, title, body){
+    if(!elBanner) return;
+    elBanner.innerHTML =
+      '<div class="offer-badge">'+badge+'</div>'+
+      '<div class="offer-title">'+title+'</div>'+
+      '<div class="offer-price">'+body+'</div>'+
+      '<div style="margin-top:18px">'+
+        '<a href="javascript:void(0)" onclick="irParaCheckoutComPlano(\'trimestral\')" class="btn-hero btn-primary" style="padding:11px 28px;font-size:.95rem">Ver Planos →</a>'+
+      '</div>';
+  }
+
+  function tick(){
+    if(timeLeft > 0){
+      timeLeft--;
+      renderTimer();
+      /* Reduz vagas ~5% de chance por segundo */
+      if(!soldOut && spotsLeft > 0 && Math.random() < 0.05){
+        spotsLeft = Math.max(0, spotsLeft - (Math.floor(Math.random()*3)+1));
+        renderSpots();
+        if(spotsLeft === 0){
+          soldOut = true;
+          clearInterval(interval);
+          showBanner('🔴 ESGOTADO 🔴','OFERTA ENCERRADA','As 500 vagas foram preenchidas!');
         }
+      }
+    } else {
+      clearInterval(interval);
+      showBanner('⏰ TEMPO ESGOTADO ⏰','OFERTA EXPIRADA','O tempo para esta oferta acabou!');
+    }
+  }
 
-        function irParaCheckoutComPlano(plano) {
-            // Verifica se a oferta ainda está disponível
-            if (plano === 'trimestral' && (soldOut || timeLeft <= 0)) {
-                alert('⏰ Oferta especial encerrada! Mas você ainda pode assinar o plano trimestral pelo valor normal.');
-                window.location.href = `/checkout.html?plan=${plano}`;
-                return;
-            }
-            
-            const token = localStorage.getItem('token');
-            const usuarioLogado = localStorage.getItem('usuario');
-            
-            if (token && usuarioLogado) {
-                window.location.href = `/checkout.html?plan=${plano}&offer=flash15min`;
-            } else {
-                localStorage.setItem('redirectAfterLogin', `/checkout.html?plan=${plano}&offer=flash15min`);
-                window.location.href = '/login.html';
-            }
-        }
+  /* --- MODAL HELPERS --- */
+  function openModal(id){
+    var m = document.getElementById(id);
+    if(m){ m.classList.add('active'); document.body.style.overflow='hidden'; }
+  }
+  function closeModal(id){
+    var m = document.getElementById(id);
+    if(m){ m.classList.remove('active'); document.body.style.overflow=''; }
+  }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            // Inicia o timer
-            startTimer();
-            updateSpotsDisplay();
-            
-            const token = localStorage.getItem('token');
-            const usuarioLogado = localStorage.getItem('usuario');
-            
-            const currentPath = window.location.pathname;
-            if (token && usuarioLogado && (currentPath === '/' || currentPath === '/index.html' || currentPath === '')) {
-                window.location.href = '/app.html';
-            }
-            
-            const redirectUrl = localStorage.getItem('redirectAfterLogin');
-            if (redirectUrl && token && usuarioLogado) {
-                localStorage.removeItem('redirectAfterLogin');
-                window.location.href = redirectUrl;
-            }
-        });
+  /* --- CONFETES (DocumentFragment para 1 único reflow) --- */
+  function confetes(){
+    var frag = document.createDocumentFragment();
+    for(var i=0; i<28; i++){
+      var el = document.createElement('div');
+      var dur = (Math.random()*1.8+1).toFixed(2);
+      el.style.cssText =
+        'position:fixed;top:-10px;left:'+Math.random()*100+'%;'+
+        'width:7px;height:14px;border-radius:2px;pointer-events:none;'+
+        'background:hsl('+Math.floor(Math.random()*360)+',100%,55%);'+
+        'opacity:.85;z-index:3000;'+
+        'animation:confetti '+dur+'s linear forwards;'+
+        'transform:rotate('+Math.floor(Math.random()*360)+'deg);';
+      frag.appendChild(el);
+      setTimeout(function(e){ return function(){ e.remove(); }; }(el), parseFloat(dur)*1000+100);
+    }
+    document.body.appendChild(frag);
+  }
 
-        // ========== FUNÇÕES DO MODAL DE IMAGEM ==========
+  /* --- COPIAR HELPER --- */
+  function copiarTexto(txt, msg){
+    if(navigator.clipboard){
+      navigator.clipboard.writeText(txt).then(function(){ alert(msg); }).catch(function(){ alert(txt); });
+    } else {
+      alert(txt);
+    }
+  }
 
-        function abrirModalImagem() {
-            const modal = document.getElementById('imagemModal');
-            const img = document.getElementById('modalImagem');
-            // Usando uma imagem placeholder para demonstração
-            img.src = 'https://via.placeholder.com/500x400/667eea/ffffff?text=⭐+Performance+Lendária!+⭐';
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
+  /* --- FUNÇÕES GLOBAIS --- */
+  window.irParaLogin = function(){
+    location.href = (localStorage.getItem('token') && localStorage.getItem('usuario')) ? '/app.html' : '/login.html';
+  };
 
-        function fecharModalImagem() {
-            const modal = document.getElementById('imagemModal');
-            modal.classList.remove('active');
-            document.body.style.overflow = '';
-        }
+  window.irParaCheckout = function(){
+    if(localStorage.getItem('token') && localStorage.getItem('usuario')){
+      location.href = '/checkout.html';
+    } else {
+      localStorage.setItem('redirectAfterLogin','/checkout.html');
+      location.href = '/login.html';
+    }
+  };
 
-        function compartilharImagem() {
-            const imagemUrl = 'https://via.placeholder.com/500x400/667eea/ffffff?text=⭐+Performance+Lendária!+⭐';
-            
-            if (navigator.share) {
-                navigator.share({
-                    title: 'Minha Performance no Karaokê!',
-                    text: 'Olha só minha pontuação no Karaokê Multiplayer! 🎤✨',
-                    url: imagemUrl
-                }).catch(() => {
-                    copiarLinkImagem(imagemUrl);
-                });
-            } else {
-                copiarLinkImagem(imagemUrl);
-            }
-        }
+  window.irParaCheckoutComPlano = function(plano){
+    if(plano==='trimestral' && (soldOut || timeLeft<=0)){
+      alert('⏰ Oferta encerrada! Você ainda pode assinar o plano trimestral pelo valor normal.');
+      location.href = CHECKOUT_BASE+'?plan='+plano;
+      return;
+    }
+    var suffix = '?plan='+plano+'&offer=flash15min';
+    if(localStorage.getItem('token') && localStorage.getItem('usuario')){
+      location.href = CHECKOUT_BASE+suffix;
+    } else {
+      localStorage.setItem('redirectAfterLogin', CHECKOUT_BASE+suffix);
+      location.href = '/login.html';
+    }
+  };
 
-        function copiarLinkImagem(url) {
-            navigator.clipboard.writeText(url).then(() => {
-                alert('📸 Link da imagem copiado! Compartilhe com seus amigos.');
-            }).catch(() => {
-                alert('📸 Compartilhe esta imagem: ' + url);
-            });
-        }
+  window.copiarLink = function(){
+    copiarTexto('https://karaoke.com.br/sala/7K4GPP','🔗 Link da sala copiado! Compartilhe com seus amigos.');
+  };
 
-        document.addEventListener('click', function(event) {
-            const modal = document.getElementById('imagemModal');
-            if (modal && modal.classList.contains('active')) {
-                if (event.target === modal) {
-                    fecharModalImagem();
-                }
-            }
-        });
+  window.abrirSelfie = function(){
+    openModal('selfieModal');
+    confetes();
+  };
+  window.fecharSelfie    = function(){ closeModal('selfieModal'); };
+  window.baixarSelfie    = function(){ alert('📸 Selfie baixada com sucesso!'); fecharSelfie(); };
+  window.compartilharSelfie = function(){ alert('📱 Link para compartilhar copiado!'); fecharSelfie(); };
 
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                fecharModalImagem();
-            }
-        });
+  window.abrirModalImagem = function(){
+    var img = document.getElementById('modalImg');
+    if(img) img.src = 'https://via.placeholder.com/500x400/667eea/ffffff?text=⭐+Performance+Lendária!+⭐';
+    openModal('imagemModal');
+  };
+  window.fecharModalImagem = function(){ closeModal('imagemModal'); };
+  window.compartilharImagem = function(){
+    var url = 'https://via.placeholder.com/500x400/667eea/ffffff?text=⭐+Performance+Lendária!+⭐';
+    if(navigator.share){
+      navigator.share({title:'Minha Performance!', text:'🎤✨ Karaokê Multiplayer', url:url})
+        .catch(function(){ copiarTexto(url,'📸 Link copiado!'); });
+    } else {
+      copiarTexto(url,'📸 Link copiado!');
+    }
+  };
 
-        // ========== FUNÇÕES EXISTENTES ==========
-        
-        function copiarLink() {
-            const link = 'https://karaoke.com.br/sala/7K4GPP';
-            navigator.clipboard.writeText(link).then(() => {
-                alert('🔗 Link da sala copiado! Compartilhe com seus amigos.');
-            });
-        }
+  /* --- FECHAR MODAL POR BACKDROP OU ESC --- */
+  document.addEventListener('click', function(e){
+    ['selfieModal','imagemModal'].forEach(function(id){
+      var m = document.getElementById(id);
+      if(m && m.classList.contains('active') && e.target === m) closeModal(id);
+    });
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key==='Escape'){
+      ['selfieModal','imagemModal'].forEach(function(id){ closeModal(id); });
+    }
+  });
 
-        function abrirSelfie() {
-            document.getElementById('selfieModal').classList.add('active');
-            criarConfetes();
-        }
+  /* --- INICIALIZAÇÃO --- */
+  document.addEventListener('DOMContentLoaded', function(){
+    renderTimer();
+    renderSpots();
+    interval = setInterval(tick, 1000);
 
-        function fecharSelfie() {
-            document.getElementById('selfieModal').classList.remove('active');
-        }
+    /* Redireciona usuário já logado */
+    var p = location.pathname;
+    if(localStorage.getItem('token') && localStorage.getItem('usuario') &&
+       (p==='/' || p==='/index.html' || p==='')){
+      location.href = '/app.html';
+      return;
+    }
+    var redir = localStorage.getItem('redirectAfterLogin');
+    if(redir && localStorage.getItem('token') && localStorage.getItem('usuario')){
+      localStorage.removeItem('redirectAfterLogin');
+      location.href = redir;
+    }
+  });
 
-        function baixarSelfie() {
-            alert('📸 Selfie baixada com sucesso!');
-            fecharSelfie();
-        }
-
-        function compartilharSelfie() {
-            alert('📱 Link para compartilhar copiado!');
-            fecharSelfie();
-        }
-
-        function criarConfetes() {
-            for (let i = 0; i < 30; i++) {
-                const confete = document.createElement('div');
-                confete.style.cssText = `
-                    position: fixed;
-                    top: -10px;
-                    left: ${Math.random() * 100}%;
-                    width: 8px;
-                    height: 16px;
-                    background: hsl(${Math.random() * 360}, 100%, 50%);
-                    opacity: 0.8;
-                    z-index: 3000;
-                    animation: confetti ${Math.random() * 2 + 1}s linear forwards;
-                    transform: rotate(${Math.random() * 360}deg);
-                `;
-                document.body.appendChild(confete);
-                
-                setTimeout(() => confete.remove(), 3000);
-            }
-        }
-    </script>
+})();
+</script>
 </body>
 </html>
