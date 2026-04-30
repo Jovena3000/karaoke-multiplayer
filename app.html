@@ -513,7 +513,7 @@ let roomId='', userId='u_'+Date.now()+'_'+Math.random().toString(36).slice(2,9);
 let userName=null, isNew=true;
 let cd=false;
 let curVid=null, curOwnerId=null, curOwnerName='', curSingerId=null;
-let scores={total:0,pos:0,neg:0};
+let scores={total:0,positive:0,negative:0};
 let participants=[], activities=[], queue=[], qPos=-1;
 let emojiCounts={}, totalReact=0;
 let lb={};
@@ -574,8 +574,8 @@ function copyLink(){
 // ═══════════════════════════════════════════
 function updScores(){
   $('vTotal').textContent=scores.total;
-  $('vPos').textContent=scores.pos;
-  $('vNeg').textContent=scores.neg;
+  $('vPos').textContent=scores.positive;
+  $('vNeg').textContent=scores.negative;
   const el=$('vTotal');
   el.className='sc-val'+(scores.total>0?' pos':scores.total<0?' neg':'');
 }
@@ -877,7 +877,7 @@ async function onVidEnd(){
 }
 
 function resetCurrentSong(){
-  scores={total:0,pos:0,neg:0};emojiCounts={};totalReact=0;updScores();
+  scores={total:0,positive:0,negative:0};emojiCounts={};totalReact=0;updScores();
 }
 
 function closeResult(){$('resOverlay').classList.remove('open')}
@@ -896,8 +896,8 @@ function showResult(){
   const s=scores.total;
   $('resScore').textContent=(s>=0?'+':'')+s;
   $('resScore').className='res-score '+(s>0?'pos':s<0?'neg':'neu');
-  $('rPos').textContent='+'+scores.pos;
-  $('rNeg').textContent='-'+scores.neg;
+  $('rPos').textContent='+'+scores.positive;
+  $('rNeg').textContent='-'+scores.negative;
   $('rReact').textContent=totalReact;
   $('resBreak').innerHTML=Object.keys(emojiCounts).sort((a,b)=>emojiCounts[b]-emojiCounts[a])
     .map(e=>`<div class="res-ei">${e} ×${emojiCounts[e]}</div>`).join('');
@@ -953,7 +953,7 @@ async function sendEmoji(e,pts){
 
   trackEmoji(e);floatEmoji(e);flashCard(pts);
   scores.total+=pts;
-  if(pts>0)scores.pos+=pts;else scores.neg+=Math.abs(pts);
+  if(pts>0)scores.positive+=pts;else scores.negative+=Math.abs(pts);
   updScores();
 
   updLBLocal(curOwnerId,e,pts);
@@ -984,7 +984,7 @@ function updLBLocal(uid,e,pts){
 // ═══════════════════════════════════════════
 async function resetAll(){
   if(!confirm('Resetar pontuação total da festa?'))return;
-  scores={total:0,pos:0,neg:0};emojiCounts={};totalReact=0;activities=[];lb={};
+  scores={total:0,positive:0,negative:0};emojiCounts={};totalReact=0;activities=[];lb={};
   updScores();updAct();updLB();
   await sbSend('reset',{});
   toast('Pontuação resetada! 🔄');addAct('🔄','Pontuação total resetada');
@@ -1117,7 +1117,7 @@ async function setupListeners(){
       seenEmojis.add(emojiId);
       floatEmoji(emoji);showNotif(emoji,uName);flashCard(points);
       trackEmoji(emoji);
-      scores.total+=points;if(points>0)scores.pos+=points;else scores.neg+=Math.abs(points);
+      scores.total+=points;if(points>0)scores.positive+=points;else scores.negative+=Math.abs(points);
       updScores();
       updLBLocal(targetUserId,emoji,points);updLB();
       const tp=participants.find(p=>p.odUserId===targetUserId);
@@ -1137,7 +1137,7 @@ async function setupListeners(){
     })
     .on('broadcast',{event:'scores-update'},({payload})=>{scores=payload;updScores()})
     .on('broadcast',{event:'reset'},()=>{
-      scores={total:0,pos:0,neg:0};emojiCounts={};totalReact=0;activities=[];lb={};
+      scores={total:0,positive:0,negative:0};emojiCounts={};totalReact=0;activities=[];lb={};
       updScores();updAct();updLB();addAct('🔄','Pontuação total resetada');toast('Pontuação resetada! 🔄');
     })
     .subscribe(async s=>{
