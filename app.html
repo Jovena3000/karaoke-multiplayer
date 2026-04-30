@@ -841,7 +841,11 @@ async function addQueue(){
     if(sbOk)await sbSend('queue-update',{queue,currentPosition:qPos});
     toast(`"${info.title.slice(0,35)}" adicionado! 🎵`);
     addAct('➕',`${userName} adicionou: ${info.title.slice(0,30)}`);
-    if(qPos===-1&&autoOn)playNext();
+    
+    // CORREÇÃO: Se auto player estiver ligado e não tem música tocando, toca agora
+    if(autoOn && !curVid && queue.length > 0){
+      playNext();
+    }
   }catch(e){toast('Erro ao adicionar música.',true)}
   finally{btn.textContent='➕ Adicionar à Fila';btn.disabled=false;inp.value=''}
 }
@@ -870,14 +874,26 @@ async function playNext(){
     $('ph').classList.remove('hidden');$('endBtn').style.display='none';
     if(ytPlayer){ytPlayer.destroy();ytPlayer=null}
     clearInterval(window.__chk);
-    toast('Fila vazia! Adicione mais músicas.');return;
+    toast('Fila vazia! Adicione mais músicas.');
+    return;
   }
-  qPos=(qPos+1)%queue.length;
-  const it=queue[qPos];
-  curOwnerId=it.added_by;curOwnerName=it.added_by_name;curSingerId=curOwnerId;
-  playVideo(it.video_id,it.video_title);
+  
+  // CORREÇÃO: Calcular próximo índice
+  let nextIndex = 0;
+  if(qPos === -1){
+    nextIndex = 0;
+  } else {
+    nextIndex = (qPos + 1) % queue.length;
+  }
+  
+  qPos = nextIndex;
+  const it = queue[qPos];
+  curOwnerId = it.added_by;
+  curOwnerName = it.added_by_name;
+  curSingerId = curOwnerId;
+  playVideo(it.video_id, it.video_title);
   safeUpdQueue();
-  await sbSend('queue-update',{queue,currentPosition:qPos});
+  await sbSend('queue-update', {queue, currentPosition: qPos});
 }
 
 function toggleAuto(){
@@ -886,24 +902,62 @@ function toggleAuto(){
   b.className='btn btn-auto'+(autoOn?' on':'');
   b.innerHTML=autoOn?'⏸️ Auto Player ON':'▶️ Auto Player';
   toast(autoOn?'Auto Player ativado!':'Auto Player desativado.');
-  if(autoOn&&!curVid&&queue.length)playNext();
+  
+  // CORREÇÃO: Verifica se tem música na fila e não está tocando nada
+  if(autoOn && !curVid && queue.length > 0){
+    playNext();
+  }
 }
 
 // ═══════════════════════════════════════════
 // END SONG / RESULT
 // ═══════════════════════════════════════════
 async function endSong(){
-  if(ending)return;ending=true;
-  if(totalReact>0){await sbSend('show-result',{singer:curOwnerName,emojiCounts,totalReactions:totalReact});showResult();}
-  else{resetCurrentSong();if(autoOn)await playNext();}
+  if(ending)return;
+  ending=true;
+  if(totalReact>0){
+    await sbSend('show-result',{singer:curOwnerName,emojiCounts,totalReactions:totalReact});
+    showResult();
+  } else {
+    resetCurrentSong();
+    // CORREÇÃO: Se auto player ligado, toca próxima
+    if(autoOn){
+      await playNext();
+    } else {
+      curVid = null;
+      $('ph').classList.remove('hidden');
+      $('endBtn').style.display = 'none';
+      if(ytPlayer){ytPlayer.destroy();ytPlayer=null}
+      safeUpdQueue();
+      toast('Música finalizada. Auto Player desligado.');
+    }
+  }
   ending=false;
 }
 
 async function onVidEnd(){
-  if(ending)return;ending=true;
-  try{if(totalReact>0){await sbSend('show-result',{singer:curOwnerName,emojiCounts,totalReactions:totalReact});showResult();}
-  else{await playNext();}}
-  catch(e){await playNext();}
+  if(ending)return;
+  ending=true;
+  try{
+    if(totalReact>0){
+      await sbSend('show-result',{singer:curOwnerName,emojiCounts,totalReactions:totalReact});
+      showResult();
+    } else {
+      resetCurrentSong();
+      // CORREÇÃO: Se auto player ligado, toca próxima
+      if(autoOn){
+        await playNext();
+      } else {
+        // Desliga o player atual
+        curVid = null;
+        $('ph').classList.remove('hidden');
+        $('endBtn').style.display = 'none';
+        if(ytPlayer){ytPlayer.destroy();ytPlayer=null}
+      }
+    }
+  } catch(e){
+    if(autoOn) await playNext();
+  }
   ending=false;
 }
 
@@ -914,9 +968,22 @@ function resetCurrentSong(){
 function closeResult(){$('resOverlay').classList.remove('open')}
 
 async function nextAfterResult(){
-  closeResult();resetCurrentSong();
+  closeResult();
+  resetCurrentSong();
   await sbSend('scores-update',scores);
-  if(autoOn)await playNext();
+  // CORREÇÃO: Se auto player ligado, toca próxima música
+  if(autoOn){
+    await playNext();
+  } else {
+    // Limpa o player atual
+    curVid = null;
+    curOwnerId = null;
+    curOwnerName = '';
+    $('ph').classList.remove('hidden');
+    $('endBtn').style.display = 'none';
+    if(ytPlayer){ytPlayer.destroy();ytPlayer=null}
+    safeUpdQueue();
+  }
 }
 
 function showResult(){
@@ -1090,7 +1157,11 @@ async function addFromSearch(vid,title,thumb){
   if(sbOk)await sbSend('queue-update',{queue,currentPosition:qPos});
   toast(`"${title.slice(0,35)}" adicionado! 🎵`);
   addAct('➕',`${userName} adicionou: ${title.slice(0,30)}`);
-  if(qPos===-1&&autoOn)playNext();
+  
+  // CORREÇÃO: Se auto player estiver ligado e não tem música tocando, toca agora
+  if(autoOn && !curVid && queue.length > 0){
+    playNext();
+  }
 }
 
 // ═══════════════════════════════════════════
