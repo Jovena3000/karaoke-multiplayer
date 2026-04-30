@@ -272,6 +272,14 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
 @keyframes slideIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
 .slide{animation:slideIn .25s ease}
 
+/* ── SEARCH RESULTS ── */
+.sr-item{display:flex;align-items:center;gap:.65rem;background:var(--light);border-radius:.6rem;padding:.6rem;cursor:pointer;border:2px solid transparent;transition:border-color .15s}
+.sr-item:hover{border-color:var(--purple)}
+.sr-thumb{width:72px;height:54px;object-fit:cover;border-radius:.35rem;flex-shrink:0}
+.sr-info{min-width:0}
+.sr-title{font-size:.82rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--txt)}
+.sr-ch{font-size:.7rem;color:var(--muted);margin-top:.15rem}
+
 /* ══════════════════════════════
    RESPONSIVE
 ══════════════════════════════ */
@@ -458,12 +466,37 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
 <div class="modal" id="vidModal">
   <div class="m-box">
     <div class="m-title">🎬 Adicionar à Fila</div>
-    <div class="inp-grp">
-      <label class="inp-lbl">Cole o link do YouTube:</label>
-      <input type="text" class="inp" id="vidInp" placeholder="https://youtube.com/watch?v=..." autocomplete="off">
+
+    <!-- ABAS -->
+    <div style="display:flex;gap:.4rem;margin-bottom:1.1rem;background:var(--light);border-radius:.6rem;padding:.3rem">
+      <button id="tabLink" onclick="switchTab('link')" style="flex:1;padding:.55rem;border:none;border-radius:.45rem;font-weight:600;font-size:.85rem;cursor:pointer;transition:background .2s,color .2s;background:linear-gradient(135deg,var(--purple),var(--pink));color:#fff;font-family:'Poppins',sans-serif">🔗 Colar Link</button>
+      <button id="tabSearch" onclick="switchTab('search')" style="flex:1;padding:.55rem;border:none;border-radius:.45rem;font-weight:600;font-size:.85rem;cursor:pointer;transition:background .2s,color .2s;background:transparent;color:var(--muted);font-family:'Poppins',sans-serif">🔍 Buscar</button>
     </div>
-    <button class="m-btn" onclick="addQueue()">➕ Adicionar à Fila</button>
-    <button class="m-btn dim" onclick="closeVidModal()">Cancelar</button>
+
+    <!-- ABA: COLAR LINK -->
+    <div id="paneLink">
+      <div class="inp-grp">
+        <label class="inp-lbl">Cole o link do YouTube:</label>
+        <input type="text" class="inp" id="vidInp" placeholder="https://youtube.com/watch?v=..." autocomplete="off">
+      </div>
+      <button class="m-btn" onclick="addQueue()">➕ Adicionar à Fila</button>
+    </div>
+
+    <!-- ABA: BUSCAR -->
+    <div id="paneSearch" style="display:none">
+      <div class="inp-grp" style="margin-bottom:.7rem">
+        <label class="inp-lbl">Buscar música no YouTube:</label>
+        <div style="display:flex;gap:.4rem">
+          <input type="text" class="inp" id="searchInp" placeholder="Nome da música ou artista..." autocomplete="off" style="flex:1">
+          <button class="m-btn" onclick="doSearch()" style="width:auto;padding:.85rem 1rem;font-size:.85rem">🔍</button>
+        </div>
+      </div>
+      <div id="searchResults" style="max-height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:.5rem">
+        <div style="text-align:center;color:var(--muted);padding:1.5rem;font-size:.85rem">Digite algo para buscar 🎵</div>
+      </div>
+    </div>
+
+    <button class="m-btn dim" onclick="closeVidModal()" style="margin-top:.6rem">Cancelar</button>
   </div>
 </div>
 
@@ -504,6 +537,7 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
 // ═══════════════════════════════════════════
 const SB_URL  = "https://yvrskenfgfpgrcpmmeln.supabase.co";
 const SB_KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl2cnNrZW5mZ2ZwZ3JjcG1tZWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNzk1NTAsImV4cCI6MjA4Njc1NTU1MH0.DzO4mZ7jYkTPoleIlF7smZ_Kim7KqFxXA4aumb7Qf8U";
+const YOUTUBE_API_KEY = 'AIzaSyBzWLKPA96ISDfEZV6rLe9S68et6PUVhno';
 
 // ═══════════════════════════════════════════
 // STATE
@@ -584,7 +618,6 @@ function flashCard(pts){
   const el=$('scTotal');
   el.classList.add('flash');
   setTimeout(()=>el.classList.remove('flash'),400);
-  // também pulsa o sub-card (positivo ou negativo)
   const sub=pts>0?$('vPos').parentElement:$('vNeg').parentElement;
   if(sub){sub.classList.add('flash');setTimeout(()=>sub.classList.remove('flash'),400);}
 }
@@ -723,13 +756,11 @@ function playVideo(vid,title=''){
   if(!vid)return;
   curVid=vid;
 
-  // Find owner in queue
   const qi=queue.find(x=>x.video_id===vid);
   curOwnerId=qi?.added_by||userId;
   curOwnerName=qi?.added_by_name||userName||'Anônimo';
   curSingerId=curOwnerId;
 
-  // Find real name from participants
   const op=participants.find(p=>p.odUserId===curOwnerId);
   if(op)curOwnerName=op.odUserName;
 
@@ -797,7 +828,7 @@ async function addQueue(){
   const vid=extractVid(url);
   if(!vid){toast('Link inválido!',true);return}
 
-  const btn=document.querySelector('#vidModal .m-btn');
+  const btn=$('paneLink').querySelector('.m-btn');
   btn.textContent='⏳ Buscando...';btn.disabled=true;
 
   try{
@@ -991,11 +1022,80 @@ async function resetAll(){
 }
 
 // ═══════════════════════════════════════════
+// MODAL VÍDEO — ABAS
+// ═══════════════════════════════════════════
+function switchTab(t){
+  const isLink=t==='link';
+  $('paneLink').style.display=isLink?'':'none';
+  $('paneSearch').style.display=isLink?'none':'';
+  $('tabLink').style.background=isLink?'linear-gradient(135deg,var(--purple),var(--pink))':'transparent';
+  $('tabLink').style.color=isLink?'#fff':'var(--muted)';
+  $('tabSearch').style.background=!isLink?'linear-gradient(135deg,var(--purple),var(--pink))':'transparent';
+  $('tabSearch').style.color=!isLink?'#fff':'var(--muted)';
+  if(!isLink)setTimeout(()=>$('searchInp').focus(),80);
+}
+
+function openVidModal(){
+  switchTab('link');
+  $('vidModal').classList.add('open');
+  setTimeout(()=>$('vidInp').focus(),80);
+}
+
+function closeVidModal(){
+  $('vidModal').classList.remove('open');
+  $('vidInp').value='';
+  $('searchInp').value='';
+  $('searchResults').innerHTML='<div style="text-align:center;color:var(--muted);padding:1.5rem;font-size:.85rem">Digite algo para buscar 🎵</div>';
+}
+
+// ═══════════════════════════════════════════
+// BUSCA YOUTUBE
+// ═══════════════════════════════════════════
+async function doSearch(){
+  const q=($('searchInp').value||'').trim();
+  if(!q){toast('Digite algo para buscar!',true);return}
+  const box=$('searchResults');
+  box.innerHTML='<div style="text-align:center;color:var(--muted);padding:1.5rem;font-size:.85rem">🔄 Buscando...</div>';
+  try{
+    const r=await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=8&q=${encodeURIComponent(q)}&key=${YOUTUBE_API_KEY}`);
+    const d=await r.json();
+    if(d.error){box.innerHTML='<div style="text-align:center;color:#ff4757;padding:1.5rem;font-size:.85rem">❌ Erro na API. Verifique a chave.</div>';return}
+    if(!d.items||!d.items.length){box.innerHTML='<div style="text-align:center;color:var(--muted);padding:1.5rem;font-size:.85rem">Nenhum resultado encontrado</div>';return}
+    box.innerHTML=d.items.map(it=>{
+      const vid=it.id.videoId;
+      const title=esc(it.snippet.title);
+      const ch=esc(it.snippet.channelTitle);
+      const thumb=it.snippet.thumbnails.default.url;
+      const safeTitle=it.snippet.title.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+      const safeThumb=thumb.replace(/'/g,"\\'");
+      return `<div class="sr-item" onclick="addFromSearch('${vid}','${safeTitle}','${safeThumb}')">
+        <img class="sr-thumb" src="${thumb}" alt="" loading="lazy" onerror="this.style.display='none'">
+        <div class="sr-info">
+          <div class="sr-title">${title}</div>
+          <div class="sr-ch">📺 ${ch}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }catch(e){
+    box.innerHTML='<div style="text-align:center;color:#ff4757;padding:1.5rem;font-size:.85rem">❌ Erro na busca. Tente novamente.</div>';
+  }
+}
+
+async function addFromSearch(vid,title,thumb){
+  closeVidModal();
+  const item={room_id:roomId,video_id:vid,video_title:title,thumbnail:thumb,
+    added_by:userId,added_by_name:userName,status:'waiting',order:queue.length};
+  queue.push(item);
+  safeUpdQueue();
+  if(sbOk)await sbSend('queue-update',{queue,currentPosition:qPos});
+  toast(`"${title.slice(0,35)}" adicionado! 🎵`);
+  addAct('➕',`${userName} adicionou: ${title.slice(0,30)}`);
+  if(qPos===-1&&autoOn)playNext();
+}
+
+// ═══════════════════════════════════════════
 // MODALS
 // ═══════════════════════════════════════════
-function openVidModal(){$('vidModal').classList.add('open');$('vidInp').focus()}
-function closeVidModal(){$('vidModal').classList.remove('open');$('vidInp').value=''}
-
 function applyCode(){
   const v=($('codeInp').value||'').trim().toUpperCase();
   if(!v||v.length!==6){toast('Digite um código de 6 caracteres!',true);return}
@@ -1167,6 +1267,7 @@ async function init(){
 
   $('nameInp').addEventListener('keypress',e=>{if(e.key==='Enter')joinRoom()});
   $('vidInp').addEventListener('keypress',e=>{if(e.key==='Enter')addQueue()});
+  $('searchInp').addEventListener('keypress',e=>{if(e.key==='Enter')doSearch()});
   $('codeInp').addEventListener('input',e=>{e.target.value=e.target.value.toUpperCase()});
   $('codeInp').addEventListener('keypress',e=>{if(e.key==='Enter')applyCode()});
 
