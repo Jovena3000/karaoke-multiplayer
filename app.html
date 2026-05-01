@@ -1293,21 +1293,24 @@ async function ytDoSearch(q,page){
     const items=data.items||[];
     if(!items.length){results.innerHTML='<div style="text-align:center;color:var(--muted);padding:1rem;font-size:.85rem">Nenhum resultado encontrado. Tente outro termo.</div>';return;}
 
-    results.innerHTML=items.map(it=>{
-      const vid=it.id?.videoId;if(!vid)return'';
+    results.innerHTML='';
+    items.forEach(it=>{
+      const vid=it.id?.videoId;if(!vid)return;
       const t=it.snippet?.title||'Sem título';
       const ch=it.snippet?.channelTitle||'';
-      const thumb=it.snippet?.thumbnails?.medium?.url||`https://img.youtube.com/vi/${vid}/mqdefault.jpg`;
-      const tEsc=t.replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-      return `<div class="yt-item">
-        <img class="yt-thumb" src="${thumb}" alt="" loading="lazy" onerror="this.src='https://img.youtube.com/vi/${vid}/mqdefault.jpg'">
-        <div class="yt-info">
-          <div class="yt-title" title="${tEsc}">${tEsc}</div>
-          <div class="yt-ch">${ch.replace(/</g,'&lt;')}</div>
-        </div>
-        <button class="yt-add" onclick="ytAddToQueue('${vid}','${tEsc.replace(/'/g,'\\'')}')">➕ Cantar</button>
-      </div>`;
-    }).join('');
+      const thumb=it.snippet?.thumbnails?.medium?.url||('https://img.youtube.com/vi/'+vid+'/mqdefault.jpg');
+      const div=document.createElement('div');
+      div.className='yt-item';
+      div.innerHTML=
+        '<img class="yt-thumb" src="'+thumb+'" alt="" loading="lazy" onerror="this.src=&quot;https://img.youtube.com/vi/'+vid+'/mqdefault.jpg&quot;">'+
+        '<div class="yt-info">'+
+          '<div class="yt-title">'+t.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div>'+
+          '<div class="yt-ch">'+ch.replace(/</g,'&lt;')+'</div>'+
+        '</div>'+
+        '<button class="yt-add">➕ Cantar</button>';
+      div.querySelector('.yt-add').addEventListener('click',()=>ytAddToQueue(vid,t));
+      results.appendChild(div);
+    });
 
     // Paginação
     const total=data.pageInfo?.totalResults||0;
