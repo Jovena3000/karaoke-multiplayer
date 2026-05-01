@@ -786,30 +786,46 @@ function playVideo(vid,title=''){
 
   const wrap=$('playerWrap');
   const layer=$('emojiLayer');
-  if(ytPlayer){ytPlayer.destroy();ytPlayer=null}
-  const old=document.getElementById('ytPlayer');
-  if(old)old.remove();
 
-  const div=document.createElement('div');
-  div.id='ytPlayer';
-  wrap.insertBefore(div,layer);
+  // Destrói player anterior completamente
+  clearInterval(window.__chk);
+  if(ytPlayer){
+    try{ytPlayer.stopVideo();ytPlayer.destroy();}catch(e){}
+    ytPlayer=null;
+  }
+  const oldEl=document.getElementById('ytPlayer');
+  if(oldEl)oldEl.remove();
+
+  // Cria iframe diretamente com origin na URL — evita postMessage cross-origin
+  const origin=encodeURIComponent(window.location.origin);
+  const iframe=document.createElement('iframe');
+  iframe.id='ytPlayer';
+  iframe.src='https://www.youtube.com/embed/'+vid+
+    '?autoplay=1&rel=0&enablejsapi=1&origin='+origin;
+  iframe.allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+  iframe.allowFullscreen=true;
+  iframe.style.cssText='position:absolute;top:0;left:0;width:100%;height:100%;border:none;z-index:1';
+  wrap.insertBefore(iframe,layer);
+
   $('ph').classList.add('hidden');
   $('endBtn').style.display='inline-block';
 
+  // Aguarda iframe carregar depois conecta YT.Player pelo ID
   function mkPlayer(){
-    ytPlayer=new YT.Player(div,{
-      videoId:vid,
-      playerVars:{autoplay:1,rel:0,enablejsapi:1,origin:window.location.origin},
+    if(typeof YT==='undefined'||!YT.Player)return;
+    ytPlayer=new YT.Player('ytPlayer',{
       events:{
-        onReady:e=>e.target.playVideo(),
+        onReady:e=>{ try{e.target.playVideo();}catch(ex){} },
         onStateChange:e=>{
           if(e.data===YT.PlayerState.ENDED&&autoOn&&curVid===vid)onVidEnd();
           if(e.data===YT.PlayerState.PLAYING){
             clearInterval(window.__chk);
             window.__chk=setInterval(()=>{
               if(!ytPlayer)return;
-              const t=ytPlayer.getCurrentTime(),d=ytPlayer.getDuration();
-              if(d>0&&t>=d-1){clearInterval(window.__chk);if(autoOn&&curVid===vid)onVidEnd();}
+              try{
+                const t=ytPlayer.getCurrentTime(),d=ytPlayer.getDuration();
+                if(d>0&&t>=d-1){clearInterval(window.__chk);if(autoOn&&curVid===vid)onVidEnd();}
+              }catch(ex){clearInterval(window.__chk);}
             },1000);
           }
         }
@@ -817,10 +833,15 @@ function playVideo(vid,title=''){
     });
   }
 
-  if(typeof YT!=='undefined'&&YT.Player)mkPlayer();
-  else{
-    window.onYouTubeIframeAPIReady=mkPlayer;
-    setTimeout(()=>{if(typeof YT!=='undefined'&&YT.Player&&!ytPlayer)mkPlayer();},800);
+  // Tenta conectar após iframe estar pronto
+  if(typeof YT!=='undefined'&&YT.Player){
+    setTimeout(mkPlayer, 1500);
+  } else {
+    const prev=window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady=()=>{
+      if(prev)prev();
+      setTimeout(mkPlayer,500);
+    };
   }
 
   saveState();
