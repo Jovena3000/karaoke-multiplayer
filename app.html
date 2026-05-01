@@ -211,6 +211,17 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
 .m-btn{background:linear-gradient(135deg,var(--pink),var(--purple));border:none;padding:.9rem;border-radius:.65rem;color:#fff;font-weight:600;font-size:1rem;cursor:pointer;width:100%;transition:opacity .2s;font-family:'Poppins',sans-serif}
 .m-btn:hover{opacity:.9}
 .m-btn.dim{background:var(--light);margin-top:.4rem}
+.yf-btn{padding:.3rem .75rem;border-radius:1rem;border:1px solid rgba(255,255,255,.2);background:transparent;color:var(--muted);cursor:pointer;font-size:.75rem;transition:all .2s;font-family:'Poppins',sans-serif}
+.yf-btn:hover,.yf-btn.active{border-color:var(--pink);color:var(--pink);background:rgba(255,45,117,.1)}
+.yt-item{background:var(--light);border-radius:.65rem;padding:.6rem;display:flex;gap:.65rem;align-items:center;border:1px solid rgba(255,255,255,.08);transition:all .2s}
+.yt-item:hover{border-color:rgba(157,78,221,.4);background:rgba(157,78,221,.08)}
+.yt-thumb{width:80px;min-width:80px;height:45px;border-radius:.4rem;object-fit:cover;background:var(--bg)}
+.yt-info{flex:1;min-width:0}
+.yt-title{font-size:.78rem;font-weight:600;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:.2rem}
+.yt-ch{font-size:.68rem;color:var(--muted)}
+.yt-add{background:linear-gradient(135deg,var(--purple),var(--pink));border:none;padding:.4rem .8rem;border-radius:.4rem;color:#fff;font-size:.72rem;font-weight:600;cursor:pointer;transition:transform .15s;white-space:nowrap;flex-shrink:0}
+.yt-add:hover{transform:scale(1.05)}
+@keyframes spin{to{transform:rotate(360deg)}}
 .m-row{display:flex;gap:.5rem;margin-bottom:.5rem}
 .m-row .inp{flex:1}
 .m-row .m-btn{width:auto;padding:.85rem 1.2rem;font-size:.85rem}
@@ -271,14 +282,6 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
 /* ── SLIDE-IN ── */
 @keyframes slideIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
 .slide{animation:slideIn .25s ease}
-
-/* ── SEARCH RESULTS ── */
-.sr-item{display:flex;align-items:center;gap:.65rem;background:var(--light);border-radius:.6rem;padding:.6rem;cursor:pointer;border:2px solid transparent;transition:border-color .15s}
-.sr-item:hover{border-color:var(--purple)}
-.sr-thumb{width:72px;height:54px;object-fit:cover;border-radius:.35rem;flex-shrink:0}
-.sr-info{min-width:0}
-.sr-title{font-size:.82rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--txt)}
-.sr-ch{font-size:.7rem;color:var(--muted);margin-top:.15rem}
 
 /* ══════════════════════════════
    RESPONSIVE
@@ -464,39 +467,52 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
 
 <!-- MODAL: VÍDEO -->
 <div class="modal" id="vidModal">
-  <div class="m-box">
+  <div class="m-box" style="max-width:560px">
     <div class="m-title">🎬 Adicionar à Fila</div>
 
     <!-- ABAS -->
-    <div style="display:flex;gap:.4rem;margin-bottom:1.1rem;background:var(--light);border-radius:.6rem;padding:.3rem">
-      <button id="tabLink" onclick="switchTab('link')" style="flex:1;padding:.55rem;border:none;border-radius:.45rem;font-weight:600;font-size:.85rem;cursor:pointer;transition:background .2s,color .2s;background:linear-gradient(135deg,var(--purple),var(--pink));color:#fff;font-family:'Poppins',sans-serif">🔗 Colar Link</button>
-      <button id="tabSearch" onclick="switchTab('search')" style="flex:1;padding:.55rem;border:none;border-radius:.45rem;font-weight:600;font-size:.85rem;cursor:pointer;transition:background .2s,color .2s;background:transparent;color:var(--muted);font-family:'Poppins',sans-serif">🔍 Buscar</button>
+    <div style="display:flex;gap:.5rem;margin-bottom:1rem;background:var(--light);border-radius:.65rem;padding:.3rem">
+      <button id="tabLink" onclick="switchTab('link')" style="flex:1;padding:.55rem;border:none;border-radius:.45rem;font-weight:600;font-size:.85rem;cursor:pointer;transition:all .2s;background:linear-gradient(135deg,var(--purple),var(--pink));color:#fff">🔗 Colar Link</button>
+      <button id="tabSearch" onclick="switchTab('search')" style="flex:1;padding:.55rem;border:none;border-radius:.45rem;font-weight:600;font-size:.85rem;cursor:pointer;transition:all .2s;background:transparent;color:var(--muted)">🔍 Buscar Música</button>
     </div>
 
     <!-- ABA: COLAR LINK -->
-    <div id="paneLink">
+    <div id="panelLink">
       <div class="inp-grp">
         <label class="inp-lbl">Cole o link do YouTube:</label>
         <input type="text" class="inp" id="vidInp" placeholder="https://youtube.com/watch?v=..." autocomplete="off">
       </div>
       <button class="m-btn" onclick="addQueue()">➕ Adicionar à Fila</button>
+      <button class="m-btn dim" onclick="closeVidModal()">Cancelar</button>
     </div>
 
     <!-- ABA: BUSCAR -->
-    <div id="paneSearch" style="display:none">
-      <div class="inp-grp" style="margin-bottom:.7rem">
-        <label class="inp-lbl">Buscar música no YouTube:</label>
-        <div style="display:flex;gap:.4rem">
-          <input type="text" class="inp" id="searchInp" placeholder="Nome da música ou artista..." autocomplete="off" style="flex:1">
-          <button class="m-btn" onclick="doSearch()" style="width:auto;padding:.85rem 1rem;font-size:.85rem">🔍</button>
-        </div>
+    <div id="panelSearch" style="display:none">
+      <div style="display:flex;gap:.5rem;margin-bottom:.75rem">
+        <input type="text" class="inp" id="ytSearchInp" placeholder="Ex: sertanejo, funk, pop..." autocomplete="off" style="flex:1">
+        <button class="m-btn" onclick="ytSearch()" style="width:auto;padding:.85rem 1.1rem;font-size:.85rem;white-space:nowrap">🔍</button>
       </div>
-      <div id="searchResults" style="max-height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:.5rem">
-        <div style="text-align:center;color:var(--muted);padding:1.5rem;font-size:.85rem">Digite algo para buscar 🎵</div>
+      <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.75rem">
+        <button onclick="ytQuick('sertanejo karaoke',this)" class="yf-btn">🎸 Sertanejo</button>
+        <button onclick="ytQuick('funk karaoke',this)" class="yf-btn">🕺 Funk</button>
+        <button onclick="ytQuick('pop karaoke',this)" class="yf-btn">🎵 Pop</button>
+        <button onclick="ytQuick('pagode karaoke',this)" class="yf-btn">🎶 Pagode</button>
+        <button onclick="ytQuick('forro karaoke',this)" class="yf-btn">💃 Forró</button>
+        <button onclick="ytQuick('rock nacional karaoke',this)" class="yf-btn">🤘 Rock</button>
+        <button onclick="ytQuick('mpb karaoke',this)" class="yf-btn">🎹 MPB</button>
       </div>
+      <div id="ytLoading" style="display:none;text-align:center;padding:1.5rem;color:var(--muted)">
+        <div style="width:32px;height:32px;border:3px solid rgba(255,255,255,.1);border-top:3px solid var(--pink);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto .75rem"></div>
+        Buscando no YouTube...
+      </div>
+      <div id="ytResults" style="max-height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:.5rem"></div>
+      <div id="ytPagination" style="display:none;justify-content:center;gap:.5rem;margin-top:.6rem;align-items:center">
+        <button onclick="ytPage(-1)" id="ytPrev" style="padding:.4rem .9rem;border-radius:.5rem;border:1px solid rgba(255,255,255,.2);background:transparent;color:#fff;cursor:pointer;font-size:.8rem">← Ant</button>
+        <span id="ytPageInfo" style="font-size:.75rem;color:var(--muted)"></span>
+        <button onclick="ytPage(1)" id="ytNext" style="padding:.4rem .9rem;border-radius:.5rem;border:1px solid rgba(255,255,255,.2);background:transparent;color:#fff;cursor:pointer;font-size:.8rem">Próx →</button>
+      </div>
+      <button class="m-btn dim" onclick="closeVidModal()" style="margin-top:.6rem">Cancelar</button>
     </div>
-
-    <button class="m-btn dim" onclick="closeVidModal()" style="margin-top:.6rem">Cancelar</button>
   </div>
 </div>
 
@@ -537,7 +553,6 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
 // ═══════════════════════════════════════════
 const SB_URL  = "https://yvrskenfgfpgrcpmmeln.supabase.co";
 const SB_KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl2cnNrZW5mZ2ZwZ3JjcG1tZWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNzk1NTAsImV4cCI6MjA4Njc1NTU1MH0.DzO4mZ7jYkTPoleIlF7smZ_Kim7KqFxXA4aumb7Qf8U";
-const YOUTUBE_API_KEY = 'AIzaSyBzWLKPA96ISDfEZV6rLe9S68et6PUVhno';
 
 // ═══════════════════════════════════════════
 // STATE
@@ -618,6 +633,7 @@ function flashCard(pts){
   const el=$('scTotal');
   el.classList.add('flash');
   setTimeout(()=>el.classList.remove('flash'),400);
+  // também pulsa o sub-card (positivo ou negativo)
   const sub=pts>0?$('vPos').parentElement:$('vNeg').parentElement;
   if(sub){sub.classList.add('flash');setTimeout(()=>sub.classList.remove('flash'),400);}
 }
@@ -756,11 +772,13 @@ function playVideo(vid,title=''){
   if(!vid)return;
   curVid=vid;
 
+  // Find owner in queue
   const qi=queue.find(x=>x.video_id===vid);
   curOwnerId=qi?.added_by||userId;
   curOwnerName=qi?.added_by_name||userName||'Anônimo';
   curSingerId=curOwnerId;
 
+  // Find real name from participants
   const op=participants.find(p=>p.odUserId===curOwnerId);
   if(op)curOwnerName=op.odUserName;
 
@@ -828,7 +846,7 @@ async function addQueue(){
   const vid=extractVid(url);
   if(!vid){toast('Link inválido!',true);return}
 
-  const btn=$('paneLink').querySelector('.m-btn');
+  const btn=document.querySelector('#vidModal .m-btn');
   btn.textContent='⏳ Buscando...';btn.disabled=true;
 
   try{
@@ -1022,80 +1040,11 @@ async function resetAll(){
 }
 
 // ═══════════════════════════════════════════
-// MODAL VÍDEO — ABAS
-// ═══════════════════════════════════════════
-function switchTab(t){
-  const isLink=t==='link';
-  $('paneLink').style.display=isLink?'':'none';
-  $('paneSearch').style.display=isLink?'none':'';
-  $('tabLink').style.background=isLink?'linear-gradient(135deg,var(--purple),var(--pink))':'transparent';
-  $('tabLink').style.color=isLink?'#fff':'var(--muted)';
-  $('tabSearch').style.background=!isLink?'linear-gradient(135deg,var(--purple),var(--pink))':'transparent';
-  $('tabSearch').style.color=!isLink?'#fff':'var(--muted)';
-  if(!isLink)setTimeout(()=>$('searchInp').focus(),80);
-}
-
-function openVidModal(){
-  switchTab('link');
-  $('vidModal').classList.add('open');
-  setTimeout(()=>$('vidInp').focus(),80);
-}
-
-function closeVidModal(){
-  $('vidModal').classList.remove('open');
-  $('vidInp').value='';
-  $('searchInp').value='';
-  $('searchResults').innerHTML='<div style="text-align:center;color:var(--muted);padding:1.5rem;font-size:.85rem">Digite algo para buscar 🎵</div>';
-}
-
-// ═══════════════════════════════════════════
-// BUSCA YOUTUBE
-// ═══════════════════════════════════════════
-async function doSearch(){
-  const q=($('searchInp').value||'').trim();
-  if(!q){toast('Digite algo para buscar!',true);return}
-  const box=$('searchResults');
-  box.innerHTML='<div style="text-align:center;color:var(--muted);padding:1.5rem;font-size:.85rem">🔄 Buscando...</div>';
-  try{
-    const r=await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=8&q=${encodeURIComponent(q)}&key=${YOUTUBE_API_KEY}`);
-    const d=await r.json();
-    if(d.error){box.innerHTML='<div style="text-align:center;color:#ff4757;padding:1.5rem;font-size:.85rem">❌ Erro na API. Verifique a chave.</div>';return}
-    if(!d.items||!d.items.length){box.innerHTML='<div style="text-align:center;color:var(--muted);padding:1.5rem;font-size:.85rem">Nenhum resultado encontrado</div>';return}
-    box.innerHTML=d.items.map(it=>{
-      const vid=it.id.videoId;
-      const title=esc(it.snippet.title);
-      const ch=esc(it.snippet.channelTitle);
-      const thumb=it.snippet.thumbnails.default.url;
-      const safeTitle=it.snippet.title.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-      const safeThumb=thumb.replace(/'/g,"\\'");
-      return `<div class="sr-item" onclick="addFromSearch('${vid}','${safeTitle}','${safeThumb}')">
-        <img class="sr-thumb" src="${thumb}" alt="" loading="lazy" onerror="this.style.display='none'">
-        <div class="sr-info">
-          <div class="sr-title">${title}</div>
-          <div class="sr-ch">📺 ${ch}</div>
-        </div>
-      </div>`;
-    }).join('');
-  }catch(e){
-    box.innerHTML='<div style="text-align:center;color:#ff4757;padding:1.5rem;font-size:.85rem">❌ Erro na busca. Tente novamente.</div>';
-  }
-}
-
-async function addFromSearch(vid,title,thumb){
-  closeVidModal();
-  const item={room_id:roomId,video_id:vid,video_title:title,thumbnail:thumb,
-    added_by:userId,added_by_name:userName,status:'waiting',order:queue.length};
-  queue.push(item);
-  safeUpdQueue();
-  if(sbOk)await sbSend('queue-update',{queue,currentPosition:qPos});
-  toast(`"${title.slice(0,35)}" adicionado! 🎵`);
-  addAct('➕',`${userName} adicionou: ${title.slice(0,30)}`);
-  if(qPos===-1&&autoOn)playNext();
-}
-
-// ═══════════════════════════════════════════
 // MODALS
 // ═══════════════════════════════════════════
+function openVidModal(){$('vidModal').classList.add('open');$('vidInp').focus()}
+function closeVidModal(){$('vidModal').classList.remove('open');$('vidInp').value=''}
+
 function applyCode(){
   const v=($('codeInp').value||'').trim().toUpperCase();
   if(!v||v.length!==6){toast('Digite um código de 6 caracteres!',true);return}
@@ -1267,11 +1216,131 @@ async function init(){
 
   $('nameInp').addEventListener('keypress',e=>{if(e.key==='Enter')joinRoom()});
   $('vidInp').addEventListener('keypress',e=>{if(e.key==='Enter')addQueue()});
-  $('searchInp').addEventListener('keypress',e=>{if(e.key==='Enter')doSearch()});
   $('codeInp').addEventListener('input',e=>{e.target.value=e.target.value.toUpperCase()});
   $('codeInp').addEventListener('keypress',e=>{if(e.key==='Enter')applyCode()});
 
   setTimeout(()=>$('nameInp').focus(),250);
+}
+
+// ═══════════════════════════════════════════
+// BUSCA YOUTUBE - APP
+// ═══════════════════════════════════════════
+const YT_API_KEY='AIzaSyBzWLKPA96ISDfEZV6rLe9S68et6PUVhno';
+let ytQuery='',ytPage_=1,ytNextTok=null,ytToks={};
+
+function switchTab(tab){
+  const isSearch=tab==='search';
+  document.getElementById('panelLink').style.display=isSearch?'none':'block';
+  document.getElementById('panelSearch').style.display=isSearch?'block':'none';
+  const tL=document.getElementById('tabLink'),tS=document.getElementById('tabSearch');
+  tL.style.background=isSearch?'transparent':'linear-gradient(135deg,var(--purple),var(--pink))';
+  tL.style.color=isSearch?'var(--muted)':'#fff';
+  tS.style.background=isSearch?'linear-gradient(135deg,var(--purple),var(--pink))':'transparent';
+  tS.style.color=isSearch?'#fff':'var(--muted)';
+  if(isSearch)setTimeout(()=>document.getElementById('ytSearchInp').focus(),50);
+}
+
+function ytQuick(term,el){
+  document.querySelectorAll('.yf-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('ytSearchInp').value=term;
+  ytDoSearch(term,1);
+}
+
+function ytSearch(){
+  const q=(document.getElementById('ytSearchInp').value||'').trim();
+  if(!q){toast('Digite o que quer buscar!',true);return}
+  ytDoSearch(q,1);
+}
+
+function ytPage(dir){
+  const np=ytPage_+dir;
+  if(np<1)return;
+  ytDoSearch(ytQuery,np);
+}
+
+async function ytDoSearch(q,page){
+  ytQuery=q;ytPage_=page;
+  const loading=document.getElementById('ytLoading');
+  const results=document.getElementById('ytResults');
+  const pag=document.getElementById('ytPagination');
+  loading.style.display='block';
+  results.innerHTML='';
+  pag.style.display='none';
+
+  try{
+    const params=new URLSearchParams({
+      part:'snippet',type:'video',maxResults:'8',
+      q:q,key:YT_API_KEY,videoCategoryId:'10',regionCode:'BR',relevanceLanguage:'pt'
+    });
+    if(ytToks[page])params.set('pageToken',ytToks[page]);
+    else if(page>1&&ytNextTok)params.set('pageToken',ytNextTok);
+
+    const ctrl=new AbortController();
+    const tid=setTimeout(()=>ctrl.abort(),12000);
+    const res=await fetch('https://www.googleapis.com/youtube/v3/search?'+params.toString(),{signal:ctrl.signal});
+    clearTimeout(tid);
+
+    if(!res.ok){
+      const e=await res.json().catch(()=>({}));
+      throw new Error(e?.error?.message||'Erro HTTP '+res.status);
+    }
+
+    const data=await res.json();
+    if(data.nextPageToken){ytNextTok=data.nextPageToken;ytToks[page+1]=data.nextPageToken;}
+    if(data.prevPageToken)ytToks[page-1]=data.prevPageToken;
+
+    const items=data.items||[];
+    if(!items.length){results.innerHTML='<div style="text-align:center;color:var(--muted);padding:1rem;font-size:.85rem">Nenhum resultado encontrado. Tente outro termo.</div>';return;}
+
+    results.innerHTML=items.map(it=>{
+      const vid=it.id?.videoId;if(!vid)return'';
+      const t=it.snippet?.title||'Sem título';
+      const ch=it.snippet?.channelTitle||'';
+      const thumb=it.snippet?.thumbnails?.medium?.url||`https://img.youtube.com/vi/${vid}/mqdefault.jpg`;
+      const tEsc=t.replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      return `<div class="yt-item">
+        <img class="yt-thumb" src="${thumb}" alt="" loading="lazy" onerror="this.src='https://img.youtube.com/vi/${vid}/mqdefault.jpg'">
+        <div class="yt-info">
+          <div class="yt-title" title="${tEsc}">${tEsc}</div>
+          <div class="yt-ch">${ch.replace(/</g,'&lt;')}</div>
+        </div>
+        <button class="yt-add" onclick="ytAddToQueue('${vid}','${tEsc.replace(/'/g,'\\'')}')">➕ Cantar</button>
+      </div>`;
+    }).join('');
+
+    // Paginação
+    const total=data.pageInfo?.totalResults||0;
+    const totalPg=Math.min(Math.ceil(total/8),50);
+    document.getElementById('ytPageInfo').textContent=`Pág ${page} / ~${totalPg}`;
+    document.getElementById('ytPrev').disabled=page<=1;
+    document.getElementById('ytNext').disabled=!data.nextPageToken||page>=totalPg;
+    pag.style.display='flex';
+
+  }catch(err){
+    results.innerHTML=`<div style="text-align:center;color:#ff4757;padding:1rem;font-size:.82rem">❌ ${err.message}</div>`;
+  }finally{
+    loading.style.display='none';
+  }
+}
+
+async function ytAddToQueue(vid,title){
+  if(!userName){toast('Entre na sala primeiro!',true);return}
+  const btn=event.target;
+  btn.textContent='⏳';btn.disabled=true;
+  try{
+    const info=await fetchInfo(vid);
+    const item={room_id:roomId,video_id:vid,video_title:info.title||title,thumbnail:info.thumb,
+      added_by:userId,added_by_name:userName,status:'waiting',order:queue.length};
+    queue.push(item);
+    safeUpdQueue();
+    if(sbOk)await sbSend('queue-update',{queue,currentPosition:qPos});
+    toast(`"${(info.title||title).slice(0,35)}" adicionado! 🎵`);
+    addAct('➕',`${userName} adicionou: ${(info.title||title).slice(0,30)}`);
+    if(qPos===-1&&autoOn)playNext();
+    btn.textContent='✅';
+    setTimeout(()=>{btn.textContent='➕ Cantar';btn.disabled=false;},1500);
+  }catch(e){toast('Erro ao adicionar.',true);btn.textContent='➕ Cantar';btn.disabled=false;}
 }
 
 document.addEventListener('DOMContentLoaded',init);
