@@ -359,6 +359,7 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
           <h2>🎵 Player de Karaokê</h2>
           <div class="btns">
             <button class="btn btn-purple" onclick="openVidModal()">➕ Adicionar à Fila</button>
+            <button class="btn btn-auto" id="autoBtn2" onclick="toggleAuto()">▶️ Auto Player</button>
             <button class="btn btn-orange" id="endBtn" style="display:none" onclick="endSong()">⏭️ Próxima</button>
           </div>
         </div>
@@ -921,9 +922,10 @@ async function playNext(){
 
 function toggleAuto(){
   autoOn=!autoOn;
-  const b=$('autoBtn');
-  b.className='btn btn-auto'+(autoOn?' on':'');
-  b.innerHTML=autoOn?'⏸️ Auto Player ON':'▶️ Auto Player';
+  const label=autoOn?'⏸️ Auto Player ON':'▶️ Auto Player';
+  const cls='btn btn-auto'+(autoOn?' on':'');
+  // Atualiza os dois botões: o da fila e o do player
+  [$('autoBtn'),$('autoBtn2')].forEach(b=>{if(b){b.className=cls;b.innerHTML=label;}});
   toast(autoOn?'Auto Player ativado!':'Auto Player desativado.');
   if(autoOn&&!curVid&&queue.length)playNext();
 }
