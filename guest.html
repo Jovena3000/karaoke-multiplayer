@@ -154,10 +154,12 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
 .act-item{display:flex;align-items:center;gap:.4rem;padding:.4rem;background:var(--light);border-radius:.4rem;margin-bottom:.3rem;font-size:.75rem}
 .act-ico{font-size:1.3rem;flex-shrink:0}
 
-/* ── MODALS ── */
-.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:500;justify-content:center;align-items:center;backdrop-filter:blur(4px);padding:1rem}
+/* ══════════════════════════════
+   MODALS — responsivos
+══════════════════════════════ */
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:500;justify-content:center;align-items:center;backdrop-filter:blur(4px);padding:.75rem;overflow-y:auto}
 .modal.open{display:flex}
-.m-box{background:linear-gradient(135deg,var(--card),var(--bg));border-radius:1.25rem;padding:1.5rem;width:100%;max-width:460px;border:2px solid rgba(157,78,221,.3);max-height:90vh;overflow-y:auto}
+.m-box{background:linear-gradient(135deg,var(--card),var(--bg));border-radius:1.25rem;padding:1.5rem;width:100%;max-width:460px;border:2px solid rgba(157,78,221,.3);max-height:calc(100svh - 1.5rem);overflow-y:auto;margin:auto}
 .m-title{font-size:1.3rem;font-weight:700;margin-bottom:1.2rem;text-align:center;background:linear-gradient(90deg,var(--pink),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .join-box{background:var(--light);border:2px dashed var(--blue);border-radius:.75rem;padding:.9rem;margin-bottom:1rem}
 .mode-badge{font-size:.75rem;padding:.35rem .9rem;border-radius:2rem;display:inline-block;margin-bottom:.75rem}
@@ -185,6 +187,9 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
 .yt-add{background:linear-gradient(135deg,var(--purple),var(--pink));border:none;padding:.4rem .8rem;border-radius:.4rem;color:#fff;font-size:.72rem;font-weight:600;cursor:pointer;transition:transform .15s;white-space:nowrap;flex-shrink:0}
 .yt-add:hover{transform:scale(1.05)}
 @keyframes spin{to{transform:rotate(360deg)}}
+/* ── Altura dos resultados YouTube: clamped para caber em qualquer tela ── */
+#ytResults{max-height:clamp(150px,38vh,320px) !important}
+#ytPagination{flex-shrink:0}
 .m-row{display:flex;gap:.5rem;margin-bottom:.5rem}
 .m-row .inp{flex:1}
 .m-row .m-btn{width:auto;padding:.85rem 1.2rem;font-size:.85rem}
@@ -276,6 +281,11 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
   .res-btns .btn{padding:.7rem 1rem;font-size:.82rem}
   .toast{right:.5rem;bottom:.5rem;max-width:calc(100vw - 1rem)}
   .e-notif{right:.5rem;top:80px}
+  /* Modal mobile */
+  .m-box{padding:1.1rem;border-radius:.9rem}
+  .m-title{font-size:1.1rem;margin-bottom:.9rem}
+  .yf-btn{font-size:.7rem;padding:.25rem .6rem}
+  #ytResults{max-height:clamp(120px,28vh,190px) !important}
 }
 
 /* Smart TV / Large 1400px+ */
@@ -292,6 +302,8 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
   .ebtn{padding:.45rem .1rem}
   .ei{font-size:1.5rem}
   .el,.ep{display:none}
+  .m-box{padding:.8rem;border-radius:.75rem}
+  #ytResults{max-height:clamp(100px,24vh,160px) !important}
 }
 </style>
 </head>
@@ -446,7 +458,7 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
         <div style="width:32px;height:32px;border:3px solid rgba(255,255,255,.1);border-top:3px solid var(--pink);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto .75rem"></div>
         Buscando no YouTube...
       </div>
-      <div id="ytResults" style="max-height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:.5rem"></div>
+      <div id="ytResults" style="overflow-y:auto;display:flex;flex-direction:column;gap:.5rem"></div>
       <div id="ytPagination" style="display:none;justify-content:center;gap:.5rem;margin-top:.6rem;align-items:center">
         <button onclick="ytPage(-1)" id="ytPrev" style="padding:.4rem .9rem;border-radius:.5rem;border:1px solid rgba(255,255,255,.2);background:transparent;color:#fff;cursor:pointer;font-size:.8rem">← Ant</button>
         <span id="ytPageInfo" style="font-size:.75rem;color:var(--muted)"></span>
@@ -684,7 +696,6 @@ function playVideo(vid){
   const wrap=$('playerWrap');
   const layer=$('emojiLayer');
 
-  // Remove iframe antigo para evitar duplicação
   const old=wrap.querySelector('iframe');
   if(old)old.remove();
 
@@ -759,7 +770,6 @@ async function sendEmoji(e,pts){
   if(cd){toast('Aguarde 1 segundo!',true);return}
   if(!curVid){toast('Nenhuma música tocando!',true);return}
 
-  // 🔥 Destinatário = dono da música (quem adicionou) ou singer
   const targetId=curOwnerId||curSingerId;
   if(!targetId){toast('Aguardando identificação do cantor...',true);return}
 
