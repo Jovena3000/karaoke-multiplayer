@@ -27,16 +27,13 @@
   --muted:#a0a0c0;
 }
 body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-height:100vh;overflow-x:hidden}
-/* SCROLLBAR */
 ::-webkit-scrollbar{width:5px}
 ::-webkit-scrollbar-track{background:var(--bg)}
 ::-webkit-scrollbar-thumb{background:var(--purple);border-radius:3px}
-/* CONNECTION BAR */
 #connBar{padding:.5rem 1rem;text-align:center;font-size:.8rem;font-weight:600;transition:background .3s}
 #connBar.ok{background:linear-gradient(135deg,var(--green),#00cc6a);color:#000}
 #connBar.wait{background:linear-gradient(135deg,var(--orange),#ffb347);color:#000}
 #connBar.err{background:linear-gradient(135deg,#ff4757,#ff6b6b);color:#fff}
-/* HEADER */
 .hdr{background:rgba(21,25,50,.95);backdrop-filter:blur(10px);padding:.8rem 1.5rem;position:sticky;top:0;z-index:200;border-bottom:1px solid rgba(157,78,221,.3)}
 .hdr-inner{max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.75rem}
 .logo{font-size:1.3rem;font-weight:800;background:linear-gradient(90deg,var(--pink),var(--purple),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
@@ -47,18 +44,15 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
 .live-dot{width:9px;height:9px;background:var(--green);border-radius:50%;animation:pulse 1.5s infinite}
 .live-txt{font-size:.75rem;color:var(--green);font-weight:600}
 @keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 8px var(--green)}50%{opacity:.4}}
-/* BOTÃO DOWNLOAD APP - NOVO! */
+/* BOTÃO DOWNLOAD APP */
 .download-area{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap}
 .btn-download-app{background:linear-gradient(135deg,#00b894,#00cec9);border:none;padding:.5rem 1rem;border-radius:2rem;color:#0a0e27;font-weight:700;font-size:.8rem;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:.5rem;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.2)}
 .btn-download-app:hover{transform:scale(1.03);background:linear-gradient(135deg,#00a884,#00b894)}
 .app-info-tooltip{font-size:.65rem;color:var(--muted);background:var(--light);padding:.2rem .6rem;border-radius:1rem;display:inline-flex;align-items:center;gap:.3rem}
-/* LAYOUT PRINCIPAL RESPONSIVO */
 .wrap{max-width:1400px;margin:1.2rem auto;padding:0 .8rem}
 .grid{display:grid;grid-template-columns:1fr 320px;gap:1.2rem}
-/* CARDS */
 .card{background:var(--card);border-radius:1rem;padding:1.2rem;border:1px solid rgba(157,78,221,.2);margin-bottom:1rem}
 .c-title{font-size:.95rem;font-weight:600;margin-bottom:.75rem;display:flex;align-items:center;gap:.4rem}
-/* VIDEO */
 .vid-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:.8rem;flex-wrap:wrap;gap:.5rem}
 .vid-hdr h2{font-size:1.1rem;font-weight:600}
 .player-wrap{position:relative;width:100%;padding-bottom:56.25%;background:#000;border-radius:.75rem;overflow:hidden}
@@ -125,7 +119,6 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
 .badge.you{background:var(--blue)}
 .act-feed{max-height:180px;overflow-y:auto}
 .act-item{background:var(--light);border-radius:.4rem;padding:.4rem;margin-bottom:.3rem;display:flex;gap:.5rem;align-items:center}
-/* MODAIS RESPONSIVOS */
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.94);z-index:500;justify-content:center;align-items:center;backdrop-filter:blur(5px);padding:1rem}
 .modal.open{display:flex}
 .m-box{background:linear-gradient(135deg,var(--card),var(--bg));border-radius:1.5rem;padding:1.4rem;width:100%;max-width:560px;border:2px solid rgba(157,78,221,.4);max-height:85vh;overflow-y:auto;box-shadow:0 20px 35px rgba(0,0,0,.6)}
@@ -168,7 +161,6 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
 .res-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin:.8rem 0}
 .res-stat{background:var(--light);padding:.5rem;border-radius:.6rem}
 .res-breakdown{display:flex;gap:.3rem;flex-wrap:wrap;justify-content:center;margin:.6rem 0}
-/* RESPONSIVIDADE */
 @media(max-width:900px){
   .grid{grid-template-columns:1fr}
   .right-col{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem}
@@ -204,7 +196,6 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
   <div class="hdr-inner">
     <div class="logo">🎤 Karaokê - Convidado</div>
     <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
-      <!-- NOVO BOTÃO DE DOWNLOAD DO APP -->
       <div class="download-area">
         <a href="https://karaokemultiplayer.com.br/app/app-release.apk" class="btn-download-app" download target="_blank" rel="noopener noreferrer">
           📲 Baixar App do Karaokê
@@ -237,14 +228,11 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
     <div class="right-col"><div class="card"><div class="c-title">👥 Participantes (<span id="pCnt2">0</span>)</div><div class="plist" id="pList"><div style="text-align:center;padding:.75rem">Aguardando...</div></div></div><div class="card"><div class="c-title">⚡ Atividade ao Vivo</div><div class="act-feed" id="actFeed"><div style="padding:.75rem;text-align:center">Nenhuma atividade</div></div></div></div>
   </div>
 </div>
-<!-- MODAL NOME -->
 <div class="modal open" id="nameModal"><div class="m-box"><div class="m-title">🎤 Bem-vindo ao Karaokê!</div><div class="join-box"><div style="font-size:.8rem;margin-bottom:.4rem">Código da sala?</div><div class="m-row"><input type="text" class="inp" id="codeInp" placeholder="Ex: A3X9K2" maxlength="6" autocomplete="off" style="text-transform:uppercase;text-align:center;font-weight:700"><button class="m-btn" onclick="applyCode()" style="width:auto;padding:.85rem 1rem">Entrar</button></div><div style="text-align:center;font-size:.7rem;margin-top:.5rem">— ou criar nova sala —</div></div><div style="text-align:center"><span class="mode-badge new" id="modeBadge">🆕 Nova sala</span></div><div class="room-display"><div class="room-disp-lbl" style="color:var(--muted)">Sala:</div><div class="room-disp-id" id="modalRoom">------</div></div><div class="inp-grp"><label class="inp-lbl">Seu nome:</label><input type="text" class="inp" id="nameInp" placeholder="Digite seu nome..." maxlength="20"></div><button class="m-btn" onclick="joinRoom()">Entrar na Sala 🚀</button></div></div>
-<!-- MODAL VÍDEO RESPONSIVO -->
 <div class="modal" id="vidModal"><div class="m-box"><div class="m-title">🎬 Adicionar à Fila</div><div style="display:flex;gap:.5rem;background:var(--light);border-radius:.65rem;padding:.3rem;margin-bottom:1rem"><button id="tabLink" onclick="switchTab('link')" style="flex:1;padding:.5rem;border:none;border-radius:.45rem;font-weight:600;cursor:pointer;background:linear-gradient(135deg,var(--purple),var(--pink));color:#fff">🔗 Link</button><button id="tabSearch" onclick="switchTab('search')" style="flex:1;padding:.5rem;border:none;border-radius:.45rem;font-weight:600;cursor:pointer;background:transparent;color:var(--muted)">🔍 Buscar</button></div><div id="panelLink"><div class="inp-grp"><label class="inp-lbl">YouTube URL:</label><input type="text" class="inp" id="vidInp" placeholder="https://youtube.com/watch?v=..."></div><button class="m-btn" onclick="addQueue()">➕ Adicionar à Fila</button><button class="m-btn dim" onclick="closeVidModal()">Cancelar</button></div><div id="panelSearch" style="display:none"><div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.8rem"><input type="text" class="inp" id="ytSearchInp" placeholder="Artista / música..." style="flex:1"><button class="m-btn" onclick="ytSearch()" style="width:auto;padding:.8rem 1rem">🔍</button></div><div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.8rem"><button onclick="ytQuick('sertanejo karaoke',this)" class="yf-btn">🎸 Sertanejo</button><button onclick="ytQuick('funk karaoke',this)" class="yf-btn">🕺 Funk</button><button onclick="ytQuick('pop karaoke',this)" class="yf-btn">🎵 Pop</button><button onclick="ytQuick('pagode karaoke',this)" class="yf-btn">🎶 Pagode</button><button onclick="ytQuick('forro karaoke',this)" class="yf-btn">💃 Forró</button><button onclick="ytQuick('rock nacional karaoke',this)" class="yf-btn">🤘 Rock</button><button onclick="ytQuick('mpb karaoke',this)" class="yf-btn">🎹 MPB</button></div><div id="ytLoading" style="display:none;text-align:center;padding:1rem"><div style="width:28px;height:28px;border:3px solid rgba(255,255,255,.1);border-top:3px solid var(--pink);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto .6rem"></div>Buscando...</div><div id="ytResults"></div><div id="ytPagination" style="display:none;justify-content:center;gap:.5rem;margin-top:.6rem;flex-wrap:wrap"><button onclick="ytPage(-1)" id="ytPrev" style="padding:.3rem .8rem;border-radius:.5rem;border:1px solid rgba(255,255,255,.2);background:transparent;color:#fff">← Ant</button><span id="ytPageInfo" style="font-size:.7rem"></span><button onclick="ytPage(1)" id="ytNext" style="padding:.3rem .8rem;border-radius:.5rem;border:1px solid rgba(255,255,255,.2);background:transparent;color:#fff">Próx →</button></div><button class="m-btn dim" onclick="closeVidModal()" style="margin-top:.8rem">Fechar</button></div></div></div>
 <div class="toast" id="toast"></div><div class="e-notif" id="eNotif"><span class="e-notif-ico" id="notifIco">🔥</span><span id="notifTxt">Reação!</span></div>
 <div class="res" id="resOverlay"><div class="res-box"><div class="res-lbl" style="color:var(--muted)">🎤 Performance Finalizada!</div><div class="res-name" id="resName">Cantor</div><div class="res-main"><div class="res-ico" id="resIco" style="font-size:3rem">🎉</div><div class="res-score pos" id="resScore">+0</div><div class="res-slbl">Pontuação Total</div></div><div class="res-stats"><div class="res-stat"><div class="res-sv pos" id="rPos">+0</div><div class="res-slb">Positivos</div></div><div class="res-stat"><div class="res-sv neg" id="rNeg">-0</div><div class="res-slb">Negativos</div></div><div class="res-stat"><div class="res-sv blue" id="rReact">0</div><div class="res-slb">Reações</div></div></div><div class="res-breakdown" id="resBreak"></div><div class="res-msg exc" id="resMsg">🌟 Incrível!</div><div class="res-btns" style="display:flex;gap:.6rem;justify-content:center;margin-top:.8rem"><button class="btn btn-green" onclick="closeResult()">🎵 Voltar</button><button class="btn btn-purple" onclick="closeResult()">Fechar</button></div></div></div>
 <script>
-// ========== CÓDIGO TOTALMENTE FUNCIONAL ==========
 const SB_URL = "https://yvrskenfgfpgrcpmmeln.supabase.co";
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl2cnNrZW5mZ2ZwZ3JjcG1tZWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNzk1NTAsImV4cCI6MjA4Njc1NTU1MH0.DzO4mZ7jYkTPoleIlF7smZ_Kim7KqFxXA4aumb7Qf8U";
 let sb=null,ch=null,sbOk=false,roomId='',userId='user_'+Date.now()+'_'+Math.random().toString(36).substr(2,9),userName=null,isNew=true,cd=false;
@@ -253,7 +241,7 @@ let emojiCounts={},totalReact=0,lb={},curSongScores={},curSongId=null,seenEmojis
 const $=id=>document.getElementById(id),esc=t=>t?t.replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])):'';
 function toast(msg,err=false){const el=$('toast');el.textContent=msg;el.className='toast show '+(err?'err':'ok');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),3000);}
 function setConn(s){const el=$('connBar');if(s==='ok'){el.className='ok';el.innerHTML='✅ Conectado!'}else if(s==='wait'){el.className='wait';el.innerHTML='🔄 Conectando...'}else{el.className='err';el.innerHTML='❌ Desconectado.'}}
-function mkId(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';return Array.from({length:6},()=>c[Math.floor(Math.random()c.length)]).join('');}
+function mkId(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';return Array.from({length:6},()=>c[Math.floor(Math.random()*c.length)]).join('');}
 function fromUrl(){const h=window.location.hash.slice(1).toUpperCase();if(/^[A-Z0-9]{6}$/.test(h))return h;const p=new URLSearchParams(window.location.search).get('room');if(p&&/^[A-Z0-9]{6}$/i.test(p))return p.toUpperCase();return null;}
 function extractVid(u){if(!u)return null;const m=u.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/(?:embed|v|shorts)\/)([a-zA-Z0-9_-]{11})/)||u.match(/^([a-zA-Z0-9_-]{11})$/);return m?m[1]:null;}
 function updScores(){$('vTotal').textContent=scores.total;$('vPos').textContent=scores.positive;$('vNeg').textContent=scores.negative;}
