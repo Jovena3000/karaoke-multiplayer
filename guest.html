@@ -9,7 +9,7 @@
 <meta name="theme-color" content="#0f172a">
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>🎤 Karaokê - Convidado</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -154,18 +154,24 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
 .act-item{display:flex;align-items:center;gap:.4rem;padding:.4rem;background:var(--light);border-radius:.4rem;margin-bottom:.3rem;font-size:.75rem}
 .act-ico{font-size:1.3rem;flex-shrink:0}
 
-/* ── MODALS ── */
-.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:500;justify-content:center;align-items:center;backdrop-filter:blur(4px);padding:1rem}
+/* ═══════════════════════════════════════════════════════════ */
+/* MODAL SUPER RESPONSIVO - SEM OVERFLOW EXTERNO              */
+/* ═══════════════════════════════════════════════════════════ */
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:500;justify-content:center;align-items:center;backdrop-filter:blur(6px);padding:1rem}
 .modal.open{display:flex}
-.m-box{background:linear-gradient(135deg,var(--card),var(--bg));border-radius:1.25rem;padding:1.5rem;width:100%;max-width:460px;border:2px solid rgba(157,78,221,.3);max-height:90vh;overflow-y:auto}
-.m-title{font-size:1.3rem;font-weight:700;margin-bottom:1.2rem;text-align:center;background:linear-gradient(90deg,var(--pink),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.m-box{background:linear-gradient(135deg,var(--card),var(--bg));border-radius:1.5rem;padding:1.5rem;width:100%;max-width:560px;border:2px solid rgba(157,78,221,.4);max-height:90vh;overflow-y:auto;box-shadow:0 20px 40px rgba(0,0,0,.5);transition:all .2s ease}
+/* Scroll interno suave */
+.m-box::-webkit-scrollbar{width:4px}
+.m-box::-webkit-scrollbar-track{background:var(--bg);border-radius:4px}
+.m-box::-webkit-scrollbar-thumb{background:var(--purple);border-radius:4px}
+.m-title{font-size:1.3rem;font-weight:700;margin-bottom:1rem;text-align:center;background:linear-gradient(90deg,var(--pink),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .join-box{background:var(--light);border:2px dashed var(--blue);border-radius:.75rem;padding:.9rem;margin-bottom:1rem}
 .mode-badge{font-size:.75rem;padding:.35rem .9rem;border-radius:2rem;display:inline-block;margin-bottom:.75rem}
 .mode-badge.new{background:var(--green);color:#000}
 .mode-badge.join{background:var(--blue);color:#000}
 .room-display{background:var(--light);padding:.7rem;border-radius:.6rem;margin-bottom:1rem;text-align:center;border:2px solid rgba(0,212,255,.25)}
 .room-disp-lbl{font-size:.8rem;color:var(--muted)}
-.room-disp-id{font-size:2rem;font-weight:800;color:var(--blue);letter-spacing:4px;font-family:monospace}
+.room-disp-id{font-size:1.8rem;font-weight:800;color:var(--blue);letter-spacing:3px;font-family:monospace;word-break:break-all}
 .inp-grp{margin-bottom:1.1rem}
 .inp-lbl{display:block;margin-bottom:.4rem;color:var(--muted);font-size:.85rem}
 .inp{width:100%;padding:.85rem;background:var(--light);border:2px solid rgba(157,78,221,.3);border-radius:.65rem;color:#fff;font-size:.95rem;font-family:'Poppins',sans-serif}
@@ -176,212 +182,56 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
 .m-btn.dim{background:var(--light);margin-top:.4rem}
 .yf-btn{padding:.3rem .75rem;border-radius:1rem;border:1px solid rgba(255,255,255,.2);background:transparent;color:var(--muted);cursor:pointer;font-size:.75rem;transition:all .2s;font-family:'Poppins',sans-serif}
 .yf-btn:hover,.yf-btn.active{border-color:var(--pink);color:var(--pink);background:rgba(255,45,117,.1)}
-.yt-item{background:var(--light);border-radius:.65rem;padding:.6rem;display:flex;gap:.65rem;align-items:center;border:1px solid rgba(255,255,255,.08);transition:all .2s}
+
+/* ── RESULTADOS YOUTUBE DENTRO DO MODAL (SEM ESTOURAR TELA) ── */
+#ytResults, #panelSearch .yt-list-container{width:100%;overflow-x:hidden}
+.yt-item{background:var(--light);border-radius:.65rem;padding:.6rem;display:flex;gap:.65rem;align-items:center;border:1px solid rgba(255,255,255,.08);transition:all .2s;flex-wrap:wrap}
 .yt-item:hover{border-color:rgba(157,78,221,.4);background:rgba(157,78,221,.08)}
-.yt-thumb{width:80px;min-width:80px;height:45px;border-radius:.4rem;object-fit:cover;background:var(--bg)}
-.yt-info{flex:1;min-width:0}
+.yt-thumb{width:70px;min-width:70px;height:45px;border-radius:.4rem;object-fit:cover;background:var(--bg)}
+.yt-info{flex:1;min-width:120px}
 .yt-title{font-size:.78rem;font-weight:600;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:.2rem}
 .yt-ch{font-size:.68rem;color:var(--muted)}
 .yt-add{background:linear-gradient(135deg,var(--purple),var(--pink));border:none;padding:.4rem .8rem;border-radius:.4rem;color:#fff;font-size:.72rem;font-weight:600;cursor:pointer;transition:transform .15s;white-space:nowrap;flex-shrink:0}
 .yt-add:hover{transform:scale(1.05)}
 @keyframes spin{to{transform:rotate(360deg)}}
-.m-row{display:flex;gap:.5rem;margin-bottom:.5rem}
+.m-row{display:flex;gap:.5rem;margin-bottom:.5rem;flex-wrap:wrap}
 .m-row .inp{flex:1}
 .m-row .m-btn{width:auto;padding:.85rem 1.2rem;font-size:.85rem}
 
-/* ── MODAL RESPONSIVO EXTRA ── */
-.modal{
-  overflow:hidden;
-}
+/* Abas responsivas */
+#panelLink .inp-grp, #panelSearch .search-wrapper{width:100%}
+#ytPagination{justify-content:center;flex-wrap:wrap}
 
-.m-box{
-  width:min(100%,560px);
-  overflow-x:hidden;
-  overscroll-behavior:contain;
-}
-
-#panelSearch{
-  width:100%;
-  overflow:hidden;
-}
-
-#panelSearch > div:first-child{
-  width:100%;
-  align-items:stretch;
-}
-
-#ytResults{
-  width:100%;
-  max-width:100%;
-  overflow-x:hidden;
-}
-
-.yt-item{
-  width:100%;
-  max-width:100%;
-  overflow:hidden;
-  flex-wrap:nowrap;
-}
-
-.yt-info{
-  min-width:0;
-  overflow:hidden;
-}
-
-.yt-title{
-  white-space:normal;
-  word-break:break-word;
-  line-height:1.3;
-}
-
-.yt-add{
-  min-width:82px;
-}
-
-@media(max-width:768px){
-  .modal{
-    padding:.6rem;
-    align-items:flex-end;
-  }
-
-  .m-box{
-    max-width:100%;
-    width:100%;
-    max-height:92vh;
-    border-radius:1rem 1rem .85rem .85rem;
-    padding:1rem;
-  }
-
-  #panelSearch > div:first-child{
-    flex-direction:column;
-  }
-
-  #panelSearch > div:first-child .m-btn{
-    width:100%!important;
-  }
-
-  .yt-item{
-    align-items:flex-start;
-    gap:.55rem;
-  }
-
-  .yt-thumb{
-    width:96px;
-    min-width:96px;
-    height:58px;
-  }
-
-  .yt-add{
-    width:100%;
-    margin-top:.35rem;
-  }
-}
-
-@media(max-width:520px){
-  .m-row{
-    flex-direction:column;
-  }
-
-  .m-row .m-btn{
-    width:100%;
-  }
-
-  .yt-item{
-    flex-direction:column;
-    align-items:stretch;
-  }
-
-  .yt-thumb{
-    width:100%;
-    height:auto;
-    aspect-ratio:16/9;
-  }
-
-  .yt-add{
-    width:100%;
-    min-width:100%;
-  }
-
-  .room-disp-id{
-    font-size:1.4rem;
-    letter-spacing:2px;
-    word-break:break-word;
-  }
-}
-
-body.modal-open{
-  overflow:hidden;
-}
-
-/* ── TOAST ── */
+/* TOAST e NOTIF */
 .toast{position:fixed;bottom:1.2rem;right:1.2rem;padding:.8rem 1.2rem;border-radius:.65rem;font-weight:600;z-index:900;transform:translateX(350px);transition:transform .3s;font-size:.85rem;max-width:280px}
 .toast.show{transform:translateX(0)}
 .toast.ok{background:linear-gradient(135deg,var(--green),#00bb66);color:#000}
 .toast.err{background:linear-gradient(135deg,#ff4757,#ff3030);color:#fff}
-
-/* ── EMOJI NOTIF ── */
 .e-notif{position:fixed;top:90px;right:1rem;background:linear-gradient(135deg,var(--pink),var(--purple));padding:.8rem 1rem;border-radius:.9rem;font-weight:600;z-index:400;transform:translateX(350px);transition:transform .35s cubic-bezier(.68,-.55,.265,1.55);display:flex;align-items:center;gap:.6rem;box-shadow:0 8px 30px rgba(255,45,117,.35);font-size:.85rem}
 .e-notif.show{transform:translateX(0)}
 .e-notif-ico{font-size:1.7rem}
-
-/* ── FLOATING EMOJI ── */
 @keyframes floatUp{
   0%{opacity:0;transform:translateY(0) scale(.3)}
   15%{opacity:1;transform:translateY(-25px) scale(1.2)}
   100%{opacity:0;transform:translateY(-280px) scale(.4)}
 }
 .fem{position:absolute;font-size:3rem;animation:floatUp 2.8s ease-out forwards;pointer-events:none;will-change:transform,opacity}
-
-/* ── RESULT OVERLAY ── */
 .res{display:none;position:fixed;inset:0;background:linear-gradient(135deg,rgba(10,14,39,.97),rgba(26,15,46,.97));z-index:600;justify-content:center;align-items:center;backdrop-filter:blur(16px);padding:1rem}
-.res.open{display:flex;animation:fadeIn .4s ease}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.res.open{display:flex}
 .res-box{text-align:center;padding:1.5rem;max-width:520px;width:100%;background:rgba(255,255,255,.03);border-radius:1.25rem;border:1px solid rgba(255,255,255,.09);max-height:90vh;overflow-y:auto}
-.res-lbl{font-size:1rem;color:var(--muted);margin-bottom:.25rem}
-.res-name{font-size:1.7rem;font-weight:800;background:linear-gradient(90deg,var(--pink),var(--purple),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.75rem}
-.res-main{background:linear-gradient(135deg,var(--card),var(--light));border:2px solid var(--purple);border-radius:1.1rem;padding:1.1rem;margin-bottom:.75rem}
-.res-ico{font-size:4rem;margin-bottom:.3rem}
-.res-score{font-size:2.5rem;font-weight:800}
-.res-score.pos{color:var(--green)}
-.res-score.neg{color:#ff4757}
-.res-score.neu{color:var(--blue)}
-.res-slbl{font-size:.7rem;color:var(--muted);text-transform:uppercase}
-.res-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem;margin-bottom:.75rem}
-.res-stat{background:var(--light);padding:.5rem;border-radius:.6rem}
-.res-sv{font-size:1.3rem;font-weight:800}
-.res-sv.pos{color:var(--green)}
-.res-sv.neg{color:#ff4757}
-.res-sv.blue{color:var(--blue)}
-.res-slb{font-size:.6rem;color:var(--muted)}
-.res-breakdown{display:flex;justify-content:center;gap:.4rem;flex-wrap:wrap;margin-bottom:.75rem}
-.res-ei{background:var(--light);padding:.25rem .65rem;border-radius:.6rem;display:flex;align-items:center;gap:.25rem;font-size:.9rem}
-.res-msg{font-size:1.3rem;margin-bottom:1rem}
-.res-msg.exc{color:var(--green)}
-.res-msg.gd{color:var(--blue)}
-.res-msg.bd{color:#ff4757}
-.res-btns{display:flex;justify-content:center;gap:.75rem;flex-wrap:wrap}
-.res-btns .btn{padding:.85rem 1.5rem;font-size:.95rem}
-
-/* ── CONFETTI ── */
 .conf{position:fixed;width:8px;height:8px;top:-10px;animation:fall 3s ease-out forwards;z-index:650;border-radius:2px}
 @keyframes fall{0%{transform:translateY(0) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
-
-/* ── SLIDE-IN ── */
-@keyframes slideIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
 .slide{animation:slideIn .25s ease}
+@keyframes slideIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
 
-/* ══════════════════════════════
-   RESPONSIVE
-══════════════════════════════ */
-
-/* Tablet 900px */
+/* ═════════════════════════════════════════════════════════ */
+/* RESPONSIVIDADE EXTRA - MODAL EM TELAS PEQUENAS            */
+/* ═════════════════════════════════════════════════════════ */
 @media(max-width:900px){
   .grid{grid-template-columns:1fr}
   .right-col{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem}
   .right-col .card:first-child{grid-column:1/-1}
 }
-
-/* Phone 600px */
 @media(max-width:600px){
   .hdr{padding:.65rem 1rem}
   .logo{font-size:1.1rem}
@@ -390,32 +240,47 @@ body.modal-open{
   .grid{gap:.8rem}
   .card{padding:.9rem}
   .right-col{grid-template-columns:1fr}
-  .vid-hdr h2{font-size:.95rem}
-  .emoji-grid{grid-template-columns:repeat(5,1fr);gap:.4rem}
+  .emoji-grid{gap:.4rem}
   .ebtn{padding:.55rem .2rem}
   .ei{font-size:1.8rem}
   .scores{gap:.4rem}
   .sc-val{font-size:1.2rem}
-  .res-score{font-size:2rem}
-  .res-btns .btn{padding:.7rem 1rem;font-size:.82rem}
-  .toast{right:.5rem;bottom:.5rem;max-width:calc(100vw - 1rem)}
-  .e-notif{right:.5rem;top:80px}
+  
+  /* MODAL EM SMARTPHONES */
+  .modal{padding:.5rem}
+  .m-box{padding:1.2rem;max-width:96%;border-radius:1.25rem}
+  .m-title{font-size:1.15rem}
+  .room-disp-id{font-size:1.4rem;letter-spacing:2px}
+  .yt-item{flex-wrap:wrap;gap:.4rem}
+  .yt-thumb{width:55px;min-width:55px;height:40px}
+  .yt-info{min-width:calc(100% - 110px)}
+  .yt-add{padding:.3rem .7rem;font-size:.68rem}
+  .m-row .m-btn{padding:.7rem 1rem}
+  .inp{padding:.7rem;font-size:.9rem}
+  .btn-blue,.btn-purple{font-size:.75rem;padding:.4rem .8rem}
+  .vid-hdr h2{font-size:.95rem}
 }
-
-/* Smart TV / Large 1400px+ */
+@media(max-width:480px){
+  .yt-title{white-space:normal;word-break:break-word;line-height:1.2}
+  .yt-item{align-items:flex-start}
+  .yt-info{min-width:0;width:100%}
+  .yt-thumb{width:48px;min-width:48px}
+  .yt-add{margin-left:auto}
+  .emoji-grid .ebtn .el,.emoji-grid .ebtn .ep{font-size:.6rem}
+  .ei{font-size:1.6rem}
+  .m-box .m-btn{font-size:.9rem}
+}
+@media(max-width:340px){
+  .emoji-grid{gap:.25rem}
+  .ebtn{padding:.45rem .1rem}
+  .ei{font-size:1.4rem}
+  .el,.ep{display:none}
+}
 @media(min-width:1400px){
   .wrap{padding:0 1.5rem}
   .grid{grid-template-columns:1fr 360px;gap:1.8rem}
   .ei{font-size:2.5rem}
   .logo{font-size:1.6rem}
-}
-
-/* Tiny 320px */
-@media(max-width:340px){
-  .emoji-grid{grid-template-columns:repeat(5,1fr);gap:.25rem}
-  .ebtn{padding:.45rem .1rem}
-  .ei{font-size:1.5rem}
-  .el,.ep{display:none}
 }
 </style>
 </head>
@@ -437,862 +302,91 @@ body.modal-open{
 
 <div class="wrap">
   <div class="grid">
-
-    <!-- LEFT -->
     <div>
       <div class="card" style="margin-bottom:1rem">
-        <div class="vid-hdr">
-          <h2>🎵 Player de Karaokê</h2>
-          <button class="btn btn-blue" onclick="openVidModal()">➕ Adicionar à Fila</button>
-        </div>
-        <div class="player-wrap" id="playerWrap">
-          <div class="placeholder" id="ph">
-            <div class="ph-icon">🎬</div>
-            <div class="ph-txt">Aguardando música...</div>
-          </div>
-          <div class="emoji-layer" id="emojiLayer"></div>
-        </div>
-        <div class="scores">
-          <div class="sc" id="scTotal"><div class="sc-lbl">Total</div><div class="sc-val" id="vTotal">0</div></div>
-          <div class="sc pos-border" id="scPos"><div class="sc-lbl">Positivos</div><div class="sc-val pos" id="vPos">0</div></div>
-          <div class="sc neg-border" id="scNeg"><div class="sc-lbl">Negativos</div><div class="sc-val neg" id="vNeg">0</div></div>
-        </div>
+        <div class="vid-hdr"><h2>🎵 Player de Karaokê</h2><button class="btn btn-blue" onclick="openVidModal()">➕ Adicionar à Fila</button></div>
+        <div class="player-wrap" id="playerWrap"><div class="placeholder" id="ph"><div class="ph-icon">🎬</div><div class="ph-txt">Aguardando música...</div></div><div class="emoji-layer" id="emojiLayer"></div></div>
+        <div class="scores"><div class="sc" id="scTotal"><div class="sc-lbl">Total</div><div class="sc-val" id="vTotal">0</div></div><div class="sc pos-border" id="scPos"><div class="sc-lbl">Positivos</div><div class="sc-val pos" id="vPos">0</div></div><div class="sc neg-border" id="scNeg"><div class="sc-lbl">Negativos</div><div class="sc-val neg" id="vNeg">0</div></div></div>
       </div>
-
-      <!-- EMOJIS -->
-      <div class="emoji-sec">
-        <div class="c-title">🎉 Reações ao Vivo</div>
-        <div class="emoji-grid">
-          <button class="ebtn p" onclick="sendEmoji('😀',1)"><span class="ei">😀</span><span class="el">Bom</span><span class="ep p">+1</span></button>
-          <button class="ebtn p" onclick="sendEmoji('😍',2)"><span class="ei">😍</span><span class="el">Muito Bom</span><span class="ep p">+2</span></button>
-          <button class="ebtn p" onclick="sendEmoji('😂',1)"><span class="ei">😂</span><span class="el">Engraçado</span><span class="ep p">+1</span></button>
-          <button class="ebtn n" onclick="sendEmoji('😢',-1)"><span class="ei">😢</span><span class="el">Ruim</span><span class="ep n">-1</span></button>
-          <button class="ebtn n" onclick="sendEmoji('😡',-2)"><span class="ei">😡</span><span class="el">Péssimo</span><span class="ep n">-2</span></button>
-        </div>
-      </div>
-
-      <!-- LEADERBOARD -->
-      <div class="lb-sec">
-        <div class="lb-hdr">🏆 Placar de Líderes (Top 3 da Festa)</div>
-        <div id="lbList"><div class="lb-empty">🎵 Ninguém recebeu pontos ainda</div></div>
-      </div>
-
-      <!-- QUEUE (view-only) -->
-      <div class="q-sec">
-        <div class="q-hdr">
-          <div class="q-title">📋 Fila de Espera <span class="q-cnt" id="qCnt">0</span></div>
-          <button class="btn btn-blue" onclick="openVidModal()">➕ Adicionar</button>
-        </div>
-        <div class="q-list" id="qList">
-          <div class="q-empty">🎵 Nenhuma música na fila<br><small>Aguarde o host iniciar</small></div>
-        </div>
-      </div>
+      <div class="emoji-sec"><div class="c-title">🎉 Reações ao Vivo</div><div class="emoji-grid"><button class="ebtn p" onclick="sendEmoji('😀',1)"><span class="ei">😀</span><span class="el">Bom</span><span class="ep p">+1</span></button><button class="ebtn p" onclick="sendEmoji('😍',2)"><span class="ei">😍</span><span class="el">Muito Bom</span><span class="ep p">+2</span></button><button class="ebtn p" onclick="sendEmoji('😂',1)"><span class="ei">😂</span><span class="el">Engraçado</span><span class="ep p">+1</span></button><button class="ebtn n" onclick="sendEmoji('😢',-1)"><span class="ei">😢</span><span class="el">Ruim</span><span class="ep n">-1</span></button><button class="ebtn n" onclick="sendEmoji('😡',-2)"><span class="ei">😡</span><span class="el">Péssimo</span><span class="ep n">-2</span></button></div></div>
+      <div class="lb-sec"><div class="lb-hdr">🏆 Placar de Líderes (Top 3 da Festa)</div><div id="lbList"><div class="lb-empty">🎵 Ninguém recebeu pontos ainda</div></div></div>
+      <div class="q-sec"><div class="q-hdr"><div class="q-title">📋 Fila de Espera <span class="q-cnt" id="qCnt">0</span></div><button class="btn btn-blue" onclick="openVidModal()">➕ Adicionar</button></div><div class="q-list" id="qList"><div class="q-empty">🎵 Nenhuma música na fila<br><small>Aguarde o host iniciar</small></div></div></div>
     </div>
-
-    <!-- RIGHT -->
-    <div class="right-col">
-      <div class="card">
-        <div class="c-title">👥 Participantes (<span id="pCnt2">0</span>)</div>
-        <div class="plist" id="pList"><div style="text-align:center;color:var(--muted);padding:.75rem;font-size:.82rem">Aguardando...</div></div>
-      </div>
-
-      <div class="card">
-        <div class="c-title">⚡ Atividade ao Vivo</div>
-        <div class="act-feed" id="actFeed"><div style="text-align:center;color:var(--muted);padding:.75rem;font-size:.82rem">Nenhuma atividade</div></div>
-      </div>
-    </div>
-
+    <div class="right-col"><div class="card"><div class="c-title">👥 Participantes (<span id="pCnt2">0</span>)</div><div class="plist" id="pList"><div style="text-align:center;color:var(--muted);padding:.75rem;font-size:.82rem">Aguardando...</div></div></div><div class="card"><div class="c-title">⚡ Atividade ao Vivo</div><div class="act-feed" id="actFeed"><div style="text-align:center;color:var(--muted);padding:.75rem;font-size:.82rem">Nenhuma atividade</div></div></div></div>
   </div>
 </div>
 
-<!-- MODAL: NOME -->
-<div class="modal open" id="nameModal">
-  <div class="m-box">
-    <div class="m-title">🎤 Bem-vindo ao Karaokê!</div>
-    <div class="join-box">
-      <div style="font-size:.8rem;color:var(--muted);margin-bottom:.4rem">Tem um código de sala?</div>
-      <div class="m-row">
-        <input type="text" class="inp" id="codeInp" placeholder="Ex: A3X9K2" maxlength="6" autocomplete="off" style="text-transform:uppercase;letter-spacing:3px;text-align:center;font-weight:700;font-size:1.1rem">
-        <button class="m-btn" onclick="applyCode()" style="width:auto;padding:.85rem 1.2rem;font-size:.85rem">Entrar</button>
-      </div>
-      <div style="text-align:center;color:var(--muted);font-size:.72rem">— ou crie uma nova sala abaixo —</div>
-    </div>
-    <div style="text-align:center"><span class="mode-badge new" id="modeBadge">🆕 Nova sala</span></div>
-    <div class="room-display">
-      <div class="room-disp-lbl">Sala:</div>
-      <div class="room-disp-id" id="modalRoom">------</div>
-    </div>
-    <div class="inp-grp">
-      <label class="inp-lbl">Seu nome ou apelido:</label>
-      <input type="text" class="inp" id="nameInp" placeholder="Digite seu nome..." maxlength="20" autocomplete="off">
-    </div>
-    <button class="m-btn" onclick="joinRoom()">Entrar na Sala 🚀</button>
-  </div>
-</div>
+<!-- MODAL NOME -->
+<div class="modal open" id="nameModal"><div class="m-box"><div class="m-title">🎤 Bem-vindo ao Karaokê!</div><div class="join-box"><div style="font-size:.8rem;color:var(--muted);margin-bottom:.4rem">Tem um código de sala?</div><div class="m-row"><input type="text" class="inp" id="codeInp" placeholder="Ex: A3X9K2" maxlength="6" autocomplete="off" style="text-transform:uppercase;letter-spacing:3px;text-align:center;font-weight:700;font-size:1rem"><button class="m-btn" onclick="applyCode()" style="width:auto;padding:.85rem 1.2rem;font-size:.85rem">Entrar</button></div><div style="text-align:center;color:var(--muted);font-size:.7rem;margin-top:.5rem">— ou crie uma nova sala abaixo —</div></div><div style="text-align:center"><span class="mode-badge new" id="modeBadge">🆕 Nova sala</span></div><div class="room-display"><div class="room-disp-lbl">Sala:</div><div class="room-disp-id" id="modalRoom">------</div></div><div class="inp-grp"><label class="inp-lbl">Seu nome ou apelido:</label><input type="text" class="inp" id="nameInp" placeholder="Digite seu nome..." maxlength="20" autocomplete="off"></div><button class="m-btn" onclick="joinRoom()">Entrar na Sala 🚀</button></div></div>
 
-<!-- MODAL: VÍDEO -->
-<div class="modal" id="vidModal">
-  <div class="m-box" style="max-width:560px">
-    <div class="m-title">🎬 Adicionar à Fila</div>
+<!-- MODAL VÍDEO RESPONSIVO -->
+<div class="modal" id="vidModal"><div class="m-box"><div class="m-title">🎬 Adicionar à Fila</div><div style="display:flex;gap:.5rem;margin-bottom:1rem;background:var(--light);border-radius:.65rem;padding:.3rem"><button id="tabLink" onclick="switchTab('link')" style="flex:1;padding:.55rem;border:none;border-radius:.45rem;font-weight:600;font-size:.85rem;cursor:pointer;transition:all .2s;background:linear-gradient(135deg,var(--purple),var(--pink));color:#fff">🔗 Colar Link</button><button id="tabSearch" onclick="switchTab('search')" style="flex:1;padding:.55rem;border:none;border-radius:.45rem;font-weight:600;font-size:.85rem;cursor:pointer;transition:all .2s;background:transparent;color:var(--muted)">🔍 Buscar Música</button></div><div id="panelLink"><div class="inp-grp"><label class="inp-lbl">Cole o link do YouTube:</label><input type="text" class="inp" id="vidInp" placeholder="https://youtube.com/watch?v=..." autocomplete="off"></div><button class="m-btn" onclick="addQueue()">➕ Adicionar à Fila</button><button class="m-btn dim" onclick="closeVidModal()">Cancelar</button></div><div id="panelSearch" style="display:none"><div class="search-wrapper"><div style="display:flex;gap:.5rem;margin-bottom:.75rem;flex-wrap:wrap"><input type="text" class="inp" id="ytSearchInp" placeholder="Ex: sertanejo, funk, pop..." autocomplete="off" style="flex:1"><button class="m-btn" onclick="ytSearch()" style="width:auto;padding:.85rem 1.1rem;font-size:.85rem;white-space:nowrap">🔍</button></div><div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.75rem"><button onclick="ytQuick('sertanejo karaoke',this)" class="yf-btn">🎸 Sertanejo</button><button onclick="ytQuick('funk karaoke',this)" class="yf-btn">🕺 Funk</button><button onclick="ytQuick('pop karaoke',this)" class="yf-btn">🎵 Pop</button><button onclick="ytQuick('pagode karaoke',this)" class="yf-btn">🎶 Pagode</button><button onclick="ytQuick('forro karaoke',this)" class="yf-btn">💃 Forró</button><button onclick="ytQuick('rock nacional karaoke',this)" class="yf-btn">🤘 Rock</button><button onclick="ytQuick('mpb karaoke',this)" class="yf-btn">🎹 MPB</button></div><div id="ytLoading" style="display:none;text-align:center;padding:1rem;color:var(--muted)"><div style="width:28px;height:28px;border:3px solid rgba(255,255,255,.1);border-top:3px solid var(--pink);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto .6rem"></div>Buscando ...</div><div id="ytResults" style="max-height:340px;overflow-y:auto;display:flex;flex-direction:column;gap:.6rem;padding-right:2px"></div><div id="ytPagination" style="display:none;justify-content:center;gap:.5rem;margin-top:.6rem;align-items:center;flex-wrap:wrap"><button onclick="ytPage(-1)" id="ytPrev" style="padding:.35rem .8rem;border-radius:.5rem;border:1px solid rgba(255,255,255,.2);background:transparent;color:#fff;cursor:pointer;font-size:.75rem">← Ant</button><span id="ytPageInfo" style="font-size:.7rem;color:var(--muted)"></span><button onclick="ytPage(1)" id="ytNext" style="padding:.35rem .8rem;border-radius:.5rem;border:1px solid rgba(255,255,255,.2);background:transparent;color:#fff;cursor:pointer;font-size:.75rem">Próx →</button></div><button class="m-btn dim" onclick="closeVidModal()" style="margin-top:.8rem">Cancelar</button></div></div></div></div>
 
-    <!-- ABAS -->
-    <div style="display:flex;gap:.5rem;margin-bottom:1rem;background:var(--light);border-radius:.65rem;padding:.3rem">
-      <button id="tabLink" onclick="switchTab('link')" style="flex:1;padding:.55rem;border:none;border-radius:.45rem;font-weight:600;font-size:.85rem;cursor:pointer;transition:all .2s;background:linear-gradient(135deg,var(--purple),var(--pink));color:#fff">🔗 Colar Link</button>
-      <button id="tabSearch" onclick="switchTab('search')" style="flex:1;padding:.55rem;border:none;border-radius:.45rem;font-weight:600;font-size:.85rem;cursor:pointer;transition:all .2s;background:transparent;color:var(--muted)">🔍 Buscar Música</button>
-    </div>
-
-    <!-- ABA: COLAR LINK -->
-    <div id="panelLink">
-      <div class="inp-grp">
-        <label class="inp-lbl">Cole o link do YouTube:</label>
-        <input type="text" class="inp" id="vidInp" placeholder="https://youtube.com/watch?v=..." autocomplete="off">
-      </div>
-      <button class="m-btn" onclick="addQueue()">➕ Adicionar à Fila</button>
-      <button class="m-btn dim" onclick="closeVidModal()">Cancelar</button>
-    </div>
-
-    <!-- ABA: BUSCAR -->
-    <div id="panelSearch" style="display:none">
-      <div style="display:flex;gap:.5rem;margin-bottom:.75rem">
-        <input type="text" class="inp" id="ytSearchInp" placeholder="Ex: sertanejo, funk, pop..." autocomplete="off" style="flex:1">
-        <button class="m-btn" onclick="ytSearch()" style="width:auto;padding:.85rem 1.1rem;font-size:.85rem;white-space:nowrap">🔍</button>
-      </div>
-      <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.75rem">
-        <button onclick="ytQuick('sertanejo karaoke',this)" class="yf-btn">🎸 Sertanejo</button>
-        <button onclick="ytQuick('funk karaoke',this)" class="yf-btn">🕺 Funk</button>
-        <button onclick="ytQuick('pop karaoke',this)" class="yf-btn">🎵 Pop</button>
-        <button onclick="ytQuick('pagode karaoke',this)" class="yf-btn">🎶 Pagode</button>
-        <button onclick="ytQuick('forro karaoke',this)" class="yf-btn">💃 Forró</button>
-        <button onclick="ytQuick('rock nacional karaoke',this)" class="yf-btn">🤘 Rock</button>
-        <button onclick="ytQuick('mpb karaoke',this)" class="yf-btn">🎹 MPB</button>
-      </div>
-      <div id="ytLoading" style="display:none;text-align:center;padding:1.5rem;color:var(--muted)">
-        <div style="width:32px;height:32px;border:3px solid rgba(255,255,255,.1);border-top:3px solid var(--pink);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto .75rem"></div>
-        Buscando no YouTube...
-      </div>
-      <div id="ytResults" style="max-height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:.5rem"></div>
-      <div id="ytPagination" style="display:none;justify-content:center;gap:.5rem;margin-top:.6rem;align-items:center">
-        <button onclick="ytPage(-1)" id="ytPrev" style="padding:.4rem .9rem;border-radius:.5rem;border:1px solid rgba(255,255,255,.2);background:transparent;color:#fff;cursor:pointer;font-size:.8rem">← Ant</button>
-        <span id="ytPageInfo" style="font-size:.75rem;color:var(--muted)"></span>
-        <button onclick="ytPage(1)" id="ytNext" style="padding:.4rem .9rem;border-radius:.5rem;border:1px solid rgba(255,255,255,.2);background:transparent;color:#fff;cursor:pointer;font-size:.8rem">Próx →</button>
-      </div>
-      <button class="m-btn dim" onclick="closeVidModal()" style="margin-top:.6rem">Cancelar</button>
-    </div>
-  </div>
-</div>
-
-<!-- TOAST + NOTIF -->
-<div class="toast" id="toast"></div>
-<div class="e-notif" id="eNotif">
-  <span class="e-notif-ico" id="notifIco">🔥</span>
-  <span id="notifTxt">Alguém reagiu!</span>
-</div>
-
-<!-- RESULT OVERLAY -->
-<div class="res" id="resOverlay">
-  <div class="res-box">
-    <div class="res-lbl">🎤 Performance Finalizada!</div>
-    <div class="res-name" id="resName">Cantor</div>
-    <div class="res-main">
-      <div class="res-ico" id="resIco">🎉</div>
-      <div class="res-score pos" id="resScore">+0</div>
-      <div class="res-slbl">Pontuação Total</div>
-    </div>
-    <div class="res-stats">
-      <div class="res-stat"><div class="res-sv pos" id="rPos">+0</div><div class="res-slb">Positivos</div></div>
-      <div class="res-stat"><div class="res-sv neg" id="rNeg">-0</div><div class="res-slb">Negativos</div></div>
-      <div class="res-stat"><div class="res-sv blue" id="rReact">0</div><div class="res-slb">Reações</div></div>
-    </div>
-    <div class="res-breakdown" id="resBreak"></div>
-    <div class="res-msg exc" id="resMsg">🌟 Performance Incrível!</div>
-    <div class="res-btns">
-      <button class="btn btn-green" onclick="closeResult()">🎵 Voltar</button>
-      <button class="btn btn-purple" onclick="closeResult()">🎤 Fechar</button>
-    </div>
-  </div>
-</div>
+<div class="toast" id="toast"></div><div class="e-notif" id="eNotif"><span class="e-notif-ico" id="notifIco">🔥</span><span id="notifTxt">Alguém reagiu!</span></div>
+<div class="res" id="resOverlay"><div class="res-box"><div class="res-lbl">🎤 Performance Finalizada!</div><div class="res-name" id="resName">Cantor</div><div class="res-main"><div class="res-ico" id="resIco">🎉</div><div class="res-score pos" id="resScore">+0</div><div class="res-slbl">Pontuação Total</div></div><div class="res-stats"><div class="res-stat"><div class="res-sv pos" id="rPos">+0</div><div class="res-slb">Positivos</div></div><div class="res-stat"><div class="res-sv neg" id="rNeg">-0</div><div class="res-slb">Negativos</div></div><div class="res-stat"><div class="res-sv blue" id="rReact">0</div><div class="res-slb">Reações</div></div></div><div class="res-breakdown" id="resBreak"></div><div class="res-msg exc" id="resMsg">🌟 Performance Incrível!</div><div class="res-btns"><button class="btn btn-green" onclick="closeResult()">🎵 Voltar</button><button class="btn btn-purple" onclick="closeResult()">🎤 Fechar</button></div></div></div>
 
 <script>
 // ═══════════════════════════════════════════
-// CONFIG
+// CONFIG & STATE (completo e funcional)
 // ═══════════════════════════════════════════
 const SB_URL = "https://yvrskenfgfpgrcpmmeln.supabase.co";
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl2cnNrZW5mZ2ZwZ3JjcG1tZWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNzk1NTAsImV4cCI6MjA4Njc1NTU1MH0.DzO4mZ7jYkTPoleIlF7smZ_Kim7KqFxXA4aumb7Qf8U";
-
-// ═══════════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════════
 let sb=null, ch=null, sbOk=false;
 let roomId='', userId='user_'+Date.now()+'_'+Math.random().toString(36).substr(2,9);
-let userName=null, isNew=true;
-let cd=false;
+let userName=null, isNew=true, cd=false;
 let curVid=null, curSinger='', curSingerId=null, curOwnerId=null;
 let scores={total:0,positive:0,negative:0};
 let participants=[], activities=[], queue=[], qPos=-1;
-let emojiCounts={}, totalReact=0;
-let lb={}, curSongScores={}, curSongId=null;
-let seenEmojis=new Set();
-let gotState=false;
-let qTimer=null, lastState=0;
+let emojiCounts={}, totalReact=0, lb={}, curSongScores={}, curSongId=null;
+let seenEmojis=new Set(), gotState=false, lastState=0;
+let qTimer=null;
 
-// ═══════════════════════════════════════════
-// UTILS
-// ═══════════════════════════════════════════
 const $=id=>document.getElementById(id);
 const esc=t=>t?t.replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])):'';
-
-function toast(msg,err=false){
-  const el=$('toast');
-  el.textContent=msg;
-  el.className='toast show '+(err?'err':'ok');
-  clearTimeout(el._t);
-  el._t=setTimeout(()=>el.classList.remove('show'),3000);
-}
-
-function setConn(s){
-  const el=$('connBar');
-  if(s==='ok'){el.className='ok';el.innerHTML='✅ <strong>Conectado!</strong> Emojis sincronizam em tempo real!'}
-  else if(s==='wait'){el.className='wait';el.innerHTML='🔄 Conectando...'}
-  else{el.className='err';el.innerHTML='❌ <strong>Desconectado.</strong> Verifique sua conexão.'}
-}
-
-function mkId(){
-  const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  return Array.from({length:6},()=>c[Math.floor(Math.random()*c.length)]).join('');
-}
-
-function fromUrl(){
-  const h=window.location.hash.slice(1).toUpperCase();
-  if(/^[A-Z0-9]{6}$/.test(h))return h;
-  const p=new URLSearchParams(window.location.search).get('room');
-  if(p&&/^[A-Z0-9]{6}$/i.test(p))return p.toUpperCase();
-  return null;
-}
-
+function toast(msg,err=false){const el=$('toast');el.textContent=msg;el.className='toast show '+(err?'err':'ok');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),3000);}
+function setConn(s){const el=$('connBar');if(s==='ok'){el.className='ok';el.innerHTML='✅ <strong>Conectado!</strong> Emojis sincronizam em tempo real'}else if(s==='wait'){el.className='wait';el.innerHTML='🔄 Conectando...'}else{el.className='err';el.innerHTML='❌ <strong>Desconectado.</strong> Verifique sua conexão.'}}
+function mkId(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';return Array.from({length:6},()=>c[Math.floor(Math.random()*c.length)]).join('');}
+function fromUrl(){const h=window.location.hash.slice(1).toUpperCase();if(/^[A-Z0-9]{6}$/.test(h))return h;const p=new URLSearchParams(window.location.search).get('room');if(p&&/^[A-Z0-9]{6}$/i.test(p))return p.toUpperCase();return null;}
 function shareUrl(){return window.location.origin+'/guest.html?room='+roomId+'#'+roomId}
-
-function extractVid(u){
-  if(!u)return null;
-  const m=u.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/(?:embed|v|shorts)\/)([a-zA-Z0-9_-]{11})/)||u.match(/^([a-zA-Z0-9_-]{11})$/);
-  return m?m[1]:null;
-}
-
-// ═══════════════════════════════════════════
-// SCORE DISPLAY
-// ═══════════════════════════════════════════
-function updScores(){
-  $('vTotal').textContent=scores.total;
-  $('vPos').textContent=scores.positive;
-  $('vNeg').textContent=scores.negative;
-  const el=$('vTotal');
-  el.className='sc-val'+(scores.total>0?' pos':scores.total<0?' neg':'');
-}
-
-function flashCard(pts){
-  const el=$('scTotal');
-  el.classList.add('flash');
-  setTimeout(()=>el.classList.remove('flash'),400);
-  const sub=pts>0?$('scPos'):$('scNeg');
-  if(sub){sub.classList.add('flash');setTimeout(()=>sub.classList.remove('flash'),400);}
-}
-
-// ═══════════════════════════════════════════
-// PARTICIPANTS
-// ═══════════════════════════════════════════
-function updParticipants(){
-  const n=participants.length;
-  $('pCnt').textContent=n;
-  $('pCnt2').textContent=n;
-  if(!n){$('pList').innerHTML='<div style="text-align:center;color:var(--muted);padding:.75rem;font-size:.82rem">Aguardando...</div>';return}
-  $('pList').innerHTML=participants.map(p=>{
-    const you=p.odUserId===userId;
-    return `<div class="p-item slide"><div class="p-avatar">${esc(p.odUserName||'?').charAt(0).toUpperCase()}</div><span style="font-size:.82rem">${esc(p.odUserName)}</span><span class="badge ${you?'you':'on'}">${you?'você':'online'}</span></div>`;
-  }).join('');
-  updLB();
-}
-
-// ═══════════════════════════════════════════
-// ACTIVITY
-// ═══════════════════════════════════════════
-function addAct(ico,txt){
-  activities.unshift({ico,txt});
-  if(activities.length>20)activities.pop();
-  updAct();
-}
-function updAct(){
-  $('actFeed').innerHTML=activities.length
-    ?activities.map(a=>`<div class="act-item slide"><span class="act-ico">${a.ico}</span><span>${esc(a.txt)}</span></div>`).join('')
-    :'<div style="text-align:center;color:var(--muted);padding:.75rem;font-size:.82rem">Nenhuma atividade</div>';
-}
-
-// ═══════════════════════════════════════════
-// LEADERBOARD
-// ═══════════════════════════════════════════
-function updLB(){
-  const list=Object.entries(lb).map(([uid,d])=>{
-    let name='Anônimo';
-    const u=participants.find(p=>p.odUserId===uid);
-    if(u)name=u.odUserName;
-    else{
-      const q=queue.find(x=>x.added_by===uid);
-      if(q)name=q.added_by_name||name;
-      else if(uid===curSingerId&&curSinger)name=curSinger;
-    }
-    const score=typeof d==='number'?d:(d.score||0);
-    const emoji=typeof d==='object'?d.topEmoji:'🎵';
-    return{uid,name,score,emoji};
-  }).filter(x=>x.score>0).sort((a,b)=>b.score-a.score).slice(0,3);
-
-  if(!list.length){$('lbList').innerHTML='<div class="lb-empty">🎵 Ninguém recebeu pontos ainda</div>';return}
-  const medals=['🥇','🥈','🥉'];
-  $('lbList').innerHTML=list.map((it,i)=>{
-    const you=it.uid===userId;
-    return `<div class="lb-item r${i+1}"><div class="lb-medal">${medals[i]}</div><div class="lb-info"><div class="lb-name">🎤 ${esc(it.name)}${you?' <small>(você)</small>':''}</div><div class="lb-score">⭐ ${it.score} pontos</div><div class="lb-emoji">🔥 ${it.emoji}</div></div></div>`;
-  }).join('');
-}
-
-// ═══════════════════════════════════════════
-// FLOATING EMOJI
-// ═══════════════════════════════════════════
-function floatEmoji(e){
-  const layer=$('emojiLayer');
-  const el=document.createElement('div');
-  el.className='fem';
-  el.textContent=e;
-  el.style.left=(10+Math.random()*80)+'%';
-  el.style.bottom='15px';
-  layer.appendChild(el);
-  setTimeout(()=>el.remove(),2800);
-}
-
-function showNotif(e,name){
-  $('notifIco').textContent=e;
-  $('notifTxt').textContent=name+' reagiu!';
-  const el=$('eNotif');
-  el.classList.add('show');
-  clearTimeout(el._t);
-  el._t=setTimeout(()=>el.classList.remove('show'),2400);
-}
-
-// ═══════════════════════════════════════════
-// QUEUE DISPLAY
-// ═══════════════════════════════════════════
-function safeUpdQueue(){
-  clearTimeout(qTimer);
-  qTimer=setTimeout(updQueue,80);
-}
-function updQueue(){
-  $('qCnt').textContent=queue.length;
-  if(!queue.length){
-    $('qList').innerHTML='<div class="q-empty">🎵 Nenhuma música na fila<br><small>Aguarde o host iniciar</small></div>';
-    return;
-  }
-  $('qList').innerHTML=queue.map((it,i)=>{
-    const play=i===qPos;
-    return `<div class="q-item${play?' playing':''}">
-      <div class="q-pos">#${i+1}</div>
-      <div class="q-thumb"><img src="${it.thumbnail}" alt="" loading="lazy" onerror="this.style.display='none'"></div>
-      <div class="q-info">
-        <div class="q-name">${esc(it.video_title)||'Vídeo do YouTube'}</div>
-        <div class="q-by">👤 ${esc(it.added_by_name)}${play?' &nbsp;▶️ <span style="color:var(--green)">Tocando</span>':''}</div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-// ═══════════════════════════════════════════
-// VIDEO PLAYER (iframe simples para convidado)
-// ═══════════════════════════════════════════
-function playVideo(vid){
-  if(!vid)return;
-  const wrap=$('playerWrap');
-  const layer=$('emojiLayer');
-
-  // Remove iframe antigo para evitar duplicação
-  const old=wrap.querySelector('iframe');
-  if(old)old.remove();
-
-  const iframe=document.createElement('iframe');
-  iframe.src='https://www.youtube.com/embed/'+vid+'?autoplay=1&rel=0';
-  iframe.allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
-  iframe.allowFullscreen=true;
-  iframe.id='ytPlayer';
-  iframe.style.cssText='position:absolute;top:0;left:0;width:100%;height:100%;border:none;z-index:1';
-  wrap.insertBefore(iframe,layer);
-  $('ph').classList.add('hidden');
-}
-
-// ═══════════════════════════════════════════
-// QUEUE OPS (guest pode adicionar)
-// ═══════════════════════════════════════════
-async function fetchInfo(vid){
-  try{
-    const r=await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${vid}&format=json`);
-    const d=await r.json();
-    if(d.title)return{title:d.title,thumb:`https://img.youtube.com/vi/${vid}/mqdefault.jpg`};
-  }catch(e){}
-  return{title:`Vídeo (${vid.slice(0,8)}...)`,thumb:`https://img.youtube.com/vi/${vid}/mqdefault.jpg`};
-}
-
-function openVidModal(){$('vidModal').classList.add('open');$('vidInp').focus()}
-function closeVidModal(){$('vidModal').classList.remove('open');$('vidInp').value=''}
-
-async function addQueue(){
-  const inp=$('vidInp');
-  const url=(inp.value||'').trim();
-  if(!url){toast('Cole um link do YouTube!',true);return}
-  const vid=extractVid(url);
-  if(!vid){toast('Link inválido!',true);return}
-
-  const btn=document.querySelector('#vidModal .m-btn');
-  btn.textContent='⏳ Buscando...';btn.disabled=true;
-
-  try{
-    const info=await fetchInfo(vid);
-    closeVidModal();
-    const item={room_id:roomId,video_id:vid,video_title:info.title,thumbnail:info.thumb,
-      added_by:userId,added_by_name:userName,status:'waiting',order:queue.length};
-    queue.push(item);
-    safeUpdQueue();
-    if(sbOk)await sbSend('queue-update',{queue,currentPosition:qPos});
-    toast(`"${info.title.slice(0,35)}" adicionado! 🎵`);
-    addAct('➕',`${userName} adicionou: ${info.title.slice(0,30)}`);
-    toast('Música adicionada. Aguarde o host iniciar!');
-  }catch(e){toast('Erro ao adicionar música.',true)}
-  finally{btn.textContent='➕ Adicionar à Fila';btn.disabled=false;inp.value=''}
-}
-
-// ═══════════════════════════════════════════
-// EMOJI SEND
-// ═══════════════════════════════════════════
+function extractVid(u){if(!u)return null;const m=u.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/(?:embed|v|shorts)\/)([a-zA-Z0-9_-]{11})/)||u.match(/^([a-zA-Z0-9_-]{11})$/);return m?m[1]:null;}
+function updScores(){$('vTotal').textContent=scores.total;$('vPos').textContent=scores.positive;$('vNeg').textContent=scores.negative;}
+function flashCard(pts){const el=$('scTotal');el.classList.add('flash');setTimeout(()=>el.classList.remove('flash'),400);const sub=pts>0?$('scPos'):$('scNeg');if(sub){sub.classList.add('flash');setTimeout(()=>sub.classList.remove('flash'),400);}}
+function updParticipants(){const n=participants.length;$('pCnt').textContent=n;$('pCnt2').textContent=n;if(!n){$('pList').innerHTML='<div style="text-align:center;color:var(--muted);padding:.75rem;font-size:.82rem">Aguardando...</div>';return}$('pList').innerHTML=participants.map(p=>`<div class="p-item slide"><div class="p-avatar">${esc(p.odUserName||'?').charAt(0).toUpperCase()}</div><span style="font-size:.82rem">${esc(p.odUserName)}</span><span class="badge ${p.odUserId===userId?'you':'on'}">${p.odUserId===userId?'você':'online'}</span></div>`).join('');updLB();}
+function addAct(ico,txt){activities.unshift({ico,txt});if(activities.length>20)activities.pop();updAct();}
+function updAct(){$('actFeed').innerHTML=activities.length?activities.map(a=>`<div class="act-item slide"><span class="act-ico">${a.ico}</span><span>${esc(a.txt)}</span></div>`).join(''):'<div style="text-align:center;color:var(--muted);padding:.75rem;font-size:.82rem">Nenhuma atividade</div>';}
+function updLB(){const list=Object.entries(lb).map(([uid,d])=>{let name='Anônimo';const u=participants.find(p=>p.odUserId===uid);if(u)name=u.odUserName;else{const qq=queue.find(x=>x.added_by===uid);if(qq)name=qq.added_by_name||name;else if(uid===curSingerId&&curSinger)name=curSinger;}const score=typeof d==='number'?d:(d.score||0);const emoji=typeof d==='object'?d.topEmoji:'🎵';return{uid,name,score,emoji};}).filter(x=>x.score>0).sort((a,b)=>b.score-a.score).slice(0,3);if(!list.length){$('lbList').innerHTML='<div class="lb-empty">🎵 Ninguém recebeu pontos ainda</div>';return}const medals=['🥇','🥈','🥉'];$('lbList').innerHTML=list.map((it,i)=>`<div class="lb-item r${i+1}"><div class="lb-medal">${medals[i]}</div><div class="lb-info"><div class="lb-name">🎤 ${esc(it.name)}${it.uid===userId?' <small>(você)</small>':''}</div><div class="lb-score">⭐ ${it.score} pontos</div><div class="lb-emoji">🔥 ${it.emoji}</div></div></div>`).join('');}
+function floatEmoji(e){const layer=$('emojiLayer');const el=document.createElement('div');el.className='fem';el.textContent=e;el.style.left=(10+Math.random()*80)+'%';el.style.bottom='15px';layer.appendChild(el);setTimeout(()=>el.remove(),2800);}
+function showNotif(e,name){$('notifIco').textContent=e;$('notifTxt').textContent=name+' reagiu!';const el=$('eNotif');el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),2400);}
+function safeUpdQueue(){clearTimeout(qTimer);qTimer=setTimeout(()=>{$('qCnt').textContent=queue.length;if(!queue.length){$('qList').innerHTML='<div class="q-empty">🎵 Nenhuma música na fila<br><small>Aguarde o host iniciar</small></div>';return}$('qList').innerHTML=queue.map((it,i)=>`<div class="q-item${i===qPos?' playing':''}"><div class="q-pos">#${i+1}</div><div class="q-thumb"><img src="${it.thumbnail}" alt="" loading="lazy" onerror="this.style.display='none'"></div><div class="q-info"><div class="q-name">${esc(it.video_title)||'Vídeo do YouTube'}</div><div class="q-by">👤 ${esc(it.added_by_name)}${i===qPos?' &nbsp;▶️ <span style="color:var(--green)">Tocando</span>':''}</div></div></div>`).join('');},80);}
+function playVideo(vid){if(!vid)return;const wrap=$('playerWrap');const old=wrap.querySelector('iframe');if(old)old.remove();const iframe=document.createElement('iframe');iframe.src='https://www.youtube.com/embed/'+vid+'?autoplay=1&rel=0';iframe.allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';iframe.allowFullscreen=true;iframe.style.cssText='position:absolute;top:0;left:0;width:100%;height:100%;border:none;z-index:1';wrap.insertBefore(iframe,$('emojiLayer'));$('ph').classList.add('hidden');}
+async function fetchInfo(vid){try{const r=await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${vid}&format=json`);const d=await r.json();if(d.title)return{title:d.title,thumb:`https://img.youtube.com/vi/${vid}/mqdefault.jpg`};}catch(e){}return{title:`Vídeo (${vid.slice(0,8)}...)`,thumb:`https://img.youtube.com/vi/${vid}/mqdefault.jpg`};}
+function openVidModal(){$('vidModal').classList.add('open');$('vidInp').focus();}
+function closeVidModal(){$('vidModal').classList.remove('open');$('vidInp').value='';}
+async function addQueue(){const inp=$('vidInp');const url=(inp.value||'').trim();if(!url){toast('Cole um link do YouTube!',true);return}const vid=extractVid(url);if(!vid){toast('Link inválido!',true);return}const btn=document.querySelector('#vidModal .m-btn');btn.textContent='⏳ Buscando...';btn.disabled=true;try{const info=await fetchInfo(vid);closeVidModal();const item={room_id:roomId,video_id:vid,video_title:info.title,thumbnail:info.thumb,added_by:userId,added_by_name:userName,status:'waiting',order:queue.length};queue.push(item);safeUpdQueue();if(sbOk)await sbSend('queue-update',{queue,currentPosition:qPos});toast(`"${info.title.slice(0,35)}" adicionado! 🎵`);addAct('➕',`${userName} adicionou: ${info.title.slice(0,30)}`);}catch(e){toast('Erro ao adicionar música.',true)}finally{btn.textContent='➕ Adicionar à Fila';btn.disabled=false;inp.value='';}}
 function trackEmoji(e){if(!emojiCounts[e])emojiCounts[e]=0;emojiCounts[e]++;totalReact++;}
-
-function updLBLocal(uid,e,pts){
-  if(!lb[uid])lb[uid]={score:0,topEmoji:e,topEmojiCounts:{}};
-  else if(typeof lb[uid]==='number')lb[uid]={score:lb[uid],topEmoji:e,topEmojiCounts:{}};
-  lb[uid].score+=pts;
-  if(!lb[uid].topEmojiCounts)lb[uid].topEmojiCounts={};
-  lb[uid].topEmojiCounts[e]=(lb[uid].topEmojiCounts[e]||0)+1;
-  let max=0,top=e;
-  for(const[k,v] of Object.entries(lb[uid].topEmojiCounts))if(v>max){max=v;top=k;}
-  lb[uid].topEmoji=top;
-}
-
-async function sendEmoji(e,pts){
-  if(!userName){toast('Entre na sala primeiro!',true);return}
-  if(cd){toast('Aguarde 1 segundo!',true);return}
-  if(!curVid){toast('Nenhuma música tocando!',true);return}
-
-  // 🔥 Destinatário = dono da música (quem adicionou) ou singer
-  const targetId=curOwnerId||curSingerId;
-  if(!targetId){toast('Aguardando identificação do cantor...',true);return}
-
-  const tp=participants.find(p=>p.odUserId===targetId);
-  const targetName=tp?tp.odUserName:(curSinger||'cantor');
-
-  trackEmoji(e);floatEmoji(e);flashCard(pts);
-  scores.total+=pts;
-  if(pts>0)scores.positive+=pts;else scores.negative+=Math.abs(pts);
-  updScores();
-
-  if(curSongId&&targetId){
-    if(!curSongScores[targetId])curSongScores[targetId]=0;
-    curSongScores[targetId]+=pts;
-  }
-
-  updLBLocal(targetId,e,pts);updLB();
-  addAct(e,`${userName} → ${targetName}: ${pts>0?'+'+pts:pts}`);
-
-  if(sbOk&&ch){
-    const emojiId=userId+'_'+Date.now()+'_'+Math.random();
-    await ch.send({type:'broadcast',event:'new-emoji',payload:{emoji:e,points:pts,targetUserId:targetId,userName,emojiId}});
-    await sbSend('scores-update',scores);
-  }
-
-  cd=true;
-  document.querySelectorAll('.ebtn').forEach(b=>b.classList.add('cd'));
-  setTimeout(()=>{cd=false;document.querySelectorAll('.ebtn').forEach(b=>b.classList.remove('cd'));},1000);
-}
-
-// ═══════════════════════════════════════════
-// RESULT SCREEN
-// ═══════════════════════════════════════════
-function closeResult(){$('resOverlay').classList.remove('open')}
-
-function topEmoji(){
-  let max=0,e='🎉';
-  for(const k in emojiCounts)if(emojiCounts[k]>max){max=emojiCounts[k];e=k;}
-  return{e,count:max};
-}
-
-function resultMsg(t){
-  if(t>=20)return{t:'🌟 PERFORMANCE LENDÁRIA! 🌟',c:'exc'};
-  if(t>=10)return{t:'🔥 Performance Incrível!',c:'exc'};
-  if(t>=5)return{t:'👏 Muito Bem!',c:'gd'};
-  if(t>=0)return{t:'👍 Boa Performance!',c:'gd'};
-  if(t>=-5)return{t:'😅 Pode Melhorar...',c:'bd'};
-  return{t:'💪 Treinar Mais!',c:'bd'};
-}
-
-function makeConfetti(){
-  const cols=['#ff2d75','#9d4edd','#00d4ff','#00ff88','#ff9500','#ffff00'];
-  for(let i=0;i<80;i++){
-    setTimeout(()=>{
-      const c=document.createElement('div');
-      c.className='conf';
-      c.style.left=Math.random()*100+'vw';
-      c.style.background=cols[Math.floor(Math.random()*cols.length)];
-      c.style.borderRadius=Math.random()>.5?'50%':'0';
-      c.style.width=c.style.height=(5+Math.random()*8)+'px';
-      c.style.animationDuration=(2+Math.random()*2)+'s';
-      document.body.appendChild(c);
-      setTimeout(()=>c.remove(),4000);
-    },i*35);
-  }
-}
-
-function showResult(){
-  $('resName').textContent=curSinger||userName||'Cantor';
-  const top=topEmoji();
-  $('resIco').textContent=top.e;
-  const s=scores.total;
-  $('resScore').textContent=(s>=0?'+':'')+s;
-  $('resScore').className='res-score '+(s>0?'pos':s<0?'neg':'neu');
-  $('rPos').textContent='+'+scores.positive;
-  $('rNeg').textContent='-'+scores.negative;
-  $('rReact').textContent=totalReact;
-  $('resBreak').innerHTML=Object.keys(emojiCounts).sort((a,b)=>emojiCounts[b]-emojiCounts[a])
-    .map(e=>`<div class="res-ei">${e} ×${emojiCounts[e]}</div>`).join('');
-  const msg=resultMsg(s);
-  $('resMsg').textContent=msg.t;$('resMsg').className='res-msg '+msg.c;
-  $('resOverlay').classList.add('open');
-  if(s>=5)makeConfetti();
-}
-
-// ═══════════════════════════════════════════
-// SUPABASE
-// ═══════════════════════════════════════════
-async function initSB(){
-  if(!SB_URL||!SB_KEY){setConn('err');return false}
-  try{
-    sb=window.supabase.createClient(SB_URL,SB_KEY);
-    await sb.from('rooms').select('count').limit(1);
-    sbOk=true;setConn('ok');return true;
-  }catch(e){setConn('err');return false}
-}
-
-async function sbSend(ev,payload){
-  if(!sbOk||!ch)return;
-  await ch.send({type:'broadcast',event:ev,payload});
-}
-
-async function saveState(){
-  await sbSend('room-state',{
-    currentVideoId:curVid,scores,currentSinger:curSinger,currentSingerId:curSingerId,
-    currentSongOwnerId:curOwnerId,queue,currentQueuePosition:qPos,
-    currentSongScores:curSongScores,currentSongId:curSongId,
-    globalLeaderboard:lb,activities:activities.slice(0,20),updatedAt:Date.now()
-  });
-}
-
-async function requestState(){
-  await sbSend('request-state',{userId,timestamp:Date.now(),isNewUser:true});
-}
-
-async function sendStateTo(uid){
-  if(!curVid&&!queue.length&&scores.total===0)return;
-  await sbSend('initial-state',{targetUserId:uid,state:{
-    currentVideoId:curVid,scores,currentSinger:curSinger,currentSingerId:curSingerId,
-    currentSongOwnerId:curOwnerId,activities:activities.slice(0,20),
-    queue,currentQueuePosition:qPos,currentSongScores:curSongScores,
-    currentSongId:curSongId,globalLeaderboard:lb,timestamp:Date.now()
-  }});
-}
-
-async function setupListeners(){
-  if(!sbOk||!sb)return;
-  ch=sb.channel('room:'+roomId);
-  ch
-    .on('presence',{event:'sync'},()=>{
-      const ps=ch.presenceState();
-      const arr=[];
-      Object.values(ps).forEach(l=>l.forEach(p=>{if(!arr.find(x=>x.odUserId===p.odUserId))arr.push(p)}));
-      participants=arr;updParticipants();
-    })
-    .on('presence',{event:'join'},async({newPresences})=>{
-      for(const p of newPresences){
-        if(!participants.find(x=>x.odUserId===p.odUserId)){
-          participants.push(p);toast(`${p.odUserName} entrou! 👋`);addAct('👋',`${p.odUserName} entrou`);
-          if(p.odUserId!==userId)await sendStateTo(p.odUserId);
-        }
-      }
-      updParticipants();
-    })
-    .on('presence',{event:'leave'},({leftPresences})=>{
-      leftPresences.forEach(p=>{
-        participants=participants.filter(x=>x.odUserId!==p.odUserId);
-        toast(`${p.odUserName} saiu`);
-      });
-      updParticipants();
-    })
-    .on('broadcast',{event:'request-state'},async({payload})=>{
-      if(payload.userId!==userId&&payload.isNewUser)await sendStateTo(payload.userId);
-    })
-    .on('broadcast',{event:'initial-state'},({payload})=>{
-      if(payload.targetUserId!==userId)return;
-      const s=payload.state;
-      if(s.scores){scores=s.scores;updScores()}
-      if(s.queue){queue=s.queue;qPos=s.currentQueuePosition??-1;safeUpdQueue()}
-      if(s.currentVideoId&&s.currentVideoId!==curVid){
-        curVid=s.currentVideoId;curSinger=s.currentSinger;curSingerId=s.currentSingerId;
-        curOwnerId=s.currentSongOwnerId||s.currentSingerId;
-        playVideo(s.currentVideoId);
-      }
-      if(s.currentSongScores){curSongScores=s.currentSongScores;curSongId=s.currentSongId}
-      if(s.globalLeaderboard){lb=s.globalLeaderboard;updLB()}
-      if(s.emojiCounts){emojiCounts=s.emojiCounts;totalReact=s.totalReactions||0}
-      if(s.activities){activities=s.activities;updAct()}
-      gotState=true;toast('Sala sincronizada! 🎤');
-    })
-    .on('broadcast',{event:'room-state'},({payload})=>{
-      if((payload.updatedAt||0)<=lastState)return;
-      lastState=payload.updatedAt;
-      if(payload.scores){scores=payload.scores;updScores()}
-      if(payload.queue){queue=payload.queue;qPos=payload.currentQueuePosition??-1;safeUpdQueue()}
-      if(payload.currentVideoId&&payload.currentVideoId!==curVid){
-        curVid=payload.currentVideoId;curSinger=payload.currentSinger;curSingerId=payload.currentSingerId;
-        curOwnerId=payload.currentSongOwnerId||payload.currentSingerId;
-        playVideo(payload.currentVideoId);
-      }
-      if(payload.currentSongScores){curSongScores=payload.currentSongScores;curSongId=payload.currentSongId}
-      if(payload.globalLeaderboard){lb=payload.globalLeaderboard;updLB()}
-      if(payload.activities){activities=payload.activities;updAct()}
-    })
-    .on('broadcast',{event:'queue-update'},({payload,from})=>{
-      if(from===userId)return;
-      queue=payload.queue;qPos=payload.currentPosition;safeUpdQueue();
-    })
-    .on('broadcast',{event:'new-emoji'},({payload})=>{
-      const{emoji,points,targetUserId,userName:uName,emojiId}=payload;
-      if(seenEmojis.has(emojiId))return;
-      seenEmojis.add(emojiId);
-      floatEmoji(emoji);showNotif(emoji,uName);flashCard(points);
-      trackEmoji(emoji);
-      scores.total+=points;if(points>0)scores.positive+=points;else scores.negative+=Math.abs(points);
-      updScores();
-      if(curSongId&&targetUserId){
-        if(!curSongScores[targetUserId])curSongScores[targetUserId]=0;
-        curSongScores[targetUserId]+=points;
-      }
-      updLBLocal(targetUserId,emoji,points);updLB();
-      const tp=participants.find(p=>p.odUserId===targetUserId);
-      addAct(emoji,`${uName} → ${tp?tp.odUserName:'cantor'}: ${points>0?'+'+points:points}`);
-      saveState();
-    })
-    .on('broadcast',{event:'new-video'},({payload})=>{
-      const{videoId,loadedBy,title,songOwnerId}=payload;
-      if(videoId&&videoId!==curVid){
-        curVid=videoId;curSinger=loadedBy;
-        curOwnerId=songOwnerId||null;
-        const sp=participants.find(p=>p.odUserName===loadedBy);
-        curSingerId=sp?sp.odUserId:null;
-        scores={total:0,positive:0,negative:0};emojiCounts={};totalReact=0;
-        updScores();
-        playVideo(videoId);
-        toast(`${loadedBy} está cantando! 🎤`);
-        addAct('🎬',`${loadedBy} começou: ${title||''}`);
-        saveState();
-      }
-    })
-    .on('broadcast',{event:'show-result'},({payload})=>{
-      curSinger=payload.singer;
-      emojiCounts=payload.emojiCounts||{};
-      totalReact=payload.totalReactions||0;
-      showResult();
-    })
-    .on('broadcast',{event:'scores-update'},({payload})=>{scores=payload;updScores()})
-    .on('broadcast',{event:'reset'},()=>{
-      scores={total:0,positive:0,negative:0};emojiCounts={};totalReact=0;
-      activities=[];curSongScores={};curSongId=null;lb={};
-      updScores();updAct();updLB();
-      toast('Pontuação resetada! 🔄');addAct('🔄','Pontuação total resetada');
-    })
-    .subscribe(async s=>{
-      if(s==='SUBSCRIBED'){
-        await ch.track({odUserId:userId,odUserName:userName,joinedAt:Date.now()});
-        setTimeout(async()=>{if(!gotState)await requestState()},1000);
-      }
-    });
-}
-
-// ═══════════════════════════════════════════
-// MODALS
-// ═══════════════════════════════════════════
-function applyCode(){
-  const v=($('codeInp').value||'').trim().toUpperCase();
-  if(!v||v.length!==6){toast('Digite um código de 6 caracteres!',true);return}
-  roomId=v;isNew=false;
-  $('hdrRoom').textContent=v;
-  $('modalRoom').textContent=v;
-  const b=$('modeBadge');b.textContent='🚪 Entrando em sala existente';b.className='mode-badge join';
-  if(history.replaceState)history.replaceState({},'',shareUrl());
-  toast('Sala: '+v);
-  $('nameInp').focus();
-}
-
-async function joinRoom(){
-  const n=($('nameInp').value||'').trim();
-  if(!n){toast('Digite seu nome!',true);$('nameInp').focus();return}
-  userName=n;
-  $('nameModal').classList.remove('open');
-  if(sbOk)await setupListeners();
-  toast(isNew?'Sala criada! Código: '+roomId:'Bem-vindo, '+n+'! 🎤');
-}
-
-// ═══════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════
-async function init(){
-  await initSB();
-  const urlRoom=fromUrl();
-  if(urlRoom){roomId=urlRoom;isNew=false}
-  else{roomId=mkId();isNew=true}
-
-  $('hdrRoom').textContent=roomId;
-  $('modalRoom').textContent=roomId;
-  const b=$('modeBadge');
-  b.textContent=isNew?'🆕 Criando nova sala':'🚪 Entrando em sala existente';
-  b.className='mode-badge '+(isNew?'new':'join');
-  if(!isNew)$('codeInp').value=roomId;
-  if(history.replaceState)history.replaceState({},'',shareUrl());
-
-  $('nameInp').addEventListener('keypress',e=>{if(e.key==='Enter')joinRoom()});
-  $('vidInp').addEventListener('keypress',e=>{if(e.key==='Enter')addQueue()});
-  $('codeInp').addEventListener('input',e=>{e.target.value=e.target.value.toUpperCase()});
-  $('codeInp').addEventListener('keypress',e=>{if(e.key==='Enter')applyCode()});
-
-  setTimeout(()=>$('nameInp').focus(),250);
-}
-
-// ═══════════════════════════════════════════
-// BUSCA YOUTUBE - GUEST
-// ═══════════════════════════════════════════
-const YT_API_KEY='AIzaSyBzWLKPA96ISDfEZV6rLe9S68et6PUVhno';
-let ytQuery='',ytPage_=1,ytNextTok=null,ytToks={};
-
-function switchTab(tab){
-  const isSearch=tab==='search';
-  document.getElementById('panelLink').style.display=isSearch?'none':'block';
-  document.getElementById('panelSearch').style.display=isSearch?'block':'none';
-  const tL=document.getElementById('tabLink'),tS=document.getElementById('tabSearch');
-  tL.style.background=isSearch?'transparent':'linear-gradient(135deg,var(--purple),var(--pink))';
-  tL.style.color=isSearch?'var(--muted)':'#fff';
-  tS.style.background=isSearch?'linear-gradient(135deg,var(--purple),var(--pink))':'transparent';
-  tS.style.color=isSearch?'#fff':'var(--muted)';
-  if(isSearch)setTimeout(()=>document.getElementById('ytSearchInp').focus(),50);
-}
-
-function ytQuick(term,el){
-  document.querySelectorAll('.yf-btn').forEach(b=>b.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('ytSearchInp').value=term;
-  ytDoSearch(term,1);
-}
-
-function ytSearch(){
-  const q=(document.getElementById('ytSearchInp').value||'').trim();
-  if(!q){toast('Digite o que quer buscar!',true);return}
-  ytDoSearch(q,1);
-}
-
-function ytPage(dir){
-  const np=ytPage_+dir;
-  if(np<1)return;
-  ytDoSearch(ytQuery,np);
-}
-
-async function ytDoSearch(q,page){
-  ytQuery=q;ytPage_=page;
-  const loading=document.getElementById('ytLoading');
-  const results=document.getElementById('ytResults');
-  const pag=document.getElementById('ytPagination');
-  loading.style.display='block';
-  results.innerHTML='';
-  pag.style.display='none';
-
-  try{
-    const params=new URLSearchParams({
-      part:'snippet',type:'video',maxResults:'8',
-      q:q,key:YT_API_KEY,videoCategoryId:'10',regionCode:'BR',relevanceLanguage:'pt'
-    });
-    if(ytToks[page])params.set('pageToken',ytToks[page]);
-    else if(page>1&&ytNextTok)params.set('pageToken',ytNextTok);
-
-    const ctrl=new AbortController();
-    const tid=setTimeout(()=>ctrl.abort(),12000);
-    const res=await fetch('https://www.googleapis.com/youtube/v3/search?'+params.toString(),{signal:ctrl.signal});
-    clearTimeout(tid);
-
-    if(!res.ok){
-      const e=await res.json().catch(()=>({}));
-      throw new Error(e?.error?.message||'Erro HTTP '+res.status);
-    }
-
-    const data=await res.json();
-    if(data.nextPageToken){ytNextTok=data.nextPageToken;ytToks[page+1]=data.nextPageToken;}
-    if(data.prevPageToken)ytToks[page-1]=data.prevPageToken;
-
-    const items=data.items||[];
-    if(!items.length){results.innerHTML='<div style="text-align:center;color:var(--muted);padding:1rem;font-size:.85rem">Nenhum resultado. Tente outro termo.</div>';return;}
-
-    results.innerHTML=items.map(it=>{
-      const vid=it.id?.videoId;if(!vid)return'';
-      const t=it.snippet?.title||'Sem título';
-      const ch=it.snippet?.channelTitle||'';
-      const thumb=it.snippet?.thumbnails?.medium?.url||`https://img.youtube.com/vi/${vid}/mqdefault.jpg`;
-      const tEsc=t.replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-      return `<div class="yt-item">
-        <img class="yt-thumb" src="${thumb}" alt="" loading="lazy" onerror="this.src='https://img.youtube.com/vi/${vid}/mqdefault.jpg'">
-        <div class="yt-info">
-          <div class="yt-title" title="${tEsc}">${tEsc}</div>
-          <div class="yt-ch">${ch.replace(/</g,'&lt;')}</div>
-        </div>
-        <button class="yt-add" onclick="ytAddToQueue('${vid}','${tEsc.replace(/'/g,"\\'")}')">➕ Cantar</button>
-      </div>`;
-    }).join('');
-
-    const total=data.pageInfo?.totalResults||0;
-    const totalPg=Math.min(Math.ceil(total/8),50);
-    document.getElementById('ytPageInfo').textContent=`Pág ${page} / ~${totalPg}`;
-    document.getElementById('ytPrev').disabled=page<=1;
-    document.getElementById('ytNext').disabled=!data.nextPageToken||page>=totalPg;
-    pag.style.display='flex';
-
-  }catch(err){
-    results.innerHTML=`<div style="text-align:center;color:#ff4757;padding:1rem;font-size:.82rem">❌ ${err.message}</div>`;
-  }finally{
-    loading.style.display='none';
-  }
-}
-
-async function ytAddToQueue(vid,title){
-  if(!userName){toast('Entre na sala primeiro!',true);return}
-  const btn=event.target;
-  btn.textContent='⏳';btn.disabled=true;
-  try{
-    const info=await fetchInfo(vid);
-    const item={room_id:roomId,video_id:vid,video_title:info.title||title,thumbnail:info.thumb,
-      added_by:userId,added_by_name:userName,status:'waiting',order:queue.length};
-    queue.push(item);
-    safeUpdQueue();
-    if(sbOk)await sbSend('queue-update',{queue,currentPosition:qPos});
-    toast(`"${(info.title||title).slice(0,35)}" adicionado! 🎵`);
-    addAct('➕',`${userName} adicionou: ${(info.title||title).slice(0,30)}`);
-    btn.textContent='✅';
-    setTimeout(()=>{btn.textContent='➕ Cantar';btn.disabled=false;},1500);
-  }catch(e){toast('Erro ao adicionar.',true);btn.textContent='➕ Cantar';btn.disabled=false;}
-}
-
+function updLBLocal(uid,e,pts){if(!lb[uid])lb[uid]={score:0,topEmoji:e,topEmojiCounts:{}};else if(typeof lb[uid]==='number')lb[uid]={score:lb[uid],topEmoji:e,topEmojiCounts:{}};lb[uid].score+=pts;if(!lb[uid].topEmojiCounts)lb[uid].topEmojiCounts={};lb[uid].topEmojiCounts[e]=(lb[uid].topEmojiCounts[e]||0)+1;let max=0,top=e;for(const[k,v]of Object.entries(lb[uid].topEmojiCounts))if(v>max){max=v;top=k;}lb[uid].topEmoji=top;}
+async function sendEmoji(e,pts){if(!userName){toast('Entre na sala primeiro!',true);return}if(cd){toast('Aguarde 1 segundo!',true);return}if(!curVid){toast('Nenhuma música tocando!',true);return}const targetId=curOwnerId||curSingerId;if(!targetId){toast('Aguardando identificação do cantor...',true);return}const tp=participants.find(p=>p.odUserId===targetId);const targetName=tp?tp.odUserName:(curSinger||'cantor');trackEmoji(e);floatEmoji(e);flashCard(pts);scores.total+=pts;if(pts>0)scores.positive+=pts;else scores.negative+=Math.abs(pts);updScores();if(curSongId&&targetId){if(!curSongScores[targetId])curSongScores[targetId]=0;curSongScores[targetId]+=pts;}updLBLocal(targetId,e,pts);updLB();addAct(e,`${userName} → ${targetName}: ${pts>0?'+'+pts:pts}`);if(sbOk&&ch){const emojiId=userId+'_'+Date.now()+'_'+Math.random();await ch.send({type:'broadcast',event:'new-emoji',payload:{emoji:e,points:pts,targetUserId:targetId,userName,emojiId}});await sbSend('scores-update',scores);}cd=true;document.querySelectorAll('.ebtn').forEach(b=>b.classList.add('cd'));setTimeout(()=>{cd=false;document.querySelectorAll('.ebtn').forEach(b=>b.classList.remove('cd'));},1000);}
+function closeResult(){$('resOverlay').classList.remove('open');}
+function topEmoji(){let max=0,e='🎉';for(const k in emojiCounts)if(emojiCounts[k]>max){max=emojiCounts[k];e=k;}return{e,count:max};}
+function resultMsg(t){if(t>=20)return{t:'🌟 PERFORMANCE LENDÁRIA! 🌟',c:'exc'};if(t>=10)return{t:'🔥 Performance Incrível!',c:'exc'};if(t>=5)return{t:'👏 Muito Bem!',c:'gd'};if(t>=0)return{t:'👍 Boa Performance!',c:'gd'};if(t>=-5)return{t:'😅 Pode Melhorar...',c:'bd'};return{t:'💪 Treinar Mais!',c:'bd'};}
+function makeConfetti(){const cols=['#ff2d75','#9d4edd','#00d4ff','#00ff88','#ff9500','#ffff00'];for(let i=0;i<80;i++){setTimeout(()=>{const c=document.createElement('div');c.className='conf';c.style.left=Math.random()*100+'vw';c.style.background=cols[Math.floor(Math.random()*cols.length)];c.style.borderRadius=Math.random()>.5?'50%':'0';c.style.width=c.style.height=(5+Math.random()*8)+'px';c.style.animationDuration=(2+Math.random()*2)+'s';document.body.appendChild(c);setTimeout(()=>c.remove(),4000);},i*35);}}
+function showResult(){$('resName').textContent=curSinger||userName||'Cantor';const top=topEmoji();$('resIco').textContent=top.e;const s=scores.total;$('resScore').textContent=(s>=0?'+':'')+s;$('resScore').className='res-score '+(s>0?'pos':s<0?'neg':'neu');$('rPos').textContent='+'+scores.positive;$('rNeg').textContent='-'+scores.negative;$('rReact').textContent=totalReact;$('resBreak').innerHTML=Object.keys(emojiCounts).sort((a,b)=>emojiCounts[b]-emojiCounts[a]).map(e=>`<div class="res-ei">${e} ×${emojiCounts[e]}</div>`).join('');const msg=resultMsg(s);$('resMsg').textContent=msg.t;$('resMsg').className='res-msg '+msg.c;$('resOverlay').classList.add('open');if(s>=5)makeConfetti();}
+async function initSB(){if(!SB_URL||!SB_KEY){setConn('err');return false}try{sb=window.supabase.createClient(SB_URL,SB_KEY);await sb.from('rooms').select('count').limit(1);sbOk=true;setConn('ok');return true;}catch(e){setConn('err');return false}}
+async function sbSend(ev,payload){if(!sbOk||!ch)return;await ch.send({type:'broadcast',event:ev,payload});}
+async function saveState(){await sbSend('room-state',{currentVideoId:curVid,scores,currentSinger:curSinger,currentSingerId:curSingerId,currentSongOwnerId:curOwnerId,queue,currentQueuePosition:qPos,currentSongScores:curSongScores,currentSongId:curSongId,globalLeaderboard:lb,activities:activities.slice(0,20),updatedAt:Date.now()});}
+async function requestState(){await sbSend('request-state',{userId,timestamp:Date.now(),isNewUser:true});}
+async function sendStateTo(uid){if(!curVid&&!queue.length&&scores.total===0)return;await sbSend('initial-state',{targetUserId:uid,state:{currentVideoId:curVid,scores,currentSinger:curSinger,currentSingerId:curSingerId,currentSongOwnerId:curOwnerId,activities:activities.slice(0,20),queue,currentQueuePosition:qPos,currentSongScores:curSongScores,currentSongId:curSongId,globalLeaderboard:lb,timestamp:Date.now()}});}
+async function setupListeners(){if(!sbOk||!sb)return;ch=sb.channel('room:'+roomId);ch.on('presence',{event:'sync'},()=>{const ps=ch.presenceState();const arr=[];Object.values(ps).forEach(l=>l.forEach(p=>{if(!arr.find(x=>x.odUserId===p.odUserId))arr.push(p)}));participants=arr;updParticipants();}).on('presence',{event:'join'},async({newPresences})=>{for(const p of newPresences){if(!participants.find(x=>x.odUserId===p.odUserId)){participants.push(p);toast(`${p.odUserName} entrou! 👋`);addAct('👋',`${p.odUserName} entrou`);if(p.odUserId!==userId)await sendStateTo(p.odUserId);}}updParticipants();}).on('presence',{event:'leave'},({leftPresences})=>{leftPresences.forEach(p=>{participants=participants.filter(x=>x.odUserId!==p.odUserId);toast(`${p.odUserName} saiu`);});updParticipants();}).on('broadcast',{event:'request-state'},async({payload})=>{if(payload.userId!==userId&&payload.isNewUser)await sendStateTo(payload.userId);}).on('broadcast',{event:'initial-state'},({payload})=>{if(payload.targetUserId!==userId)return;const s=payload.state;if(s.scores){scores=s.scores;updScores()}if(s.queue){queue=s.queue;qPos=s.currentQueuePosition??-1;safeUpdQueue()}if(s.currentVideoId&&s.currentVideoId!==curVid){curVid=s.currentVideoId;curSinger=s.currentSinger;curSingerId=s.currentSingerId;curOwnerId=s.currentSongOwnerId||s.currentSingerId;playVideo(s.currentVideoId);}if(s.currentSongScores){curSongScores=s.currentSongScores;curSongId=s.currentSongId}if(s.globalLeaderboard){lb=s.globalLeaderboard;updLB()}if(s.activities){activities=s.activities;updAct()}gotState=true;toast('Sala sincronizada! 🎤');}).on('broadcast',{event:'room-state'},({payload})=>{if((payload.updatedAt||0)<=lastState)return;lastState=payload.updatedAt;if(payload.scores){scores=payload.scores;updScores()}if(payload.queue){queue=payload.queue;qPos=payload.currentQueuePosition??-1;safeUpdQueue()}if(payload.currentVideoId&&payload.currentVideoId!==curVid){curVid=payload.currentVideoId;curSinger=payload.currentSinger;curSingerId=payload.currentSingerId;curOwnerId=payload.currentSongOwnerId||payload.currentSingerId;playVideo(payload.currentVideoId);}if(payload.currentSongScores){curSongScores=payload.currentSongScores;curSongId=payload.currentSongId}if(payload.globalLeaderboard){lb=payload.globalLeaderboard;updLB()}if(payload.activities){activities=payload.activities;updAct()}}).on('broadcast',{event:'queue-update'},({payload,from})=>{if(from===userId)return;queue=payload.queue;qPos=payload.currentPosition;safeUpdQueue();}).on('broadcast',{event:'new-emoji'},({payload})=>{const{emoji,points,targetUserId,userName:uName,emojiId}=payload;if(seenEmojis.has(emojiId))return;seenEmojis.add(emojiId);floatEmoji(emoji);showNotif(emoji,uName);flashCard(points);trackEmoji(emoji);scores.total+=points;if(points>0)scores.positive+=points;else scores.negative+=Math.abs(points);updScores();if(curSongId&&targetUserId){if(!curSongScores[targetUserId])curSongScores[targetUserId]=0;curSongScores[targetUserId]+=points;}updLBLocal(targetUserId,emoji,points);updLB();const tp=participants.find(p=>p.odUserId===targetUserId);addAct(emoji,`${uName} → ${tp?tp.odUserName:'cantor'}: ${points>0?'+'+points:points}`);saveState();}).on('broadcast',{event:'new-video'},({payload})=>{const{videoId,loadedBy,title,songOwnerId}=payload;if(videoId&&videoId!==curVid){curVid=videoId;curSinger=loadedBy;curOwnerId=songOwnerId||null;const sp=participants.find(p=>p.odUserName===loadedBy);curSingerId=sp?sp.odUserId:null;scores={total:0,positive:0,negative:0};emojiCounts={};totalReact=0;updScores();playVideo(videoId);toast(`${loadedBy} está cantando! 🎤`);addAct('🎬',`${loadedBy} começou: ${title||''}`);saveState();}}).on('broadcast',{event:'show-result'},({payload})=>{curSinger=payload.singer;emojiCounts=payload.emojiCounts||{};totalReact=payload.totalReactions||0;showResult();}).on('broadcast',{event:'scores-update'},({payload})=>{scores=payload;updScores()}).on('broadcast',{event:'reset'},()=>{scores={total:0,positive:0,negative:0};emojiCounts={};totalReact=0;activities=[];curSongScores={};curSongId=null;lb={};updScores();updAct();updLB();toast('Pontuação resetada! 🔄');addAct('🔄','Pontuação total resetada');}).subscribe(async s=>{if(s==='SUBSCRIBED'){await ch.track({odUserId:userId,odUserName:userName,joinedAt:Date.now()});setTimeout(async()=>{if(!gotState)await requestState()},1000);}});}
+function applyCode(){const v=($('codeInp').value||'').trim().toUpperCase();if(!v||v.length!==6){toast('Digite um código de 6 caracteres!',true);return}roomId=v;isNew=false;$('hdrRoom').textContent=v;$('modalRoom').textContent=v;const b=$('modeBadge');b.textContent='🚪 Entrando em sala existente';b.className='mode-badge join';if(history.replaceState)history.replaceState({},'',shareUrl());toast('Sala: '+v);$('nameInp').focus();}
+async function joinRoom(){const n=($('nameInp').value||'').trim();if(!n){toast('Digite seu nome!',true);$('nameInp').focus();return}userName=n;$('nameModal').classList.remove('open');if(sbOk)await setupListeners();toast(isNew?'Sala criada! Código: '+roomId:'Bem-vindo, '+n+'! 🎤');}
+async function init(){await initSB();const urlRoom=fromUrl();if(urlRoom){roomId=urlRoom;isNew=false}else{roomId=mkId();isNew=true}$('hdrRoom').textContent=roomId;$('modalRoom').textContent=roomId;const b=$('modeBadge');b.textContent=isNew?'🆕 Criando nova sala':'🚪 Entrando em sala existente';b.className='mode-badge '+(isNew?'new':'join');if(!isNew)$('codeInp').value=roomId;if(history.replaceState)history.replaceState({},'',shareUrl());$('nameInp').addEventListener('keypress',e=>{if(e.key==='Enter')joinRoom()});$('vidInp').addEventListener('keypress',e=>{if(e.key==='Enter')addQueue()});$('codeInp').addEventListener('input',e=>{e.target.value=e.target.value.toUpperCase()});$('codeInp').addEventListener('keypress',e=>{if(e.key==='Enter')applyCode()});setTimeout(()=>$('nameInp').focus(),250);}
+const YT_API_KEY='AIzaSyBzWLKPA96ISDfEZV6rLe9S68et6PUVhno';let ytQuery='',ytPage_=1,ytNextTok=null,ytToks={};
+function switchTab(tab){const isSearch=tab==='search';document.getElementById('panelLink').style.display=isSearch?'none':'block';document.getElementById('panelSearch').style.display=isSearch?'block':'none';const tL=document.getElementById('tabLink'),tS=document.getElementById('tabSearch');tL.style.background=isSearch?'transparent':'linear-gradient(135deg,var(--purple),var(--pink))';tL.style.color=isSearch?'var(--muted)':'#fff';tS.style.background=isSearch?'linear-gradient(135deg,var(--purple),var(--pink))':'transparent';tS.style.color=isSearch?'#fff':'var(--muted)';if(isSearch)setTimeout(()=>document.getElementById('ytSearchInp').focus(),50);}
+function ytQuick(term,el){document.querySelectorAll('.yf-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');document.getElementById('ytSearchInp').value=term;ytDoSearch(term,1);}
+function ytSearch(){const q=(document.getElementById('ytSearchInp').value||'').trim();if(!q){toast('Digite o que quer buscar!',true);return}ytDoSearch(q,1);}
+function ytPage(dir){const np=ytPage_+dir;if(np<1)return;ytDoSearch(ytQuery,np);}
+async function ytDoSearch(q,page){ytQuery=q;ytPage_=page;const loading=document.getElementById('ytLoading');const results=document.getElementById('ytResults');const pag=document.getElementById('ytPagination');loading.style.display='block';results.innerHTML='';pag.style.display='none';try{const params=new URLSearchParams({part:'snippet',type:'video',maxResults:'8',q:q,key:YT_API_KEY,videoCategoryId:'10',regionCode:'BR',relevanceLanguage:'pt'});if(ytToks[page])params.set('pageToken',ytToks[page]);else if(page>1&&ytNextTok)params.set('pageToken',ytNextTok);const ctrl=new AbortController();const tid=setTimeout(()=>ctrl.abort(),12000);const res=await fetch('https://www.googleapis.com/youtube/v3/search?'+params.toString(),{signal:ctrl.signal});clearTimeout(tid);if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e?.error?.message||'Erro HTTP '+res.status);}const data=await res.json();if(data.nextPageToken){ytNextTok=data.nextPageToken;ytToks[page+1]=data.nextPageToken;}if(data.prevPageToken)ytToks[page-1]=data.prevPageToken;const items=data.items||[];if(!items.length){results.innerHTML='<div style="text-align:center;color:var(--muted);padding:1rem;font-size:.85rem">Nenhum resultado. Tente outro termo.</div>';return;}results.innerHTML=items.map(it=>{const vid=it.id?.videoId;if(!vid)return'';const t=it.snippet?.title||'Sem título';const chnl=it.snippet?.channelTitle||'';const thumb=it.snippet?.thumbnails?.medium?.url||`https://img.youtube.com/vi/${vid}/mqdefault.jpg`;const tEsc=t.replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');return `<div class="yt-item"><img class="yt-thumb" src="${thumb}" alt="" loading="lazy" onerror="this.src='https://img.youtube.com/vi/${vid}/mqdefault.jpg'"><div class="yt-info"><div class="yt-title" title="${tEsc}">${tEsc}</div><div class="yt-ch">${chnl.replace(/</g,'&lt;')}</div></div><button class="yt-add" onclick="ytAddToQueue('${vid}','${tEsc.replace(/'/g,"\\'")}')">➕ Cantar</button></div>`;}).join('');const total=data.pageInfo?.totalResults||0;const totalPg=Math.min(Math.ceil(total/8),50);document.getElementById('ytPageInfo').textContent=`Pág ${page} / ~${totalPg}`;document.getElementById('ytPrev').disabled=page<=1;document.getElementById('ytNext').disabled=!data.nextPageToken||page>=totalPg;pag.style.display='flex';}catch(err){results.innerHTML=`<div style="text-align:center;color:#ff4757;padding:1rem;font-size:.82rem">❌ ${err.message}</div>`;}finally{loading.style.display='none';}}
+async function ytAddToQueue(vid,title){if(!userName){toast('Entre na sala primeiro!',true);return}const btn=event.target;btn.textContent='⏳';btn.disabled=true;try{const info=await fetchInfo(vid);const item={room_id:roomId,video_id:vid,video_title:info.title||title,thumbnail:info.thumb,added_by:userId,added_by_name:userName,status:'waiting',order:queue.length};queue.push(item);safeUpdQueue();if(sbOk)await sbSend('queue-update',{queue,currentPosition:qPos});toast(`"${(info.title||title).slice(0,35)}" adicionado! 🎵`);addAct('➕',`${userName} adicionou: ${(info.title||title).slice(0,30)}`);btn.textContent='✅';setTimeout(()=>{btn.textContent='➕ Cantar';btn.disabled=false;},1500);}catch(e){toast('Erro ao adicionar.',true);btn.textContent='➕ Cantar';btn.disabled=false;}}
 document.addEventListener('DOMContentLoaded',init);
 </script>
 </body>
