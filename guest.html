@@ -23,6 +23,7 @@
   --blue:#00d4ff;
   --green:#00ff88;
   --orange:#ff9500;
+  --yellow:#ffcc00;
   --txt:#fff;
   --muted:#a0a0c0;
 }
@@ -44,10 +45,46 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
 .live-dot{width:9px;height:9px;background:var(--green);border-radius:50%;animation:pulse 1.5s infinite}
 .live-txt{font-size:.75rem;color:var(--green);font-weight:600}
 @keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 8px var(--green)}50%{opacity:.4}}
-/* BOTÃO DOWNLOAD APP */
+/* BOTÃO DOWNLOAD APP - AMARELO DEGRADÊ E PULSANTE */
 .download-area{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap}
-.btn-download-app{background:linear-gradient(135deg,#00b894,#00cec9);border:none;padding:.5rem 1rem;border-radius:2rem;color:#0a0e27;font-weight:700;font-size:.8rem;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:.5rem;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.2)}
-.btn-download-app:hover{transform:scale(1.03);background:linear-gradient(135deg,#00a884,#00b894)}
+.btn-download-app{
+  background:linear-gradient(135deg,#ffd700,#ff8c00,#ffcc00);
+  border:none;
+  padding:.5rem 1rem;
+  border-radius:2rem;
+  color:#2c1810;
+  font-weight:800;
+  font-size:.8rem;
+  cursor:pointer;
+  transition:all .2s;
+  display:inline-flex;
+  align-items:center;
+  gap:.5rem;
+  text-decoration:none;
+  box-shadow:0 0 12px rgba(255,215,0,0.5);
+  animation:pulse-glow 1.5s ease-in-out infinite;
+  letter-spacing:0.5px;
+}
+.btn-download-app:hover{
+  transform:scale(1.05);
+  background:linear-gradient(135deg,#ffe44d,#ffaa00);
+  box-shadow:0 0 20px rgba(255,215,0,0.8);
+  animation:none;
+}
+@keyframes pulse-glow{
+  0%{
+    box-shadow:0 0 5px rgba(255,215,0,0.4);
+    transform:scale(1);
+  }
+  50%{
+    box-shadow:0 0 20px rgba(255,215,0,0.9),0 0 8px rgba(255,200,0,0.6);
+    transform:scale(1.02);
+  }
+  100%{
+    box-shadow:0 0 5px rgba(255,215,0,0.4);
+    transform:scale(1);
+  }
+}
 .app-info-tooltip{font-size:.65rem;color:var(--muted);background:var(--light);padding:.2rem .6rem;border-radius:1rem;display:inline-flex;align-items:center;gap:.3rem}
 .wrap{max-width:1400px;margin:1.2rem auto;padding:0 .8rem}
 .grid{display:grid;grid-template-columns:1fr 320px;gap:1.2rem}
