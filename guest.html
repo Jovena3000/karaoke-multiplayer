@@ -47,6 +47,11 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
 .hdr{background:rgba(21,25,50,.95);backdrop-filter:blur(10px);padding:.8rem 1.5rem;position:sticky;top:0;z-index:200;border-bottom:1px solid rgba(157,78,221,.3)}
 .hdr-inner{max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.75rem}
 .logo{font-size:1.3rem;font-weight:800;background:linear-gradient(90deg,var(--pink),var(--purple),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.logo-wrap{display:flex;flex-direction:column;gap:.3rem}
+.btn-download-app{display:inline-block;background:linear-gradient(135deg,#ffe000,#ffb300);color:#000;font-weight:700;font-size:.72rem;padding:.3rem .85rem;border-radius:2rem;text-decoration:none;white-space:nowrap;box-shadow:0 2px 10px rgba(255,179,0,.35);transition:transform .2s,box-shadow .2s}
+.btn-download-app:hover{transform:scale(1.05);box-shadow:0 4px 16px rgba(255,179,0,.5)}
+.app-info-tooltip{display:block;font-size:.6rem;color:var(--muted);margin-top:.15rem;line-height:1.3}
+.download-area{display:flex;flex-direction:column}
 .room-pill{display:flex;align-items:center;gap:.5rem;background:var(--light);padding:.4rem .9rem;border-radius:2rem;border:1px solid rgba(0,212,255,.3);flex-wrap:wrap}
 .room-code{font-weight:700;color:var(--blue);font-size:1.1rem;letter-spacing:3px;font-family:monospace}
 .pcount{background:var(--purple);padding:.15rem .6rem;border-radius:1rem;font-size:.8rem}
@@ -316,7 +321,15 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
 
 <header class="hdr">
   <div class="hdr-inner">
-    <div class="logo">🎤 Karaokê - Convidado</div>
+    <div class="logo-wrap">
+      <div class="logo">🎤 Karaokê - Convidado</div>
+      <div class="download-area">
+        <a href="https://karaokemultiplayer.com.br/app/app-release.apk" class="btn-download-app" download target="_blank" rel="noopener noreferrer">
+          📲 Baixar App do Karaokê
+        </a>
+        <span class="app-info-tooltip">⚙️ Após baixar, vá em Configurações > Segurança > Ativar "Fontes desconhecidas"</span>
+      </div>
+    </div>
     <div class="room-pill">
       <span style="color:var(--muted);font-size:.8rem">Sala:</span>
       <span class="room-code" id="hdrRoom">------</span>
