@@ -1201,5 +1201,98 @@ async function ytAddToQueue(vid,title){
 
 document.addEventListener('DOMContentLoaded',init);
 </script>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- SCRIPT DE NAVEGAÇÃO INTRA-APP - Garante que links abram no TWA  -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<script>
+(function() {
+    // Configuração do domínio do app
+    const APP_DOMAIN = 'karaokemultiplayer.com.br';
+    const WWW_DOMAIN = 'www.karaokemultiplayer.com.br';
+    
+    // Função para verificar se a URL é do mesmo domínio do app
+    function isSameOrigin(url) {
+        if (!url) return false;
+        if (url.startsWith('/') || url.startsWith('./') || url.startsWith('../')) {
+            return true;
+        }
+        try {
+            const linkUrl = new URL(url, window.location.href);
+            const currentHost = window.location.hostname;
+            return linkUrl.hostname === currentHost || 
+                   linkUrl.hostname === APP_DOMAIN || 
+                   linkUrl.hostname === WWW_DOMAIN;
+        } catch(e) {
+            return false;
+        }
+    }
+    
+    // Interceptar todos os cliques em links e botões que abrem URLs
+    document.addEventListener('click', function(e) {
+        // Procurar por elemento <a> ou botões com href
+        let target = e.target;
+        let linkElement = null;
+        
+        while (target && target !== document.body) {
+            if (target.tagName === 'A') {
+                linkElement = target;
+                break;
+            }
+            target = target.parentElement;
+        }
+        
+        if (linkElement && linkElement.tagName === 'A') {
+            const href = linkElement.getAttribute('href');
+            const targetAttr = linkElement.getAttribute('target');
+            
+            if (href && href !== '#' && !href.startsWith('javascript:')) {
+                // Se for link interno do app, abrir no mesmo contexto
+                if (isSameOrigin(href)) {
+                    e.preventDefault();
+                    // Remover target _blank se existir
+                    window.location.href = href;
+                    return;
+                }
+                // Links externos (como download APK) mantêm comportamento padrão
+            }
+        }
+    });
+    
+    // Remover target="_blank" de todos os links internos existentes
+    function fixInternalLinks() {
+        const allLinks = document.querySelectorAll('a[href]');
+        allLinks.forEach(link => {
+            const href = link.getAttribute('href');
+            if (href && isSameOrigin(href)) {
+                if (link.getAttribute('target') === '_blank') {
+                    link.removeAttribute('target');
+                }
+            }
+        });
+    }
+    
+    // Executar ao carregar a página
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', fixInternalLinks);
+    } else {
+        fixInternalLinks();
+    }
+    
+    // Observer para links adicionados dinamicamente
+    if (window.MutationObserver) {
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.addedNodes.length) {
+                    fixInternalLinks();
+                }
+            });
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+    }
+    
+    console.log('✅ Navegação intra-app configurada - links abrirão dentro do aplicativo');
+})();
+</script>
 </body>
 </html>
