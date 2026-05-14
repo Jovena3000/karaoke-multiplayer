@@ -730,8 +730,7 @@ body{
       </a>
     </div>
 
-        <!-- VÍDEO DEMONSTRATIVO -->
-<div class="demo-video-container">
+       <div class="demo-video-container">
   <video id="demoVideo" class="demo-video" autoplay muted loop playsinline>
     <source src="video.mp4" type="video/mp4">
     Seu navegador não suporta vídeos.
@@ -1193,14 +1192,12 @@ body{
   };
 
       // BOTÃO PARA ATIVAR O SOM DO VÍDEO
-  var video = document.getElementById('Video');
+  var video = document.getElementById('demoVideo');
   var unmuteBtn = document.getElementById('unmuteBtn');
   if(unmuteBtn && video){
     unmuteBtn.addEventListener('click', function(){
       video.muted = false;
-      video.volume = 1.0;
       unmuteBtn.style.display = 'none';
-      console.log('Som ativado!');
     });
   }
 
