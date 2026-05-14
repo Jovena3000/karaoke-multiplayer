@@ -1192,13 +1192,15 @@ body{
     }
   };
 
-    // BOTÃO PARA ATIVAR O SOM DO VÍDEO (com seus nomes)
+      // BOTÃO PARA ATIVAR O SOM DO VÍDEO
   var video = document.getElementById('Video');
   var unmuteBtn = document.getElementById('unmuteBtn');
   if(unmuteBtn && video){
     unmuteBtn.addEventListener('click', function(){
       video.muted = false;
+      video.volume = 1.0;
       unmuteBtn.style.display = 'none';
+      console.log('Som ativado!');
     });
   }
 
