@@ -212,20 +212,25 @@ body{
 .btn-secondary{background:transparent;border:2px solid #fff;color:#fff}
 .btn-secondary:hover{background:#fff;color:#667eea}
 
-/* VÍDEO DEMONSTRATIVO - RESPONSIVO COM BOTÃO DE SOM */
+/* VÍDEO DEMONSTRATIVO - CORRIGIDO RESPONSIVO */
 .demo-video-container {
   position: relative;
-  max-width: 800px;
+  max-width: 100%;
+  width: 100%;
   margin: 20px auto 30px;
   border-radius: 20px;
   overflow: hidden;
   box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-  border: 3px solid rgba(255,215,0,0.5);
+  border: 3px solid rgba(255,215,0,0.6);
+  background: #000;
 }
 
 .demo-video {
   width: 100%;
   height: auto;
+  min-height: 200px;
+  max-height: 500px;
+  object-fit: contain;
   display: block;
   background: #000;
 }
@@ -234,20 +239,20 @@ body{
   position: absolute;
   bottom: 15px;
   right: 15px;
-  background: rgba(0,0,0,0.75);
-  color: white;
-  border: none;
+  background: rgba(0,0,0,0.8);
+  color: #ffd700;
+  border: 1px solid #ffd700;
   border-radius: 30px;
-  padding: 8px 16px;
+  padding: 10px 18px;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: bold;
   cursor: pointer;
   z-index: 10;
   transition: all 0.3s ease;
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 
 .unmute-button:hover {
@@ -256,17 +261,52 @@ body{
   transform: scale(1.05);
 }
 
+/* Desktop grande */
+@media (min-width: 1200px) {
+  .demo-video-container {
+    max-width: 900px;
+  }
+  .demo-video {
+    max-height: 506px;
+  }
+}
+
+/* Tablet */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .demo-video-container {
+    max-width: 85%;
+    margin: 20px auto;
+  }
+  .demo-video {
+    max-height: 450px;
+  }
+}
+
+/* Celular */
 @media (max-width: 768px) {
   .demo-video-container {
-    max-width: 95%;
+    max-width: 98%;
     border-radius: 16px;
-    margin: 15px auto 25px;
+    margin: 15px auto;
+  }
+  .demo-video {
+    max-height: 280px;
+    min-height: 180px;
   }
   .unmute-button {
     padding: 6px 12px;
-    font-size: 12px;
+    font-size: 11px;
     bottom: 10px;
     right: 10px;
+    gap: 4px;
+  }
+}
+
+/* Celular pequeno */
+@media (max-width: 480px) {
+  .demo-video {
+    max-height: 220px;
+    min-height: 150px;
   }
 }
 
@@ -690,14 +730,14 @@ body{
       </a>
     </div>
 
-    <!-- VÍDEO DEMONSTRATIVO - COM BOTÃO PARA ATIVAR O SOM -->
+        <!-- VÍDEO DEMONSTRATIVO - CORRIGIDO -->
     <div class="demo-video-container">
-      <video autoplay muted loop playsinline class="demo-video" id="demoVideo">
+      <video id="demoVideo" class="demo-video" autoplay muted loop playsinline disableRemotePlayback>
         <source src="demo-video.mp4" type="video/mp4">
         Seu navegador não suporta vídeos.
       </video>
       <button class="unmute-button" id="unmuteBtn">
-        <i class="fas fa-volume-mute"></i> Ativar Som
+        <i class="fas fa-volume-up"></i> 🔈 Ativar Som
       </button>
     </div>
 
