@@ -59,7 +59,6 @@ body{
   border:1.5px solid rgba(255,255,255,.28);
   will-change:transform;
   animation:float 8s ease-in-out infinite;
-  /* tamanho responsivo */
   font-size:clamp(.75rem,2.5vw,1.6rem);
   padding:clamp(3px,1vw,7px) clamp(6px,2vw,13px);
 }
@@ -70,11 +69,9 @@ body{
 .fe-3{top:70%;left:3%;animation-delay:2s}
 .fe-4{top:80%;right:3%;animation-delay:3s;animation-name:float-x}
 
-/* tablet */
 @media(max-width:1024px) and (min-width:769px){
   .fe{font-size:clamp(.75rem,2vw,1.2rem)}
 }
-/* mobile */
 @media(max-width:768px){
   .fe{opacity:.55;font-size:.78rem;padding:2px 6px}
   .fe span{font-size:.6rem}
@@ -112,7 +109,6 @@ body{
 .btn-signup{background:#ffd700;color:#333}
 .btn-signup:hover{transform:scale(1.05);box-shadow:0 0 16px rgba(255,215,0,.5)}
 
-/* mobile: empilha logo + nav verticalmente */
 @media(max-width:480px){
   .header-in{flex-direction:column;gap:6px;padding:0 12px}
   .nav{gap:8px}
@@ -176,7 +172,6 @@ body{
   font-size:clamp(.78rem,2vw,.85rem);margin-bottom:12px;
 }
 
-/* Timer */
 .timer-wrap{background:rgba(0,0,0,.45);border-radius:14px;padding:clamp(10px,3vw,16px);margin:14px 0}
 .timer-label{font-size:clamp(.65rem,2vw,.75rem);text-transform:uppercase;letter-spacing:2px;margin-bottom:10px}
 .timer{display:flex;justify-content:center;gap:clamp(10px,4vw,20px);flex-wrap:wrap}
@@ -191,7 +186,6 @@ body{
 .timer-num.blink{animation:blink .5s ease-in-out infinite}
 .timer-sub{font-size:clamp(.6rem,1.8vw,.68rem);margin-top:5px;opacity:.8}
 
-/* Spots */
 .spots{margin-top:12px;font-size:.88rem}
 .spots-num{
   font-size:clamp(.9rem,3vw,1.2rem);font-weight:800;color:#ffd700;
@@ -218,6 +212,64 @@ body{
 .btn-secondary{background:transparent;border:2px solid #fff;color:#fff}
 .btn-secondary:hover{background:#fff;color:#667eea}
 
+/* VÍDEO DEMONSTRATIVO - RESPONSIVO COM BOTÃO DE SOM */
+.demo-video-container {
+  position: relative;
+  max-width: 800px;
+  margin: 20px auto 30px;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  border: 3px solid rgba(255,215,0,0.5);
+}
+
+.demo-video {
+  width: 100%;
+  height: auto;
+  display: block;
+  background: #000;
+}
+
+.unmute-button {
+  position: absolute;
+  bottom: 15px;
+  right: 15px;
+  background: rgba(0,0,0,0.75);
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.unmute-button:hover {
+  background: #ffd700;
+  color: #333;
+  transform: scale(1.05);
+}
+
+@media (max-width: 768px) {
+  .demo-video-container {
+    max-width: 95%;
+    border-radius: 16px;
+    margin: 15px auto 25px;
+  }
+  .unmute-button {
+    padding: 6px 12px;
+    font-size: 12px;
+    bottom: 10px;
+    right: 10px;
+  }
+}
+
 @media(max-width:600px){
   .hero-btns{flex-direction:column;align-items:center;gap:10px}
   .btn-hero{width:100%;max-width:300px}
@@ -233,9 +285,7 @@ body{
   gap:20px;
   animation:slideIn .9s ease-out both;
 }
-/* tablet */
 @media(max-width:1024px){.preview-grid{grid-template-columns:repeat(2,1fr)}}
-/* mobile */
 @media(max-width:640px){.preview-grid{grid-template-columns:1fr;gap:16px}}
 
 .pcard{
@@ -267,7 +317,6 @@ body{
 }
 .parts-badge{display:flex;align-items:center;gap:5px;font-size:clamp(.78rem,2vw,.88rem);flex-shrink:0}
 
-/* ---- Main screen ---- */
 .main-scr{background:#1a1a2e;color:#fff;padding:16px;flex:1}
 .song-player{text-align:center;margin:10px 0}
 .song-title{font-size:clamp(1rem,3vw,1.3rem);font-weight:700;color:#ffd700;margin-bottom:4px}
@@ -308,7 +357,6 @@ body{
 }
 .btn-copy:hover{opacity:.88}
 
-/* ---- Queue screen ---- */
 .queue-scr{background:#fff;padding:16px;flex:1}
 .queue-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;color:#333}
 .queue-title{font-weight:700;font-size:.98rem}
@@ -331,7 +379,6 @@ body{
 .queue-cta p{color:#1976d2;margin-bottom:3px;font-size:.88rem;font-weight:600}
 .queue-cta small{font-size:.76rem;color:#555}
 
-/* ---- Score screen ---- */
 .score-scr{background:linear-gradient(135deg,#667eea,#764ba2);padding:20px;color:#fff;text-align:center;flex:1}
 .performer{font-size:clamp(1.4rem,4vw,1.9rem);font-weight:700;margin-bottom:6px}
 .total-score{
@@ -368,7 +415,6 @@ body{
 .cta-grid{
   max-width:1200px;margin:0 auto;
   display:grid;
-  /* mínimo 280px para não ter scroll em telas < 340px */
   grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
   gap:20px;
 }
@@ -387,7 +433,7 @@ body{
 .cta-highlight{
   background:linear-gradient(135deg,#fff9e6,#fff2cc);
   border-left:4px solid #ffd700;position:relative;
-  padding-top:clamp(26px,5vw,34px);/* espaço para o badge */
+  padding-top:clamp(26px,5vw,34px);
 }
 .cta-highlight::before{
   content:"✨ MAIS POPULAR ✨";
@@ -419,9 +465,7 @@ body{
   max-width:1200px;margin:0 auto;
   display:grid;grid-template-columns:repeat(4,1fr);gap:20px;
 }
-/* tablet: 2 colunas */
 @media(max-width:1024px){.plans-grid{grid-template-columns:repeat(2,1fr)}}
-/* mobile: 1 coluna */
 @media(max-width:580px){.plans-grid{grid-template-columns:1fr}}
 
 .plan-card{
@@ -437,7 +481,7 @@ body{
 .plan-recommended{
   border:3px solid #ffd700;
   background:linear-gradient(135deg,#fff9e6,#fff2cc);
-  margin-top:20px;/* espaço para o badge */
+  margin-top:20px;
 }
 .plan-recommended::before{
   content:"⭐ RECOMENDADO";
@@ -513,7 +557,7 @@ body{
   display:none;position:fixed;inset:0;
   background:rgba(0,0,0,.92);z-index:2000;
   align-items:center;justify-content:center;
-  padding:16px;/* garante que não encoste nas bordas */
+  padding:16px;
 }
 .modal.active{display:flex;animation:fadeIn .28s ease}
 
@@ -536,7 +580,6 @@ body{
 }
 .modal-close:hover{transform:scale(1.2);color:#ffd700}
 
-/* ---- Selfie ---- */
 .selfie-prev{
   background:rgba(255,255,255,.1);border-radius:16px;
   padding:clamp(16px,4vw,26px);margin:14px 0;
@@ -560,7 +603,6 @@ body{
 .btn-cl{background:#ff4757;color:#fff}
 .btn-sm:hover{transform:scale(1.06)}
 
-/* ---- Image modal ---- */
 .img-modal-box{max-width:540px}
 .img-modal-box img{max-width:100%;border-radius:12px;margin:8px 0;box-shadow:0 9px 28px rgba(0,0,0,.3)}
 .img-caption h3{color:#ffd700;font-size:clamp(1.1rem,3.5vw,1.35rem);margin-bottom:8px}
@@ -572,9 +614,6 @@ body{
 }
 .btn-share-modal:hover{transform:scale(1.05)}
 
-/* =========================================================
-   TOUCH: desativa elevação por hover (evita "travamento" em tap)
-   ========================================================= */
 @media(hover:none){
   .plan-card:hover,
   .pcard:hover,
@@ -583,15 +622,11 @@ body{
   .react-item:hover{transform:none!important;box-shadow:none!important}
 }
 
-/* =========================================================
-   UTILITÁRIOS
-   ========================================================= */
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
 </style>
 </head>
 <body>
 
-<!-- ===== FLOATING EMOJIS ===== -->
 <div class="fe-wrap" aria-hidden="true">
   <div class="fe fe-1">😀 <span class="p">+1</span></div>
   <div class="fe fe-2">🎤 <span class="p">+5</span></div>
@@ -599,7 +634,6 @@ body{
   <div class="fe fe-4">😍 <span class="p">+3</span></div>
 </div>
 
-<!-- ===== HEADER ===== -->
 <header class="header">
   <div class="header-in">
     <div class="logo">
@@ -613,12 +647,10 @@ body{
   </div>
 </header>
 
-<!-- ===== HERO ===== -->
 <section class="hero">
   <div class="hero-in">
     <h2 class="hero-title">Cante, Pontue, Vire Estrela! ⭐</h2>
 
-    <!-- OFFER BANNER -->
     <div class="offer-banner" id="offerBanner">
       <div class="offer-badge">🔥 OFERTA POR TEMPO LIMITADO 🔥</div>
       <div class="offer-title">3 MESES DE KARAOKÊ PREMIUM</div>
@@ -645,7 +677,7 @@ body{
         <div class="prog-wrap"><div class="prog-fill" id="progFill"></div></div>
         <div class="spots-note">* Para os 500 primeiros clientes</div>
       </div>
-    </div><!-- /offer-banner -->
+    </div>
 
     <p class="hero-sub">
       A primeira plataforma de karaokê interativo onde você canta ao vivo com amigos
@@ -656,15 +688,20 @@ body{
       <a href="javascript:void(0)" onclick="irParaCheckoutComPlano('trimestral')" class="btn-hero btn-primary">
         🎵 GARANTIR OFERTA AGORA
       </a>
-      <a href="https://uploads.onecompiler.io/43xkytw48/44gvhqscq/img-03.png" class="btn-hero btn-secondary" target="_blank" rel="noopener">
-        ▶️ Ver Demonstração
-      </a>
     </div>
 
-    <!-- PREVIEW CARDS -->
-    <div class="preview-grid">
+    <!-- VÍDEO DEMONSTRATIVO - COM BOTÃO PARA ATIVAR O SOM -->
+    <div class="demo-video-container">
+      <video autoplay muted loop playsinline class="demo-video" id="demoVideo">
+        <source src="demo-video.mp4" type="video/mp4">
+        Seu navegador não suporta vídeos.
+      </video>
+      <button class="unmute-button" id="unmuteBtn">
+        <i class="fas fa-volume-mute"></i> Ativar Som
+      </button>
+    </div>
 
-      <!-- Card 1: Tela principal -->
+    <div class="preview-grid">
       <div class="pcard">
         <div class="pcard-head head-dark">
           <span class="room-tag">7K4GPP</span>
@@ -700,7 +737,6 @@ body{
         </div>
       </div>
 
-      <!-- Card 2: Fila -->
       <div class="pcard">
         <div class="pcard-head head-blue">
           <span class="room-tag">FILA</span>
@@ -726,7 +762,6 @@ body{
         </div>
       </div>
 
-      <!-- Card 3: Pontuação -->
       <div class="pcard">
         <div class="pcard-head head-purple">
           <span class="room-tag">FINAL</span>
@@ -751,96 +786,81 @@ body{
           </div>
         </div>
       </div>
-
-    </div><!-- /preview-grid -->
+    </div>
   </div>
 </section>
 
-<!-- ===== CTA SHOWCASE ===== -->
 <section class="cta-section">
   <div class="cta-grid">
-
     <div class="cta-card cta-highlight">
       <div class="cta-icon">🎤➖</div>
       <h3>Sem microfone? Sem problema!</h3>
       <p>No Karaokê Multiplayer, quem te dá a nota é a galera — com emojis em tempo real. Cante do sofá, da TV ou do celular.</p>
       <a href="https://karaokemultiplayer.com.br/checkout.html?plan=trimestral&offer=flash15min" class="cta-btn">Garantir Oferta →</a>
     </div>
-
     <div class="cta-card">
       <div class="cta-icon">📱💻📺</div>
       <h3>De qualquer lugar, em qualquer tela</h3>
       <p>Computador, tablet, celular ou Smart TV — seu palco está onde você estiver.</p>
       <a href="https://karaokemultiplayer.com.br/checkout.html?plan=trimestral&offer=flash15min" class="cta-btn">Quero Essa Oferta →</a>
     </div>
-
     <div class="cta-card">
       <div class="cta-icon">👥➡️⭐</div>
       <h3>Agora quem decide é a galera</h3>
       <p>Cada emoji vale nota. Quanto mais a plateia se emocionar, mais alta sua pontuação.</p>
       <a href="https://karaokemultiplayer.com.br/checkout.html?plan=trimestral&offer=flash15min" class="cta-btn">Ativar Plateia →</a>
     </div>
-
     <div class="cta-card cta-highlight">
       <div class="cta-icon">📸✨</div>
       <h3>Cante, pontue, vire estrela</h3>
       <p>Sua performance vira um momento único. O público decide, você brilha.</p>
       <a href="https://karaokemultiplayer.com.br/checkout.html?plan=trimestral&offer=flash15min" class="cta-btn">Quero Minha Selfie →</a>
     </div>
-
     <div class="cta-card">
       <div class="cta-icon">🎉🏠</div>
       <h3>O karaokê que se adapta à sua vida</h3>
       <p>De casa, da festa ou na fila do banco? Sim, dá pra cantar e pontuar de onde quiser.</p>
       <a href="https://karaokemultiplayer.com.br/checkout.html?plan=trimestral&offer=flash15min" class="cta-btn">Liberar Acesso →</a>
     </div>
-
     <div class="cta-card">
       <div class="cta-icon">🎭🎤</div>
       <h3>Transforme qualquer festa em um SHOW</h3>
       <p>Com karaokê sincronizado, pontuação colaborativa e selfie final.</p>
       <a href="https://karaokemultiplayer.com.br/checkout.html?plan=trimestral&offer=flash15min" class="cta-btn">Criar Evento →</a>
     </div>
-
     <div class="cta-card">
       <div class="cta-icon">🎧🚫</div>
       <h3>Nada de equipamentos caros</h3>
       <p>Só você, seus amigos e a vontade de cantar. Acesse pelo navegador, compartilhe o link e comece a receber emojis — e pontos.</p>
       <a href="https://karaokemultiplayer.com.br/checkout.html?plan=trimestral&offer=flash15min" class="cta-btn">Quero Cantar Agora →</a>
     </div>
-
     <div class="cta-card cta-highlight">
       <div class="cta-icon">😍🔥👏</div>
       <h3>Cada emoji vale nota</h3>
       <p>Quanto mais a plateia se emocionar, mais alta sua pontuação. No final, o resultado vira uma selfie para guardar ou postar.</p>
       <a href="https://karaokemultiplayer.com.br/checkout.html?plan=trimestral&offer=flash15min" class="cta-btn">Ativar Minha Plateia →</a>
     </div>
-
     <div class="cta-card">
       <div class="cta-icon">⭐🌟⭐</div>
       <h3>Cante como se ninguém estivesse vendo — mas eles estão</h3>
       <p>Sua pontuação final vira um troféu digital: "Essa foi minha performance lendária!"</p>
       <a href="https://karaokemultiplayer.com.br/checkout.html?plan=trimestral&offer=flash15min" class="cta-btn">Viver Minha Estrela →</a>
     </div>
-
     <div class="cta-card">
       <div class="cta-icon">🌍🎶</div>
       <h3>Karaokê sem fronteiras</h3>
       <p>Conecte amigos de qualquer lugar, em qualquer dispositivo. Cantem juntos e criem memórias inesquecíveis.</p>
       <a href="https://karaokemultiplayer.com.br/checkout.html?plan=trimestral&offer=flash15min" class="cta-btn">Começar Agora →</a>
     </div>
-
   </div>
 </section>
 
-<!-- ===== PLANS ===== -->
 <section class="plans">
   <div class="section-title">
     <h3>Escolha seu Plano</h3>
     <p>Comece a cantar hoje e vire a estrela da noite! ⭐</p>
   </div>
   <div class="plans-grid">
-
     <div class="plan-card">
       <div class="plan-name">Plano Mensal</div>
       <div class="plan-price">R$ 10,00 <small>/mês</small></div>
@@ -853,7 +873,6 @@ body{
       </ul>
       <a href="https://karaokemultiplayer.com.br/checkout.html?plan=mensal" class="btn-plan">Assinar Agora</a>
     </div>
-
     <div class="plan-card plan-recommended">
       <div class="plan-offer-badge">🎁 OFERTA ESPECIAL — 500 PRIMEIROS 🎁</div>
       <div class="plan-name">Plano Trimestral</div>
@@ -870,7 +889,6 @@ body{
       </ul>
       <a href="https://karaokemultiplayer.com.br/checkout.html?plan=trimestral&offer=flash15min" class="btn-plan">Garantir Oferta Agora →</a>
     </div>
-
     <div class="plan-card">
       <div class="plan-name">Plano Semestral</div>
       <div class="plan-price">R$ 89,90 <small>/semestre</small></div>
@@ -884,7 +902,6 @@ body{
       </ul>
       <a href="https://karaokemultiplayer.com.br/checkout.html?plan=semestral" class="btn-plan">Assinar Agora</a>
     </div>
-
     <div class="plan-card">
       <div class="plan-name">Plano Anual</div>
       <div class="plan-price">R$ 159,90 <small>/ano</small></div>
@@ -899,11 +916,9 @@ body{
       </ul>
       <a href="https://karaokemultiplayer.com.br/checkout.html?plan=anual" class="btn-plan">Assinar Agora</a>
     </div>
-
   </div>
 </section>
 
-<!-- ===== MODAL SELFIE ===== -->
 <div class="modal" id="selfieModal" role="dialog" aria-modal="true" aria-label="Selfie da performance">
   <div class="modal-box">
     <h3>⭐ Sua Performance Lendária! ⭐</h3>
@@ -922,7 +937,6 @@ body{
   </div>
 </div>
 
-<!-- ===== MODAL IMAGEM ===== -->
 <div class="modal" id="imagemModal" role="dialog" aria-modal="true" aria-label="Imagem da performance">
   <div class="modal-box img-modal-box">
     <button class="modal-close" onclick="fecharModalImagem()" aria-label="Fechar">&times;</button>
@@ -937,7 +951,6 @@ body{
   </div>
 </div>
 
-<!-- ===== FOOTER ===== -->
 <footer class="footer">
   <div class="footer-grid">
     <div class="footer-col">
@@ -981,29 +994,24 @@ body{
   </div>
 </footer>
 
-<!-- ===== JAVASCRIPT ===== -->
 <script>
 (function(){
   'use strict';
 
-  /* ---- CONSTANTES ---- */
   var TOTAL_SPOTS   = 500;
   var CHECKOUT_BASE = 'https://karaokemultiplayer.com.br/checkout.html';
 
-  /* ---- ESTADO ---- */
   var timeLeft  = 59 * 60;
   var spotsLeft = TOTAL_SPOTS;
   var soldOut   = false;
   var iv        = null;
 
-  /* ---- CACHE DOM (1 vez) ---- */
   var elMin    = document.getElementById('tMin');
   var elSec    = document.getElementById('tSec');
   var elSpots  = document.getElementById('spotsLeft');
   var elProg   = document.getElementById('progFill');
   var elBanner = document.getElementById('offerBanner');
 
-  /* ---- UTILS ---- */
   function pad(n){ return n < 10 ? '0'+n : ''+n; }
 
   function renderTimer(){
@@ -1055,7 +1063,6 @@ body{
     }
   }
 
-  /* ---- MODAL HELPERS ---- */
   function openModal(id){
     var m = document.getElementById(id);
     if(m){ m.classList.add('active'); document.body.style.overflow='hidden'; }
@@ -1065,7 +1072,6 @@ body{
     if(m){ m.classList.remove('active'); document.body.style.overflow=''; }
   }
 
-  /* ---- CONFETES (1 único reflow via DocumentFragment) ---- */
   function confetes(){
     var frag = document.createDocumentFragment();
     for(var i=0; i<26; i++){
@@ -1079,13 +1085,11 @@ body{
         'animation:confetti '+dur+'s linear forwards;'+
         'transform:rotate('+Math.floor(Math.random()*360)+'deg);';
       frag.appendChild(el);
-      /* closure para capturar 'el' corretamente */
       (function(e,d){ setTimeout(function(){ e.parentNode && e.parentNode.removeChild(e); }, d*1000+150); })(el,parseFloat(dur));
     }
     document.body.appendChild(frag);
   }
 
-  /* ---- CLIPBOARD ---- */
   function copiarTexto(txt, msg){
     if(navigator.clipboard && window.isSecureContext){
       navigator.clipboard.writeText(txt).then(function(){ alert(msg); }).catch(function(){ prompt('Copie o link:', txt); });
@@ -1094,9 +1098,6 @@ body{
     }
   }
 
-  /* ====================================================
-     FUNÇÕES GLOBAIS
-     ==================================================== */
   window.irParaLogin = function(){
     location.href = (localStorage.getItem('token') && localStorage.getItem('usuario'))
       ? '/app.html' : '/login.html';
@@ -1151,7 +1152,16 @@ body{
     }
   };
 
-  /* ---- FECHAR POR BACKDROP OU ESC ---- */
+  // BOTÃO PARA ATIVAR O SOM DO VÍDEO
+  var video = document.getElementById('demoVideo');
+  var unmuteBtn = document.getElementById('unmuteBtn');
+  if(unmuteBtn && video){
+    unmuteBtn.addEventListener('click', function(){
+      video.muted = false;
+      unmuteBtn.style.display = 'none';
+    });
+  }
+
   var MODAIS = ['selfieModal','imagemModal'];
   document.addEventListener('click', function(e){
     MODAIS.forEach(function(id){
@@ -1163,9 +1173,6 @@ body{
     if(e.key==='Escape') MODAIS.forEach(closeModal);
   });
 
-  /* ====================================================
-     INIT
-     ==================================================== */
   document.addEventListener('DOMContentLoaded', function(){
     renderTimer();
     renderSpots();
