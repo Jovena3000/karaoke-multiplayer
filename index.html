@@ -731,15 +731,15 @@ body{
     </div>
 
         <!-- VÍDEO DEMONSTRATIVO - CORRIGIDO -->
-    <div class="video-container">
-      <video id="Video" class="video" autoplay muted loop playsinline disableRemotePlayback>
-        <source src="video.mp4" type="video/mp4">
-        Seu navegador não suporta vídeos.
-      </video>
-      <button class="unmute-button" id="unmuteBtn">
-        <i class="fas fa-volume-up"></i> 🔈 Ativar Som
-      </button>
-    </div>
+<div class="demo-video-container">
+  <video id="demoVideo" class="demo-video" autoplay muted loop playsinline disableRemotePlayback>
+    <source src="video.mp4" type="video/mp4">
+    Seu navegador não suporta vídeos.
+  </video>
+  <button class="unmute-button" id="unmuteBtn">
+    <i class="fas fa-volume-up"></i> 🔈 Ativar Som
+  </button>
+</div>
 
     <div class="preview-grid">
       <div class="pcard">
@@ -1192,8 +1192,8 @@ body{
     }
   };
 
-  // BOTÃO PARA ATIVAR O SOM DO VÍDEO
-  var video = document.getElementById('demoVideo');
+    // BOTÃO PARA ATIVAR O SOM DO VÍDEO (com seus nomes)
+  var video = document.getElementById('Video');
   var unmuteBtn = document.getElementById('unmuteBtn');
   if(unmuteBtn && video){
     unmuteBtn.addEventListener('click', function(){
