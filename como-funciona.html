@@ -1,28 +1,160 @@
 <!-- ============================================ -->
-<!-- SEÇÃO: COMO FUNCIONA                         -->
+<!-- SEÇÃO: COMO FUNCIONA - ESTILO KARAOKÊ        -->
 <!-- ============================================ -->
 <section class="como-funciona">
     <div class="container">
         <h2>🎯 Como funciona?</h2>
         <div class="passos">
             <div class="passo">
+                <div class="passo-icone">🎤</div>
                 <div class="passo-numero">1</div>
                 <h3>Crie ou entre na sala</h3>
                 <p>Compartilhe o link da sua festa com os amigos. Sem cadastro chato, sem baixar aplicativo — tudo funciona direto no navegador.</p>
             </div>
             <div class="passo">
+                <div class="passo-icone">📋</div>
                 <div class="passo-numero">2</div>
                 <h3>Adicione músicas à fila</h3>
                 <p>Cada participante escolhe sua música favorita. A fila é colaborativa e todo mundo canta junto — ou tenta!</p>
             </div>
             <div class="passo">
+                <div class="passo-icone">😍</div>
                 <div class="passo-numero">3</div>
                 <h3>Cante e receba emojis</h3>
                 <p>A plateia reage com ❤️, 😂, 😮 ou 👍. Cada reação vale ponto. Quanto mais a galera se emocionar, maior sua pontuação!</p>
             </div>
             <div class="passo">
+                <div class="passo-icone">🏆</div>
                 <div class="passo-numero">4</div>
                 <h3>Vire estrela</h3>
+                <p>No final, sua performance vira uma selfie personalizada com a pontuação final. Compartilhe nas redes e mostre seu talento (ou falta dele) para o mundo.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+/* ===== SEÇÃO COMO FUNCIONA - ESTILO ESCURO NEON ===== */
+.como-funciona {
+    background: linear-gradient(135deg, #0b0b1f 0%, #1a1a3a 100%);
+    padding: 70px 20px;
+    font-family: 'Segoe UI', 'Poppins', system-ui, sans-serif;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Efeito de fundo com ondas sutis */
+.como-funciona::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 20% 50%, rgba(255, 107, 107, 0.1), transparent 70%);
+    pointer-events: none;
+}
+
+.como-funciona .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+}
+
+.como-funciona h2 {
+    text-align: center;
+    font-size: 2.8rem;
+    margin-bottom: 3rem;
+    background: linear-gradient(135deg, #fff, #ffb347);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    letter-spacing: -0.5px;
+}
+
+.passos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    justify-content: center;
+}
+
+.passo {
+    background: rgba(15, 15, 35, 0.8);
+    backdrop-filter: blur(4px);
+    border-radius: 28px;
+    padding: 30px 20px;
+    flex: 1;
+    min-width: 220px;
+    text-align: center;
+    border: 1px solid rgba(255, 180, 71, 0.3);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.passo:hover {
+    transform: translateY(-10px);
+    border-color: #ff6b6b;
+    box-shadow: 0 25px 40px rgba(255, 107, 107, 0.2);
+    background: rgba(25, 25, 55, 0.9);
+}
+
+/* Ícone grande emoji acima do número */
+.passo-icone {
+    font-size: 3.5rem;
+    margin-bottom: 5px;
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+}
+
+.passo-numero {
+    background: linear-gradient(135deg, #ff6b6b, #ffb347);
+    color: white;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    font-weight: bold;
+    margin: 10px auto 15px;
+    box-shadow: 0 5px 10px rgba(0,0,0,0.3);
+}
+
+.passo h3 {
+    font-size: 1.6rem;
+    margin: 15px 0 10px;
+    color: #ffb347;
+    letter-spacing: -0.3px;
+}
+
+.passo p {
+    color: #ddd;
+    line-height: 1.5;
+    font-size: 1rem;
+    padding: 0 10px;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+    .como-funciona h2 {
+        font-size: 2rem;
+    }
+    .passo {
+        min-width: 100%;
+    }
+    .passo-icone {
+        font-size: 2.8rem;
+    }
+    .passo h3 {
+        font-size: 1.4rem;
+    }
+}
+</style>
                 <p>No final, sua performance vira uma selfie personalizada com a pontuação final. Compartilhe nas redes e mostre seu talento (ou falta dele) para o mundo.</p>
             </div>
         </div>
