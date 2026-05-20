@@ -29,6 +29,140 @@
                 <h3>⭐ Como funciona a pontuação?</h3>
                 <p>A plateia envia emojis durante sua performance: ❤️ = 5 pontos, 😂 = 3 pontos, 👍 = 1 ponto. A pontuação é somada em tempo real e exibida ao final.</p>
             </div>
+            <div class="faq-item">
+                <h3>🔊 Posso usar caixa de som Bluetooth?</h3>
+                <p>Pode sim! Conecte seu dispositivo a uma caixa externa e a festa fica ainda melhor. Só cuidado para não desafinar demais 😉</p>
+            </div>
+            <div class="faq-item">
+                <h3>📹 Preciso ligar a câmera?</h3>
+                <p>Não é obrigatório. Apenas o áudio é necessário para cantar. Mas se quiser mostrar sua carinha de artista, fique à vontade!</p>
+            </div>
+            <div class="faq-item">
+                <h3>🕒 As músicas têm tempo limite?</h3>
+                <p>Cada música dura em média de 3 a 5 minutos, mas você pode pular a qualquer momento se a plateia pedir bis (ou se estiver muito ruim 😅).</p>
+            </div>
+            <div class="faq-item">
+                <h3>🏆 O que ganho sendo o melhor da noite?</h3>
+                <p>Além da glória eterna, você ganha um troféu virtual exclusivo para compartilhar nas redes sociais e um selo de "Craque da Noite" no seu perfil.</p>
+            </div>
+            <div class="faq-item">
+                <h3>🔒 Meus dados estão seguros?</h3>
+                <p>Sim! Seguimos a LGPD e não compartilhamos suas informações com terceiros sem consentimento. Veja nossa <a href="https://karaokemultiplayer.com.br/privacidade">Política de Privacidade</a>.</p>
+            </div>
+            <div class="faq-item">
+                <h3>🎫 Preciso pagar para criar uma sala?</h3>
+                <p>Não! Criar sala e participar como cantor é totalmente gratuito. Planos pagos só para recursos extras como remover anúncios e personalizar a sala.</p>
+            </div>
         </div>
     </div>
 </section>
+
+<style>
+/* ===== SEÇÃO FAQ - ESTILO ESCURO NEON ===== */
+.faq {
+    background: linear-gradient(135deg, #0a0a1a 0%, #151530 100%);
+    padding: 70px 20px;
+    font-family: 'Segoe UI', 'Poppins', system-ui, sans-serif;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Efeito de brilho sutil no fundo */
+.faq::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 107, 107, 0.08), transparent 70%);
+    pointer-events: none;
+}
+
+.faq .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+}
+
+.faq h2 {
+    text-align: center;
+    font-size: 2.8rem;
+    margin-bottom: 3rem;
+    background: linear-gradient(135deg, #ffffff, #ffb347);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    letter-spacing: -0.5px;
+}
+
+.faq-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 30px;
+}
+
+.faq-item {
+    background: rgba(20, 20, 45, 0.75);
+    backdrop-filter: blur(4px);
+    border-radius: 24px;
+    padding: 24px;
+    border: 1px solid rgba(255, 180, 71, 0.25);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.faq-item:hover {
+    transform: translateY(-6px);
+    border-color: #ff6b6b;
+    background: rgba(35, 35, 65, 0.85);
+    box-shadow: 0 15px 30px rgba(255, 107, 107, 0.15);
+}
+
+.faq-item h3 {
+    font-size: 1.4rem;
+    margin-bottom: 12px;
+    color: #ffb347;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-left: 4px solid #ff6b6b;
+    padding-left: 15px;
+}
+
+.faq-item p {
+    color: #e0e0e0;
+    line-height: 1.5;
+    font-size: 0.98rem;
+    margin: 0;
+}
+
+.faq-item a {
+    color: #ff8c42;
+    text-decoration: none;
+    border-bottom: 1px dotted rgba(255, 140, 66, 0.5);
+}
+
+.faq-item a:hover {
+    color: #ff6b6b;
+    border-bottom-color: #ff6b6b;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+    .faq {
+        padding: 50px 15px;
+    }
+    .faq h2 {
+        font-size: 2rem;
+    }
+    .faq-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    .faq-item h3 {
+        font-size: 1.2rem;
+    }
+}
+</style>
