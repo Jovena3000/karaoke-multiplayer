@@ -63,6 +63,15 @@
             cursor: pointer;
             margin-top: 20px;
         }
+        input, select, textarea {
+            background: rgba(0,0,0,0.5);
+            color: white;
+            border: 1px solid rgba(255,180,71,0.5);
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #ff6b6b;
+        }
         @media (max-width: 768px) {
             .container { padding: 25px 20px; }
             h1 { font-size: 2rem; }
@@ -86,24 +95,30 @@
         </div>
 
         <div class="card">
-            <h2>📝 Como reportar?</h2>
-            <p><strong>Opção 1 – Formulário rápido:</strong> Preencha o formulário abaixo (simulado). Em breve teremos integração com banco de dados.</p>
-            <form action="#" method="post">
-                <label>Seu e-mail:</label><br>
-                <input type="email" style="width:100%; padding:8px; margin:8px 0; border-radius:8px; border:none;"><br>
+            <h2>📝 Formulário de reporte</h2>
+            <p>Preencha os campos abaixo. Sua mensagem será enviada diretamente para nossa equipe.</p>
+            
+            <!-- FORMULÁRIO COM ACTION DO FORMSPREE -->
+            <form action="https://formspree.io/f/mkoervgy" method="POST">
+                <label>Seu e-mail (para resposta):</label><br>
+                <input type="email" name="email" required style="width:100%; padding:8px; margin:8px 0; border-radius:8px;"><br>
+                
                 <label>Tipo do problema:</label><br>
-                <select style="width:100%; padding:8px; margin:8px 0; border-radius:8px;">
-                    <option>Selecione...</option>
-                    <option>Bug técnico</option>
-                    <option>Problema com pagamento</option>
-                    <option>Reportar usuário</option>
-                    <option>Sugestão</option>
+                <select name="tipo_problema" required style="width:100%; padding:8px; margin:8px 0; border-radius:8px;">
+                    <option value="">Selecione...</option>
+                    <option value="bug">Bug técnico</option>
+                    <option value="pagamento">Problema com pagamento</option>
+                    <option value="usuario">Reportar usuário</option>
+                    <option value="sugestao">Sugestão</option>
                 </select><br>
+                
                 <label>Descreva detalhadamente:</label><br>
-                <textarea rows="4" style="width:100%; padding:8px; border-radius:8px;"></textarea><br>
+                <textarea name="mensagem" rows="4" required style="width:100%; padding:8px; border-radius:8px;"></textarea><br>
+                
                 <button type="submit">Enviar reporte</button>
             </form>
-            <p><em>Observação: O formulário acima é um exemplo. Para funcionar completamente, você precisará integrar com um backend (Supabase, por exemplo).</em></p>
+            
+            <p><em>✅ Seu reporte será enviado com segurança. Responderemos em até 24h úteis.</em></p>
         </div>
 
         <div class="card">
