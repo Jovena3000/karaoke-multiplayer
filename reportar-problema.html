@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportar Problema - Karaokê Multiplayer</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', 'Poppins', system-ui, sans-serif;
+            background: linear-gradient(135deg, #0b0b1f 0%, #1a1a3a 100%);
+            color: #f0f0f0;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(15, 15, 35, 0.75);
+            backdrop-filter: blur(10px);
+            border-radius: 32px;
+            padding: 40px 45px;
+            border: 1px solid rgba(255, 180, 71, 0.3);
+        }
+        h1 {
+            font-size: 2.8rem;
+            background: linear-gradient(135deg, #fff, #ffb347);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            border-left: 5px solid #ff6b6b;
+            padding-left: 20px;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #ffb347;
+            margin: 30px 0 15px 0;
+        }
+        .card {
+            background: rgba(25, 25, 55, 0.6);
+            border-radius: 20px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .card ul, .card p { margin-left: 20px; }
+        a {
+            color: #ff8c42;
+            text-decoration: none;
+        }
+        .voltar {
+            display: inline-block;
+            margin-top: 30px;
+            background: rgba(255, 107, 107, 0.2);
+            padding: 10px 20px;
+            border-radius: 40px;
+        }
+        button {
+            background: linear-gradient(135deg, #ff6b6b, #ffb347);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 40px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        @media (max-width: 768px) {
+            .container { padding: 25px 20px; }
+            h1 { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚠️ Reportar um problema</h1>
+        <p>Identificou algo estranho? Conte para gente. Valorizamos cada reporte!</p>
+
+        <div class="card">
+            <h2>🐛 Tipos de problema que você pode reportar</h2>
+            <ul>
+                <li>Bug técnico (tela branca, erro ao carregar, áudio falhando)</li>
+                <li>Problema com pagamento ou assinatura</li>
+                <li>Conteúdo impróprio ou comportamento de usuário</li>
+                <li>Sugestão de nova música ou funcionalidade</li>
+                <li>Dúvida não resolvida pela central de ajuda</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>📝 Como reportar?</h2>
+            <p><strong>Opção 1 – Formulário rápido:</strong> Preencha o formulário abaixo (simulado). Em breve teremos integração com banco de dados.</p>
+            <form action="#" method="post">
+                <label>Seu e-mail:</label><br>
+                <input type="email" style="width:100%; padding:8px; margin:8px 0; border-radius:8px; border:none;"><br>
+                <label>Tipo do problema:</label><br>
+                <select style="width:100%; padding:8px; margin:8px 0; border-radius:8px;">
+                    <option>Selecione...</option>
+                    <option>Bug técnico</option>
+                    <option>Problema com pagamento</option>
+                    <option>Reportar usuário</option>
+                    <option>Sugestão</option>
+                </select><br>
+                <label>Descreva detalhadamente:</label><br>
+                <textarea rows="4" style="width:100%; padding:8px; border-radius:8px;"></textarea><br>
+                <button type="submit">Enviar reporte</button>
+            </form>
+            <p><em>Observação: O formulário acima é um exemplo. Para funcionar completamente, você precisará integrar com um backend (Supabase, por exemplo).</em></p>
+        </div>
+
+        <div class="card">
+            <h2>📧 Reportar por e-mail</h2>
+            <p>Envie um e-mail para <a href="mailto:suporte@karaokemultiplayer.com.br">suporte@karaokemultiplayer.com.br</a> com o assunto “REPORTE” e inclua prints ou vídeos, se possível.</p>
+        </div>
+
+        <a href="index.html" class="voltar">⬅ Voltar para o site</a>
+    </div>
+</body>
+</html>
