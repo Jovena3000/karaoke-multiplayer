@@ -1,243 +1,314 @@
-<!-- ============================================ -->
-<!-- SEÇÃO: SOBRE NÓS                              -->
-<!-- ============================================ -->
-<section class="sobre-nos">
-    <div class="container">
-        <h2>🎤 Sobre o Karaokê Multiplayer</h2>
-        <div class="sobre-grid">
-            <div class="sobre-texto">
-                <p>Nascemos da paixão por música e da vontade de conectar pessoas através da cantoria. Sabemos que os melhores momentos acontecem quando amigos se reúnem para soltar a voz — mesmo que desafinado — e virar a noite cantando.</p>
-                <p>O <strong>Karaokê Multiplayer</strong> foi criado para transformar qualquer encontro em um show inesquecível. Sem equipamentos caros, sem complicação: apenas você, seus amigos e a plateia, que decide sua nota com <strong>💖 emojis em tempo real</strong>.</p>
-                <p>Nossa missão é democratizar o karaokê, levando a experiência interativa para dentro da sua casa, da sua festa ou até mesmo da fila do banco (sim, a gente apoia!). A cada apresentação, uma selfie épica e um troféu digital para guardar de recordação.</p>
-                <p><strong>🚀 Números que mostram nossa energia:</strong></p>
-                <ul>
-                    <li>🎙️ +10.000 cantores mensais</li>
-                    <li>🎶 +50.000 músicas no catálogo</li>
-                    <li>⭐ +98% de aprovação dos usuários</li>
-                </ul>
-            </div>
-            <div class="sobre-imagens-duas">
-                <div class="sobre-imagem">
-                    <img src="https://uploads.onecompiler.io/43xkytw48/44jy6nsxe/pessoascantando.jfif" alt="Pessoas cantando karaokê online">
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sobre e FAQ - Karaokê Multiplayer</title>
+    <style>
+        /* Reset básico */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0b0b1f 0%, #1a1a3a 100%);
+            color: #f0f0f0;
+        }
+
+        /* Estilos gerais das seções */
+        .sobre-nos, .como-funciona, .faq {
+            padding: 60px 20px;
+        }
+
+        .sobre-nos {
+            background-color: #f9f5ff;
+            color: #222;
+        }
+        .como-funciona {
+            background-color: #fff0f0;
+            color: #222;
+        }
+        .faq {
+            background-color: #fef9e6;
+            color: #222;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            color: #222;
+        }
+
+        /* Sobre nós */
+        .sobre-grid {
+            display: flex;
+            gap: 40px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .sobre-texto {
+            flex: 2;
+            min-width: 250px;
+        }
+        .sobre-texto p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+        .sobre-texto ul {
+            padding-left: 1.5rem;
+        }
+        .sobre-texto li {
+            margin: 8px 0;
+            font-weight: bold;
+        }
+        .sobre-imagens-duas {
+            flex: 1;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .sobre-imagem {
+            flex: 1;
+            min-width: 180px;
+            text-align: center;
+        }
+        .sobre-imagem img {
+            width: 100%;
+            max-width: 250px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            object-fit: cover;
+        }
+
+        /* Como funciona */
+        .passos {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+        }
+        .passo {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            flex: 1;
+            min-width: 200px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+        }
+        .passo:hover {
+            transform: translateY(-5px);
+        }
+        .passo-numero {
+            background-color: #ff6b6b;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin: 0 auto 15px;
+        }
+        .passo h3 {
+            margin-bottom: 10px;
+            color: #ff6b6b;
+        }
+        .passo p {
+            color: #555;
+        }
+
+        /* FAQ */
+        .faq-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        .faq-item {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: all 0.2s;
+        }
+        .faq-item:hover {
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+        .faq-item h3 {
+            margin-top: 0;
+            color: #b45f06;
+            border-left: 5px solid #ffb347;
+            padding-left: 15px;
+        }
+        .faq-item p {
+            color: #555;
+        }
+
+        /* Botão Voltar */
+        .voltar-container {
+            text-align: center;
+            padding: 40px 20px 60px;
+            background: transparent;
+        }
+        .voltar {
+            display: inline-block;
+            background: rgba(255, 107, 107, 0.2);
+            padding: 12px 28px;
+            border-radius: 40px;
+            color: #ffb347;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 107, 107, 0.3);
+        }
+        .voltar:hover {
+            background: #ff6b6b;
+            color: #0b0b1f;
+            border-color: #ff6b6b;
+            transform: translateX(-5px);
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            h2 {
+                font-size: 2rem;
+            }
+            .sobre-grid {
+                flex-direction: column;
+            }
+            .sobre-imagens-duas {
+                flex-direction: column;
+                align-items: center;
+            }
+            .sobre-imagem img {
+                max-width: 100%;
+            }
+            .passos {
+                flex-direction: column;
+            }
+            .faq-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============================================ -->
+    <!-- SEÇÃO: SOBRE NÓS                              -->
+    <!-- ============================================ -->
+    <section class="sobre-nos">
+        <div class="container">
+            <h2>🎤 Sobre o Karaokê Multiplayer</h2>
+            <div class="sobre-grid">
+                <div class="sobre-texto">
+                    <p>Nascemos da paixão por música e da vontade de conectar pessoas através da cantoria. Sabemos que os melhores momentos acontecem quando amigos se reúnem para soltar a voz — mesmo que desafinado — e virar a noite cantando.</p>
+                    <p>O <strong>Karaokê Multiplayer</strong> foi criado para transformar qualquer encontro em um show inesquecível. Sem equipamentos caros, sem complicação: apenas você, seus amigos e a plateia, que decide sua nota com <strong>💖 emojis em tempo real</strong>.</p>
+                    <p>Nossa missão é democratizar o karaokê, levando a experiência interativa para dentro da sua casa, da sua festa ou até mesmo da fila do banco (sim, a gente apoia!). A cada apresentação, uma selfie épica e um troféu digital para guardar de recordação.</p>
+                    <p><strong>🚀 Números que mostram nossa energia:</strong></p>
+                    <ul>
+                        <li>🎙️ +10.000 cantores mensais</li>
+                        <li>🎶 +50.000 músicas no catálogo</li>
+                        <li>⭐ +98% de aprovação dos usuários</li>
+                    </ul>
                 </div>
-                <div class="sobre-imagem">
-                    <img src="https://uploads.onecompiler.io/43xkytw48/44p6r8k6p/logo2.jpeg" alt="Karaokê Multiplayer logo">
+                <div class="sobre-imagens-duas">
+                    <div class="sobre-imagem">
+                        <img src="https://uploads.onecompiler.io/43xkytw48/44jy6nsxe/pessoascantando.jfif" alt="Pessoas cantando karaokê online">
+                    </div>
+                    <div class="sobre-imagem">
+                        <img src="https://uploads.onecompiler.io/43xkytw48/44p6r8k6p/logo2.jpeg" alt="Karaokê Multiplayer logo">
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<!-- ============================================ -->
-<!-- SEÇÃO: COMO FUNCIONA                         -->
-<!-- ============================================ -->
-<section class="como-funciona">
-    <div class="container">
-        <h2>🎯 Como funciona?</h2>
-        <div class="passos">
-            <div class="passo">
-                <div class="passo-numero">1</div>
-                <h3>Crie ou entre na sala</h3>
-                <p>Compartilhe o link da sua festa com os amigos. Sem cadastro chato, sem baixar aplicativo — tudo funciona direto no navegador.</p>
-            </div>
-            <div class="passo">
-                <div class="passo-numero">2</div>
-                <h3>Adicione músicas à fila</h3>
-                <p>Cada participante escolhe sua música favorita. A fila é colaborativa e todo mundo canta junto — ou tenta!</p>
-            </div>
-            <div class="passo">
-                <div class="passo-numero">3</div>
-                <h3>Cante e receba emojis</h3>
-                <p>A plateia reage com ❤️, 😂, 😮 ou 👍. Cada reação vale ponto. Quanto mais a galera se emocionar, maior sua pontuação!</p>
-            </div>
-            <div class="passo">
-                <div class="passo-numero">4</div>
-                <h3>Vire estrela</h3>
-                <p>No final, sua performance vira uma selfie personalizada com a pontuação final. Compartilhe nas redes e mostre seu talento (ou falta dele) para o mundo.</p>
+    <!-- ============================================ -->
+    <!-- SEÇÃO: COMO FUNCIONA                         -->
+    <!-- ============================================ -->
+    <section class="como-funciona">
+        <div class="container">
+            <h2>🎯 Como funciona?</h2>
+            <div class="passos">
+                <div class="passo">
+                    <div class="passo-numero">1</div>
+                    <h3>Crie ou entre na sala</h3>
+                    <p>Compartilhe o link da sua festa com os amigos. Sem cadastro chato, sem baixar aplicativo — tudo funciona direto no navegador.</p>
+                </div>
+                <div class="passo">
+                    <div class="passo-numero">2</div>
+                    <h3>Adicione músicas à fila</h3>
+                    <p>Cada participante escolhe sua música favorita. A fila é colaborativa e todo mundo canta junto — ou tenta!</p>
+                </div>
+                <div class="passo">
+                    <div class="passo-numero">3</div>
+                    <h3>Cante e receba emojis</h3>
+                    <p>A plateia reage com ❤️, 😂, 😮 ou 👍. Cada reação vale ponto. Quanto mais a galera se emocionar, maior sua pontuação!</p>
+                </div>
+                <div class="passo">
+                    <div class="passo-numero">4</div>
+                    <h3>Vire estrela</h3>
+                    <p>No final, sua performance vira uma selfie personalizada com a pontuação final. Compartilhe nas redes e mostre seu talento (ou falta dele) para o mundo.</p>
+                </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<!-- ============================================ -->
-<!-- SEÇÃO: FAQ (PERGUNTAS FREQUENTES)             -->
-<!-- ============================================ -->
-<section class="faq">
-    <div class="container">
-        <h2>🤔 Dúvidas frequentes</h2>
-        <div class="faq-grid">
-            <div class="faq-item">
-                <h3>🎙️ Preciso de microfone profissional?</h3>
-                <p>Não! Use o microfone do seu celular, fone de ouvido ou笔记本. O importante é a diversão — e os emojis da galera!</p>
-            </div>
-            <div class="faq-item">
-                <h3>📱 Funciona em qualquer dispositivo?</h3>
-                <p>Sim! Computador, tablet, celular ou Smart TV. Basta um navegador moderno e conexão com internet.</p>
-            </div>
-            <div class="faq-item">
-                <h3>👥 Quantas pessoas podem participar?</h3>
-                <p>Quantas quiserem! Suporte para até 50 pessoas por sala, mas recomendamos grupos menores para mais interação.</p>
-            </div>
-            <div class="faq-item">
-                <h3>🎶 As músicas são licenciadas?</h3>
-                <p>Sim, todas as faixas são licenciadas e seguras para uso em eventos privados. Sem surpresas desagradáveis!</p>
-            </div>
-            <div class="faq-item">
-                <h3>💰 Os planos têm carência?</h3>
-                <p>Não. Seu plano começa na hora do pagamento e você pode cancelar quando quiser, sem multa.</p>
-            </div>
-            <div class="faq-item">
-                <h3>⭐ Como funciona a pontuação?</h3>
-                <p>A plateia envia emojis durante sua performance: ❤️ = 5 pontos, 😂 = 3 pontos, 👍 = 1 ponto. A pontuação é somada em tempo real e exibida ao final.</p>
+    <!-- ============================================ -->
+    <!-- SEÇÃO: FAQ (PERGUNTAS FREQUENTES)             -->
+    <!-- ============================================ -->
+    <section class="faq">
+        <div class="container">
+            <h2>🤔 Dúvidas frequentes</h2>
+            <div class="faq-grid">
+                <div class="faq-item">
+                    <h3>🎙️ Preciso de microfone profissional?</h3>
+                    <p>Não! Use o microfone do seu celular, fone de ouvido ou notebook. O importante é a diversão — e os emojis da galera!</p>
+                </div>
+                <div class="faq-item">
+                    <h3>📱 Funciona em qualquer dispositivo?</h3>
+                    <p>Sim! Computador, tablet, celular ou Smart TV. Basta um navegador moderno e conexão com internet.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>👥 Quantas pessoas podem participar?</h3>
+                    <p>Quantas quiserem! Suporte para até 50 pessoas por sala, mas recomendamos grupos menores para mais interação.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>🎶 As músicas são licenciadas?</h3>
+                    <p>Sim, todas as faixas são licenciadas e seguras para uso em eventos privados. Sem surpresas desagradáveis!</p>
+                </div>
+                <div class="faq-item">
+                    <h3>💰 Os planos têm carência?</h3>
+                    <p>Não. Seu plano começa na hora do pagamento e você pode cancelar quando quiser, sem multa.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>⭐ Como funciona a pontuação?</h3>
+                    <p>A plateia envia emojis durante sua performance: ❤️ = 5 pontos, 😂 = 3 pontos, 👍 = 1 ponto. A pontuação é somada em tempo real e exibida ao final.</p>
+                </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<!-- ============================================ -->
-<!-- CSS COMPLETO (incluindo ajuste das imagens)  -->
-<!-- ============================================ -->
-<style>
-/* Estilos gerais das seções */
-.sobre-nos, .como-funciona, .faq {
-    padding: 60px 20px;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-.sobre-nos {
-    background-color: #f9f5ff;
-}
-.como-funciona {
-    background-color: #fff0f0;
-}
-.faq {
-    background-color: #fef9e6;
-}
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-}
-h2 {
-    text-align: center;
-    font-size: 2.5rem;
-    margin-bottom: 1.5rem;
-    color: #222;
-}
-.sobre-grid {
-    display: flex;
-    gap: 40px;
-    align-items: center;
-    flex-wrap: wrap;
-}
-.sobre-texto {
-    flex: 2;
-    min-width: 250px;
-}
-.sobre-texto p {
-    font-size: 1.1rem;
-    line-height: 1.6;
-    margin-bottom: 1rem;
-    color: #333;
-}
-.sobre-texto ul {
-    padding-left: 1.5rem;
-}
-.sobre-texto li {
-    margin: 8px 0;
-    font-weight: bold;
-}
-/* Estilos para as duas imagens lado a lado */
-.sobre-imagens-duas {
-    flex: 1;
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
-    justify-content: center;
-}
-.sobre-imagem {
-    flex: 1;
-    min-width: 180px;
-    text-align: center;
-}
-.sobre-imagem img {
-    width: 100%;
-    max-width: 250px;
-    border-radius: 20px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-    object-fit: cover;
-}
-.passos {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 30px;
-    justify-content: center;
-}
-.passo {
-    background: white;
-    border-radius: 20px;
-    padding: 25px;
-    flex: 1;
-    min-width: 200px;
-    text-align: center;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-    transition: transform 0.3s ease;
-}
-.passo:hover {
-    transform: translateY(-5px);
-}
-.passo-numero {
-    background-color: #ff6b6b;
-    color: white;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.8rem;
-    font-weight: bold;
-    margin: 0 auto 15px;
-}
-.passo h3 {
-    margin-bottom: 10px;
-    color: #ff6b6b;
-}
-.faq-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 30px;
-}
-.faq-item {
-    background: white;
-    border-radius: 16px;
-    padding: 20px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    transition: all 0.2s;
-}
-.faq-item:hover {
-    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-}
-.faq-item h3 {
-    margin-top: 0;
-    color: #b45f06;
-    border-left: 5px solid #ffb347;
-    padding-left: 15px;
-}
-@media (max-width: 768px) {
-    h2 {
-        font-size: 2rem;
-    }
-    .sobre-grid {
-        flex-direction: column;
-    }
-    .sobre-imagens-duas {
-        flex-direction: column;
-        align-items: center;
-    }
-    .sobre-imagem img {
-        max-width: 100%;
-    }
-    .passos {
-        flex-direction: column;
-    }
-}
-</style>
+    <!-- Botão Voltar para o site -->
+    <div class="voltar-container">
+        <a href="index.html" class="voltar">⬅ Voltar para o site</a>
+    </div>
+
+</body>
+</html>
