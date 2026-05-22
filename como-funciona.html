@@ -1,5 +1,5 @@
 <!-- ============================================ -->
-<!-- SEÇÃO: COMO FUNCIONA - ESTILO KARAOKÊ        -->
+<!-- SEÇÃO: COMO FUNCIONA - RESPONSIVA E MODERNA  -->
 <!-- ============================================ -->
 <section class="como-funciona">
     <div class="container">
@@ -34,16 +34,16 @@
 </section>
 
 <style>
-/* ===== SEÇÃO COMO FUNCIONA - ESTILO ESCURO NEON ===== */
+/* ===== SEÇÃO COMO FUNCIONA - ESTILO ESCURO NEON + RESPONSIVO ===== */
 .como-funciona {
     background: linear-gradient(135deg, #0b0b1f 0%, #1a1a3a 100%);
-    padding: 70px 20px;
+    padding: clamp(40px, 8vw, 80px) 20px;
     font-family: 'Segoe UI', 'Poppins', system-ui, sans-serif;
     position: relative;
     overflow: hidden;
 }
 
-/* Efeito de fundo com ondas sutis */
+/* Efeito de fundo */
 .como-funciona::before {
     content: "";
     position: absolute;
@@ -56,60 +56,61 @@
 }
 
 .como-funciona .container {
-    max-width: 1200px;
+    max-width: 1300px;
     margin: 0 auto;
     position: relative;
     z-index: 2;
 }
 
+/* Título responsivo */
 .como-funciona h2 {
     text-align: center;
-    font-size: 2.8rem;
-    margin-bottom: 3rem;
+    font-size: clamp(1.8rem, 6vw, 2.8rem);
+    margin-bottom: clamp(2rem, 5vw, 3rem);
     background: linear-gradient(135deg, #fff, #ffb347);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-    text-shadow: 0 2px 5px rgba(0,0,0,0.2);
     letter-spacing: -0.5px;
 }
 
+/* Grid flexível */
 .passos {
     display: flex;
     flex-wrap: wrap;
-    gap: 30px;
+    gap: 25px;
     justify-content: center;
 }
 
+/* Cards */
 .passo {
     background: rgba(15, 15, 35, 0.8);
     backdrop-filter: blur(4px);
     border-radius: 28px;
-    padding: 30px 20px;
-    flex: 1;
-    min-width: 220px;
+    padding: 25px 18px;
+    flex: 1 1 220px;
+    min-width: 200px;
     text-align: center;
     border: 1px solid rgba(255, 180, 71, 0.3);
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
     transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
 }
 
 .passo:hover {
-    transform: translateY(-10px);
+    transform: translateY(-8px);
     border-color: #ff6b6b;
     box-shadow: 0 25px 40px rgba(255, 107, 107, 0.2);
     background: rgba(25, 25, 55, 0.9);
 }
 
-/* Ícone grande emoji acima do número */
+/* Ícone emoji */
 .passo-icone {
-    font-size: 3.5rem;
+    font-size: clamp(2.5rem, 7vw, 3.8rem);
     margin-bottom: 5px;
     filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
 }
 
+/* Número */
 .passo-numero {
     background: linear-gradient(135deg, #ff6b6b, #ffb347);
     color: white;
@@ -119,44 +120,90 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.6rem;
+    font-size: 1.5rem;
     font-weight: bold;
     margin: 10px auto 15px;
     box-shadow: 0 5px 10px rgba(0,0,0,0.3);
 }
 
+/* Título do card */
 .passo h3 {
-    font-size: 1.6rem;
-    margin: 15px 0 10px;
+    font-size: clamp(1.2rem, 4vw, 1.6rem);
+    margin: 12px 0 10px;
     color: #ffb347;
-    letter-spacing: -0.3px;
 }
 
+/* Parágrafo */
 .passo p {
     color: #ddd;
     line-height: 1.5;
-    font-size: 1rem;
-    padding: 0 10px;
+    font-size: clamp(0.85rem, 3vw, 1rem);
+    padding: 0 5px;
 }
 
-/* Responsivo */
-@media (max-width: 768px) {
-    .como-funciona h2 {
-        font-size: 2rem;
+/* ========== RESPONSIVIDADE AVANÇADA ========== */
+/* Tablets (768px a 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+    .passos {
+        gap: 20px;
     }
     .passo {
-        min-width: 100%;
+        flex: 1 1 200px;
+        padding: 20px 15px;
     }
     .passo-icone {
         font-size: 2.8rem;
     }
     .passo h3 {
-        font-size: 1.4rem;
+        font-size: 1.3rem;
+    }
+}
+
+/* Celulares (até 767px) */
+@media (max-width: 767px) {
+    .como-funciona {
+        padding: 40px 15px;
+    }
+    .passos {
+        gap: 20px;
+        flex-direction: column;
+        align-items: center;
+    }
+    .passo {
+        max-width: 100%;
+        width: 100%;
+        flex: none;
+        padding: 20px 15px;
+    }
+    .passo-icone {
+        font-size: 2.5rem;
+    }
+    .passo-numero {
+        width: 38px;
+        height: 38px;
+        font-size: 1.2rem;
+    }
+    .passo h3 {
+        font-size: 1.2rem;
+    }
+    .passo p {
+        font-size: 0.9rem;
+    }
+}
+
+/* Celulares muito pequenos (até 480px) */
+@media (max-width: 480px) {
+    .como-funciona h2 {
+        font-size: 1.6rem;
+    }
+    .passo {
+        padding: 18px 12px;
+    }
+    .passo-icone {
+        font-size: 2.2rem;
+    }
+    .passo p {
+        font-size: 0.85rem;
     }
 }
 </style>
-                <p>No final, sua performance vira uma selfie personalizada com a pontuação final. Compartilhe nas redes e mostre seu talento (ou falta dele) para o mundo.</p>
-            </div>
-        </div>
-    </div>
-</section>
