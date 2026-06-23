@@ -159,9 +159,23 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
 .badge.you{background:var(--blue)}
 .badge.on{background:var(--green);color:#000;animation:pulse 1s infinite}
 
-.act-feed{max-height:180px;overflow-y:auto}
-.act-item{display:flex;align-items:center;gap:.4rem;padding:.4rem;background:var(--light);border-radius:.4rem;margin-bottom:.3rem;font-size:.75rem}
-.act-ico{font-size:1.3rem;flex-shrink:0}
+/* ── TOP 5 MÚSICAS DA SEMANA ── */
+.top5-sec{background:var(--card);border-radius:1rem;padding:1.2rem;border:1px solid rgba(157,78,221,.2)}
+.top5-hdr{font-size:.95rem;font-weight:600;margin-bottom:.75rem;display:flex;align-items:center;gap:.4rem;color:var(--orange)}
+.top5-list{display:flex;flex-direction:column;gap:.45rem}
+.top5-item{background:var(--light);border-radius:.65rem;padding:.55rem .65rem;display:flex;align-items:center;gap:.65rem;border:1px solid rgba(255,255,255,.07);transition:border-color .2s}
+.top5-item:hover{border-color:rgba(157,78,221,.4)}
+.top5-thumb{width:56px;height:42px;border-radius:.4rem;background:var(--bg);overflow:hidden;flex-shrink:0;position:relative}
+.top5-thumb img{width:100%;height:100%;object-fit:cover}
+.top5-rank{position:absolute;top:2px;left:3px;background:rgba(0,0,0,.7);color:#fff;font-size:.55rem;font-weight:700;padding:.1rem .3rem;border-radius:.2rem;line-height:1.2}
+.top5-info{flex:1;min-width:0}
+.top5-title{font-size:.78rem;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:.15rem}
+.top5-artist{font-size:.67rem;color:var(--muted)}
+.top5-btn{background:linear-gradient(135deg,var(--purple),var(--pink));border:none;padding:.38rem .75rem;border-radius:.4rem;color:#fff;font-size:.72rem;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:transform .15s,opacity .2s;display:flex;align-items:center;gap:.3rem}
+.top5-btn:hover{transform:scale(1.05)}
+.top5-btn:disabled{opacity:.4;pointer-events:none}
+.top5-loading{text-align:center;padding:1rem;color:var(--muted);font-size:.82rem}
+.top5-spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,.1);border-top:2px solid var(--pink);border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:.4rem}
 
 /* ══════════════════════════════
    MODALS — responsivos
@@ -404,9 +418,12 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
         <div class="plist" id="pList"><div style="text-align:center;color:var(--muted);padding:.75rem;font-size:.82rem">Aguardando...</div></div>
       </div>
 
-      <div class="card">
-        <div class="c-title">⚡ Atividade ao Vivo</div>
-        <div class="act-feed" id="actFeed"><div style="text-align:center;color:var(--muted);padding:.75rem;font-size:.82rem">Nenhuma atividade</div></div>
+      <!-- TOP 5 MÚSICAS DA SEMANA -->
+      <div class="top5-sec">
+        <div class="top5-hdr">🔥 Cinco Músicas Mais Cantadas da Semana</div>
+        <div class="top5-list" id="top5List">
+          <div class="top5-loading"><span class="top5-spinner"></span>Carregando...</div>
+        </div>
       </div>
     </div>
 
@@ -620,20 +637,6 @@ function updParticipants(){
 }
 
 // ═══════════════════════════════════════════
-// ACTIVITY
-// ═══════════════════════════════════════════
-function addAct(ico,txt){
-  activities.unshift({ico,txt});
-  if(activities.length>20)activities.pop();
-  updAct();
-}
-function updAct(){
-  $('actFeed').innerHTML=activities.length
-    ?activities.map(a=>`<div class="act-item slide"><span class="act-ico">${a.ico}</span><span>${esc(a.txt)}</span></div>`).join('')
-    :'<div style="text-align:center;color:var(--muted);padding:.75rem;font-size:.82rem">Nenhuma atividade</div>';
-}
-
-// ═══════════════════════════════════════════
 // LEADERBOARD
 // ═══════════════════════════════════════════
 function updLB(){
@@ -821,6 +824,14 @@ async function sendEmoji(e,pts){
 }
 
 // ═══════════════════════════════════════════
+// ACTIVITY (mantida internamente, removida da UI)
+// ═══════════════════════════════════════════
+function addAct(ico,txt){
+  activities.unshift({ico,txt});
+  if(activities.length>20)activities.pop();
+}
+
+// ═══════════════════════════════════════════
 // RESULT SCREEN
 // ═══════════════════════════════════════════
 function closeResult(){$('resOverlay').classList.remove('open')}
@@ -873,6 +884,59 @@ function showResult(){
   $('resMsg').textContent=msg.t;$('resMsg').className='res-msg '+msg.c;
   $('resOverlay').classList.add('open');
   if(s>=5)makeConfetti();
+}
+
+// ═══════════════════════════════════════════
+// TOP 5 MÚSICAS DA SEMANA
+// ═══════════════════════════════════════════
+const TOP5_SONGS = [
+  {vid:'kTJczUoc26U', title:'Top Sertanejo 2026 – As Melhores Do Sertanejo Universitário', artist:'As Melhores'},
+  {vid:'_HAZMumJQo4', title:'Zé Neto e Cristiano – Oi, tudo bem? (Vocês e...)', artist:'Zé Neto e Cristiano'},
+  {vid:'w4bFKbCHO5c', title:'TOP SERTANEJO 2026 – As Melhores do Sertanejo', artist:'Sertanejo 2020'},
+  {vid:'kXYiU_JCYtU', title:'Marília Mendonça – Graveto', artist:'Marília Mendonça'},
+  {vid:'LHCob76kigA', title:'Gusttavo Lima – Embargado', artist:'Gusttavo Lima'},
+];
+
+async function loadTop5(){
+  const list=$('top5List');
+  list.innerHTML=TOP5_SONGS.map((s,i)=>{
+    const thumb=`https://img.youtube.com/vi/${s.vid}/mqdefault.jpg`;
+    const tEsc=s.title.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    const aEsc=s.artist.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return `<div class="top5-item">
+      <div class="top5-thumb">
+        <img src="${thumb}" alt="${tEsc}" loading="lazy" onerror="this.style.background='var(--bg)'">
+        <span class="top5-rank">#${i+1}</span>
+      </div>
+      <div class="top5-info">
+        <div class="top5-title" title="${tEsc}">${tEsc}</div>
+        <div class="top5-artist">${aEsc}</div>
+      </div>
+      <button class="top5-btn" id="top5btn-${i}" onclick="top5AddQueue('${s.vid}','${tEsc.replace(/'/g,"\\'")}','${aEsc.replace(/'/g,"\\'")}',${i})">➕ Cantar</button>
+    </div>`;
+  }).join('');
+}
+
+async function top5AddQueue(vid, title, artist, idx){
+  if(!userName){toast('Entre na sala primeiro!',true);return}
+  const btn=$(`top5btn-${idx}`);
+  btn.textContent='⏳';btn.disabled=true;
+  try{
+    const thumb=`https://img.youtube.com/vi/${vid}/mqdefault.jpg`;
+    const fullTitle=title+' – '+artist;
+    const item={room_id:roomId,video_id:vid,video_title:title,thumbnail:thumb,
+      added_by:userId,added_by_name:userName,status:'waiting',order:queue.length};
+    queue.push(item);
+    safeUpdQueue();
+    if(sbOk)await sbSend('queue-update',{queue,currentPosition:qPos});
+    addAct('➕',`${userName} adicionou: ${title.slice(0,30)}`);
+    toast(`"${title.slice(0,35)}" adicionado! 🎵`);
+    btn.innerHTML='✅';
+    setTimeout(()=>{btn.innerHTML='➕ Cantar';btn.disabled=false;},2000);
+  }catch(e){
+    toast('Erro ao adicionar.',true);
+    btn.innerHTML='➕ Cantar';btn.disabled=false;
+  }
 }
 
 // ═══════════════════════════════════════════
@@ -957,7 +1021,7 @@ async function setupListeners(){
       if(s.currentSongScores){curSongScores=s.currentSongScores;curSongId=s.currentSongId}
       if(s.globalLeaderboard){lb=s.globalLeaderboard;updLB()}
       if(s.emojiCounts){emojiCounts=s.emojiCounts;totalReact=s.totalReactions||0}
-      if(s.activities){activities=s.activities;updAct()}
+      if(s.activities){activities=s.activities;}
       gotState=true;toast('Sala sincronizada! 🎤');
     })
     .on('broadcast',{event:'room-state'},({payload})=>{
@@ -972,7 +1036,7 @@ async function setupListeners(){
       }
       if(payload.currentSongScores){curSongScores=payload.currentSongScores;curSongId=payload.currentSongId}
       if(payload.globalLeaderboard){lb=payload.globalLeaderboard;updLB()}
-      if(payload.activities){activities=payload.activities;updAct()}
+      if(payload.activities){activities=payload.activities;}
     })
     .on('broadcast',{event:'queue-update'},({payload,from})=>{
       if(from===userId)return;
@@ -1020,7 +1084,7 @@ async function setupListeners(){
     .on('broadcast',{event:'reset'},()=>{
       scores={total:0,positive:0,negative:0};emojiCounts={};totalReact=0;
       activities=[];curSongScores={};curSongId=null;lb={};
-      updScores();updAct();updLB();
+      updScores();updLB();
       toast('Pontuação resetada! 🔄');addAct('🔄','Pontuação total resetada');
     })
     .subscribe(async s=>{
@@ -1077,6 +1141,7 @@ async function init(){
   $('codeInp').addEventListener('input',e=>{e.target.value=e.target.value.toUpperCase()});
   $('codeInp').addEventListener('keypress',e=>{if(e.key==='Enter')applyCode()});
 
+  loadTop5();
   setTimeout(()=>$('nameInp').focus(),250);
 }
 
