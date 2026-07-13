@@ -331,6 +331,57 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
   .m-box{padding:.8rem;border-radius:.75rem}
   #ytResults{max-height:clamp(80px,22vh,140px)}
 }
+
+/* ══════════════════════════════════════════════════════════════
+   AJUSTES EXTRAS DE RESPONSIVIDADE (não alteram o comportamento
+   já existente — apenas reforçam o player e itens de lista em
+   telas muito pequenas, telas muito grandes e orientação landscape)
+══════════════════════════════════════════════════════════════ */
+
+/* Player: garante que o iframe do YouTube nunca “vaze” do card
+   arredondado e mantenha a proporção 16:9 em qualquer largura */
+.player-wrap{max-width:100%}
+.player-wrap iframe{border-radius:inherit}
+
+/* Ultra-wide desktop / monitores grandes: evita que o vídeo fique
+   gigantesco e desproporcional em telas muito largas (≥1800px) */
+@media(min-width:1800px){
+  .wrap{max-width:1600px}
+}
+
+/* Celulares em modo paisagem (altura curta): impede que o player
+   16:9 empurre o resto da página para muito longe da tela e quebre
+   o padrão visual — sem alterar o comportamento em modo retrato */
+@media(orientation:landscape) and (max-height:500px){
+  .player-wrap{padding-bottom:0;height:min(60vh,420px)}
+  .m-box{max-height:calc(100svh - .8rem)}
+  .res-box{max-height:85vh}
+}
+
+/* Tablets pequenos / celulares grandes entre 601px–768px:
+   ajusta grid de participantes/top5 para não ficar apertado */
+@media(min-width:601px) and (max-width:768px){
+  .right-col{grid-template-columns:1fr}
+}
+
+/* Telas bem estreitas (≤380px): evita overflow horizontal em
+   itens de lista com miniaturas fixas (fila, top5, busca YouTube) */
+@media(max-width:380px){
+  .q-thumb,.top5-thumb{width:44px;height:34px}
+  .yt-thumb{width:60px;min-width:60px;height:36px}
+  .top5-title,.q-name,.yt-title{font-size:.72rem}
+  .top5-artist,.q-by,.yt-ch{font-size:.62rem}
+  .top5-btn,.yt-add{padding:.32rem .55rem;font-size:.66rem}
+  .lb-medal{min-width:28px;font-size:1.15rem}
+  .lb-name{font-size:.82rem}
+  .lb-score{font-size:.72rem}
+}
+
+/* Modo paisagem em telas pequenas: coluna direita não deve ocupar
+   metade da largura útil enquanto o player já é pequeno */
+@media(orientation:landscape) and (max-width:900px) and (max-height:500px){
+  .right-col{grid-template-columns:repeat(2,1fr)}
+}
 </style>
 </head>
 <body>
@@ -723,7 +774,7 @@ function playVideo(vid){
   if(old)old.remove();
 
   const iframe=document.createElement('iframe');
-  iframe.src='https://www.youtube.com/embed/'+vid+'?autoplay=1&rel=0';
+  iframe.src='https://www.youtube.com/embed/'+vid+'?autoplay=1&rel=0&playsinline=1';
   iframe.allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
   iframe.allowFullscreen=true;
   iframe.id='ytPlayer';
