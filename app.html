@@ -191,12 +191,10 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
 .act-item{display:flex;align-items:center;gap:.4rem;padding:.4rem;background:var(--light);border-radius:.4rem;margin-bottom:.3rem;font-size:.75rem}
 .act-ico{font-size:1.3rem;flex-shrink:0}
 
-/* ══════════════════════════════
-   MODALS — responsivos
-══════════════════════════════ */
-.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:500;justify-content:center;align-items:center;backdrop-filter:blur(4px);padding:.75rem;overflow-y:auto}
+/* ── MODALS ── */
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:500;justify-content:center;align-items:center;backdrop-filter:blur(4px);padding:1rem}
 .modal.open{display:flex}
-.m-box{background:linear-gradient(135deg,var(--card),var(--bg));border-radius:1.25rem;padding:1.5rem;width:100%;max-width:460px;border:2px solid rgba(157,78,221,.3);max-height:calc(100svh - 1.5rem);overflow-y:auto;margin:auto}
+.m-box{background:linear-gradient(135deg,var(--card),var(--bg));border-radius:1.25rem;padding:1.5rem;width:100%;max-width:460px;border:2px solid rgba(157,78,221,.3);max-height:90vh;overflow-y:auto}
 .m-title{font-size:1.3rem;font-weight:700;margin-bottom:1.2rem;text-align:center;background:linear-gradient(90deg,var(--pink),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .join-box{background:var(--light);border:2px dashed var(--blue);border-radius:.75rem;padding:.9rem;margin-bottom:1rem}
 .mode-badge{font-size:.75rem;padding:.35rem .9rem;border-radius:2rem;display:inline-block;margin-bottom:.75rem}
@@ -224,9 +222,6 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
 .yt-add{background:linear-gradient(135deg,var(--purple),var(--pink));border:none;padding:.4rem .8rem;border-radius:.4rem;color:#fff;font-size:.72rem;font-weight:600;cursor:pointer;transition:transform .15s;white-space:nowrap;flex-shrink:0}
 .yt-add:hover{transform:scale(1.05)}
 @keyframes spin{to{transform:rotate(360deg)}}
-/* ── Altura dos resultados YouTube: clamped para caber em qualquer tela ── */
-#ytResults{max-height:clamp(150px,38vh,320px) !important}
-#ytPagination{flex-shrink:0}
 .m-row{display:flex;gap:.5rem;margin-bottom:.5rem}
 .m-row .inp{flex:1}
 .m-row .m-btn{width:auto;padding:.85rem 1.2rem;font-size:.85rem}
@@ -319,11 +314,6 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
   .res-btns .btn{padding:.7rem 1rem;font-size:.82rem}
   .toast{right:.5rem;bottom:.5rem;max-width:calc(100vw - 1rem)}
   .e-notif{right:.5rem;top:80px}
-  /* Modal mobile */
-  .m-box{padding:1.1rem;border-radius:.9rem}
-  .m-title{font-size:1.1rem;margin-bottom:.9rem}
-  .yf-btn{font-size:.7rem;padding:.25rem .6rem}
-  #ytResults{max-height:clamp(120px,28vh,190px) !important}
 }
 
 /* Large / Smart TV 1400px+ */
@@ -340,8 +330,6 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
   .ebtn{padding:.45rem .1rem}
   .ei{font-size:1.5rem}
   .el,.ep{display:none}
-  .m-box{padding:.8rem;border-radius:.75rem}
-  #ytResults{max-height:clamp(100px,24vh,160px) !important}
 }
 </style>
 </head>
@@ -496,7 +484,7 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
         <input type="text" class="inp" id="vidInp" placeholder="https://youtube.com/watch?v=..." autocomplete="off">
       </div>
       <button class="m-btn" onclick="addQueue()">➕ Adicionar à Fila</button>
-      <button class="m-btn dim" onclick="closeVidModal()">Voltar a Página Inicial</button>
+      <button class="m-btn dim" onclick="closeVidModal()">Cancelar</button>
     </div>
 
     <!-- ABA: BUSCAR -->
@@ -518,13 +506,13 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
         <div style="width:32px;height:32px;border:3px solid rgba(255,255,255,.1);border-top:3px solid var(--pink);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto .75rem"></div>
         Buscando no YouTube...
       </div>
-      <div id="ytResults" style="overflow-y:auto;display:flex;flex-direction:column;gap:.5rem"></div>
+      <div id="ytResults" style="max-height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:.5rem"></div>
       <div id="ytPagination" style="display:none;justify-content:center;gap:.5rem;margin-top:.6rem;align-items:center">
         <button onclick="ytPage(-1)" id="ytPrev" style="padding:.4rem .9rem;border-radius:.5rem;border:1px solid rgba(255,255,255,.2);background:transparent;color:#fff;cursor:pointer;font-size:.8rem">← Ant</button>
         <span id="ytPageInfo" style="font-size:.75rem;color:var(--muted)"></span>
         <button onclick="ytPage(1)" id="ytNext" style="padding:.4rem .9rem;border-radius:.5rem;border:1px solid rgba(255,255,255,.2);background:transparent;color:#fff;cursor:pointer;font-size:.8rem">Próx →</button>
       </div>
-      <button class="m-btn dim" onclick="closeVidModal()" style="margin-top:.6rem">Voltar a Página Inicial</button>
+      <button class="m-btn dim" onclick="closeVidModal()" style="margin-top:.6rem">Cancelar</button>
     </div>
   </div>
 </div>
@@ -646,6 +634,7 @@ function flashCard(pts){
   const el=$('scTotal');
   el.classList.add('flash');
   setTimeout(()=>el.classList.remove('flash'),400);
+  // também pulsa o sub-card (positivo ou negativo)
   const sub=pts>0?$('vPos').parentElement:$('vNeg').parentElement;
   if(sub){sub.classList.add('flash');setTimeout(()=>sub.classList.remove('flash'),400);}
 }
@@ -784,11 +773,13 @@ function playVideo(vid,title=''){
   if(!vid)return;
   curVid=vid;
 
+  // Find owner in queue
   const qi=queue.find(x=>x.video_id===vid);
   curOwnerId=qi?.added_by||userId;
   curOwnerName=qi?.added_by_name||userName||'Anônimo';
   curSingerId=curOwnerId;
 
+  // Find real name from participants
   const op=participants.find(p=>p.odUserId===curOwnerId);
   if(op)curOwnerName=op.odUserName;
 
@@ -797,6 +788,7 @@ function playVideo(vid,title=''){
   const wrap=$('playerWrap');
   const layer=$('emojiLayer');
 
+  // Destrói player anterior completamente
   clearInterval(window.__chk);
   if(ytPlayer){
     try{ytPlayer.stopVideo();ytPlayer.destroy();}catch(e){}
@@ -805,6 +797,7 @@ function playVideo(vid,title=''){
   const oldEl=document.getElementById('ytPlayer');
   if(oldEl)oldEl.remove();
 
+  // Cria iframe diretamente com origin na URL — evita postMessage cross-origin
   const origin=encodeURIComponent(window.location.origin);
   const iframe=document.createElement('iframe');
   iframe.id='ytPlayer';
@@ -818,6 +811,7 @@ function playVideo(vid,title=''){
   $('ph').classList.add('hidden');
   $('endBtn').style.display='inline-block';
 
+  // Aguarda iframe carregar depois conecta YT.Player pelo ID
   function mkPlayer(){
     if(typeof YT==='undefined'||!YT.Player)return;
     ytPlayer=new YT.Player('ytPlayer',{
@@ -840,6 +834,7 @@ function playVideo(vid,title=''){
     });
   }
 
+  // Tenta conectar após iframe estar pronto
   if(typeof YT!=='undefined'&&YT.Player){
     setTimeout(mkPlayer, 1500);
   } else {
@@ -929,6 +924,7 @@ function toggleAuto(){
   autoOn=!autoOn;
   const label=autoOn?'⏸️ Auto Player ON':'▶️ Auto Player';
   const cls='btn btn-auto'+(autoOn?' on':'');
+  // Atualiza os dois botões: o da fila e o do player
   [$('autoBtn'),$('autoBtn2')].forEach(b=>{if(b){b.className=cls;b.innerHTML=label;}});
   toast(autoOn?'Auto Player ativado!':'Auto Player desativado.');
   if(autoOn&&!curVid&&queue.length)playNext();
@@ -1056,19 +1052,15 @@ function updLBLocal(uid,e,pts){
 }
 
 // ═══════════════════════════════════════════
-// RESET — Placar de Líderes (lb) é blindado e nunca resetado
+// RESET
 // ═══════════════════════════════════════════
 async function resetAll(){
-  if(!confirm('Resetar pontuação da música atual?\n\n⚠️ O Placar de Líderes é permanente e não será apagado.'))return;
-  // lb (leaderboard) intencionalmente preservado
-  scores={total:0,positive:0,negative:0};
-  emojiCounts={};
-  totalReact=0;
-  activities=[];
-  updScores();updAct();
+  if(!confirm('Resetar pontuação total da festa?'))return;
+  // lb (leaderboard) intencionalmente preservado — placar de líderes blindado
+  scores={total:0,positive:0,negative:0};emojiCounts={};totalReact=0;activities=[];
+  updScores();updAct();updLB();
   await sbSend('reset',{});
-  toast('Pontuação resetada! 🔄 (Placar de Líderes mantido 🏆)');
-  addAct('🔄','Pontuação resetada — Placar de Líderes preservado');
+  toast('Pontuação resetada! 🔄 (Placar de Líderes mantido 🏆)');addAct('🔄','Pontuação resetada — Placar de Líderes preservado');
 }
 
 // ═══════════════════════════════════════════
@@ -1218,14 +1210,9 @@ async function setupListeners(){
     })
     .on('broadcast',{event:'scores-update'},({payload})=>{scores=payload;updScores()})
     .on('broadcast',{event:'reset'},()=>{
-      // lb (leaderboard) intencionalmente preservado no reset
-      scores={total:0,positive:0,negative:0};
-      emojiCounts={};
-      totalReact=0;
-      activities=[];
-      updScores();updAct();
-      addAct('🔄','Pontuação resetada — Placar de Líderes preservado');
-      toast('Pontuação resetada! 🔄 (Placar de Líderes mantido 🏆)');
+      // lb (leaderboard) intencionalmente preservado — placar de líderes blindado
+      scores={total:0,positive:0,negative:0};emojiCounts={};totalReact=0;activities=[];
+      updScores();updAct();updLB();addAct('🔄','Pontuação resetada — Placar de Líderes preservado');toast('Pontuação resetada! 🔄 (Placar de Líderes mantido 🏆)');
     })
     .subscribe(async s=>{
       if(s==='SUBSCRIBED'){
@@ -1350,6 +1337,7 @@ async function ytDoSearch(q,page){
       results.appendChild(div);
     });
 
+    // Paginação
     const total=data.pageInfo?.totalResults||0;
     const totalPg=Math.min(Math.ceil(total/8),50);
     document.getElementById('ytPageInfo').textContent=`Pág ${page} / ~${totalPg}`;
