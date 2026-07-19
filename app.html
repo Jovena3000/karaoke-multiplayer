@@ -1056,14 +1056,19 @@ function updLBLocal(uid,e,pts){
 }
 
 // ═══════════════════════════════════════════
-// RESET
+// RESET — Placar de Líderes (lb) é blindado e nunca resetado
 // ═══════════════════════════════════════════
 async function resetAll(){
-  if(!confirm('Resetar pontuação total da festa?'))return;
-  scores={total:0,positive:0,negative:0};emojiCounts={};totalReact=0;activities=[];lb={};
-  updScores();updAct();updLB();
+  if(!confirm('Resetar pontuação da música atual?\n\n⚠️ O Placar de Líderes é permanente e não será apagado.'))return;
+  // lb (leaderboard) intencionalmente preservado
+  scores={total:0,positive:0,negative:0};
+  emojiCounts={};
+  totalReact=0;
+  activities=[];
+  updScores();updAct();
   await sbSend('reset',{});
-  toast('Pontuação resetada! 🔄');addAct('🔄','Pontuação total resetada');
+  toast('Pontuação resetada! 🔄 (Placar de Líderes mantido 🏆)');
+  addAct('🔄','Pontuação resetada — Placar de Líderes preservado');
 }
 
 // ═══════════════════════════════════════════
@@ -1213,8 +1218,14 @@ async function setupListeners(){
     })
     .on('broadcast',{event:'scores-update'},({payload})=>{scores=payload;updScores()})
     .on('broadcast',{event:'reset'},()=>{
-      scores={total:0,positive:0,negative:0};emojiCounts={};totalReact=0;activities=[];lb={};
-      updScores();updAct();updLB();addAct('🔄','Pontuação total resetada');toast('Pontuação resetada! 🔄');
+      // lb (leaderboard) intencionalmente preservado no reset
+      scores={total:0,positive:0,negative:0};
+      emojiCounts={};
+      totalReact=0;
+      activities=[];
+      updScores();updAct();
+      addAct('🔄','Pontuação resetada — Placar de Líderes preservado');
+      toast('Pontuação resetada! 🔄 (Placar de Líderes mantido 🏆)');
     })
     .subscribe(async s=>{
       if(s==='SUBSCRIBED'){
