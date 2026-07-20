@@ -526,7 +526,9 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
 
 <!-- RESULT OVERLAY -->
 <div class="res" id="resOverlay">
-  <div class="res-box">
+  <video id="resVideo" src="/imagem3-karaoke.mp4" muted playsinline loop
+    style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1"></video>
+  <div class="res-box" style="position:relative;z-index:2">
     <div class="res-lbl">🎤 Performance Finalizada!</div>
     <div class="res-name" id="resName">Cantor</div>
     <div class="res-main">
@@ -961,7 +963,6 @@ async function nextAfterResult(){
 }
 
 function showResult(){
-  const ov=$('resOverlay');
   $('resName').textContent=curOwnerName||userName||'Cantor';
   const top=topEmoji();
   $('resIco').textContent=top.e;
@@ -975,7 +976,7 @@ function showResult(){
     .map(e=>`<div class="res-ei">${e} ×${emojiCounts[e]}</div>`).join('');
   const msg=resultMsg(s);
   $('resMsg').textContent=msg.t;$('resMsg').className='res-msg '+msg.c;
-  ov.classList.add('open');
+  $('resOverlay').classList.add('open');
   if(s>=5)makeConfetti();
 }
 
