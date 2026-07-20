@@ -249,7 +249,31 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
 .res{display:none;position:fixed;inset:0;background:linear-gradient(135deg,rgba(10,14,39,.97),rgba(26,15,46,.97));z-index:600;justify-content:center;align-items:center;backdrop-filter:blur(16px);padding:1rem}
 .res.open{display:flex;animation:fadeIn .4s ease}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-.res-box{text-align:center;padding:1.5rem;max-width:520px;width:100%;background:rgba(255,255,255,.03);border-radius:1.25rem;border:1px solid rgba(255,255,255,.09);max-height:90vh;overflow-y:auto}
+
+/* ── VÍDEO DE FUNDO NO RESULTADO ── */
+#resultVideo {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  opacity: 0.7;
+}
+.res-box {
+  position: relative;
+  z-index: 1;
+  text-align:center;
+  padding:1.5rem;
+  max-width:520px;
+  width:100%;
+  background:rgba(255,255,255,.03);
+  border-radius:1.25rem;
+  border:1px solid rgba(255,255,255,.09);
+  max-height:90vh;
+  overflow-y:auto;
+}
 .res-lbl{font-size:1rem;color:var(--muted);margin-bottom:.25rem}
 .res-name{font-size:1.7rem;font-weight:800;background:linear-gradient(90deg,var(--pink),var(--purple),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.75rem}
 .res-main{background:linear-gradient(135deg,var(--card),var(--light));border:2px solid var(--purple);border-radius:1.1rem;padding:1.1rem;margin-bottom:.75rem}
@@ -526,6 +550,9 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
 
 <!-- RESULT OVERLAY -->
 <div class="res" id="resOverlay">
+  <!-- VÍDEO DE FUNDO -->
+  <video id="resultVideo" src="video-karaoke.mp4" muted playsinline loop></video>
+
   <div class="res-box">
     <div class="res-lbl">🎤 Performance Finalizada!</div>
     <div class="res-name" id="resName">Cantor</div>
@@ -634,7 +661,6 @@ function flashCard(pts){
   const el=$('scTotal');
   el.classList.add('flash');
   setTimeout(()=>el.classList.remove('flash'),400);
-  // também pulsa o sub-card (positivo ou negativo)
   const sub=pts>0?$('vPos').parentElement:$('vNeg').parentElement;
   if(sub){sub.classList.add('flash');setTimeout(()=>sub.classList.remove('flash'),400);}
 }
@@ -882,7 +908,7 @@ async function addQueue(){
     toast(`"${info.title.slice(0,35)}" adicionado! 🎵`);
     addAct('➕',`${userName} adicionou: ${info.title.slice(0,30)}`);
     if(qPos===-1&&autoOn)playNext();
-  }catch(e){toast('Erro ao adicionar música.',true)}
+  }catch(e){toast('Erro ao adicionar música.',true);}
   finally{btn.textContent='➕ Adicionar à Fila';btn.disabled=false;inp.value=''}
 }
 
@@ -924,7 +950,6 @@ function toggleAuto(){
   autoOn=!autoOn;
   const label=autoOn?'⏸️ Auto Player ON':'▶️ Auto Player';
   const cls='btn btn-auto'+(autoOn?' on':'');
-  // Atualiza os dois botões: o da fila e o do player
   [$('autoBtn'),$('autoBtn2')].forEach(b=>{if(b){b.className=cls;b.innerHTML=label;}});
   toast(autoOn?'Auto Player ativado!':'Auto Player desativado.');
   if(autoOn&&!curVid&&queue.length)playNext();
@@ -952,7 +977,11 @@ function resetCurrentSong(){
   scores={total:0,positive:0,negative:0};emojiCounts={};totalReact=0;updScores();
 }
 
-function closeResult(){$('resOverlay').classList.remove('open')}
+function closeResult(){
+  $('resOverlay').classList.remove('open');
+  const vid = document.getElementById('resultVideo');
+  if (vid) { vid.pause(); vid.currentTime = 0; }
+}
 
 async function nextAfterResult(){
   closeResult();resetCurrentSong();
@@ -976,6 +1005,14 @@ function showResult(){
   const msg=resultMsg(s);
   $('resMsg').textContent=msg.t;$('resMsg').className='res-msg '+msg.c;
   ov.classList.add('open');
+
+  // Tocar vídeo
+  const vid = document.getElementById('resultVideo');
+  if (vid) {
+    vid.currentTime = 0;
+    vid.play().catch(e => {});
+  }
+
   if(s>=5)makeConfetti();
 }
 
