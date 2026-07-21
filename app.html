@@ -548,6 +548,30 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
   </div>
 </div>
 
+<!-- ========================================================= -->
+<!-- VIDEO ENTRE MÚSICAS (ADICIONADO CONFORME SOLICITADO)     -->
+<!-- ========================================================= -->
+<div id="transitionVideo"
+     style="
+        display:none;
+        position:fixed;
+        inset:0;
+        background:#000;
+        z-index:99999;
+    ">
+    <video id="transitionPlayer"
+           src="/video-karaoke.mp4"
+           autoplay
+           playsinline
+           preload="auto"
+           style="
+                width:100%;
+                height:100%;
+                object-fit:cover;
+           ">
+    </video>
+</div>
+
 <script>
 // ═══════════════════════════════════════════
 // CONFIG
@@ -931,23 +955,74 @@ function toggleAuto(){
 }
 
 // ═══════════════════════════════════════════
-// END SONG / RESULT
+// FUNÇÃO DE TRANSIÇÃO (ADICIONADA)
+// ═══════════════════════════════════════════
+function playTransitionVideo(callback){
+    const box=document.getElementById("transitionVideo");
+    const video=document.getElementById("transitionPlayer");
+
+    box.style.display="block";
+
+    video.pause();
+    video.currentTime=0;
+
+    video.onended=function(){
+        box.style.display="none";
+        if(callback) callback();
+    };
+
+    video.play();
+}
+
+// ═══════════════════════════════════════════
+// END SONG / RESULT (ALTERADAS)
 // ═══════════════════════════════════════════
 async function endSong(){
-  if(ending)return;ending=true;
-  if(totalReact>0){await sbSend('show-result',{singer:curOwnerName,emojiCounts,totalReactions:totalReact});showResult();}
-  else{resetCurrentSong();if(autoOn)await playNext();}
-  ending=false;
+    if(ending)return;
+    ending=true;
+
+    playTransitionVideo(async ()=>{
+        if(totalReact>0){
+            await sbSend('show-result',{
+                singer:curOwnerName,
+                emojiCounts,
+                totalReactions:totalReact
+            });
+            showResult();
+        }else{
+            resetCurrentSong();
+            if(autoOn) await playNext();
+        }
+        ending=false;
+    });
 }
 
 async function onVidEnd(){
-  if(ending)return;ending=true;
-  try{if(totalReact>0){await sbSend('show-result',{singer:curOwnerName,emojiCounts,totalReactions:totalReact});showResult();}
-  else{await playNext();}}
-  catch(e){await playNext();}
-  ending=false;
+    if(ending)return;
+    ending=true;
+
+    playTransitionVideo(async ()=>{
+        try{
+            if(totalReact>0){
+                await sbSend('show-result',{
+                    singer:curOwnerName,
+                    emojiCounts,
+                    totalReactions:totalReact
+                });
+                showResult();
+            }else{
+                await playNext();
+            }
+        }catch(e){
+            await playNext();
+        }
+        ending=false;
+    });
 }
 
+// ═══════════════════════════════════════════
+// RESULT HELPERS (NÃO ALTERADAS)
+// ═══════════════════════════════════════════
 function resetCurrentSong(){
   scores={total:0,positive:0,negative:0};emojiCounts={};totalReact=0;updScores();
 }
