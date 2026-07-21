@@ -1196,10 +1196,11 @@ async function setupListeners(){
     })
     .on('broadcast',{event:'scores-update'},({payload})=>{scores=payload;updScores()})
     .on('broadcast',{event:'reset'},()=>{
+      // lb (leaderboard) intencionalmente preservado — placar de líderes blindado
       scores={total:0,positive:0,negative:0};emojiCounts={};totalReact=0;
-      activities=[];curSongScores={};curSongId=null;lb={};
+      activities=[];curSongScores={};curSongId=null;
       updScores();updLB();
-      toast('Pontuação resetada! 🔄');addAct('🔄','Pontuação total resetada');
+      toast('Pontuação resetada! 🔄 (Placar de Líderes mantido 🏆)');addAct('🔄','Pontuação resetada — Placar de Líderes preservado');
     })
     .subscribe(async s=>{
       if(s==='SUBSCRIBED'){
