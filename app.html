@@ -950,13 +950,36 @@ async function playNext(){
   await sbSend('queue-update',{queue,currentPosition:qPos});
 }
 
+// ═══════════════════════════════════════════
+// TOGGLE AUTO PLAYER (CORRIGIDO)
+// ═══════════════════════════════════════════
 function toggleAuto(){
-  autoOn=!autoOn;
-  const label=autoOn?'⏸️ Auto Player ON':'▶️ Auto Player';
-  const cls='btn btn-auto'+(autoOn?' on':'');
-  [$('autoBtn'),$('autoBtn2')].forEach(b=>{if(b){b.className=cls;b.innerHTML=label;}});
-  toast(autoOn?'Auto Player ativado!':'Auto Player desativado.');
-  if(autoOn&&!curVid&&queue.length)playNext();
+  autoOn = !autoOn;
+  const label = autoOn ? '⏸️ Auto Player ON' : '▶️ Auto Player';
+  const cls = 'btn btn-auto' + (autoOn ? ' on' : '');
+  [$('autoBtn'), $('autoBtn2')].forEach(b => {
+    if (b) { b.className = cls; b.innerHTML = label; }
+  });
+  toast(autoOn ? 'Auto Player ativado!' : 'Auto Player desativado.');
+
+  if (autoOn && queue.length) {
+    let deveTocar = false;
+    if (!ytPlayer) {
+      deveTocar = true;
+    } else {
+      try {
+        const state = ytPlayer.getPlayerState();
+        if (state === -1 || state === 0 || state === 2) {
+          deveTocar = true;
+        }
+      } catch (e) {
+        deveTocar = true;
+      }
+    }
+    if (deveTocar) {
+      playNext();
+    }
+  }
 }
 
 // ═══════════════════════════════════════════
@@ -1020,7 +1043,6 @@ function showResult(){
     const playPromise = vid.play();
     if (playPromise !== undefined) {
       playPromise.catch(() => {
-        // Se o autoplay for bloqueado, adiciona um ouvinte de clique para tocar
         const playOnClick = function() {
           vid.play().catch(e => {});
           document.removeEventListener('click', playOnClick);
