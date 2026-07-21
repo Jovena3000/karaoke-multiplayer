@@ -180,7 +180,12 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
 /* ══════════════════════════════
    MODALS — responsivos
 ══════════════════════════════ */
-.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:500;justify-content:center;align-items:flex-start;backdrop-filter:blur(4px);padding:.75rem;overflow-y:auto}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:500;justify-content:center;align-items:flex-start;backdrop-filter:blur(4px);padding:.75rem;overflow-y:auto;
+  padding-top:max(.75rem,env(safe-area-inset-top));
+  padding-bottom:max(.75rem,env(safe-area-inset-bottom));
+  padding-left:max(.75rem,env(safe-area-inset-left));
+  padding-right:max(.75rem,env(safe-area-inset-right));
+}
 .modal.open{display:flex}
 .m-box{background:linear-gradient(135deg,var(--card),var(--bg));border-radius:1.25rem;padding:1.5rem;width:100%;max-width:460px;border:2px solid rgba(157,78,221,.3);max-height:calc(100svh - 1.5rem);overflow-y:auto;margin:auto}
 .m-title{font-size:1.3rem;font-weight:700;margin-bottom:1.2rem;text-align:center;background:linear-gradient(90deg,var(--pink),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
@@ -193,13 +198,13 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
 .room-disp-id{font-size:2rem;font-weight:800;color:var(--blue);letter-spacing:4px;font-family:monospace}
 .inp-grp{margin-bottom:1.1rem}
 .inp-lbl{display:block;margin-bottom:.4rem;color:var(--muted);font-size:.85rem}
-.inp{width:100%;padding:.85rem;background:var(--light);border:2px solid rgba(157,78,221,.3);border-radius:.65rem;color:#fff;font-size:.95rem;font-family:'Poppins',sans-serif}
+.inp{width:100%;padding:.85rem;background:var(--light);border:2px solid rgba(157,78,221,.3);border-radius:.65rem;color:#fff;font-size:16px;font-family:'Poppins',sans-serif}
 .inp:focus{outline:none;border-color:var(--purple)}
 .inp::placeholder{color:var(--muted)}
-.m-btn{background:linear-gradient(135deg,var(--pink),var(--purple));border:none;padding:.9rem;border-radius:.65rem;color:#fff;font-weight:600;font-size:1rem;cursor:pointer;width:100%;transition:opacity .2s;font-family:'Poppins',sans-serif}
+.m-btn{background:linear-gradient(135deg,var(--pink),var(--purple));border:none;padding:.9rem;border-radius:.65rem;color:#fff;font-weight:600;font-size:1rem;cursor:pointer;width:100%;transition:opacity .2s;font-family:'Poppins',sans-serif;min-height:44px}
 .m-btn:hover{opacity:.9}
 .m-btn.dim{background:var(--light);margin-top:.4rem}
-.yf-btn{padding:.3rem .75rem;border-radius:1rem;border:1px solid rgba(255,255,255,.2);background:transparent;color:var(--muted);cursor:pointer;font-size:.75rem;transition:all .2s;font-family:'Poppins',sans-serif}
+.yf-btn{padding:.3rem .75rem;border-radius:1rem;border:1px solid rgba(255,255,255,.2);background:transparent;color:var(--muted);cursor:pointer;font-size:.75rem;transition:all .2s;font-family:'Poppins',sans-serif;min-height:32px}
 .yf-btn:hover,.yf-btn.active{border-color:var(--pink);color:var(--pink);background:rgba(255,45,117,.1)}
 .yt-item{background:var(--light);border-radius:.65rem;padding:.6rem;display:flex;gap:.65rem;align-items:center;border:1px solid rgba(255,255,255,.08);transition:all .2s}
 .yt-item:hover{border-color:rgba(157,78,221,.4);background:rgba(157,78,221,.08)}
@@ -207,7 +212,7 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
 .yt-info{flex:1;min-width:0}
 .yt-title{font-size:.78rem;font-weight:600;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:.2rem}
 .yt-ch{font-size:.68rem;color:var(--muted)}
-.yt-add{background:linear-gradient(135deg,var(--purple),var(--pink));border:none;padding:.4rem .8rem;border-radius:.4rem;color:#fff;font-size:.72rem;font-weight:600;cursor:pointer;transition:transform .15s;white-space:nowrap;flex-shrink:0}
+.yt-add{background:linear-gradient(135deg,var(--purple),var(--pink));border:none;padding:.4rem .8rem;border-radius:.4rem;color:#fff;font-size:.72rem;font-weight:600;cursor:pointer;transition:transform .15s;white-space:nowrap;flex-shrink:0;min-height:36px}
 .yt-add:hover{transform:scale(1.05)}
 @keyframes spin{to{transform:rotate(360deg)}}
 
@@ -217,8 +222,11 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
 #ytPagination{flex-shrink:0}
 
 .m-row{display:flex;gap:.5rem;margin-bottom:.5rem}
-.m-row .inp{flex:1}
-.m-row .m-btn{width:auto;padding:.85rem 1.2rem;font-size:.85rem}
+.m-row .inp{flex:1;min-width:0}
+.m-row .m-btn{width:auto;padding:.85rem 1.2rem;font-size:.85rem;flex-shrink:0}
+
+/* ── TABS (Colar Link / Buscar Música) ── */
+#tabLink,#tabSearch{min-height:44px}
 
 /* ── TOAST ── */
 .toast{position:fixed;bottom:1.2rem;right:1.2rem;padding:.8rem 1.2rem;border-radius:.65rem;font-weight:600;z-index:900;transform:translateX(350px);transition:transform .3s;font-size:.85rem;max-width:280px}
@@ -288,6 +296,15 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
   .right-col .card:first-child{grid-column:1/-1}
 }
 
+/* Tablets — modais (601px–900px): telas maiores que celular mas
+   ainda touch. Aproveita mais espaço sem ficar gigante. */
+@media(min-width:601px) and (max-width:900px){
+  .m-box{max-width:480px;padding:1.6rem}
+  .room-disp-id{font-size:2.2rem}
+  #ytResults{max-height:clamp(200px,40vh,340px)}
+  .yt-thumb{width:88px;min-width:88px;height:50px}
+}
+
 /* Phone 600px */
 @media(max-width:600px){
   .hdr{padding:.65rem 1rem}
@@ -308,10 +325,31 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
   .toast{right:.5rem;bottom:.5rem;max-width:calc(100vw - 1rem)}
   .e-notif{right:.5rem;top:80px}
   /* Modal mobile */
-  .m-box{padding:1.1rem;border-radius:.9rem}
+  .m-box{padding:1.1rem;border-radius:.9rem;max-height:calc(100svh - .8rem)}
   .m-title{font-size:1.1rem;margin-bottom:.9rem}
   .yf-btn{font-size:.7rem;padding:.25rem .6rem}
   #ytResults{max-height:clamp(100px,28vh,180px)}
+
+  /* ── Modal "Bem-vindo ao Karaokê" (nameModal) ── */
+  .join-box{padding:.7rem;margin-bottom:.85rem}
+  .join-box>div:first-child{font-size:.75rem}
+  .room-display{padding:.6rem;margin-bottom:.85rem}
+  .room-disp-id{font-size:1.6rem;letter-spacing:3px}
+  .mode-badge{font-size:.68rem;padding:.3rem .7rem;margin-bottom:.6rem}
+  .inp-grp{margin-bottom:.85rem}
+  .inp{padding:.75rem}
+  .m-row{gap:.4rem}
+  .m-row .m-btn{padding:.75rem .9rem;font-size:.78rem}
+
+  /* ── Modal "Adicionar à Fila" (vidModal) ── */
+  #tabLink,#tabSearch{font-size:.78rem;padding:.5rem .3rem;min-height:40px}
+  #ytSearchInp{font-size:16px}
+  .yt-thumb{width:64px;min-width:64px;height:38px}
+  .yt-title{font-size:.72rem}
+  .yt-ch{font-size:.62rem}
+  .yt-add{padding:.32rem .6rem;font-size:.66rem;min-height:32px}
+  #ytPageInfo{font-size:.68rem}
+  #ytPrev,#ytNext{padding:.35rem .7rem;font-size:.72rem}
 }
 
 /* Smart TV / Large 1400px+ */
@@ -330,6 +368,18 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
   .el,.ep{display:none}
   .m-box{padding:.8rem;border-radius:.75rem}
   #ytResults{max-height:clamp(80px,22vh,140px)}
+
+  /* nameModal ainda mais compacto */
+  .m-title{font-size:1rem}
+  .room-disp-id{font-size:1.35rem;letter-spacing:2px}
+  .m-row{flex-direction:column}
+  .m-row .m-btn{width:100%}
+
+  /* vidModal ainda mais compacto */
+  #tabLink,#tabSearch{font-size:.7rem;padding:.45rem .2rem}
+  .yf-btn{font-size:.66rem;padding:.22rem .5rem}
+  .yt-thumb{width:52px;min-width:52px;height:32px}
+  .yt-item{gap:.45rem;padding:.45rem}
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -356,6 +406,15 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
   .player-wrap{padding-bottom:0;height:min(60vh,420px)}
   .m-box{max-height:calc(100svh - .8rem)}
   .res-box{max-height:85vh}
+
+  /* Modais em paisagem: reduz respiro vertical para caber sem
+     cortar o botão de ação principal */
+  .modal{align-items:center}
+  .m-box{padding:.9rem}
+  .join-box,.room-display{padding:.5rem;margin-bottom:.6rem}
+  .inp-grp{margin-bottom:.6rem}
+  .m-title{margin-bottom:.6rem}
+  #ytResults{max-height:clamp(90px,26vh,160px)}
 }
 
 /* Tablets pequenos / celulares grandes entre 601px–768px:
@@ -375,6 +434,10 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
   .lb-medal{min-width:28px;font-size:1.15rem}
   .lb-name{font-size:.82rem}
   .lb-score{font-size:.72rem}
+
+  /* nameModal / vidModal em telas muito estreitas */
+  .room-disp-id{font-size:1.45rem;letter-spacing:2px}
+  #codeInp{letter-spacing:2px;font-size:1rem!important}
 }
 
 /* Modo paisagem em telas pequenas: coluna direita não deve ocupar
