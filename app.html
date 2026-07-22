@@ -578,6 +578,7 @@ let participants=[], activities=[], queue=[], qPos=-1;
 let emojiCounts={}, totalReact=0;
 let lb={};
 let seenEmojis=new Set();
+let resultAudio=null;
 let autoOn=false, ending=false;
 let gotState=false;
 let qTimer=null, lastState=0;
@@ -962,15 +963,29 @@ function resetCurrentSong(){
   scores={total:0,positive:0,negative:0};emojiCounts={};totalReact=0;updScores();
 }
 
-function closeResult(){$('resOverlay').classList.remove('open')}
+function closeResult(){
+  if(resultAudio){
+    try{resultAudio.pause();resultAudio.currentTime=0;}catch(e){}
+  }
+  $('resOverlay').classList.remove('open')
+}
 
 async function nextAfterResult(){
+  if(resultAudio){
+    try{resultAudio.pause();resultAudio.currentTime=0;}catch(e){}
+  }
   closeResult();resetCurrentSong();
   await sbSend('scores-update',scores);
   if(autoOn)await playNext();
 }
 
 function showResult(){
+  try{
+    resultAudio=new Audio('https://jovena3000.github.io/karaoke-multiplayer/palmasAudio.mpeg');
+    resultAudio.loop=false;
+    resultAudio.play().catch(e=>console.warn('Áudio de resultado não pôde ser reproduzido:',e));
+  }catch(e){console.warn('Erro ao criar áudio de resultado:',e);}
+
   const ov=$('resOverlay');
   $('resName').textContent=curOwnerName||userName||'Cantor';
   const top=topEmoji();
