@@ -582,7 +582,6 @@ let resultAudio=null;
 let autoOn=false, ending=false;
 let gotState=false;
 let qTimer=null, lastState=0;
-let wakeLock=null;
 
 // ═══════════════════════════════════════════
 // UTILS
@@ -629,53 +628,6 @@ function extractVid(u){
 function copyLink(){
   const u=shareUrl();
   navigator.clipboard.writeText(u).then(()=>toast('Link copiado!')).catch(()=>toast('Link: '+u));
-}
-
-// ═══════════════════════════════════════════
-// REPRODUÇÃO EM SEGUNDO PLANO
-// (Wake Lock evita que a tela apague/suspenda o
-// player; Media Session dá controles no sistema
-// e ajuda o áudio a seguir tocando minimizado)
-// ═══════════════════════════════════════════
-async function requestWakeLock(){
-  try{
-    if('wakeLock' in navigator){
-      wakeLock=await navigator.wakeLock.request('screen');
-      wakeLock.addEventListener('release',()=>{wakeLock=null;});
-    }
-  }catch(e){console.log('WakeLock indisponível:',e?.message||e);}
-}
-async function releaseWakeLock(){
-  if(wakeLock){try{await wakeLock.release();}catch(e){}wakeLock=null;}
-}
-document.addEventListener('visibilitychange',async()=>{
-  if(document.visibilityState==='visible'&&curVid&&!wakeLock)await requestWakeLock();
-});
-
-function updateMediaSession(title,thumbUrl){
-  if(!('mediaSession' in navigator))return;
-  try{
-    navigator.mediaSession.metadata=new MediaMetadata({
-      title:title||'Karaokê',
-      artist:curOwnerName||'Karaokê Premium',
-      album:'Sala '+roomId,
-      artwork:thumbUrl?[
-        {src:thumbUrl,sizes:'320x180',type:'image/jpeg'},
-        {src:thumbUrl,sizes:'640x360',type:'image/jpeg'}
-      ]:[]
-    });
-    navigator.mediaSession.playbackState='playing';
-    navigator.mediaSession.setActionHandler('play',()=>{try{ytPlayer&&ytPlayer.playVideo();}catch(e){}});
-    navigator.mediaSession.setActionHandler('pause',()=>{try{ytPlayer&&ytPlayer.pauseVideo();}catch(e){}});
-    navigator.mediaSession.setActionHandler('nexttrack',()=>{endSong();});
-  }catch(e){console.log('MediaSession indisponível:',e?.message||e);}
-}
-function clearMediaSession(){
-  if(!('mediaSession' in navigator))return;
-  try{
-    navigator.mediaSession.metadata=null;
-    navigator.mediaSession.playbackState='none';
-  }catch(e){}
 }
 
 // ═══════════════════════════════════════════
@@ -861,7 +813,7 @@ function playVideo(vid,title=''){
   const iframe=document.createElement('iframe');
   iframe.id='ytPlayer';
   iframe.src='https://www.youtube.com/embed/'+vid+
-    '?autoplay=1&rel=0&enablejsapi=1&playsinline=1&origin='+origin;
+    '?autoplay=1&rel=0&enablejsapi=1&origin='+origin;
   iframe.allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
   iframe.allowFullscreen=true;
   iframe.style.cssText='position:absolute;top:0;left:0;width:100%;height:100%;border:none;z-index:1';
@@ -869,9 +821,6 @@ function playVideo(vid,title=''){
 
   $('ph').classList.add('hidden');
   $('endBtn').style.display='inline-block';
-
-  requestWakeLock();
-  updateMediaSession(title||curOwnerName,'https://img.youtube.com/vi/'+vid+'/mqdefault.jpg');
 
   // Aguarda iframe carregar depois conecta YT.Player pelo ID
   function mkPlayer(){
@@ -881,10 +830,6 @@ function playVideo(vid,title=''){
         onReady:e=>{ try{e.target.playVideo();}catch(ex){} },
         onStateChange:e=>{
           if(e.data===YT.PlayerState.ENDED&&autoOn&&curVid===vid)onVidEnd();
-          if('mediaSession' in navigator){
-            if(e.data===YT.PlayerState.PLAYING)navigator.mediaSession.playbackState='playing';
-            else if(e.data===YT.PlayerState.PAUSED)navigator.mediaSession.playbackState='paused';
-          }
           if(e.data===YT.PlayerState.PLAYING){
             clearInterval(window.__chk);
             window.__chk=setInterval(()=>{
@@ -976,7 +921,6 @@ async function playNext(){
     $('ph').classList.remove('hidden');$('endBtn').style.display='none';
     if(ytPlayer){ytPlayer.destroy();ytPlayer=null}
     clearInterval(window.__chk);
-    releaseWakeLock();clearMediaSession();
     toast('Fila vazia! Adicione mais músicas.');return;
   }
   qPos=(qPos+1)%queue.length;
