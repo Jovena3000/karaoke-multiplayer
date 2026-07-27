@@ -9,7 +9,7 @@
 <meta name="theme-color" content="#0f172a">
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>🎤 Karaokê - Convidado</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -339,7 +339,7 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
    telas muito pequenas, telas muito grandes e orientação landscape)
 ══════════════════════════════════════════════════════════════ */
 
-.player-wrap{max-width:100%}
+.player-wrap{max-width:100%;max-height:70vh}
 .player-wrap iframe{border-radius:inherit}
 
 @media(min-width:1800px){
@@ -850,8 +850,16 @@ async function fetchInfo(vid){
   return{title:`Vídeo (${vid.slice(0,8)}...)`,thumb:`https://img.youtube.com/vi/${vid}/mqdefault.jpg`};
 }
 
+// Tira o foco de qualquer campo/botão ativo. Em celulares (iOS/Android),
+// manter o foco em um input/botão depois que um modal fecha ou a fila muda
+// pode fazer o navegador manter o zoom aplicado à página, dando a
+// impressão de que o player de vídeo "cresceu" e não volta ao tamanho normal.
+function resetMobileZoom(){
+  if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();
+}
+
 function openVidModal(){$('vidModal').classList.add('open');$('vidInp').focus()}
-function closeVidModal(){$('vidModal').classList.remove('open');$('vidInp').value=''}
+function closeVidModal(){$('vidModal').classList.remove('open');$('vidInp').value='';resetMobileZoom()}
 
 async function addQueue(){
   const inp=$('vidInp');
@@ -875,7 +883,7 @@ async function addQueue(){
     addAct('➕',`${userName} adicionou: ${info.title.slice(0,30)}`);
     toast('Música adicionada. Aguarde o host iniciar!');
   }catch(e){toast('Erro ao adicionar música.',true)}
-  finally{btn.textContent='➕ Adicionar à Fila';btn.disabled=false;inp.value=''}
+  finally{btn.textContent='➕ Adicionar à Fila';btn.disabled=false;inp.value='';resetMobileZoom()}
 }
 
 // ═══════════════════════════════════════════
@@ -1047,6 +1055,7 @@ async function top5AddQueue(vid, title, artist, idx){
     addAct('➕',`${userName} adicionou: ${title.slice(0,30)}`);
     toast(`"${title.slice(0,35)}" adicionado! 🎵`);
     btn.innerHTML='✅';
+    resetMobileZoom();
     setTimeout(()=>{btn.innerHTML='➕ Cantar';btn.disabled=false;},2000);
   }catch(e){
     toast('Erro ao adicionar.',true);
@@ -1244,6 +1253,7 @@ async function joinRoom(){
   if(!n){toast('Digite seu nome!',true);$('nameInp').focus();return}
   userName=n;
   $('nameModal').classList.remove('open');
+  resetMobileZoom();
   if(sbOk)await setupListeners();
   toast(isNew?'Sala criada! Código: '+roomId:'Bem-vindo, '+n+'! 🎤');
 }
@@ -1394,6 +1404,7 @@ async function ytAddToQueue(vid,title){
     toast(`"${(info.title||title).slice(0,35)}" adicionado! 🎵`);
     addAct('➕',`${userName} adicionou: ${(info.title||title).slice(0,30)}`);
     btn.textContent='✅';
+    resetMobileZoom();
     setTimeout(()=>{btn.textContent='➕ Cantar';btn.disabled=false;},1500);
   }catch(e){toast('Erro ao adicionar.',true);btn.textContent='➕ Cantar';btn.disabled=false;}
 }
