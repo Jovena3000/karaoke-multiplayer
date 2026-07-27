@@ -513,9 +513,9 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
         <div class="plist" id="pList"><div style="text-align:center;color:var(--muted);padding:.75rem;font-size:.82rem">Aguardando...</div></div>
       </div>
 
-      <!-- TOP 5 MÚSICAS DA SEMANA -->
+      <!-- TOP 10 MÚSICAS DA SEMANA -->
       <div class="top5-sec">
-        <div class="top5-hdr">🔥 Cinco Músicas Mais Cantadas da Semana</div>
+        <div class="top5-hdr">🔥 Dez Músicas Mais Cantadas da Semana</div>
         <div class="top5-list" id="top5List">
           <div class="top5-loading"><span class="top5-spinner"></span>Carregando...</div>
         </div>
@@ -982,7 +982,7 @@ function showResult(){
 }
 
 // ═══════════════════════════════════════════
-// TOP 5 MÚSICAS DA SEMANA
+// TOP 10 MÚSICAS DA SEMANA
 // ═══════════════════════════════════════════
 const TOP5_SONGS = [
    {vid:'d_A5_bEHt5k', title:'P do Pecado', artist:'Grupo Menos É Mais, Simone Mendes'},
@@ -990,6 +990,11 @@ const TOP5_SONGS = [
   {vid:'iRRR586XqcA', title:'Borboletas', artist:'Victor & Léo'},
   {vid:'G73LBvMd84Q', title:'Pais e Filhos', artist:'Legião Urbana'},
   {vid:'8Qqof-Re98s', title:'Cheia de Manias', artist:'Raça Negra'},
+  {vid:'zRZVsCW_G7A', title:'Todo Mundo Vai Sofrer', artist:'Marília Mendonça'},
+  {vid:'oJThp7EAK3g', title:'Graveto', artist:'Marília Mendonça'},
+  {vid:'qB9_GWx7bMQ', title:'Olha Onde Eu Tô', artist:'Ana Castela'},
+  {vid:'Mr1MinMxUec', title:'Erro Gostoso', artist:'Simone Mendes'},
+  {vid:'XE4Y2dyUntE', title:'Dormi na Praça', artist:'Bruno e Marrone'},
 ];
 
 async function loadTop5(){
