@@ -17,6 +17,13 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif}
 html,body{max-width:100%;overflow-x:hidden}
+/* Desativa o "font boosting"/text autosizing do Chrome/Android — é isso que
+   fazia a página parecer "ampliar sozinha" ao mudar o layout (ex.: quando o
+   vídeo entra ao vivo), sem o usuário ter pedido zoom nenhum. */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+/* Evita que um duplo-toque em qualquer área da página seja interpretado
+   como gesto de zoom pelo navegador (mantém toque único/rolagem normais). */
+html,body{touch-action:manipulation}
 
 :root{
   --bg:#0a0e27;
