@@ -9,13 +9,14 @@
 <meta name="theme-color" content="#0f172a">
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>🎤 Karaokê - Convidado</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif}
+html,body{max-width:100%;overflow-x:hidden}
 
 :root{
   --bg:#0a0e27;
@@ -38,7 +39,7 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
 ::-webkit-scrollbar-thumb{background:var(--purple);border-radius:3px}
 
 /* ── CONNECTION BAR ── */
-#connBar{padding:.2.5rem 1rem;text-align:center;font-size:.4rem;font-weight:600;transition:background .3s}
+#connBar{padding:.5rem 1rem;text-align:center;font-size:.75rem;font-weight:600;transition:background .3s}
 #connBar.ok{background:linear-gradient(135deg,var(--green),#00cc6a);color:#000}
 #connBar.wait{background:linear-gradient(135deg,var(--orange),#ffb347);color:#000}
 #connBar.err{background:linear-gradient(135deg,#ff4757,#ff6b6b);color:#fff}
@@ -338,34 +339,23 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
    telas muito pequenas, telas muito grandes e orientação landscape)
 ══════════════════════════════════════════════════════════════ */
 
-/* Player: garante que o iframe do YouTube nunca “vaze” do card
-   arredondado e mantenha a proporção 16:9 em qualquer largura */
 .player-wrap{max-width:100%}
 .player-wrap iframe{border-radius:inherit}
 
-/* Ultra-wide desktop / monitores grandes: evita que o vídeo fique
-   gigantesco e desproporcional em telas muito largas (≥1800px) */
 @media(min-width:1800px){
   .wrap{max-width:1600px}
 }
 
-/* Celulares em modo paisagem (altura curta): impede que o player
-   16:9 empurre o resto da página para muito longe da tela e quebre
-   o padrão visual — sem alterar o comportamento em modo retrato */
 @media(orientation:landscape) and (max-height:500px){
   .player-wrap{padding-bottom:0;height:min(60vh,420px)}
   .m-box{max-height:calc(100svh - .8rem)}
   .res-box{max-height:85vh}
 }
 
-/* Tablets pequenos / celulares grandes entre 601px–768px:
-   ajusta grid de participantes/top5 para não ficar apertado */
 @media(min-width:601px) and (max-width:768px){
   .right-col{grid-template-columns:1fr}
 }
 
-/* Telas bem estreitas (≤380px): evita overflow horizontal em
-   itens de lista com miniaturas fixas (fila, top5, busca YouTube) */
 @media(max-width:380px){
   .q-thumb,.top5-thumb{width:44px;height:34px}
   .yt-thumb{width:60px;min-width:60px;height:36px}
@@ -377,8 +367,6 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
   .lb-score{font-size:.72rem}
 }
 
-/* Modo paisagem em telas pequenas: coluna direita não deve ocupar
-   metade da largura útil enquanto o player já é pequeno */
 @media(orientation:landscape) and (max-width:900px) and (max-height:500px){
   .right-col{grid-template-columns:repeat(2,1fr)}
 }
@@ -388,14 +376,10 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
    Modal "Adicionar à Fila" (acesso via QR Code em celulares/tablets)
 ══════════════════════════════════════════════════════════════ */
 
-/* Evita zoom automático do iOS ao focar em inputs (mínimo 16px) */
 @media(max-width:900px){
   .inp{font-size:16px}
 }
 
-/* Celulares pequenos: empilha o campo de código + botão "Entrar"
-   para não ficarem espremidos, e reduz elementos grandes do
-   modal de boas-vindas */
 @media(max-width:400px){
   .join-box .m-row{flex-direction:column}
   .join-box .m-row .m-btn{width:100%}
@@ -404,15 +388,10 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
   .join-box{padding:.7rem}
 }
 
-/* Tablets (601px–1024px): aproveita melhor o espaço disponível
-   nos modais sem ficarem esticados demais nem apertados */
 @media(min-width:601px) and (max-width:1024px){
   .m-box{max-width:520px}
 }
 
-/* Celulares/tablets em paisagem com pouca altura: reduz respiros
-   verticais do modal de boas-vindas e do modal de vídeo para caber
-   sem cortar conteúdo */
 @media(orientation:landscape) and (max-height:500px){
   .m-title{margin-bottom:.6rem;font-size:1.05rem}
   .join-box{padding:.6rem;margin-bottom:.6rem}
@@ -421,10 +400,46 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
   .m-btn{padding:.7rem}
 }
 
-/* Modal "Adicionar à Fila": no celular, os botões de gênero musical
-   (Sertanejo, Funk, Pop...) quebram melhor em telas bem estreitas */
 @media(max-width:360px){
   .yf-btn{padding:.22rem .5rem;font-size:.66rem}
+}
+
+/* ══════════════════════════════════════════════════════════════
+   RESPONSIVIDADE REFORÇADA — abas do modal "Adicionar à Fila"
+   (Colar Link / Buscar Música) em qualquer celular ou tablet
+══════════════════════════════════════════════════════════════ */
+
+/* Garante que as abas nunca quebrem feio e o texto não estoure */
+#tabLink,#tabSearch{min-width:0}
+@media(max-width:420px){
+  #tabLink,#tabSearch{font-size:.75rem;padding:.5rem .3rem}
+}
+
+/* Linha de busca (input + lupa) empilha em telas muito estreitas */
+@media(max-width:360px){
+  #panelSearch > div[style*="display:flex"]:first-of-type{flex-wrap:wrap}
+}
+
+/* Itens de resultado da busca do YouTube: thumb/título/botão sempre
+   cabem sem overflow horizontal, mesmo em celulares pequenos */
+@media(max-width:400px){
+  .yt-item{padding:.5rem;gap:.5rem}
+  .yt-thumb{width:64px;min-width:64px;height:38px}
+  .yt-add{padding:.35rem .6rem;font-size:.68rem}
+}
+
+/* Paginação da busca: não deixa os botões colarem nas bordas em telas
+   pequenas */
+@media(max-width:360px){
+  #ytPagination{gap:.3rem}
+  #ytPrev,#ytNext{padding:.35rem .6rem;font-size:.72rem}
+  #ytPageInfo{font-size:.68rem}
+}
+
+/* Tablets em pé (601–900px): aproveita melhor a largura do modal de
+   busca para até 2 colunas de resultados, mantendo o link em 1 coluna */
+@media(min-width:601px) and (max-width:900px){
+  #ytResults{max-height:clamp(160px,40vh,340px)}
 }
 </style>
 </head>
@@ -652,8 +667,8 @@ let participants=[], activities=[], queue=[], qPos=-1;
 let emojiCounts={}, totalReact=0;
 let lb={}, curSongScores={}, curSongId=null;
 let seenEmojis=new Set();
+// gotState = já recebi o estado autoritativo da sala (necessário antes de re-emitir dados)
 let gotState=false;
-let liveUpdateApplied=false;
 let qTimer=null, lastState=0;
 
 // ═══════════════════════════════════════════
@@ -884,6 +899,7 @@ function updLBLocal(name,e,pts){
 
 async function sendEmoji(e,pts){
   if(!userName){toast('Entre na sala primeiro!',true);return}
+  if(!gotState){toast('Sincronizando sala, aguarde um instante...',true);return}
   if(cd){toast('Aguarde 1 segundo!',true);return}
   if(!curVid){toast('Nenhuma música tocando!',true);return}
 
@@ -904,13 +920,12 @@ async function sendEmoji(e,pts){
   }
 
   updLBLocal(targetName,e,pts);updLB();
-  liveUpdateApplied=true;
   addAct(e,`${userName} → ${targetName}: ${pts>0?'+'+pts:pts}`);
 
   if(sbOk&&ch){
     const emojiId=userId+'_'+Date.now()+'_'+Math.random();
     await ch.send({type:'broadcast',event:'new-emoji',payload:{emoji:e,points:pts,targetUserId:targetId,targetName,userName,emojiId}});
-    await sbSend('scores-update',scores);
+    await saveState();
   }
 
   cd=true;
@@ -1056,7 +1071,12 @@ async function sbSend(ev,payload){
   await ch.send({type:'broadcast',event:ev,payload});
 }
 
+// saveState() é a única fonte que propaga o estado "oficial" da sala.
+// BLINDAGEM: nunca propagar estado antes de ter recebido/confirmado o
+// estado autoritativo (gotState). Isso evita que um convidado que acabou
+// de entrar (com scores locais zerados) sobrescreva o placar de todo mundo.
 async function saveState(){
+  if(!gotState)return;
   await sbSend('room-state',{
     currentVideoId:curVid,scores,currentSinger:curSinger,currentSingerId:curSingerId,
     currentSongOwnerId:curOwnerId,queue,currentQueuePosition:qPos,
@@ -1070,6 +1090,8 @@ async function requestState(){
 }
 
 async function sendStateTo(uid){
+  // Só posso enviar estado para outra pessoa se o meu próprio estado já for confiável
+  if(!gotState)return;
   if(!curVid&&!queue.length&&scores.total===0)return;
   await sbSend('initial-state',{targetUserId:uid,state:{
     currentVideoId:curVid,scores,currentSinger:curSinger,currentSingerId:curSingerId,
@@ -1112,11 +1134,10 @@ async function setupListeners(){
       if(payload.targetUserId!==userId)return;
       if(gotState)return; // já sincronizado — ignora fotos atrasadas/duplicadas de outros participantes
       const s=payload.state;
-      if(!liveUpdateApplied){
-        if(s.scores){scores=s.scores;updScores()}
-        if(s.globalLeaderboard){lb=s.globalLeaderboard;updLB()}
-        if(s.emojiCounts){emojiCounts=s.emojiCounts;totalReact=s.totalReactions||0}
-      }
+      // Aplica sempre (primeira sincronização é sempre autoritativa)
+      if(s.scores){scores=s.scores;updScores()}
+      if(s.globalLeaderboard){lb=s.globalLeaderboard;updLB()}
+      if(s.emojiCounts){emojiCounts=s.emojiCounts;totalReact=s.totalReactions||0}
       if(s.queue){queue=s.queue;qPos=s.currentQueuePosition??-1;safeUpdQueue()}
       if(s.currentVideoId&&s.currentVideoId!==curVid){
         curVid=s.currentVideoId;curSinger=s.currentSinger;curSingerId=s.currentSingerId;
@@ -1130,10 +1151,8 @@ async function setupListeners(){
     .on('broadcast',{event:'room-state'},({payload})=>{
       if((payload.updatedAt||0)<=lastState)return;
       lastState=payload.updatedAt;
-      if(!liveUpdateApplied){
-        if(payload.scores){scores=payload.scores;updScores()}
-        if(payload.globalLeaderboard){lb=payload.globalLeaderboard;updLB()}
-      }
+      if(payload.scores){scores=payload.scores;updScores()}
+      if(payload.globalLeaderboard){lb=payload.globalLeaderboard;updLB()}
       if(payload.queue){queue=payload.queue;qPos=payload.currentQueuePosition??-1;safeUpdQueue()}
       if(payload.currentVideoId&&payload.currentVideoId!==curVid){
         curVid=payload.currentVideoId;curSinger=payload.currentSinger;curSingerId=payload.currentSingerId;
@@ -1142,6 +1161,8 @@ async function setupListeners(){
       }
       if(payload.currentSongScores){curSongScores=payload.currentSongScores;curSongId=payload.currentSongId}
       if(payload.activities){activities=payload.activities;}
+      // room-state confirma que estou alinhado com a sala
+      if(!gotState)gotState=true;
     })
     .on('broadcast',{event:'queue-update'},({payload,from})=>{
       if(from===userId)return;
@@ -1162,7 +1183,6 @@ async function setupListeners(){
       const tp=participants.find(p=>p.odUserId===targetUserId);
       const finalTargetName=targetName||(tp?tp.odUserName:'cantor');
       updLBLocal(finalTargetName,emoji,points);updLB();
-      liveUpdateApplied=true;
       addAct(emoji,`${uName} → ${finalTargetName}: ${points>0?'+'+points:points}`);
       saveState();
     })
@@ -1210,6 +1230,7 @@ function applyCode(){
   const v=($('codeInp').value||'').trim().toUpperCase();
   if(!v||v.length!==6){toast('Digite um código de 6 caracteres!',true);return}
   roomId=v;isNew=false;
+  gotState=false;
   $('hdrRoom').textContent=v;
   $('modalRoom').textContent=v;
   const b=$('modeBadge');b.textContent='🚪 Entrando em sala existente';b.className='mode-badge join';
@@ -1235,6 +1256,11 @@ async function init(){
   const urlRoom=fromUrl();
   if(urlRoom){roomId=urlRoom;isNew=false}
   else{roomId=mkId();isNew=true}
+
+  // Quem cria a sala já é a fonte autoritativa do próprio estado (vazio).
+  // Quem entra numa sala existente (via QR/código) só fica "sincronizado"
+  // após receber initial-state ou room-state de alguém já na sala.
+  gotState=isNew;
 
   $('hdrRoom').textContent=roomId;
   $('modalRoom').textContent=roomId;
@@ -1380,11 +1406,9 @@ document.addEventListener('DOMContentLoaded',init);
 <!-- ═══════════════════════════════════════════════════════════════ -->
 <script>
 (function() {
-    // Configuração do domínio do app
     const APP_DOMAIN = 'karaokemultiplayer.com.br';
     const WWW_DOMAIN = 'www.karaokemultiplayer.com.br';
-    
-    // Função para verificar se a URL é do mesmo domínio do app
+
     function isSameOrigin(url) {
         if (!url) return false;
         if (url.startsWith('/') || url.startsWith('./') || url.startsWith('../')) {
@@ -1400,13 +1424,11 @@ document.addEventListener('DOMContentLoaded',init);
             return false;
         }
     }
-    
-    // Interceptar todos os cliques em links e botões que abrem URLs
+
     document.addEventListener('click', function(e) {
-        // Procurar por elemento <a> ou botões com href
         let target = e.target;
         let linkElement = null;
-        
+
         while (target && target !== document.body) {
             if (target.tagName === 'A') {
                 linkElement = target;
@@ -1414,25 +1436,21 @@ document.addEventListener('DOMContentLoaded',init);
             }
             target = target.parentElement;
         }
-        
+
         if (linkElement && linkElement.tagName === 'A') {
             const href = linkElement.getAttribute('href');
             const targetAttr = linkElement.getAttribute('target');
-            
+
             if (href && href !== '#' && !href.startsWith('javascript:')) {
-                // Se for link interno do app, abrir no mesmo contexto
                 if (isSameOrigin(href)) {
                     e.preventDefault();
-                    // Remover target _blank se existir
                     window.location.href = href;
                     return;
                 }
-                // Links externos (como download APK) mantêm comportamento padrão
             }
         }
     });
-    
-    // Remover target="_blank" de todos os links internos existentes
+
     function fixInternalLinks() {
         const allLinks = document.querySelectorAll('a[href]');
         allLinks.forEach(link => {
@@ -1444,15 +1462,13 @@ document.addEventListener('DOMContentLoaded',init);
             }
         });
     }
-    
-    // Executar ao carregar a página
+
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', fixInternalLinks);
     } else {
         fixInternalLinks();
     }
-    
-    // Observer para links adicionados dinamicamente
+
     if (window.MutationObserver) {
         const observer = new MutationObserver(function(mutations) {
             mutations.forEach(function(mutation) {
@@ -1463,7 +1479,7 @@ document.addEventListener('DOMContentLoaded',init);
         });
         observer.observe(document.body, { childList: true, subtree: true });
     }
-    
+
     console.log('✅ Navegação intra-app configurada - links abrirão dentro do aplicativo');
 })();
 </script>
