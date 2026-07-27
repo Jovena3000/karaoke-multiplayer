@@ -59,7 +59,7 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
 ::-webkit-scrollbar-thumb{background:var(--purple);border-radius:3px}
 
 /* ── CONNECTION BAR ── */
-#connBar{padding:.2.5rem 1rem;text-align:center;font-size:.4rem;font-weight:600;transition:background .3s}
+#connBar{padding:.5rem 1rem;text-align:center;font-size:.8rem;font-weight:600;transition:background .3s}
 #connBar.ok{background:linear-gradient(135deg,var(--green),#00cc6a);color:#000}
 #connBar.wait{background:linear-gradient(135deg,var(--orange),#ffb347);color:#000}
 #connBar.err{background:linear-gradient(135deg,#ff4757,#ff6b6b);color:#fff}
@@ -967,6 +967,12 @@ async function nextAfterResult(){
 }
 
 function showResult(){
+try{
+    resultAudio=new Audio('https://jovena3000.github.io/karaoke-multiplayer/palmasAudio.mpeg');
+    resultAudio.loop=false;
+    resultAudio.play().catch(e=>console.warn('Áudio de resultado não pôde ser reproduzido:',e));
+  }catch(e){console.warn('Erro ao criar áudio de resultado:',e);}
+
   const ov=$('resOverlay');
   $('resName').textContent=curOwnerName||userName||'Cantor';
   const top=topEmoji();
