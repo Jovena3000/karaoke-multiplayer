@@ -264,7 +264,7 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
 .res-ico{font-size:4rem;margin-bottom:.3rem;filter:drop-shadow(0 0 14px rgba(255,255,255,.35))}
 @keyframes gradFlow{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 @keyframes scorePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
-.res-score{font-size:5rem;font-weight:800;background-size:300% 300%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;display:inline-block;-webkit-text-stroke:4px #000;paint-order:stroke fill;animation:gradFlow 3s ease infinite,scorePulse 1.8s ease-in-out infinite}
+.res-score{font-size:10rem;font-weight:800;background-size:300% 300%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;display:inline-block;-webkit-text-stroke:4px #000;paint-order:stroke fill;animation:gradFlow 3s ease infinite,scorePulse 1.8s ease-in-out infinite}
 .res-score.pos{background-image:linear-gradient(90deg,#00ff88,#00e0ff,#00ff88);filter:drop-shadow(0 0 16px rgba(0,255,136,.85))}
 .res-score.neg{background-image:linear-gradient(90deg,#ff4757,#ff9500,#ff4757);filter:drop-shadow(0 0 16px rgba(255,71,87,.85))}
 .res-score.neu{background-image:linear-gradient(90deg,#00d4ff,#9d4edd,#00d4ff);filter:drop-shadow(0 0 16px rgba(0,212,255,.85))}
@@ -578,7 +578,6 @@ let participants=[], activities=[], queue=[], qPos=-1;
 let emojiCounts={}, totalReact=0;
 let lb={};
 let seenEmojis=new Set();
-let resultAudio=null;
 let autoOn=false, ending=false;
 let gotState=false;
 let qTimer=null, lastState=0;
@@ -682,25 +681,20 @@ function updAct(){
 // ═══════════════════════════════════════════
 // LEADERBOARD
 // ═══════════════════════════════════════════
+function nkey(n){return (n||'').trim().toLowerCase()}
+
 function updLB(){
-  const list=Object.entries(lb).map(([uid,d])=>{
-    let name='Anônimo';
-    const u=participants.find(p=>p.odUserId===uid);
-    if(u)name=u.odUserName;
-    else{
-      const q=queue.find(q=>q.added_by===uid);
-      if(q)name=q.added_by_name||name;
-      else if(uid===curSingerId&&curOwnerName)name=curOwnerName;
-    }
+  const list=Object.entries(lb).map(([key,d])=>{
+    const name=(typeof d==='object'&&d.displayName)?d.displayName:'Anônimo';
     const score=typeof d==='number'?d:(d.score||0);
     const emoji=typeof d==='object'?d.topEmoji:'🎵';
-    return{uid,name,score,emoji};
+    return{key,name,score,emoji};
   }).filter(x=>x.score>0).sort((a,b)=>b.score-a.score);
 
   if(!list.length){$('lbList').innerHTML='<div class="lb-empty">🎵 Ninguém recebeu pontos ainda</div>';return}
   const medals=['🥇','🥈','🥉'];
   $('lbList').innerHTML=list.map((it,i)=>{
-    const you=it.uid===userId;
+    const you=it.key===nkey(userName);
     const med=medals[i]||(i+1)+'º';
     return `<div class="lb-item r${i+1}"><div class="lb-medal">${med}</div><div class="lb-info"><div class="lb-name">🎤 ${esc(it.name)}${you?' <small>(você)</small>':''}</div><div class="lb-score">⭐ ${it.score} pontos</div><div class="lb-emoji">🔥 ${it.emoji}</div></div></div>`;
   }).join('');
@@ -963,29 +957,15 @@ function resetCurrentSong(){
   scores={total:0,positive:0,negative:0};emojiCounts={};totalReact=0;updScores();
 }
 
-function closeResult(){
-  if(resultAudio){
-    try{resultAudio.pause();resultAudio.currentTime=0;}catch(e){}
-  }
-  $('resOverlay').classList.remove('open')
-}
+function closeResult(){$('resOverlay').classList.remove('open')}
 
 async function nextAfterResult(){
-  if(resultAudio){
-    try{resultAudio.pause();resultAudio.currentTime=0;}catch(e){}
-  }
   closeResult();resetCurrentSong();
   await sbSend('scores-update',scores);
   if(autoOn)await playNext();
 }
 
 function showResult(){
-  try{
-    resultAudio=new Audio('https://jovena3000.github.io/karaoke-multiplayer/palmasAudio.mpeg');
-    resultAudio.loop=false;
-    resultAudio.play().catch(e=>console.warn('Áudio de resultado não pôde ser reproduzido:',e));
-  }catch(e){console.warn('Erro ao criar áudio de resultado:',e);}
-
   const ov=$('resOverlay');
   $('resName').textContent=curOwnerName||userName||'Cantor';
   const top=topEmoji();
@@ -1053,11 +1033,11 @@ async function sendEmoji(e,pts){
   if(pts>0)scores.positive+=pts;else scores.negative+=Math.abs(pts);
   updScores();
 
-  updLBLocal(curOwnerId,e,pts);
+  updLBLocal(curOwnerName,e,pts);
   updLB();
 
   addAct(e,`${userName} → ${curOwnerName}: ${pts>0?'+'+pts:pts}`);
-  await sbSend('new-emoji',{emoji:e,points:pts,targetUserId:curOwnerId,userName,emojiId:userId+'_'+Date.now()+'_'+Math.random()});
+  await sbSend('new-emoji',{emoji:e,points:pts,targetUserId:curOwnerId,targetName:curOwnerName,userName,emojiId:userId+'_'+Date.now()+'_'+Math.random()});
   await sbSend('scores-update',scores);
 
   cd=true;
@@ -1065,15 +1045,18 @@ async function sendEmoji(e,pts){
   setTimeout(()=>{cd=false;document.querySelectorAll('.ebtn').forEach(b=>b.classList.remove('cd'));},1000);
 }
 
-function updLBLocal(uid,e,pts){
-  if(!lb[uid])lb[uid]={score:0,topEmoji:e,topEmojiCounts:{}};
-  else if(typeof lb[uid]==='number')lb[uid]={score:lb[uid],topEmoji:e,topEmojiCounts:{}};
-  lb[uid].score+=pts;
-  if(!lb[uid].topEmojiCounts)lb[uid].topEmojiCounts={};
-  lb[uid].topEmojiCounts[e]=(lb[uid].topEmojiCounts[e]||0)+1;
+function updLBLocal(name,e,pts){
+  const key=nkey(name);
+  if(!key)return;
+  if(!lb[key])lb[key]={score:0,topEmoji:e,topEmojiCounts:{},displayName:name};
+  else if(typeof lb[key]==='number')lb[key]={score:lb[key],topEmoji:e,topEmojiCounts:{},displayName:name};
+  if(!lb[key].displayName)lb[key].displayName=name;
+  lb[key].score+=pts;
+  if(!lb[key].topEmojiCounts)lb[key].topEmojiCounts={};
+  lb[key].topEmojiCounts[e]=(lb[key].topEmojiCounts[e]||0)+1;
   let max=0,top=e;
-  for(const[k,v] of Object.entries(lb[uid].topEmojiCounts))if(v>max){max=v;top=k;}
-  lb[uid].topEmoji=top;
+  for(const[k,v] of Object.entries(lb[key].topEmojiCounts))if(v>max){max=v;top=k;}
+  lb[key].topEmoji=top;
 }
 
 // ═══════════════════════════════════════════
@@ -1210,16 +1193,17 @@ async function setupListeners(){
       queue=payload.queue;qPos=payload.currentPosition;safeUpdQueue();
     })
     .on('broadcast',{event:'new-emoji'},({payload})=>{
-      const{emoji,points,targetUserId,userName:uName,emojiId}=payload;
+      const{emoji,points,targetUserId,targetName,userName:uName,emojiId}=payload;
       if(seenEmojis.has(emojiId))return;
       seenEmojis.add(emojiId);
       floatEmoji(emoji);showNotif(emoji,uName);flashCard(points);
       trackEmoji(emoji);
       scores.total+=points;if(points>0)scores.positive+=points;else scores.negative+=Math.abs(points);
       updScores();
-      updLBLocal(targetUserId,emoji,points);updLB();
       const tp=participants.find(p=>p.odUserId===targetUserId);
-      addAct(emoji,`${uName} → ${tp?tp.odUserName:'cantor'}: ${points>0?'+'+points:points}`);
+      const finalTargetName=targetName||(tp?tp.odUserName:'cantor');
+      updLBLocal(finalTargetName,emoji,points);updLB();
+      addAct(emoji,`${uName} → ${finalTargetName}: ${points>0?'+'+points:points}`);
       saveState();
     })
     .on('broadcast',{event:'new-video'},({payload})=>{
