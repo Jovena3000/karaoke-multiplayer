@@ -580,6 +580,7 @@ let lb={};
 let seenEmojis=new Set();
 let autoOn=false, ending=false;
 let gotState=false;
+let liveUpdateApplied=false;
 let qTimer=null, lastState=0;
 
 // ═══════════════════════════════════════════
@@ -1034,6 +1035,7 @@ async function sendEmoji(e,pts){
   updScores();
 
   updLBLocal(curOwnerName,e,pts);
+  liveUpdateApplied=true;
   updLB();
 
   addAct(e,`${userName} → ${curOwnerName}: ${pts>0?'+'+pts:pts}`);
@@ -1165,28 +1167,33 @@ async function setupListeners(){
     })
     .on('broadcast',{event:'initial-state'},({payload})=>{
       if(payload.targetUserId!==userId)return;
+      if(gotState)return; // já sincronizado — ignora fotos atrasadas/duplicadas de outros participantes
       const s=payload.state;
-      if(s.scores){scores=s.scores;updScores()}
+      if(!liveUpdateApplied){
+        if(s.scores){scores=s.scores;updScores()}
+        if(s.globalLeaderboard){lb=s.globalLeaderboard;updLB()}
+        if(s.emojiCounts){emojiCounts=s.emojiCounts;totalReact=s.totalReactions||0}
+      }
       if(s.queue){queue=s.queue;qPos=s.currentQueuePosition??-1;safeUpdQueue()}
       if(s.currentVideoId&&s.currentVideoId!==curVid){
         curVid=s.currentVideoId;curOwnerName=s.currentSinger;curSingerId=s.currentSingerId;
         playVideo(s.currentVideoId);
       }
-      if(s.globalLeaderboard){lb=s.globalLeaderboard;updLB()}
-      if(s.emojiCounts){emojiCounts=s.emojiCounts;totalReact=s.totalReactions||0}
       if(s.activities){activities=s.activities;updAct()}
       gotState=true;toast('Sala sincronizada! 🎤');
     })
     .on('broadcast',{event:'room-state'},({payload})=>{
       if((payload.updatedAt||0)<=lastState)return;
       lastState=payload.updatedAt;
-      if(payload.scores){scores=payload.scores;updScores()}
+      if(!liveUpdateApplied){
+        if(payload.scores){scores=payload.scores;updScores()}
+        if(payload.globalLeaderboard){lb=payload.globalLeaderboard;updLB()}
+      }
       if(payload.queue){queue=payload.queue;qPos=payload.currentQueuePosition??-1;safeUpdQueue()}
       if(payload.currentVideoId&&payload.currentVideoId!==curVid){
         curVid=payload.currentVideoId;curOwnerName=payload.currentSinger;curSingerId=payload.currentSingerId;
         playVideo(payload.currentVideoId);
       }
-      if(payload.globalLeaderboard){lb=payload.globalLeaderboard;updLB()}
     })
     .on('broadcast',{event:'queue-update'},({payload,from})=>{
       if(from===userId)return;
@@ -1203,6 +1210,7 @@ async function setupListeners(){
       const tp=participants.find(p=>p.odUserId===targetUserId);
       const finalTargetName=targetName||(tp?tp.odUserName:'cantor');
       updLBLocal(finalTargetName,emoji,points);updLB();
+      liveUpdateApplied=true;
       addAct(emoji,`${uName} → ${finalTargetName}: ${points>0?'+'+points:points}`);
       saveState();
     })
