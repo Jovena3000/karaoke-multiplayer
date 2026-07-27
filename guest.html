@@ -9,17 +9,21 @@
 <meta name="theme-color" content="#0f172a">
 
 <meta charset="UTF-8">
-<!-- VIEWPORT CORRIGIDA: permite zoom e ajuste correto -->
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<!-- Meta para iOS (reforça o comportamento) -->
+<!-- VIEWPORT DEFINITIVA: permite zoom livre -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>🎤 Karaokê - Convidado</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
+/* RESET E CONFIGURAÇÕES GLOBAIS */
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif}
-html,body{max-width:100%;overflow-x:hidden}
+html,body{
+  max-width:100%;
+  overflow-x:hidden;
+  min-width:0;
+}
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 html,body{touch-action:manipulation}
 
@@ -71,16 +75,21 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
 @keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 8px var(--green)}50%{opacity:.4}}
 
 /* ── LAYOUT ── */
-.wrap{max-width:1400px;margin:1.2rem auto;padding:0 .8rem}
+.wrap{
+  max-width:1400px;
+  margin:1.2rem auto;
+  padding:0 .8rem;
+  min-width:0;
+}
 .grid{
   display:grid;
-  grid-template-columns:1fr minmax(280px, 1fr); /* em vez de largura fixa */
+  grid-template-columns:1fr 1fr; /* duas colunas iguais, depois ajustamos com media */
   gap:1.2rem;
-  min-width:0; /* evita overflow */
+  min-width:0;
 }
 
 /* ── CARD BASE ── */
-.card{background:var(--card);border-radius:1rem;padding:1.2rem;border:1px solid rgba(157,78,221,.2);margin-bottom:1rem}
+.card{background:var(--card);border-radius:1rem;padding:1.2rem;border:1px solid rgba(157,78,221,.2);margin-bottom:1rem;min-width:0}
 .card:last-child{margin-bottom:0}
 .c-title{font-size:.95rem;font-weight:600;margin-bottom:.75rem;display:flex;align-items:center;gap:.4rem}
 
@@ -92,11 +101,11 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
 .player-wrap{
   position:relative;
   width:100%;
-  padding-bottom:56.25%; /* proporção 16:9 */
+  padding-bottom:56.25%;
   background:#000;
   border-radius:.75rem;
   overflow:hidden;
-  /* removido max-height:70vh para não cortar o vídeo */
+  min-width:0;
 }
 .player-wrap iframe{
   position:absolute;
@@ -106,7 +115,8 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
   height:100%;
   border:none;
   z-index:1;
-  object-fit:contain; /* garante que o vídeo inteiro seja visível */
+  object-fit:contain;
+  min-width:0;
 }
 
 .placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(157,78,221,.08),rgba(0,212,255,.08));z-index:2}
@@ -137,7 +147,7 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
 .btn-dim{background:var(--light);border:1px solid rgba(255,255,255,.15)}
 
 /* ── EMOJI SECTION ── */
-.emoji-sec{background:var(--card);border-radius:1rem;padding:1.2rem;margin-top:1rem;border:1px solid rgba(157,78,221,.2)}
+.emoji-sec{background:var(--card);border-radius:1rem;padding:1.2rem;margin-top:1rem;border:1px solid rgba(157,78,221,.2);min-width:0}
 .emoji-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:.6rem}
 .ebtn{background:var(--light);border:2px solid transparent;padding:.75rem .3rem;border-radius:.65rem;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:.2rem;transition:transform .2s,border-color .2s;color:var(--txt)}
 .ebtn:hover{transform:translateY(-4px)}
@@ -151,21 +161,21 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
 .ep.n{color:#ff4757}
 
 /* ── LEADERBOARD ── */
-.lb-sec{background:var(--card);border-radius:1rem;padding:1.2rem;margin-top:1rem;border:1px solid rgba(157,78,221,.2)}
+.lb-sec{background:var(--card);border-radius:1rem;padding:1.2rem;margin-top:1rem;border:1px solid rgba(157,78,221,.2);min-width:0}
 .lb-hdr{font-size:1rem;font-weight:600;color:var(--orange);margin-bottom:.75rem}
 .lb-item{background:var(--light);border-radius:.65rem;padding:.65rem .9rem;display:flex;align-items:center;gap:.75rem;margin-bottom:.4rem;border-left:4px solid transparent}
 .lb-item.r1{border-left-color:gold;background:linear-gradient(135deg,var(--light),rgba(255,215,0,.08))}
 .lb-item.r2{border-left-color:silver}
 .lb-item.r3{border-left-color:#cd7f32}
 .lb-medal{font-size:1.4rem;min-width:36px;text-align:center}
-.lb-info{flex:1}
+.lb-info{flex:1;min-width:0}
 .lb-name{font-weight:600;font-size:.9rem}
 .lb-score{font-size:.8rem;color:var(--green);font-weight:600}
 .lb-emoji{font-size:.7rem;color:var(--muted)}
 .lb-empty{text-align:center;padding:.8rem;color:var(--muted);background:var(--light);border-radius:.65rem;font-size:.85rem}
 
 /* ── QUEUE (view-only) ── */
-.q-sec{background:var(--card);border-radius:1rem;padding:1.2rem;margin-top:1rem;border:1px solid rgba(157,78,221,.2)}
+.q-sec{background:var(--card);border-radius:1rem;padding:1.2rem;margin-top:1rem;border:1px solid rgba(157,78,221,.2);min-width:0}
 .q-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;flex-wrap:wrap;gap:.5rem}
 .q-title{font-size:1rem;font-weight:600;display:flex;align-items:center;gap:.4rem}
 .q-cnt{background:var(--purple);padding:.15rem .5rem;border-radius:1rem;font-size:.75rem}
@@ -189,7 +199,7 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
 .badge.on{background:var(--green);color:#000;animation:pulse 1s infinite}
 
 /* ── TOP 10 MÚSICAS DA SEMANA ── */
-.top5-sec{background:var(--card);border-radius:1rem;padding:1.2rem;border:1px solid rgba(157,78,221,.2)}
+.top5-sec{background:var(--card);border-radius:1rem;padding:1.2rem;border:1px solid rgba(157,78,221,.2);min-width:0}
 .top5-hdr{font-size:.95rem;font-weight:600;margin-bottom:.75rem;display:flex;align-items:center;gap:.4rem;color:var(--orange)}
 .top5-list{display:flex;flex-direction:column;gap:.45rem}
 .top5-item{background:var(--light);border-radius:.65rem;padding:.55rem .65rem;display:flex;align-items:center;gap:.65rem;border:1px solid rgba(255,255,255,.07);transition:border-color .2s}
@@ -362,9 +372,7 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
 }
 
 /* ══════════════════════════════════════════════════════════════
-   AJUSTES EXTRAS DE RESPONSIVIDADE (não alteram o comportamento
-   já existente — apenas reforçam o player e itens de lista em
-   telas muito pequenas, telas muito grandes e orientação landscape)
+   AJUSTES EXTRAS DE RESPONSIVIDADE
 ══════════════════════════════════════════════════════════════ */
 
 @media(min-width:1800px){
@@ -396,11 +404,6 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
   .right-col{grid-template-columns:repeat(2,1fr)}
 }
 
-/* ══════════════════════════════════════════════════════════════
-   RESPONSIVIDADE EXTRA — Modal "Bem-vindo ao Karaokê" e
-   Modal "Adicionar à Fila" (acesso via QR Code em celulares/tablets)
-══════════════════════════════════════════════════════════════ */
-
 @media(max-width:900px){
   .inp{font-size:16px}
 }
@@ -429,40 +432,23 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
   .yf-btn{padding:.22rem .5rem;font-size:.66rem}
 }
 
-/* ══════════════════════════════════════════════════════════════
-   RESPONSIVIDADE REFORÇADA — abas do modal "Adicionar à Fila"
-   (Colar Link / Buscar Música) em qualquer celular ou tablet
-══════════════════════════════════════════════════════════════ */
-
-/* Garante que as abas nunca quebrem feio e o texto não estoure */
 #tabLink,#tabSearch{min-width:0}
 @media(max-width:420px){
   #tabLink,#tabSearch{font-size:.75rem;padding:.5rem .3rem}
 }
-
-/* Linha de busca (input + lupa) empilha em telas muito estreitas */
 @media(max-width:360px){
   #panelSearch > div[style*="display:flex"]:first-of-type{flex-wrap:wrap}
 }
-
-/* Itens de resultado da busca do YouTube: thumb/título/botão sempre
-   cabem sem overflow horizontal, mesmo em celulares pequenos */
 @media(max-width:400px){
   .yt-item{padding:.5rem;gap:.5rem}
   .yt-thumb{width:64px;min-width:64px;height:38px}
   .yt-add{padding:.35rem .6rem;font-size:.68rem}
 }
-
-/* Paginação da busca: não deixa os botões colarem nas bordas em telas
-   pequenas */
 @media(max-width:360px){
   #ytPagination{gap:.3rem}
   #ytPrev,#ytNext{padding:.35rem .6rem;font-size:.72rem}
   #ytPageInfo{font-size:.68rem}
 }
-
-/* Tablets em pé (601–900px): aproveita melhor a largura do modal de
-   busca para até 2 colunas de resultados, mantendo o link em 1 coluna */
 @media(min-width:601px) and (max-width:900px){
   #ytResults{max-height:clamp(160px,40vh,340px)}
 }
@@ -858,6 +844,8 @@ function playVideo(vid){
   // CRÍTICO: não adicionar allowfullscreen de NENHUMA forma
   iframe.id='ytPlayer';
   iframe.style.cssText='position:absolute;top:0;left:0;width:100%;height:100%;border:none;z-index:1';
+  // Sandbox adicional para evitar comportamentos estranhos
+  iframe.setAttribute('sandbox', 'allow-same-origin allow-scripts allow-popups allow-forms');
   wrap.insertBefore(iframe,layer);
   $('ph').classList.add('hidden');
 }
@@ -876,6 +864,9 @@ async function fetchInfo(vid){
 
 function resetMobileZoom(){
   if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();
+  // Força scroll to top e reseta escala (em alguns navegadores)
+  window.scrollTo(0,0);
+  document.body.style.transform = 'scale(1)';
 }
 
 // Rede de segurança contra fullscreen forçado
@@ -1181,6 +1172,8 @@ async function setupListeners(){
       if(s.currentSongScores){curSongScores=s.currentSongScores;curSongId=s.currentSongId}
       if(s.activities){activities=s.activities;}
       gotState=true;toast('Sala sincronizada! 🎤');
+      // reset zoom após sincronizar
+      resetMobileZoom();
     })
     .on('broadcast',{event:'room-state'},({payload})=>{
       if((payload.updatedAt||0)<=lastState)return;
@@ -1196,6 +1189,7 @@ async function setupListeners(){
       if(payload.currentSongScores){curSongScores=payload.currentSongScores;curSongId=payload.currentSongId}
       if(payload.activities){activities=payload.activities;}
       if(!gotState)gotState=true;
+      resetMobileZoom();
     })
     .on('broadcast',{event:'queue-update'},({payload,from})=>{
       if(from===userId)return;
@@ -1232,6 +1226,7 @@ async function setupListeners(){
         toast(`${loadedBy} está cantando! 🎤`);
         addAct('🎬',`${loadedBy} começou: ${title||''}`);
         saveState();
+        resetMobileZoom();
       }
     })
     .on('broadcast',{event:'show-result'},({payload})=>{
@@ -1269,6 +1264,7 @@ function applyCode(){
   if(history.replaceState)history.replaceState({},'',shareUrl());
   toast('Sala: '+v);
   $('nameInp').focus();
+  resetMobileZoom();
 }
 
 async function joinRoom(){
@@ -1279,6 +1275,7 @@ async function joinRoom(){
   resetMobileZoom();
   if(sbOk)await setupListeners();
   toast(isNew?'Sala criada! Código: '+roomId:'Bem-vindo, '+n+'! 🎤');
+  resetMobileZoom();
 }
 
 // ═══════════════════════════════════════════
@@ -1306,7 +1303,7 @@ async function init(){
   $('codeInp').addEventListener('keypress',e=>{if(e.key==='Enter')applyCode()});
 
   loadTop5();
-  setTimeout(()=>$('nameInp').focus(),250);
+  setTimeout(()=>{$('nameInp').focus(); resetMobileZoom();},250);
 }
 
 // ═══════════════════════════════════════════
@@ -1433,7 +1430,7 @@ document.addEventListener('DOMContentLoaded',init);
 </script>
 
 <!-- ═══════════════════════════════════════════════════════════════ -->
-<!-- SCRIPT DE NAVEGAÇÃO INTRA-APP - Garante que links abram no TWA  -->
+<!-- SCRIPT DE NAVEGAÇÃO INTRA-APP -->
 <!-- ═══════════════════════════════════════════════════════════════ -->
 <script>
 (function() {
@@ -1470,8 +1467,6 @@ document.addEventListener('DOMContentLoaded',init);
 
         if (linkElement && linkElement.tagName === 'A') {
             const href = linkElement.getAttribute('href');
-            const targetAttr = linkElement.getAttribute('target');
-
             if (href && href !== '#' && !href.startsWith('javascript:')) {
                 if (isSameOrigin(href)) {
                     e.preventDefault();
