@@ -579,8 +579,8 @@ let emojiCounts={}, totalReact=0;
 let lb={};
 let seenEmojis=new Set();
 let autoOn=false, ending=false;
+// gotState = já recebi o estado autoritativo da sala (necessário antes de re-emitir dados)
 let gotState=false;
-let liveUpdateApplied=false;
 let qTimer=null, lastState=0;
 
 // ═══════════════════════════════════════════
@@ -645,7 +645,6 @@ function flashCard(pts){
   const el=$('scTotal');
   el.classList.add('flash');
   setTimeout(()=>el.classList.remove('flash'),400);
-  // também pulsa o sub-card (positivo ou negativo)
   const sub=pts>0?$('vPos').parentElement:$('vNeg').parentElement;
   if(sub){sub.classList.add('flash');setTimeout(()=>sub.classList.remove('flash'),400);}
 }
@@ -779,13 +778,11 @@ function playVideo(vid,title=''){
   if(!vid)return;
   curVid=vid;
 
-  // Find owner in queue
   const qi=queue.find(x=>x.video_id===vid);
   curOwnerId=qi?.added_by||userId;
   curOwnerName=qi?.added_by_name||userName||'Anônimo';
   curSingerId=curOwnerId;
 
-  // Find real name from participants
   const op=participants.find(p=>p.odUserId===curOwnerId);
   if(op)curOwnerName=op.odUserName;
 
@@ -794,7 +791,6 @@ function playVideo(vid,title=''){
   const wrap=$('playerWrap');
   const layer=$('emojiLayer');
 
-  // Destrói player anterior completamente
   clearInterval(window.__chk);
   if(ytPlayer){
     try{ytPlayer.stopVideo();ytPlayer.destroy();}catch(e){}
@@ -803,7 +799,6 @@ function playVideo(vid,title=''){
   const oldEl=document.getElementById('ytPlayer');
   if(oldEl)oldEl.remove();
 
-  // Cria iframe diretamente com origin na URL — evita postMessage cross-origin
   const origin=encodeURIComponent(window.location.origin);
   const iframe=document.createElement('iframe');
   iframe.id='ytPlayer';
@@ -817,7 +812,6 @@ function playVideo(vid,title=''){
   $('ph').classList.add('hidden');
   $('endBtn').style.display='inline-block';
 
-  // Aguarda iframe carregar depois conecta YT.Player pelo ID
   function mkPlayer(){
     if(typeof YT==='undefined'||!YT.Player)return;
     ytPlayer=new YT.Player('ytPlayer',{
@@ -840,7 +834,6 @@ function playVideo(vid,title=''){
     });
   }
 
-  // Tenta conectar após iframe estar pronto
   if(typeof YT!=='undefined'&&YT.Player){
     setTimeout(mkPlayer, 1500);
   } else {
@@ -930,7 +923,6 @@ function toggleAuto(){
   autoOn=!autoOn;
   const label=autoOn?'⏸️ Auto Player ON':'▶️ Auto Player';
   const cls='btn btn-auto'+(autoOn?' on':'');
-  // Atualiza os dois botões: o da fila e o do player
   [$('autoBtn'),$('autoBtn2')].forEach(b=>{if(b){b.className=cls;b.innerHTML=label;}});
   toast(autoOn?'Auto Player ativado!':'Auto Player desativado.');
   if(autoOn&&!curVid&&queue.length)playNext();
@@ -1030,6 +1022,7 @@ function trackEmoji(e){if(!emojiCounts[e])emojiCounts[e]=0;emojiCounts[e]++;tota
 
 async function sendEmoji(e,pts){
   if(!userName){toast('Entre na sala primeiro!',true);return}
+  if(!gotState){toast('Sincronizando sala, aguarde um instante...',true);return}
   if(cd){toast('Aguarde 1 segundo!',true);return}
   if(!curVid){toast('Nenhuma música tocando!',true);return}
   if(!curOwnerId){toast('Erro: dono da música não identificado.',true);return}
@@ -1041,12 +1034,11 @@ async function sendEmoji(e,pts){
   updScores();
 
   updLBLocal(curOwnerName,e,pts);
-  liveUpdateApplied=true;
   updLB();
 
   addAct(e,`${userName} → ${curOwnerName}: ${pts>0?'+'+pts:pts}`);
   await sbSend('new-emoji',{emoji:e,points:pts,targetUserId:curOwnerId,targetName:curOwnerName,userName,emojiId:userId+'_'+Date.now()+'_'+Math.random()});
-  await sbSend('scores-update',scores);
+  await saveState();
 
   cd=true;
   document.querySelectorAll('.ebtn').forEach(b=>b.classList.add('cd'));
@@ -1076,6 +1068,7 @@ async function resetAll(){
   scores={total:0,positive:0,negative:0};emojiCounts={};totalReact=0;activities=[];
   updScores();updAct();updLB();
   await sbSend('reset',{});
+  await saveState();
   toast('Pontuação resetada! 🔄 (Placar de Líderes mantido 🏆)');addAct('🔄','Pontuação resetada — Placar de Líderes preservado');
 }
 
@@ -1089,6 +1082,7 @@ function applyCode(){
   const v=($('codeInp').value||'').trim().toUpperCase();
   if(!v||v.length!==6){toast('Digite um código de 6 caracteres!',true);return}
   roomId=v;isNew=false;
+  gotState=false;
   setRoomUI(v);
   const b=$('modeBadge');b.textContent='🚪 Entrando em sala existente';b.className='mode-badge join';
   if(history.replaceState)history.replaceState({},'',shareUrl());
@@ -1122,7 +1116,12 @@ async function sbSend(ev,payload){
   await ch.send({type:'broadcast',event:ev,payload});
 }
 
+// saveState() é a única fonte que propaga o estado "oficial" da sala.
+// BLINDAGEM: nunca propagar estado antes de ter recebido/confirmado o
+// estado autoritativo (gotState). Isso evita que um convidado que acabou
+// de entrar (com scores locais zerados) sobrescreva o placar de todo mundo.
 async function saveState(){
+  if(!gotState)return;
   await sbSend('room-state',{
     currentVideoId:curVid,scores,currentSinger:curOwnerName,currentSingerId:curSingerId,
     queue,currentQueuePosition:qPos,globalLeaderboard:lb,updatedAt:Date.now()
@@ -1134,6 +1133,8 @@ async function requestState(){
 }
 
 async function sendStateTo(uid){
+  // Só posso enviar estado para outra pessoa se o meu próprio estado já for confiável
+  if(!gotState)return;
   if(!curVid&&!queue.length&&scores.total===0)return;
   await sbSend('initial-state',{targetUserId:uid,state:{
     currentVideoId:curVid,scores,currentSinger:curOwnerName,currentSingerId:curSingerId,
@@ -1175,11 +1176,10 @@ async function setupListeners(){
       if(payload.targetUserId!==userId)return;
       if(gotState)return; // já sincronizado — ignora fotos atrasadas/duplicadas de outros participantes
       const s=payload.state;
-      if(!liveUpdateApplied){
-        if(s.scores){scores=s.scores;updScores()}
-        if(s.globalLeaderboard){lb=s.globalLeaderboard;updLB()}
-        if(s.emojiCounts){emojiCounts=s.emojiCounts;totalReact=s.totalReactions||0}
-      }
+      // Aplica sempre (primeira sincronização é sempre autoritativa)
+      if(s.scores){scores=s.scores;updScores()}
+      if(s.globalLeaderboard){lb=s.globalLeaderboard;updLB()}
+      if(s.emojiCounts){emojiCounts=s.emojiCounts;totalReact=s.totalReactions||0}
       if(s.queue){queue=s.queue;qPos=s.currentQueuePosition??-1;safeUpdQueue()}
       if(s.currentVideoId&&s.currentVideoId!==curVid){
         curVid=s.currentVideoId;curOwnerName=s.currentSinger;curSingerId=s.currentSingerId;
@@ -1191,15 +1191,15 @@ async function setupListeners(){
     .on('broadcast',{event:'room-state'},({payload})=>{
       if((payload.updatedAt||0)<=lastState)return;
       lastState=payload.updatedAt;
-      if(!liveUpdateApplied){
-        if(payload.scores){scores=payload.scores;updScores()}
-        if(payload.globalLeaderboard){lb=payload.globalLeaderboard;updLB()}
-      }
+      if(payload.scores){scores=payload.scores;updScores()}
+      if(payload.globalLeaderboard){lb=payload.globalLeaderboard;updLB()}
       if(payload.queue){queue=payload.queue;qPos=payload.currentQueuePosition??-1;safeUpdQueue()}
       if(payload.currentVideoId&&payload.currentVideoId!==curVid){
         curVid=payload.currentVideoId;curOwnerName=payload.currentSinger;curSingerId=payload.currentSingerId;
         playVideo(payload.currentVideoId);
       }
+      // room-state confirma que estou alinhado com a sala
+      if(!gotState)gotState=true;
     })
     .on('broadcast',{event:'queue-update'},({payload,from})=>{
       if(from===userId)return;
@@ -1216,7 +1216,6 @@ async function setupListeners(){
       const tp=participants.find(p=>p.odUserId===targetUserId);
       const finalTargetName=targetName||(tp?tp.odUserName:'cantor');
       updLBLocal(finalTargetName,emoji,points);updLB();
-      liveUpdateApplied=true;
       addAct(emoji,`${uName} → ${finalTargetName}: ${points>0?'+'+points:points}`);
       saveState();
     })
@@ -1253,6 +1252,11 @@ async function init(){
   const urlRoom=fromUrl();
   if(urlRoom){roomId=urlRoom;isNew=false}
   else{roomId=mkId();isNew=true}
+
+  // Quem cria a sala já é a fonte autoritativa do próprio estado (vazio).
+  // Quem entra numa sala existente só fica "sincronizado" após receber
+  // initial-state ou room-state de alguém que já está na sala.
+  gotState=isNew;
 
   setRoomUI(roomId);
   const b=$('modeBadge');
@@ -1360,7 +1364,6 @@ async function ytDoSearch(q,page){
       results.appendChild(div);
     });
 
-    // Paginação
     const total=data.pageInfo?.totalResults||0;
     const totalPg=Math.min(Math.ceil(total/8),50);
     document.getElementById('ytPageInfo').textContent=`Pág ${page} / ~${totalPg}`;
