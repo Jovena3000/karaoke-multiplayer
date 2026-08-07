@@ -618,6 +618,7 @@ let autoOn=false, ending=false;
 let gotState=false;
 let qTimer=null, lastState=0;
 let appMode=false;
+let wakeLock=null, silentAudio=null;
 
 // ═══════════════════════════════════════════
 // UTILS
@@ -858,6 +859,12 @@ function playVideo(vid,title=''){
         onReady:e=>{ try{e.target.playVideo();}catch(ex){} },
         onStateChange:e=>{
           if(e.data===YT.PlayerState.ENDED&&autoOn&&curVid===vid)onVidEnd();
+          if('mediaSession' in navigator){
+            try{
+              if(e.data===YT.PlayerState.PLAYING)navigator.mediaSession.playbackState='playing';
+              else if(e.data===YT.PlayerState.PAUSED)navigator.mediaSession.playbackState='paused';
+            }catch(ex){}
+          }
           if(e.data===YT.PlayerState.PLAYING){
             clearInterval(window.__chk);
             window.__chk=setInterval(()=>{
@@ -882,6 +889,9 @@ function playVideo(vid,title=''){
       setTimeout(mkPlayer,500);
     };
   }
+
+  requestWakeLock();
+  startSilentAudio();
 
   saveState();
   addAct('🎬',`${curOwnerName} — música iniciada`);
@@ -950,6 +960,8 @@ async function playNext(){
     clearInterval(window.__chk);
     updAudioCard();
     clearMediaSession();
+    releaseWakeLock();
+    stopSilentAudio();
     toast('Fila vazia! Adicione mais músicas.');return;
   }
   qPos=(qPos+1)%queue.length;
@@ -1042,6 +1054,58 @@ function clearMediaSession(){
     navigator.mediaSession.playbackState='none';
   }catch(e){}
 }
+
+// ═══════════════════════════════════════════
+// BLINDAGEM DE REPRODUÇÃO EM SEGUNDO PLANO
+// (Wake Lock + sinal de áudio ativo + auto-retomar)
+// Obs: não existe garantia 100% em todos os aparelhos — isso depende do
+// sistema/navegador do celular. Estas técnicas reduzem bastante o problema.
+// ═══════════════════════════════════════════
+async function requestWakeLock(){
+  try{
+    if('wakeLock' in navigator){
+      wakeLock=await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release',()=>{wakeLock=null;});
+    }
+  }catch(e){/* alguns navegadores negam sem gesto do usuário — segue o jogo */}
+}
+
+function releaseWakeLock(){
+  if(wakeLock){try{wakeLock.release();}catch(e){}wakeLock=null;}
+}
+
+function startSilentAudio(){
+  if(silentAudio)return;
+  try{
+    // Áudio silencioso em loop: sinaliza ao navegador que a aba tem mídia
+    // ativa, o que reduz a chance de o Chrome suspender a aba inteira
+    // quando ela vai para segundo plano.
+    silentAudio=new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=');
+    silentAudio.loop=true;
+    silentAudio.volume=0.01;
+    silentAudio.play().catch(()=>{});
+  }catch(e){}
+}
+
+function stopSilentAudio(){
+  if(silentAudio){try{silentAudio.pause();}catch(e){}silentAudio=null;}
+}
+
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible'){
+    if(curVid)requestWakeLock();
+    // Ao voltar (desbloquear/reabrir), se o YouTube pausou sozinho em
+    // segundo plano, tenta retomar automaticamente sem precisar tocar em nada.
+    setTimeout(()=>{
+      try{
+        if(ytPlayer&&typeof ytPlayer.getPlayerState==='function'&&typeof YT!=='undefined'){
+          const st=ytPlayer.getPlayerState();
+          if(st===YT.PlayerState.PAUSED&&curVid){ytPlayer.playVideo();}
+        }
+      }catch(e){}
+    },400);
+  }
+});
 
 // ═══════════════════════════════════════════
 // END SONG / RESULT
