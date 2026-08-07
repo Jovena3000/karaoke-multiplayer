@@ -294,6 +294,29 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
 .slide{animation:slideIn .25s ease}
 
 /* ══════════════════════════════
+   MODO APP (ÁUDIO EM SEGUNDO PLANO)
+══════════════════════════════ */
+.btn-dim.on{background:linear-gradient(135deg,var(--green),#00bb66);color:#000;border-color:transparent}
+.player-wrap.app-mode{padding-bottom:0;height:1px;min-height:1px;overflow:hidden;opacity:0;pointer-events:none}
+.audio-mode-card{display:none;background:linear-gradient(135deg,var(--card),var(--light));border-radius:1rem;padding:1.5rem;text-align:center;border:2px solid rgba(157,78,221,.3);margin-top:.6rem;position:relative;overflow:hidden}
+.audio-mode-card.show{display:block;animation:fadeIn .3s ease}
+.audio-mode-card::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(157,78,221,.15),transparent 70%);pointer-events:none}
+.audio-art{width:110px;height:110px;border-radius:1.1rem;margin:0 auto .9rem;background:linear-gradient(135deg,var(--pink),var(--purple),var(--blue));display:flex;align-items:center;justify-content:center;font-size:2.6rem;overflow:hidden;box-shadow:0 10px 30px rgba(157,78,221,.4);position:relative;z-index:1}
+.audio-art img{width:100%;height:100%;object-fit:cover;border-radius:1.1rem}
+.audio-art.spin{animation:audioSpin 10s linear infinite}
+@keyframes audioSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.audio-title{font-weight:700;font-size:1.1rem;margin-bottom:.2rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 .5rem;position:relative;z-index:1}
+.audio-singer{color:var(--muted);font-size:.85rem;margin-bottom:1rem;position:relative;z-index:1}
+.eq{display:flex;gap:4px;justify-content:center;align-items:flex-end;height:30px;position:relative;z-index:1}
+.eq span{width:5px;background:linear-gradient(var(--pink),var(--blue));border-radius:2px;animation:eq 1s ease-in-out infinite}
+.eq span:nth-child(2){animation-delay:.2s}
+.eq span:nth-child(3){animation-delay:.4s}
+.eq span:nth-child(4){animation-delay:.1s}
+.eq span:nth-child(5){animation-delay:.3s}
+@keyframes eq{0%,100%{height:6px}50%{height:26px}}
+.audio-badge{display:inline-flex;align-items:center;gap:.35rem;margin-top:1rem;padding:.4rem .8rem;background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.3);border-radius:2rem;font-size:.7rem;color:var(--green);position:relative;z-index:1}
+
+/* ══════════════════════════════
    RESPONSIVE
 ══════════════════════════════ */
 
@@ -324,6 +347,7 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
   .res-btns .btn{padding:.7rem 1rem;font-size:.82rem}
   .toast{right:.5rem;bottom:.5rem;max-width:calc(100vw - 1rem)}
   .e-notif{right:.5rem;top:80px}
+  .audio-art{width:90px;height:90px}
 }
 
 /* Large / Smart TV 1400px+ */
@@ -370,6 +394,7 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
           <div class="btns">
             <button class="btn btn-purple" onclick="openVidModal()">➕ Adicionar à Fila</button>
             <button class="btn btn-auto" id="autoBtn2" onclick="toggleAuto()">▶️ Auto Player</button>
+            <button class="btn btn-dim" id="appModeBtn" onclick="toggleAppMode()">🎧 Modo App</button>
             <button class="btn btn-orange" id="endBtn" style="display:none" onclick="endSong()">⏭️ Próxima</button>
           </div>
         </div>
@@ -380,6 +405,16 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
           </div>
           <div class="emoji-layer" id="emojiLayer"></div>
         </div>
+
+        <!-- MODO APP: card de áudio em segundo plano -->
+        <div class="audio-mode-card" id="audioCard">
+          <div class="audio-art" id="audioArt"><span id="audioArtIco">🎤</span></div>
+          <div class="audio-title" id="audioTitle">Nenhuma música</div>
+          <div class="audio-singer" id="audioSinger">—</div>
+          <div class="eq"><span></span><span></span><span></span><span></span><span></span></div>
+          <div class="audio-badge">🔋 Modo economia ativo — tela desligada, som continua tocando</div>
+        </div>
+
         <div class="scores">
           <div class="sc" id="scTotal"><div class="sc-lbl">Total</div><div class="sc-val" id="vTotal">0</div></div>
           <div class="sc pos-border"><div class="sc-lbl">Positivos</div><div class="sc-val pos" id="vPos">0</div></div>
@@ -582,6 +617,7 @@ let autoOn=false, ending=false;
 // gotState = já recebi o estado autoritativo da sala (necessário antes de re-emitir dados)
 let gotState=false;
 let qTimer=null, lastState=0;
+let appMode=false;
 
 // ═══════════════════════════════════════════
 // UTILS
@@ -786,6 +822,9 @@ function playVideo(vid,title=''){
   const op=participants.find(p=>p.odUserId===curOwnerId);
   if(op)curOwnerName=op.odUserName;
 
+  updAudioCard();
+  updMediaSession(qi);
+
   emojiCounts={};totalReact=0;
 
   const wrap=$('playerWrap');
@@ -909,6 +948,8 @@ async function playNext(){
     $('ph').classList.remove('hidden');$('endBtn').style.display='none';
     if(ytPlayer){ytPlayer.destroy();ytPlayer=null}
     clearInterval(window.__chk);
+    updAudioCard();
+    clearMediaSession();
     toast('Fila vazia! Adicione mais músicas.');return;
   }
   qPos=(qPos+1)%queue.length;
@@ -926,6 +967,80 @@ function toggleAuto(){
   [$('autoBtn'),$('autoBtn2')].forEach(b=>{if(b){b.className=cls;b.innerHTML=label;}});
   toast(autoOn?'Auto Player ativado!':'Auto Player desativado.');
   if(autoOn&&!curVid&&queue.length)playNext();
+}
+
+// ═══════════════════════════════════════════
+// MODO APP (áudio em segundo plano, economia de bateria)
+// ═══════════════════════════════════════════
+function toggleAppMode(){
+  appMode=!appMode;
+  const wrap=$('playerWrap'), card=$('audioCard'), btn=$('appModeBtn'), art=$('audioArt');
+  if(appMode){
+    wrap.classList.add('app-mode');
+    card.classList.add('show');
+    btn.classList.add('on');
+    btn.innerHTML='🎥 Voltar ao Vídeo';
+    art.classList.add('spin');
+    updAudioCard();
+    toast('Modo App ativado! 🎧 Tela desligada — a música continua tocando.');
+  }else{
+    wrap.classList.remove('app-mode');
+    card.classList.remove('show');
+    btn.classList.remove('on');
+    btn.innerHTML='🎧 Modo App';
+    art.classList.remove('spin');
+    toast('Modo Vídeo reativado.');
+  }
+}
+
+function updAudioCard(){
+  const qi=queue.find(x=>x.video_id===curVid);
+  const title=qi?qi.video_title:'Nenhuma música';
+  const singer=curOwnerName?('👤 '+curOwnerName):'—';
+  $('audioTitle').textContent=title;
+  $('audioSinger').textContent=singer;
+  const artEl=$('audioArt');
+  if(qi&&qi.thumbnail){
+    artEl.innerHTML=`<img src="${qi.thumbnail}" alt="" onerror="this.parentElement.innerHTML='<span>🎤</span>'">`;
+    if(appMode)artEl.classList.add('spin');
+  }else{
+    artEl.innerHTML='<span>🎤</span>';
+    artEl.classList.remove('spin');
+  }
+}
+
+// ═══════════════════════════════════════════
+// MEDIA SESSION API (controles na tela de bloqueio / notificação)
+// ═══════════════════════════════════════════
+function updMediaSession(qi){
+  if(!('mediaSession' in navigator))return;
+  try{
+    const title=qi?qi.video_title:'Karaokê Premium';
+    const artist=curOwnerName?('Cantando: '+curOwnerName):'Karaokê Premium';
+    const art=qi&&qi.thumbnail?qi.thumbnail:'https://img.youtube.com/vi/'+(curVid||'')+'/mqdefault.jpg';
+    navigator.mediaSession.metadata=new MediaMetadata({
+      title:title,
+      artist:artist,
+      album:'🎤 Karaokê Premium — Sala '+roomId,
+      artwork:[
+        {src:art,sizes:'320x180',type:'image/jpeg'},
+        {src:art,sizes:'480x360',type:'image/jpeg'}
+      ]
+    });
+    navigator.mediaSession.playbackState='playing';
+    navigator.mediaSession.setActionHandler('play',()=>{try{ytPlayer&&ytPlayer.playVideo();}catch(e){}});
+    navigator.mediaSession.setActionHandler('pause',()=>{try{ytPlayer&&ytPlayer.pauseVideo();}catch(e){}});
+    navigator.mediaSession.setActionHandler('nexttrack',()=>{ if(!ending) endSong(); });
+    navigator.mediaSession.setActionHandler('previoustrack',null);
+  }catch(e){}
+}
+
+function clearMediaSession(){
+  if(!('mediaSession' in navigator))return;
+  try{
+    navigator.mediaSession.metadata=null;
+    navigator.mediaSession.playbackState='none';
+  }catch(e){}
 }
 
 // ═══════════════════════════════════════════
