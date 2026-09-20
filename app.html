@@ -1576,6 +1576,37 @@ async function ytAddToQueue(vid,title){
   }catch(e){toast('Erro ao adicionar.',true);btn.textContent='➕ Cantar';btn.disabled=false;}
 }
 
+// ═══════════════════════════════════════════
+// ✅ ADICIONADO: RASTREAMENTO ONLINE
+// Avisa o backend que este usuário está ativo (atualiza ultimo_acesso)
+// ═══════════════════════════════════════════
+async function registrarAtividade() {
+  const token = localStorage.getItem('token');
+  if (!token) return;
+  
+  try {
+    await fetch('https://karaoke-api-backend3.vercel.app/api/atividade', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+  } catch (e) {
+    console.log('⚠️ Erro ao registrar atividade:', e.message);
+  }
+}
+
+// Registra agora (ao carregar)
+registrarAtividade();
+
+// Registra a cada 2 minutos enquanto a aba estiver aberta
+setInterval(registrarAtividade, 120000);
+
+// Registra também quando o usuário voltar para a aba
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    registrarAtividade();
+  }
+});
+
 document.addEventListener('DOMContentLoaded',init);
 </script>
 </body>
