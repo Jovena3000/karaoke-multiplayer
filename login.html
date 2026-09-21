@@ -127,14 +127,14 @@
             position: relative;
         }
         
-        /* Ajuste: Largura máxima reduzida para 350px e padding mais enxuto (15px 20px) */
+        /* Ajuste: Largura reduzida para 300px e padding ainda menor */
         .login-container {
             background: white;
-            padding: 15px 20px;
+            padding: 10px 15px;
             border-radius: 10px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.1);
             width: 100%;
-            max-width: 350px;
+            max-width: 300px;
             position: relative;
             z-index: 1;
         }
@@ -143,29 +143,31 @@
             color: #333;
             margin-bottom: 30px;
         }
+        /* Ajuste: Espaço entre os campos reduzido */
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
         label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 3px;
             color: #555;
+            font-size: 0.9rem;
         }
         input {
             width: 100%;
-            padding: 10px;
+            padding: 8px 10px;
             border: 1px solid #ddd;
             border-radius: 4px;
-            font-size: 16px;
+            font-size: 14px;
         }
         button {
             width: 100%;
-            padding: 12px;
+            padding: 10px;
             background: #667eea;
             color: white;
             border: none;
             border-radius: 4px;
-            font-size: 16px;
+            font-size: 15px;
             cursor: pointer;
             transition: background 0.3s;
         }
@@ -176,9 +178,11 @@
             background: #ccc;
             cursor: not-allowed;
         }
+        /* Ajuste: Espaço acima dos links reduzido */
         .links {
             text-align: center;
-            margin-top: 15px;
+            margin-top: 10px;
+            font-size: 0.85rem;
         }
         .links a {
             color: #667eea;
@@ -189,10 +193,11 @@
             text-decoration: underline;
         }
         .alert {
-            padding: 10px;
+            padding: 8px;
             border-radius: 4px;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             display: none;
+            font-size: 0.85rem;
         }
         .alert.error {
             background: #f8d7da;
@@ -348,7 +353,7 @@
 
     <div class="login-container">
         <!-- Imagem mantida em 220px -->
-        <img src="https://uploads.onecompiler.io/43v37pq3s/1789353441041/Logo%20colorido%20de%20Karaok%C3%83%C2%AA%20Multiplayer%20(1)%20(2).png" width="220" alt="Karaokê Multiplayer" style="display:block; width:220px; max-width:80%; height:auto; margin:0 auto 10px auto;">
+        <img src="https://uploads.onecompiler.io/43v37pq3s/1789353441041/Logo%20colorido%20de%20Karaok%C3%83%C2%AA%20Multiplayer%20(1)%20(2).png" width="220" alt="Karaokê Multiplayer" style="display:block; width:220px; max-width:100%; height:auto; margin:0 auto 10px auto;">
         
         <div id="alertMessage" class="alert"></div>
         
