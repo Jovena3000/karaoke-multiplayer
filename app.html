@@ -10,11 +10,38 @@
 <meta name="theme-color" content="#0f172a">
 
 <script>
+// ═══════════════════════════════════════════
+// PROTEÇÃO DE ACESSO: login obrigatório + plano ativo
+// - sem token, token vencido ou inválido  -> volta para o login
+// - o servidor confirma o plano ao abrir, a cada 5 min e ao voltar para a aba
+// ═══════════════════════════════════════════
 (function(){
+  const API='https://karaoke-api-backend3.vercel.app/api';
   const pub=['/login.html','/checkout.html','/checkout'];
-  const tok=localStorage.getItem('token');
   const cur=window.location.pathname;
-  if(!tok&&!pub.some(p=>cur.includes(p))){window.location.href='/login.html';return;}
+  const ehPublica=pub.some(p=>cur.includes(p));
+
+  function sair(motivo){
+    try{localStorage.removeItem('token');}catch(e){}
+    if(!ehPublica)window.location.href='/login.html'+(motivo?'?motivo='+motivo:'');
+  }
+  window.encerrarSessao=sair;
+
+  function expDoToken(t){
+    try{
+      const b=t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+      return JSON.parse(atob(b)).exp||0;
+    }catch(e){return 0;}
+  }
+
+  const tok=localStorage.getItem('token');
+  if(!tok&&!ehPublica){window.location.href='/login.html';return;}
+
+  if(tok&&!ehPublica){
+    const exp=expDoToken(tok);
+    if(!exp||exp*1000<Date.now()){sair('sessao_expirada');return;}
+  }
+
   if(tok){
     const orig=window.fetch;
     window.fetch=function(r,o={}){
@@ -24,6 +51,24 @@
       }
       return orig(r,o);
     };
+  }
+
+  window.verificarSessao=async function(){
+    try{
+      const r=await fetch(API+'/verificar-sessao',{headers:{'Authorization':'Bearer '+tok},cache:'no-store'});
+      if(r.status===401||r.status===403){
+        const d=await r.json().catch(()=>({}));
+        sair(d.codigo==='PLANO_VENCIDO'?'plano_vencido':'sessao_expirada');
+      }
+    }catch(e){/* sem internet ou servidor fora do ar: não derruba o usuário */}
+  };
+
+  if(tok&&!ehPublica){
+    window.verificarSessao();
+    setInterval(window.verificarSessao,5*60*1000);
+    document.addEventListener('visibilitychange',()=>{
+      if(document.visibilityState==='visible')window.verificarSessao();
+    });
   }
 })();
 </script>
@@ -1585,10 +1630,15 @@ async function registrarAtividade() {
   if (!token) return;
   
   try {
-    await fetch('https://karaoke-api-backend3.vercel.app/api/atividade', {
+    const r = await fetch('https://karaoke-api-backend3.vercel.app/api/atividade', {
       method: 'POST',
       headers: { 'Authorization': 'Bearer ' + token }
     });
+    // Plano vencido ou sessão inválida: encerra o login salvo
+    if ((r.status === 401 || r.status === 403) && window.encerrarSessao) {
+      const d = await r.json().catch(() => ({}));
+      window.encerrarSessao(d.codigo === 'PLANO_VENCIDO' ? 'plano_vencido' : 'sessao_expirada');
+    }
   } catch (e) {
     console.log('⚠️ Erro ao registrar atividade:', e.message);
   }
