@@ -574,7 +574,7 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
         <input type="text" class="inp" id="vidInp" placeholder="https://youtube.com/watch?v=..." autocomplete="off">
       </div>
       <button class="m-btn" onclick="addQueue()">➕ Adicionar à Fila</button>
-      <button class="m-btn dim" onclick="closeVidModal()">Voltar a Página Inicial</button>
+      <button class="m-btn dim" onclick="closeVidModal()">Cancelar</button>
     </div>
 
     <!-- ABA: BUSCAR -->
@@ -602,7 +602,7 @@ body{background:linear-gradient(135deg,var(--bg),#1a1f4d);color:var(--txt);min-h
         <span id="ytPageInfo" style="font-size:.75rem;color:var(--muted)"></span>
         <button onclick="ytPage(1)" id="ytNext" style="padding:.4rem .9rem;border-radius:.5rem;border:1px solid rgba(255,255,255,.2);background:transparent;color:#fff;cursor:pointer;font-size:.8rem">Próx →</button>
       </div>
-      <button class="m-btn dim" onclick="closeVidModal()" style="margin-top:.6rem">Voltar a Página Inicial</button>
+      <button class="m-btn dim" onclick="closeVidModal()" style="margin-top:.6rem">Cancelar</button>
     </div>
   </div>
 </div>
@@ -659,6 +659,10 @@ let emojiCounts={}, totalReact=0;
 let lb={};
 let seenEmojis=new Set();
 let autoOn=false, ending=false;
+// Auto Player: controle de falhas e do resultado
+let falhasSeguidas=0, resTimer=null;
+const PULAR_ERRO_MS=2500;        // espera antes de pular um vídeo com erro
+const AUTO_RESULTADO_MS=10000;   // tempo da tela de resultado antes de seguir no Auto Player
 // gotState = já recebi o estado autoritativo da sala (necessário antes de re-emitir dados)
 let gotState=false;
 let qTimer=null, lastState=0;
@@ -902,6 +906,17 @@ function playVideo(vid,title=''){
     ytPlayer=new YT.Player('ytPlayer',{
       events:{
         onReady:e=>{ try{e.target.playVideo();}catch(ex){} },
+        onError:e=>{
+          // 2/5/100/101/150: vídeo inválido, removido ou sem permissão para tocar fora do YouTube
+          if(curVid!==vid)return;
+          console.warn('Erro do player do YouTube:',e.data,vid);
+          const motivo=(e.data===101||e.data===150)
+            ?'O dono do vídeo não permite tocar fora do YouTube.'
+            :'Não foi possível reproduzir este vídeo.';
+          toast('⚠️ '+motivo+(autoOn?' Pulando...':''),true);
+          addAct('⚠️','Vídeo indisponível: '+motivo);
+          if(autoOn)setTimeout(()=>pularFaixaComErro(vid),PULAR_ERRO_MS);
+        },
         onStateChange:e=>{
           if(e.data===YT.PlayerState.ENDED&&autoOn&&curVid===vid)onVidEnd();
           if('mediaSession' in navigator){
@@ -911,6 +926,7 @@ function playVideo(vid,title=''){
             }catch(ex){}
           }
           if(e.data===YT.PlayerState.PLAYING){
+            falhasSeguidas=0;
             clearInterval(window.__chk);
             window.__chk=setInterval(()=>{
               if(!ytPlayer)return;
@@ -989,6 +1005,23 @@ async function removeIdx(i){
   toast('Música removida');addAct('❌',`${userName} removeu música`);
 }
 
+// Pula um vídeo que deu erro. Se TODAS as músicas da fila falharem em sequência,
+// desliga o Auto Player (evita ficar rodando a fila em loop sem tocar nada).
+async function pularFaixaComErro(vid){
+  if(!autoOn||curVid!==vid||ending)return;
+  falhasSeguidas++;
+  if(falhasSeguidas>=Math.max(queue.length,1)){
+    falhasSeguidas=0;
+    toggleAuto();
+    toast('Nenhuma música da fila pôde ser reproduzida. Auto Player desligado.',true);
+    return;
+  }
+  ending=true;
+  try{await playNext();}
+  catch(e){console.error('Erro ao pular música:',e);}
+  finally{ending=false;}
+}
+
 async function playIdx(i){
   if(i<0||i>=queue.length||i===qPos)return;
   qPos=i;
@@ -1019,6 +1052,7 @@ async function playNext(){
 
 function toggleAuto(){
   autoOn=!autoOn;
+  if(autoOn)falhasSeguidas=0;
   const label=autoOn?'⏸️ Auto Player ON':'▶️ Auto Player';
   const cls='btn btn-auto'+(autoOn?' on':'');
   [$('autoBtn'),$('autoBtn2')].forEach(b=>{if(b){b.className=cls;b.innerHTML=label;}});
@@ -1155,26 +1189,46 @@ document.addEventListener('visibilitychange',()=>{
 // ═══════════════════════════════════════════
 // END SONG / RESULT
 // ═══════════════════════════════════════════
+// Com o Auto Player ligado, a tela de resultado fecha sozinha e segue para a próxima música
+function agendarProximaAuto(){
+  clearTimeout(resTimer);
+  if(!autoOn)return;
+  toast('Próxima música em '+Math.round(AUTO_RESULTADO_MS/1000)+' segundos...');
+  resTimer=setTimeout(()=>{
+    if(autoOn&&$('resOverlay').classList.contains('open'))nextAfterResult();
+  },AUTO_RESULTADO_MS);
+}
+
 async function endSong(){
   if(ending)return;ending=true;
-  if(totalReact>0){await sbSend('show-result',{singer:curOwnerName,emojiCounts,totalReactions:totalReact});showResult();}
-  else{resetCurrentSong();if(autoOn)await playNext();}
-  ending=false;
+  try{
+    if(totalReact>0){
+      await sbSend('show-result',{singer:curOwnerName,emojiCounts,totalReactions:totalReact});
+      showResult();agendarProximaAuto();
+    }else{resetCurrentSong();if(autoOn)await playNext();}
+  }catch(e){console.error('Erro ao encerrar música:',e);}
+  finally{ending=false;}
 }
 
 async function onVidEnd(){
   if(ending)return;ending=true;
-  try{if(totalReact>0){await sbSend('show-result',{singer:curOwnerName,emojiCounts,totalReactions:totalReact});showResult();}
-  else{await playNext();}}
-  catch(e){await playNext();}
-  ending=false;
+  try{
+    if(totalReact>0){
+      await sbSend('show-result',{singer:curOwnerName,emojiCounts,totalReactions:totalReact});
+      showResult();agendarProximaAuto();
+    }else{await playNext();}
+  }catch(e){
+    console.error('Erro ao finalizar música:',e);
+    try{await playNext();}catch(e2){console.error('Erro ao iniciar a próxima:',e2);}
+  }
+  finally{ending=false;}   // antes, um erro aqui deixava 'ending' preso e o Auto Player nunca mais avançava
 }
 
 function resetCurrentSong(){
   scores={total:0,positive:0,negative:0};emojiCounts={};totalReact=0;updScores();
 }
 
-function closeResult(){$('resOverlay').classList.remove('open')}
+function closeResult(){clearTimeout(resTimer);$('resOverlay').classList.remove('open')}
 
 async function nextAfterResult(){
   closeResult();resetCurrentSong();
@@ -1367,6 +1421,17 @@ async function sendStateTo(uid){
   }});
 }
 
+// Quem adiciona música manda a posição que ELE tem (normalmente -1, se não está tocando nada).
+// Mantém a posição da música que está tocando aqui, senão o Auto Player volta para a 1ª da fila.
+function posicaoNaFila(q,posRecebida){
+  if(curVid){
+    if(posRecebida>=0&&q[posRecebida]&&q[posRecebida].video_id===curVid)return posRecebida;
+    const i=q.findIndex(x=>x.video_id===curVid);
+    if(i>=0)return i;
+  }
+  return posRecebida;
+}
+
 async function setupListeners(){
   if(!sbOk||!sb)return;
   ch=sb.channel('room:'+roomId);
@@ -1427,7 +1492,7 @@ async function setupListeners(){
     })
     .on('broadcast',{event:'queue-update'},({payload,from})=>{
       if(from===userId)return;
-      queue=payload.queue;qPos=payload.currentPosition;safeUpdQueue();
+      queue=payload.queue;qPos=posicaoNaFila(queue,payload.currentPosition);safeUpdQueue();
     })
     .on('broadcast',{event:'new-emoji'},({payload})=>{
       const{emoji,points,targetUserId,targetName,userName:uName,emojiId}=payload;
