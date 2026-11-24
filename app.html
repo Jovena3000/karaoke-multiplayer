@@ -1188,6 +1188,8 @@ function toggleAppMode(){
     art.classList.remove('spin');
     toast('Modo Vídeo reativado.');
   }
+  if(precisaAudioSilencioso()){if(curVid)startSilentAudio();}
+  else stopSilentAudio();
 }
 
 function updAudioCard(){
@@ -1259,13 +1261,37 @@ function releaseWakeLock(){
   if(wakeLock){try{wakeLock.release();}catch(e){}wakeLock=null;}
 }
 
+// O áudio silencioso serve para o celular não suspender a aba em segundo plano.
+// No computador ele só é usado no "Modo App" (antes rodava sempre).
+function precisaAudioSilencioso(){
+  const ua=navigator.userAgent||'';
+  const celular=/Android|iPhone|iPad|iPod/i.test(ua)||(navigator.maxTouchPoints>1&&/Macintosh/.test(ua));
+  return celular||appMode;
+}
+
+// WAV silencioso VÁLIDO (1 s, 8 kHz, 8 bits). O arquivo antigo tinha ZERO amostras: em loop ele
+// disparava ~15.000 eventos por segundo e ocupava quase uma CPU inteira, travando o player do YouTube.
+let silentAudioUrl=null;
+function silentWavUrl(){
+  if(silentAudioUrl)return silentAudioUrl;
+  const n=8000, b=new Uint8Array(44+n), v=new DataView(b.buffer);
+  const txt=(o,t)=>{for(let i=0;i<t.length;i++)b[o+i]=t.charCodeAt(i);};
+  txt(0,'RIFF');v.setUint32(4,36+n,true);txt(8,'WAVE');txt(12,'fmt ');
+  v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);
+  v.setUint32(24,8000,true);v.setUint32(28,8000,true);v.setUint16(32,1,true);v.setUint16(34,8,true);
+  txt(36,'data');v.setUint32(40,n,true);
+  b.fill(128,44);   // 128 = silêncio em PCM de 8 bits
+  silentAudioUrl=URL.createObjectURL(new Blob([b],{type:'audio/wav'}));
+  return silentAudioUrl;
+}
+
 function startSilentAudio(){
-  if(silentAudio)return;
+  if(silentAudio||!precisaAudioSilencioso())return;
   try{
     // Áudio silencioso em loop: sinaliza ao navegador que a aba tem mídia
     // ativa, o que reduz a chance de o Chrome suspender a aba inteira
     // quando ela vai para segundo plano.
-    silentAudio=new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=');
+    silentAudio=new Audio(silentWavUrl());
     silentAudio.loop=true;
     silentAudio.volume=0.01;
     silentAudio.play().catch(()=>{});
