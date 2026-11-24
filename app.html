@@ -8,6 +8,7 @@
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="manifest" href="/site.webmanifest">
 <meta name="theme-color" content="#0f172a">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 
 <script>
 // ═══════════════════════════════════════════
@@ -938,7 +939,12 @@ function iniciarPlayer(vid,gen){
     console.log('[player] API do YouTube ainda não carregou; aguardando...');
     apiProntaCbs.push(()=>{if(ativo()&&modoPlayer===null)criarPlayerApi(vid,gen);});
     // API bloqueada (extensão/antivírus) ou lenta: toca com o iframe simples, igual ao convidado
-    window.__wd=setTimeout(()=>{if(ativo()&&modoPlayer===null)usarIframeSimples(vid,gen,'api-nao-carregou');},API_ESPERA_MS);
+    window.__wd=setTimeout(()=>{
+      if(ativo()&&modoPlayer===null){
+        toast('⚠️ O YouTube não respondeu neste navegador. Se a música não tocar, desative bloqueadores/extensões para este site ou teste em janela anônima.',true);
+        usarIframeSimples(vid,gen,'api-nao-carregou');
+      }
+    },API_ESPERA_MS);
   }
 }
 
@@ -967,6 +973,11 @@ function criarPlayerApi(vid,gen){
           // 2/5/100/101/150: vídeo inválido, removido ou sem permissão para tocar fora do YouTube
           if(!ativo())return;
           console.warn('[player] erro do YouTube:',e.data,vid);
+          if(e.data===153){
+            // 153 = o YouTube não recebeu a identificação do site (referrer/origin) para este player
+            toast('⚠️ O YouTube recusou o player (erro 153). Tentando o modo alternativo...',true);
+            return usarIframeSimples(vid,gen,'erro-153');
+          }
           const motivo=(e.data===101||e.data===150)
             ?'O dono do vídeo não permite tocar fora do YouTube.'
             :'Não foi possível reproduzir este vídeo.';
@@ -1007,6 +1018,7 @@ function criarPlayerApi(vid,gen){
   window.__wd=setTimeout(()=>{
     if(ativo()&&!pronto){
       console.warn('[player] API não ficou pronta em '+PLAYER_WATCHDOG_MS+' ms');
+      toast('⚠️ O YouTube não respondeu neste navegador. Se a música não tocar, desative bloqueadores/extensões para este site ou teste em janela anônima.',true);
       usarIframeSimples(vid,gen,'api-nao-respondeu');
     }
   },PLAYER_WATCHDOG_MS);
@@ -1485,7 +1497,17 @@ async function initSB(){
 
 async function sbSend(ev,payload){
   if(!sbOk||!ch)return;
-  await ch.send({type:'broadcast',event:ev,payload});
+  try{
+    // Canal ainda conectando (ou reconectando): entrega explícita por REST.
+    // Antes o send() fazia isso sozinho e mostrava o aviso "falling back to REST API".
+    if(ch.state!=='joined'&&typeof ch.httpSend==='function'){
+      await ch.httpSend(ev,payload);
+      return;
+    }
+    await ch.send({type:'broadcast',event:ev,payload});
+  }catch(e){
+    console.warn('[realtime] não foi possível enviar "'+ev+'":',e&&e.message?e.message:e);
+  }
 }
 
 // saveState() é a única fonte que propaga o estado "oficial" da sala.
